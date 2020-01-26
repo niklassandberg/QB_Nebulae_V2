@@ -2,12 +2,15 @@
 
 #sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
 
+echo "enable i2c"
+sudo modprobe i2c-dev
 echo "starting bootup LEDs"
 python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py booting &
 
 #moved this to check_wifi, so we can optimised based on if using wifi or not
 #echo "optimizing system."
 #sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt.sh
+sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_wifi.py
 
 echo "checking for firmware update"
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh
@@ -32,7 +35,6 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/enable_inputs.sh
 
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
 sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py
-sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_wifi.py
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
 
 sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
