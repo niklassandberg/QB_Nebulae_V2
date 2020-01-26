@@ -53,13 +53,14 @@ then
     echo "detected firmware pacakges to install" 
     sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
     python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
-    cd /home/alarm/QB_Nebulae_V2/Code/packages
 
-    echo "installed any services"
-    sudo find . -name *.service -exec cp {} /etc/systemd/system
+    echo "install web services"
+    sudo /home/alarm/QB_Nebulae_V2/Code/web/NebFile/NebFile.service /etc/systemd/system
     sudo systemctl --system daemon-reload 
 
-    sudo pacman -Uy *
+    cd /home/alarm/QB_Nebulae_V2/Code/packages
+
+    sudo pacman --noconfirm -U *.tar.xz
     echo "installed packages"
 
     echo "install pip2"
@@ -77,7 +78,7 @@ else
     if [ $FC -gt 0 ] 
     then 
         echo "Packages detected"
-	sudo pacman -Uy /mnt/memory/*.tar.xz
+	sudo pacman --noconfirm -U /mnt/memory/*.tar.xz
         rm /mnt/memory/*.tar.xz
     else  
       echo "No Update Detected"
