@@ -48,6 +48,29 @@ then
         sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service > /etc/systemd/system/nebulae.service"
     fi
     sudo reboot
+elif [ -d /home/alarm/QB_Nebulae_V2/Code/packages ]
+then
+    echo "detected pacakges to install" 
+    sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
+    python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
+    cd /home/alarm/QB_Nebulae_V2/Code/packages
+
+    echo "installed any services"
+    sudo find . -name *.service -exec cp {} /etc/systemd/system
+    sudo systemctl --system daemon-reload 
+
+    sudo pacman -Uy *
+    echo "installed packages"
+    echo "install pip2"
+    cd python
+    sudo python2 pip-20.0.2-py2.py3-none-any.whl/pip install --no-index pip-20.0.2-py2.py3-none-any.whl 
+
+    echo "installed pip packages"
+    sudo pip2 install *
+    cd /home/alarm
+
+    rm -rf /home/alarm/QB_Nebulae_V2/Code/packages
+    sudo reboot
 else
     echo "No Update Detected"
 fi
