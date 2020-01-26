@@ -55,7 +55,7 @@ then
     python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
 
     echo "install web services"
-    sudo /home/alarm/QB_Nebulae_V2/Code/web/NebFile/NebFile.service /etc/systemd/system
+    sudo cp /home/alarm/QB_Nebulae_V2/Code/web/NebFile/NebFile.service /etc/systemd/system
     sudo systemctl --system daemon-reload 
 
     cd /home/alarm/QB_Nebulae_V2/Code/packages
