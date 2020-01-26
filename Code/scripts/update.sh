@@ -50,7 +50,7 @@ then
     sudo reboot
 elif [ -d /home/alarm/QB_Nebulae_V2/Code/packages ]
 then
-    echo "detected pacakges to install" 
+    echo "detected firmware pacakges to install" 
     sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
     python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
     cd /home/alarm/QB_Nebulae_V2/Code/packages
@@ -61,6 +61,7 @@ then
 
     sudo pacman -Uy *
     echo "installed packages"
+
     echo "install pip2"
     cd python
     sudo python2 pip-20.0.2-py2.py3-none-any.whl/pip install --no-index pip-20.0.2-py2.py3-none-any.whl 
@@ -72,7 +73,15 @@ then
     rm -rf /home/alarm/QB_Nebulae_V2/Code/packages
     sudo reboot
 else
-    echo "No Update Detected"
+    FC=`ls -l /mnt/memory/*.tar.xz | wc -l` 
+    if [ $FC -gt 0 ] 
+    then 
+        echo "Packages detected"
+	sudo pacman -Uy /mnt/memory/*.tar.xz
+        rm /mnt/memory/*.tar.xz
+    else  
+      echo "No Update Detected"
+    fi
 fi
 sudo umount /dev/sda1
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro

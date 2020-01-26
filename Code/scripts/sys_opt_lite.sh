@@ -8,10 +8,10 @@ sudo modprobe i2c-dev
 sudo service ntp stop
 
 ## Stop the triggerhappy service
-sudo service triggerhappy stop
+##sudo service triggerhappy stop
 
 ## Stop the dbus service. Warning: this can cause unpredictable behaviour when running a desktop environment on the RPi
-sudo service dbus stop
+##sudo service dbus stop
 
 ## Stop the console-kit-daemon service. Warning: this can cause unpredictable behaviour when running a desktop environment on the RPi
 sudo killall console-kit-daemon
@@ -33,13 +33,13 @@ sudo mount -o remount,size=128M /dev/shm
 killall gvfsd
 
 ## Kill the userspace D-Bus daemon. Warning: this can cause unpredictable behaviour when running a desktop environment on the RPi
-killall dbus-daemon
+##killall dbus-daemon
 
 ## Kill the userspace dbus-launch daemon. Warning: this can cause unpredictable behaviour when running a desktop environment on the RPi
-killall dbus-launch
+##killall dbus-launch
 
 #disable hdmi
-/opt/vc/bin/tvservice -o
+##/opt/vc/bin/tvservice -o
 #enable tvservice with:
 #/opt/vc/bin/tvservice -p
 

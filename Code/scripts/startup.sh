@@ -5,8 +5,9 @@
 echo "starting bootup LEDs"
 python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py booting &
 
-echo "optimizing system."
-sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt.sh
+#moved this to check_wifi, so we can optimised based on if using wifi or not
+#echo "optimizing system."
+#sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt.sh
 
 echo "checking for firmware update"
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh
