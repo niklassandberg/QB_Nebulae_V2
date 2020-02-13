@@ -45,7 +45,7 @@ class FileLoader(object):
             self.copyType("audio")
             self.copyType("instr")
             self.copyType("pd")
-            self.copyType("scsyndef")
+            self.copyType("sc")
             self.umount()
         else:
             self.launch_bootled(0)
