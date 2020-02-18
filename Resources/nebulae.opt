@@ -1,0 +1,6 @@
+[ADC]
+smoothCoeff= 0.33
+
+[Hybrid]
+pitchCoeff = 0.33
+filterCoeff = 0.43

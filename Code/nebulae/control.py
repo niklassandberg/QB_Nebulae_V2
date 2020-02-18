@@ -8,6 +8,9 @@ import random
 import os
 import digitaldata
 import time
+import nconfig
+
+
 # Hardware SPI configuration:
 SPI_PORT   = 0
 SPI_DEVICE_CV = 0
@@ -24,6 +27,12 @@ BUTTON_GATE_SR = 2
 BUTTON_GPIO_GATE_SR = 3
 BUTTON_GPIO_GATE_NONE = 4
 BUTTON_SR_GATE_NONE = 5
+
+
+config = nconfig.NConfig()
+defSmoothCoeff = float(config.getValue("ADC","smoothCoeff",0.33))
+defHybridCoeff = float(config.getValue("Hybrid","filterCoeff",0.43))
+defPitchCoeff = float(config.getValue("Hybrid","pitchCoeff",0.85))
 
 def addHysteresis(cur, new, distance):
     output = cur    
@@ -71,7 +80,8 @@ class AdcData(object):
         self.filtPotVal = 0
         self.filtCVVal = 0
         #self.smoothCoeff = 0.125
-        self.smoothCoeff = 0.33
+        ##self.smoothCoeff = 0.33
+        self.smoothCoeff = defSmoothCoeff
         self.hyst_amt = 0.002
         self.stablized = True
         self.stable_delta = 0.0
@@ -221,6 +231,9 @@ class StaticData(object):
     def setValue(self, value):
         self.curVal = value
 
+
+
+
 class HybridData(object):
     def __init__(self, channel, name, minimum, maximum, init_val):
         self.init  = init_val
@@ -241,13 +254,15 @@ class HybridData(object):
             self.scaling = 0.8685 # Rev13
             ## TODO recalibrate for rev10
             #self.filtCoeff = 0.20
-            self.filtCoeff = 0.33
+            ##self.filtCoeff = 0.33
+            self.filtCoeff = defPitchCoeff
+            print("pitch filtCoeff " + str(self.filtCoeff));
         else:
             self.minimum = minimum
             self.maximum = maximum
             self.scaling = 1.0
             self.offset = -0.0049
-            self.filtCoeff = 0.43
+            self.filtCoeff = defHybridCoeff
         self.range = self.maximum - self.minimum
         self.channel = channel
         if (channel >= 0):
