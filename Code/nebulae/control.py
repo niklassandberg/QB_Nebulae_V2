@@ -32,7 +32,7 @@ BUTTON_SR_GATE_NONE = 5
 config = nconfig.NConfig()
 defSmoothCoeff = float(config.getValue("ADC","smoothCoeff",0.33))
 defHybridCoeff = float(config.getValue("Hybrid","filterCoeff",0.43))
-defPitchCoeff = float(config.getValue("Hybrid","pitchCoeff",0.85))
+defPitchCoeff = float(config.getValue("Hybrid","pitchCoeff",0.95))
 
 def addHysteresis(cur, new, distance):
     output = cur    
