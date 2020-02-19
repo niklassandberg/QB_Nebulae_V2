@@ -6,13 +6,32 @@ import conductor
 import time
 import threading
 from Tkinter import *
+import sys
 
 
 # Test instrs
 #instr = "a_granularlooper"
 instr = "c_synth"
+dir = "."
+
+if len(sys.argv) == 1 : 
+    print "usage:"
+    print "python2 nebulae.py instrname [home dir]"
+    print "home dir : where instr and audio folders live, defaults to current dir"
+    sys.exit(-1)
+
+if len(sys.argv) > 1 : 
+    instr = sys.argv[1]
+
+
+print "Instrument :" + instr
 
 orc_handle = conductor.Conductor() # Initialize Audio File Tables and Csound Score/Orchestra
+
+if len(sys.argv) > 2 : 
+    dir = sys.argv[2]
+    orc_handle.set_home_dir(dir)
+
 orc_handle.generate_orc(instr)
 configData = orc_handle.getConfigDict()
 c = ctcsound.Csound()    # Create an instance of Csound

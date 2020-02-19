@@ -14,7 +14,14 @@ class Conductor(object):
         self.dir = "audio/"
         self.filehandler = fh.FileHandler(self.dir,[".wav",".aif", ".aiff"])
 
+    def set_home_dir(self, dir):
+        print "home dir:" + dir
+        self.instr_dir=dir+"/instr/"
+        self.dir = dir+"/audio/"
+        self.filehandler = fh.FileHandler(self.dir,[".wav",".aif", ".aiff"])
+
     def generate_orc(self, instr):
+        print "generate_orc : " + self.instr_dir + self.instr
         self.instr = instr
         self.orcheader = """
 ; File-Looping Orc
