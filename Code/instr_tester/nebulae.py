@@ -9,15 +9,8 @@ from Tkinter import *
 
 
 # Test instrs
-#instr = "scantable"
-#instr = "granular_test"
-#instr = "scanned"
-#instr = "xscanned" # starts where scanned left off with larger tables and xscan instead of scan opcodes.
-#instr = "filter"
-#instr = "blur"
-#instr = "/dev/pvs"
-instr = "granularlooper_pvs"
-#instr = "granularlooper"
+#instr = "a_granularlooper"
+instr = "c_synth"
 
 orc_handle = conductor.Conductor() # Initialize Audio File Tables and Csound Score/Orchestra
 orc_handle.generate_orc(instr)
@@ -77,11 +70,11 @@ class Application(Frame):
         self.sizeSlider.grid(row=1,column=3)
         self.sizeSlider.set(c_handle.getValue("size"))
         self.sizeUpdater = SliderWrapper(c, "size", self.sizeSlider)
-        # Mix
-        self.mixSlider = Scale(self.canvas, from_=0.0, to=1.0, resolution=tick_size, command=self.updateControls, label="Mix")
-        self.mixSlider.grid(row=3,column=1)
-        self.mixSlider.set(c_handle.getValue("mix"))
-        self.mixUpdater = SliderWrapper(c, "mix", self.mixSlider)
+        # Blend
+        self.blendSlider = Scale(self.canvas, from_=0.0, to=1.0, resolution=tick_size, command=self.updateControls, label="Blend")
+        self.blendSlider.grid(row=3,column=1)
+        self.blendSlider.set(c_handle.getValue("blend"))
+        self.blendUpdater = SliderWrapper(c, "blend", self.blendSlider)
         # Density
         self.densitySlider = Scale(self.canvas, from_=0.0, to=1.0, resolution=tick_size, command=self.updateControls, label="Density")
         self.densitySlider.grid(row=2,column=1)
@@ -92,11 +85,11 @@ class Application(Frame):
         self.overlapSlider.grid(row=2,column=3)
         self.overlapSlider.set(c_handle.getValue("overlap"))
         self.overlapUpdater = SliderWrapper(c, "overlap", self.overlapSlider)
-        # Degrade
-        self.degradeSlider = Scale(self.canvas, from_=0.0, to=1.0, resolution=tick_size, command=self.updateControls, label="Degrade")
-        self.degradeSlider.grid(row=3,column=3)
-        self.degradeSlider.set(c_handle.getValue("degrade"))
-        self.degradeUpdater = SliderWrapper(c, "degrade", self.degradeSlider)
+        # Window
+        self.windowSlider = Scale(self.canvas, from_=0.0, to=1.0, resolution=tick_size, command=self.updateControls, label="Window")
+        self.windowSlider.grid(row=3,column=3)
+        self.windowSlider.set(c_handle.getValue("window"))
+        self.windowUpdater = SliderWrapper(c, "window", self.windowSlider)
         # Speed
         self.speedSlider = Scale(self.canvas, from_=0.0, to=1.0, resolution=tick_size, command=self.updateControls, label="Speed")
         self.speedSlider.grid(row=2,column=2)
@@ -125,10 +118,10 @@ class Application(Frame):
     def updateControls(self, val):
         self.startUpdater.update()
         self.sizeUpdater.update()
-        self.mixUpdater.update()
+        self.blendUpdater.update()
         self.densityUpdater.update()
         self.overlapUpdater.update()
-        self.degradeUpdater.update()
+        self.windowUpdater.update()
         self.speedUpdater.update()
         self.pitchUpdater.update()
         c_handle.updateAll()
