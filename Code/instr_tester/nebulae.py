@@ -133,6 +133,10 @@ class Application(Frame):
         self.sourceButtonState = IntVar()
         self.sourceButton = Checkbutton(self.canvas, text="Source", var=self.sourceButtonState, command=self.handleSource)
         self.sourceButton.grid(row=4,column=4)
+        # Source
+        self.recordButtonState = IntVar()
+        self.recordButton = Checkbutton(self.canvas, text="Record", var=self.recordButtonState, command=self.handleRecord)
+        self.recordButton.grid(row=4,column=5)
 
     def updateControls(self, val):
         self.startUpdater.update()
@@ -143,6 +147,11 @@ class Application(Frame):
         self.windowUpdater.update()
         self.speedUpdater.update()
         self.pitchUpdater.update()
+        c_handle.updateAll()
+
+    def handleRecord(self):
+        print "Handling Record!"
+        c_handle.channeldict["record"].setValue(self.recordButtonState.get())
         c_handle.updateAll()
 
     def handleFreeze(self):

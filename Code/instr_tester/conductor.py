@@ -21,8 +21,8 @@ class Conductor(object):
         self.filehandler = fh.FileHandler(self.dir,[".wav",".aif", ".aiff"])
 
     def generate_orc(self, instr):
-        print "generate_orc : " + self.instr_dir + self.instr
         self.instr = instr
+        print "generate_orc : " + self.instr_dir + self.instr
         self.orcheader = """
 ; File-Looping Orc
 nchnls=2
