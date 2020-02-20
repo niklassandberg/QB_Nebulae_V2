@@ -80,6 +80,13 @@ def delete(src):
         shutil.rmtree(src)
     return '{"ok":"ok"}'
 
+def mountUSB():
+    os.system("mount /dev/sda1 /mnt/memory")
+
+
+def unmountUSB():
+    os.system("umount /dev/sda1")
+
 def get_node(fpath):
     if fpath == '#' :
         return get_files(BASE_DIR)

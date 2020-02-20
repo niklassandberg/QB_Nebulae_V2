@@ -187,14 +187,42 @@ $(function () {
 	});
 
     $("#usb-sel-but").click(function(){
-        baseDirLabel = 'USB Drive';
-        workingDir = '/mnt/memory/';
-        refreshWorkingDir();
+        $.get(fsurl+'?operation=mount_usb')
+        .done(function () {
+            baseDirLabel = 'USB Drive';
+            workingDir = '/mnt/memory/';
+            refreshWorkingDir();
+        })
+        .fail(function() {
+            console.log('problem mounting usb');
+            baseDirLabel = 'Home';
+            workingDir = '/home/alarm/';
+            refreshWorkingDir();
+        });
+
     });
 
     $("#home-sel-but").click(function(){
-        baseDirLabel = 'Nebulae';
+        baseDirLabel = 'Home';
         workingDir = '/home/alarm/';
+        refreshWorkingDir();
+    });
+
+    $("#inst-sel-but").click(function(){
+        baseDirLabel = 'CSound';
+        workingDir = '/home/alarm/instr';
+        refreshWorkingDir();
+    });
+
+    $("#hpd-sel-but").click(function(){
+        baseDirLabel = 'Nebulae';
+        workingDir = '/home/alarm/pd';
+        refreshWorkingDir();
+    });
+
+    $("#audio-sel-but").click(function(){
+        baseDirLabel = 'Nebulae';
+        workingDir = '/home/alarm/audio';
         refreshWorkingDir();
     });
 
@@ -386,6 +414,18 @@ $(function () {
         });
     });
 
+    $("#unmount-but").click(function(){
+        $.get(fsurl+'?operation=unmount_usb')
+        .done(function () {
+            baseDirLabel = 'Home';
+            workingDir = '/home/alarm/';
+            refreshWorkingDir();
+        })
+        .fail(function() {
+            console.log('problem unmounting usb');
+        });
+    });
+
     $("#unzip-but").click(function(){
         var selectedNodes = getSelectedNodes();
         var gotaZip = false;
@@ -421,6 +461,7 @@ $(function () {
             console.log('problem unzipping');
         });
     });
+
 
     // click on directory table row, excluding input elements
     $('body').on('click', '.fsdir', function(event) {
