@@ -82,10 +82,13 @@ def delete(src):
 
 def mountUSB():
     os.system("mount /dev/sda1 /mnt/memory")
+    return '{"ok":"ok"}'
 
 
 def unmountUSB():
+    print "unmount usb"
     os.system("umount /dev/sda1")
+    return '{"ok":"ok"}'
 
 def get_node(fpath):
     if fpath == '#' :

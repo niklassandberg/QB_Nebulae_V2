@@ -112,7 +112,7 @@ class Root():
                 return file_operations.zip(data['path'])
             if data['operation'] == 'mount_usb' :
                 return file_operations.mountUSB()
-            if data['operation'] == 'umount_usb' :
+            if data['operation'] == 'unmount_usb' :
                 return file_operations.unmountUSB()
               
         else :

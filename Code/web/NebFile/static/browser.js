@@ -1,7 +1,7 @@
 
 var appBaseURL = ''
 var fsurl = '/fmdata'
-var workingDir = '/';
+var workingDir = '/home/alarm';
 var baseDirLabel = 'Nebulae';
 var clipboard = {};
 
@@ -187,8 +187,10 @@ $(function () {
 	});
 
     $("#usb-sel-but").click(function(){
+        console.log('mounting usb');
         $.get(fsurl+'?operation=mount_usb')
         .done(function () {
+            console.log('mounting usb -done');
             baseDirLabel = 'USB Drive';
             workingDir = '/mnt/memory/';
             refreshWorkingDir();
@@ -208,14 +210,14 @@ $(function () {
         refreshWorkingDir();
     });
 
-    $("#inst-sel-but").click(function(){
+    $("#instr-sel-but").click(function(){
         baseDirLabel = 'CSound';
         workingDir = '/home/alarm/instr';
         refreshWorkingDir();
     });
 
-    $("#hpd-sel-but").click(function(){
-        baseDirLabel = 'Nebulae';
+    $("#pd-sel-but").click(function(){
+        baseDirLabel = 'Pure Data';
         workingDir = '/home/alarm/pd';
         refreshWorkingDir();
     });
@@ -415,8 +417,10 @@ $(function () {
     });
 
     $("#unmount-but").click(function(){
+        console.log('unmounting usb');
         $.get(fsurl+'?operation=unmount_usb')
         .done(function () {
+            console.log('unmounting usb -done');
             baseDirLabel = 'Home';
             workingDir = '/home/alarm/';
             refreshWorkingDir();

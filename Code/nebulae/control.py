@@ -58,7 +58,8 @@ def averageInput(new_val, hist, hist_size, hist_idx):
 
 # Class for handling ADC Input Data
 class AdcData(object):
-    def __init__(self, pot_channel, cv_channel, minimum, maximum, init_val=0.0):
+    def __init__(self, pot_channel, cv_channel, name,minimum, maximum, init_val=0.0):
+        self.name = name
         self.minimum = minimum
         self.maximum = maximum
         self.range = maximum - minimum
@@ -460,7 +461,7 @@ class ControlChannel(object):
         if (cvchn is -2):
             cvchn = data_channel
         if (self.source is "analog"):
-            self.input = AdcData(data_channel, cvchn, minimum, maximum, init_val=init)
+            self.input = AdcData(data_channel,cvchn, self.name, minimum, maximum, init_val=init)
         elif (source is "static"):
             self.input = StaticData(self.curVal)
         elif (source is "digital"):
