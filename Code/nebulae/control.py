@@ -30,9 +30,13 @@ BUTTON_SR_GATE_NONE = 5
 
 
 config = nconfig.NConfig()
-defSmoothCoeff = float(config.getValue("ADC","smoothCoeff",0.33))
-defHybridCoeff = float(config.getValue("Hybrid","filterCoeff",0.43))
-defPitchCoeff = float(config.getValue("Hybrid","pitchCoeff",0.95))
+defSmoothCoeff = float(config.getValue("filterCoeff","analog",0.33))
+defHybridCoeff = float(config.getValue("filterCoeff","hybrid",0.43))
+
+# litte filtering on v/oct we dont want it gliding
+defPitchCoeff = float(config.getValue("filterCoeff","pitch",0.95))
+# reduced filtering on start, so that it can quickly and accurately be changed
+defStartCoeff = float(config.getValue("filterCoeff","start",0.95))
 
 def addHysteresis(cur, new, distance):
     output = cur    
@@ -90,6 +94,8 @@ class AdcData(object):
             self.mcp_pot = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_POT))
         if (cv_channel >= 0):
             self.mcp_cv = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_CV))
+        if self.name == "start":
+            self.smoothCoeff = defStartCoeff
 
     def setIgnoreHID(self, state):
         self.ignoring_pot = state
@@ -256,7 +262,6 @@ class HybridData(object):
             #self.filtCoeff = 0.20
             ##self.filtCoeff = 0.33
             self.filtCoeff = defPitchCoeff
-            print("pitch filtCoeff " + str(self.filtCoeff));
         else:
             self.minimum = minimum
             self.maximum = maximum
