@@ -14,7 +14,7 @@ class FileLoader(object):
         self.currentState = self.states[self.numStates-1]
         self.audiotypes = [ ".wav", ".aif", ".aiff", ".flac"]
         self.instrtypes = [".instr"]
-        self.pdtypes = [".pd"]
+        self.pdtypes = [".pd",".pd_linux"]
         self.csdtypes = [".csd"]
         self.scdtypes = [".scd"]
         self.othertypes = [".c", ".sh", ".cpp", ".cc"]
