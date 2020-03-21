@@ -10,7 +10,6 @@ import fileloader
 import time
 import logger
 import neb_globals
-from SuperCollider import SuperCollider 
 
 cfg_path = "/home/alarm/QB_Nebulae_V2/Code/config/"
 
@@ -30,7 +29,7 @@ class Nebulae(object):
         #self.currentInstr = "a_granularlooper"
         self.c = None
         self.pt = None 
-        self.sc = SuperCollider()
+        self.st = None
         self.ui = None
         self.c_handle = None
         self.led_process = None
@@ -54,7 +53,7 @@ class Nebulae(object):
         factory_path = "/home/alarm/QB_Nebulae_V2/Code/instr/"
         user_path = "/home/alarm/instr/"
         pd_path = "/home/alarm/pd/"
-        sc_path = "/home/alarm/scsyndef/"
+        sc_path = "/home/alarm/sc/"
         if self.new_bank == 'factory': 
             path = factory_path + self.new_instr + '.instr'
         elif self.new_bank == 'user':
@@ -62,7 +61,7 @@ class Nebulae(object):
         elif self.new_bank == 'puredata':
             path = pd_path + self.new_instr + '.pd'
         elif self.new_bank == 'supercollider':
-            path = sc_path + self.new_instr + '.scsyndef'
+            path = sc_path + self.new_instr + '.sc'
         else:
             print "bank not recocgnized."
             print self.new_bank
@@ -200,6 +199,19 @@ class Nebulae(object):
         floader = fileloader.FileLoader() 
         floader.reload() #reloads all the files to be sure
         self.orc_handle.refreshFileHandler() #also the audio files
+
+        fullPath = "/home/alarm/sc/" + patch + ".sc"
+
+        if debug == False:
+            cmd = "/usr/local/bin/sclang".split()
+        else:
+            cmd = "/usr/local/bin/sclang".split()
+        cmd.append(fullPath)
+        self.st = Popen(cmd)
+        print 'sleeping'
+        time.sleep(2)
+
+
         self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider") #supercollider controlhandler
         self.c_handle.setCsoundPerformanceThread(None)
         self.c_handle.enterSuperColliderMode() ##enters supercollider mode and boots scsynth
@@ -312,8 +324,12 @@ class Nebulae(object):
             sys.exit()     
             
     def cleanup_sc(self):
-        self.sc.free_synth()
-        self.sc.exit()
+        self.st.terminate()
+        self.st.kill()
+        cmd = "sudo killall jackd" 
+        os.system(cmd)
+        cmd = "sudo killall scsynth" 
+        os.system(cmd)
        
     def cleanup_puredata(self): 
         self.pt.terminate()

@@ -12,7 +12,7 @@ import time
 import threading
 import wavewriter
 import numpy as np
-from SuperCollider import SuperCollider
+from scsender
 
 
 # Defines for Button/Gate Types
@@ -51,6 +51,7 @@ class ControlHandler(object):
         self.saveFlag = 0
         self.now = int(round(time.time() * 1000))
         self.pdSock = pdsender.PdSend()
+        self.scSock = pdsender.ScSend()
         self.currentInstr = instr
         self.currentBank = bank
         self.static_file_idx = 0
@@ -230,7 +231,9 @@ class ControlHandler(object):
         self.altchanneldict["source_alt"].setValue(0)
         if self.pdSock.is_connected(): #kills pure data
             self.pdSock.close()
-        self.sc.boot()
+        if not self.scSock.is_connected():
+            print "Connecting to SC Socket"
+            self.scSock.connect()
     
     def enterNormalMode(self):
         print "entering normal"
@@ -247,7 +250,8 @@ class ControlHandler(object):
         self.control_mode = "normal"
         if self.pdSock.is_connected():
             self.pdSock.close()
-        self.sc.exit()
+        if self.scSock.is_connected():
+            self.scSock.close()
 
     def enterPureDataMode(self):
         self.prev_control_mode = self.control_mode
@@ -257,10 +261,12 @@ class ControlHandler(object):
             self.resistSecondarySettings()
         for chn in self.channels:
             chn.muteCSound(True)
+        if self.scSock.is_connected():
+            self.scSock.close()
+
         if not self.pdSock.is_connected():
             print "Connecting to PD Socket"
             self.pdSock.connect()
-        self.sc.exit()
         self.control_mode = "puredata"
     
     def enterSecondaryMode(self):
@@ -454,7 +460,7 @@ class ControlHandler(object):
                         print 'Could not send messgaes to PD. No connection?'
             elif self.prev_control_mode =="supercollider": #if we are in sc mode
                 for chn in self.channels: #for each of the adc channels
-                    self.sc.setSynth(chn.name, chn.getValue()) ##for each channel I send a OSC message
+                    self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
                     chn.update() #update all control values
             else:
                 for chn in self.channels:
@@ -503,7 +509,7 @@ class ControlHandler(object):
             for chn in self.channels: #for each of the adc channels
                 if chn.name != "sourcegate":
                     chn.setIgnoreHID(False)
-                self.sc.setSynth(chn.name, chn.getValue()) ##for each channel I send a OSC message
+                self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
                 chn.update() #update all control values
         else: #includes "normal":4
             filestate = self.channeldict["filestate"].getValue()

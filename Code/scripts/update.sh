@@ -47,6 +47,12 @@ then
         echo "updating /etc/systemd/system/nebulae.service for next boot up."
         sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service > /etc/systemd/system/nebulae.service"
     fi
+
+    #mkdir dir if they dont exist
+    mkdir -p /home/alarm/sc
+    mkdir -p /home/alarm/pd
+    mkdir -p /home/alarm/instr
+
     sudo reboot
 elif [ -d /home/alarm/QB_Nebulae_V2/Code/packages ]
 then
@@ -70,6 +76,7 @@ then
     echo "installed pip packages"
     sudo pip2 install *
     cd /home/alarm
+
 
     rm -rf /home/alarm/QB_Nebulae_V2/Code/packages
     sudo reboot

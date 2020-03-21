@@ -222,6 +222,12 @@ $(function () {
         refreshWorkingDir();
     });
 
+    $("#sc-sel-but").click(function(){
+        baseDirLabel = 'Supercollider';
+        workingDir = '/home/alarm/sc';
+        refreshWorkingDir();
+    });
+
     $("#audio-sel-but").click(function(){
         baseDirLabel = 'Nebulae';
         workingDir = '/home/alarm/audio';
