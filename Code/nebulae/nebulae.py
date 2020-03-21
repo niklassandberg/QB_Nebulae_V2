@@ -187,15 +187,15 @@ class Nebulae(object):
             "Could not write config file."
             
             
-    def start_supercollider(self, synth): #start sc with the selected synth
+    def start_supercollider(self, patch): #start sc with the selected synth
         #self.cleanup_puredata() ##kills pure data
         #self.cleanup()
         if self.c is not None: ##if csound is still alive
             self.c.cleanup() ##kill it
             self.c = None ##set its life to None
         self.c_handle = None
-        self.currentIntr = synth
-        self.newInstr = synth
+        self.currentIntr = patch
+        self.newInstr = patch
         floader = fileloader.FileLoader() 
         floader.reload() #reloads all the files to be sure
         self.orc_handle.refreshFileHandler() #also the audio files
@@ -203,20 +203,17 @@ class Nebulae(object):
         fullPath = "/home/alarm/sc/" + patch + ".sc"
 
         if debug == False:
-            cmd = "/usr/local/bin/sclang".split()
+            cmd = "sclang".split()
         else:
-            cmd = "/usr/local/bin/sclang".split()
+            cmd = "sclang".split()
         cmd.append(fullPath)
         self.st = Popen(cmd)
         print 'sleeping'
         time.sleep(2)
-
-
         self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider") #supercollider controlhandler
         self.c_handle.setCsoundPerformanceThread(None)
         self.c_handle.enterSuperColliderMode() ##enters supercollider mode and boots scsynth
         self.loadUI()
-        self.sc.instantiate_synth(synth) #instantiate the selected synth on the server
         
 
     def start_puredata(self, patch):

@@ -12,7 +12,7 @@ import time
 import threading
 import wavewriter
 import numpy as np
-from scsender
+import scsender
 
 
 # Defines for Button/Gate Types
@@ -36,7 +36,6 @@ class ControlHandler(object):
         GPIO.setmode(GPIO.BCM) # init GPIO
         GPIO.setwarnings(False) # silence GPIO warnings (this is probably not the best.)
         self.eol_pin = 16
-        self.sc = SuperCollider() #added supercollider
         self.eol_state = False
         GPIO.setup(self.eol_pin, GPIO.OUT)
         self.shiftReg = libSR.ShiftRegister()
@@ -51,7 +50,7 @@ class ControlHandler(object):
         self.saveFlag = 0
         self.now = int(round(time.time() * 1000))
         self.pdSock = pdsender.PdSend()
-        self.scSock = pdsender.ScSend()
+        self.scSock = scsender.ScSend()
         self.currentInstr = instr
         self.currentBank = bank
         self.static_file_idx = 0
