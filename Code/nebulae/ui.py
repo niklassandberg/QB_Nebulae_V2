@@ -525,13 +525,6 @@ class UserInterface(object):
                 self.ignore_next_speed_click = True
                 self.controlhandler.enterInstrSelMode()
             self.set_speed_amount()
-        elif mode == "puredata":
-            if self.speed_click.risingEdge() == True:
-                self.time_pressed_speed = self.now
-            if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500:
-                self.ignore_next_speed_click = True
-                self.controlhandler.enterInstrSelMode()
-            self.set_speed_amount()
         elif mode == "secondary controls":
             self.set_alt_speed_amount()
         elif mode == "instr selector":
