@@ -61,7 +61,7 @@ class Nebulae(object):
         elif self.new_bank == 'puredata':
             path = pd_path + self.new_instr + '.pd'
         elif self.new_bank == 'supercollider':
-            path = sc_path + self.new_instr + '.sc'
+            path = sc_path + self.new_instr + '.scd'
         else:
             print "bank not recocgnized."
             print self.new_bank
@@ -200,7 +200,7 @@ class Nebulae(object):
         floader.reload() #reloads all the files to be sure
         self.orc_handle.refreshFileHandler() #also the audio files
 
-        fullPath = "/home/alarm/sc/" + patch + ".sc"
+        fullPath = "/home/alarm/sc/" + patch + ".scd"
 
         if debug == False:
             cmd = "sclang".split()

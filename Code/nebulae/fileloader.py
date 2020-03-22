@@ -16,7 +16,7 @@ class FileLoader(object):
         self.instrtypes = [".instr"]
         self.pdtypes = [".pd",".pd_linux"]
         self.csdtypes = [".csd"]
-        self.scdtypes = [".sc"]
+        self.scdtypes = [".scd",".sc"]
         self.othertypes = [".c", ".sh", ".cpp", ".cc"]
         self.dirs = [ "audio", "instr", "pd", "sc", "csound", "other"]
         self.dirtypes = {}
