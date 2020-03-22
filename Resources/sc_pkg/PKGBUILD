@@ -14,12 +14,10 @@ arch=('armv7h')
 url="https://supercollider.github.io"
 license=('GPL3')
 groups=('pro-audio')
-depends=('avahi' 'desktop-file-utils' 'fftw' 'gcc-libs' 'glibc' 'libasound.so'
-'libboost_filesystem.so' 'libboost_program_options.so' 'libboost_regex.so'
-'libboost_thread.so' 'libjack.so' 'libsndfile.so' 'libx11' 'libyaml-cpp.so'
-'libreadline.so'
-'systemd-libs')
-makedepends=('boost' 'cmake' )
+depends=('avahi' 'desktop-file-utils' 'fftw' 'gcc-libs' 'glibc' 
+'libreadline.so')
+#'libasound.so' 'libjack.so' 'libsndfile.so' 'systemd-libs')
+makedepends=('cmake' )
 optdepends=(
             'gedit: gedit interface'
             'sc3-plugins: additional extension plugins for scsynth')
@@ -35,26 +33,21 @@ sha512sums=('8d414e036899ed2c8f1e6852cf325d85f2b99b0fa98dc1bd832be6106c8ec4d71f1
 prepare() {
   mv -v "${_name}-Source" "${pkgname}-${pkgver}"
   cd "${pkgname}-${pkgver}"
-  patch -Np1 -i "../${pkgname}-3.10.4-system_boost.patch"
+  #patch -Np1 -i "../${pkgname}-3.10.4-system_boost.patch"
 }
 
 build() {
   cd "${pkgname}-${pkgver}"
+  mkdir build && cd build
   cmake -DCMAKE_INSTALL_PREFIX=/usr \
         -DCMAKE_BUILD_TYPE=Release \
-        -DBoost_NO_BOOST_CMAKE=ON \
         -DLIBSCSYNTH=ON \
-        -DFORTIFY=ON \
-        -DSYSTEM_YAMLCPP=ON \
-        -DSYSTEM_BOOST=ON \
-        -DSC_VIM=OFF \
-        -DSC_EL=OFF \
-	-DSC_IDE=OFF -DNO_X11=ON -DSC_QT=OFF \
         -B build \
-        -DSSE=OFF -DSSE2=OFF -DSUPERNOVA=OFF -DNOVA_SIMD=ON -DNATIVE=OFF \
+	-DSUPERNOVA=OFF -DSC_ED=OFF -DSC_EL=OFF -DSC_VIM=OFF -DNATIVE=ON \
+    	-DSC_IDE=OFF -DNO_X11=ON -DSC_QT=OFF \
         -DCMAKE_C_FLAGS="${CFLAGS}" \
-        .
-  make VERBOSE=1 -C build
+        ..
+  cmake --build . --config Release --target all -- -j3
 }
 
 check() {
