@@ -275,10 +275,10 @@ class ControlHandler(object):
             print "entering secondary"
             self.resistNormalSettings() 
 
-            if not self.pdSock.is_connected() and self.control_mode == "puredata" 
+            if not self.pdSock.is_connected() and self.control_mode == "puredata" :
                 print "Connecting to PD Socket"
                 self.pdSock.connect()
-            if not self.scSock.is_connected() and self.control_mode == "supercollider" 
+            if not self.scSock.is_connected() and self.control_mode == "supercollider" :
                 print "Connecting to SC Socket"
                 self.scSock.connect()
 
