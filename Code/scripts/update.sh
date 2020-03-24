@@ -79,6 +79,11 @@ then
         echo "updating /etc/jackdrc"
         sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/jackdrc > /etc/jackdrc"
     fi
+    if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/startup.scd ]
+    then
+        echo "updating startup.scd"
+        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/startup.scd > /root/.config/SuperCollider/startup.scd"
+    fi
 
     #mkdir dir if they dont exist
     mkdir -p /home/alarm/sc
