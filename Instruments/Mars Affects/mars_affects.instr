@@ -17,8 +17,6 @@ file,triggered,rising
 file_alt,latching,falling
 nebconfigend
 
-; http://www.csounds.com/manual/html/UsingOptimizing.html
-
 /****************
  MARS AFFECTS 1.5.1, based on Original 'Effects' / 'World of Echo'
 
