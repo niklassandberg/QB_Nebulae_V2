@@ -8,6 +8,7 @@ import random
 import os
 import digitaldata
 import time
+from calibration_data import CalibrationData
 # Hardware SPI configuration:
 SPI_PORT   = 0
 SPI_DEVICE_CV = 0
@@ -26,9 +27,9 @@ BUTTON_GPIO_GATE_NONE = 4
 BUTTON_SR_GATE_NONE = 5
 
 def addHysteresis(cur, new, distance):
-    output = cur    
-    if cur + distance < new:    
-        output = new    
+    output = cur
+    if cur + distance < new:
+        output = new
     elif cur - distance > new:
         output = new
     return output
@@ -93,7 +94,7 @@ class AdcData(object):
 
     def clearResistVal(self):
         self.resisting_change = False
-    
+
     def isResisting(self):
         return self.resisting_change
 
@@ -148,7 +149,7 @@ class AdcData(object):
             temp_cv = ((4095.0 - temp_cv_code) - 2047.0) / 2047.0
             self.raw_cv = temp_cv
             temp_cv -= self.cv_offset
-        else: 
+        else:
             temp_cv = 0.0
         self.filtCVVal += self.smoothCoeff * (temp_cv - self.filtCVVal)
         return self.filtCVVal
@@ -160,7 +161,7 @@ class AdcData(object):
             self.raw_pot = temp_pot
             self.filtPotVal += self.smoothCoeff * (temp_pot - self.filtPotVal)
             if self.resisting_change is True:
-                temp_hyst = addHysteresis(self.resist_val, self.raw_pot, 0.1) 
+                temp_hyst = addHysteresis(self.resist_val, self.raw_pot, 0.1)
                 if temp_hyst != self.resist_val:
                     self.resisting_change = False
                     self.resist_val = self.raw_pot
@@ -173,8 +174,8 @@ class AdcData(object):
                     pot = self.static_pot
         else:
             pot = 0.0
-        return pot 
-        
+        return pot
+
 
     def clipControl(self, val):
         if val < self.minimum + (self.hyst_amt * 4):
@@ -182,7 +183,7 @@ class AdcData(object):
         if val > self.maximum - (self.hyst_amt * 4):
             val = self.maximum
         return val
-        
+
     def setCVOffset(self, value):
         self.cv_offset = value
 
@@ -263,6 +264,7 @@ class HybridData(object):
         self.last_in = 0.0
         self.staticVal = init_val
         self.ignore_enc = False
+        self.new_calibration = False
 
     def getValue(self):
         #hyst_amt = 0.0025
@@ -272,7 +274,7 @@ class HybridData(object):
             temp_analog = ((1.0 - (temp_code / 4095.0)) * self.range) + self.minimum
             #temp_code = self.mcp_cv.read_adc(self.channel) >> 3
             #temp_analog = ((1.0 - (temp_code / 511.0)) * self.range) + self.minimum
-            temp_analog *= self.scaling
+            # temp_analog *= self.scaling # Moved scaling to the output
             self.raw_cv = temp_analog
         else:
             temp_analog = 0.0
@@ -281,28 +283,33 @@ class HybridData(object):
             temp_analog = (temp_analog * 2.0) - 1.0
             self.raw_cv = temp_analog
         if (self.channel >= 0):
-            temp_rnd = temp_analog
+            # Apply scale and offset from calibration..
+            # The offset is handled differently for v/oct
+            if self.name == "pitch" and self.new_calibration:
+                temp_rnd = self.offset + (temp_analog * self.scaling)
+            else:
+                temp_rnd = (temp_analog * self.scaling) - self.offset
             self.filtVal += self.filtCoeff * (temp_rnd - self.filtVal)
-            self.analogVal = self.filtVal - self.offset
+            self.analogVal = self.filtVal
             self.hystVal = addHysteresis(self.hystVal, self.analogVal, hyst_amt)
             temp = self.hystVal + self.staticVal
             temp_rnd = round(temp, 4)
             if self.name == "speed":
                 tolerance = 0.00208 # 1/8 semi-tone = quarter tone tolerance.
                 factors = [0.0, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0]
-                for f in factors: 
-                    factor_val_pos = (f + 4.0) / 8.0 
-                    factor_val_neg = ((-1.0 * f) + 4.0) / 8.0 
+                for f in factors:
+                    factor_val_pos = (f + 4.0) / 8.0
+                    factor_val_neg = ((-1.0 * f) + 4.0) / 8.0
                     if temp_rnd < factor_val_pos + tolerance and temp_rnd > factor_val_pos - tolerance:
                         temp_rnd = factor_val_pos
                     if temp_rnd < factor_val_neg + tolerance and temp_rnd > factor_val_neg - tolerance:
                         temp_rnd = factor_val_neg
             elif self.name == "pitch":
                 tolerance = 0.00208
-                octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]  
+                octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
                 for octave in octaves:
                     if temp_rnd < octave + tolerance and temp_rnd > octave - tolerance:
-                        temp_rnd = octave 
+                        temp_rnd = octave
             if self.stablized is True:
                 if abs(temp_rnd - self.curVal) > 0.005:
                     self.stablized = False
@@ -333,10 +340,20 @@ class HybridData(object):
         #    print "###### SPEEED #######"
         #    print "Val: " + str(self.curVal) + " CV: " + str(self.filtVal) +  " CV Code: " + str(temp_code) + " Scaling: " + str(self.scaling)
         #    print "Cur Max: " + str(self.curMax) + " Cur Min: " + str(self.curMin) + " Noise Range: " + str(noise_range) + " dummy code: " + str(temp_dummy_code) + " diff: " + str(temp_code)
-        return self.curVal 
-    
+        return self.curVal
+
     def setCVOffset(self, value):
         self.offset = value
+
+    def setCVScaling(self, value):
+        """
+        This is only used with the new calibration added for pitch/voct
+
+        So, this will _also_ tell the class to use the new calibration scheme
+        which handles its offset in the opposite direction.
+        """
+        self.new_calibration = True
+        self.scaling = value
 
     def setIgnoreHID(self, state):
         self.ignore_enc = state
@@ -352,11 +369,12 @@ class HybridData(object):
         return self.raw_cv
 
     def getCVValue(self):
-        return self.raw_cv - self.offset
+        ## Note to future self: this does not get used anywhere...
+        return (self.raw_cv * self.scaling) - self.offset
 
-        
 
-                
+
+
 
 # Single Channel of Return Communication from CSound
 class CommChannel(object):
@@ -403,7 +421,7 @@ class CommChannel(object):
             if self.state == 1:
                 self.state = 0
                 self.csound.setControlChannel(self.name, self.state)
-        
+
 
 # Single Channel of Control Information
 class ControlChannel(object):
@@ -418,7 +436,7 @@ class ControlChannel(object):
         self.csound = csound
         self.name = name
         if self.csound is not None:
-            chn, _ = self.csound.channelPtr(self.name, 
+            chn, _ = self.csound.channelPtr(self.name,
                 ctcsound.CSOUND_CONTROL_CHANNEL | ctcsound.CSOUND_INPUT_CHANNEL)
             self.channel = chn
         else:
@@ -449,10 +467,16 @@ class ControlChannel(object):
         elif (source is "hybrid"):
             self.input = HybridData(data_channel, self.name, minimum, maximum, init_val=self.curVal)
 
-        if self.source == "analog" or self.source == "hybrid": 
+        if self.source == "analog" or self.source == "hybrid":
             new_offset = self.gatherOffset(self.name)
             #print name + ": new offset = " + str(new_offset)
-            self.setCVOffset(new_offset) 
+            self.setCVOffset(new_offset)
+
+        # Use new 1V/oct calibration if available
+        if self.name == "pitch" and self.isManuallyCalibrated():
+            voct_scale, voct_offset = self.gatherVoctCalibration()
+            self.setCVOffset(voct_offset)
+            self.setCVScaling(voct_scale)
 
     def setValue(self, val):
         self.input.setValue(val)
@@ -485,10 +509,14 @@ class ControlChannel(object):
         if self.source == "hybrid":
             val = self.input.getStaticVal()
             return val
-    
+
     def setCVOffset(self, value):
         if self.source == "hybrid" or self.source == "analog":
             self.input.setCVOffset(value)
+
+    def setCVScaling(self, value):
+        if self.source == "hybrid":
+            self.input.setCVScaling(value)
 
     def setIgnoreNextButton(self):
         if self.source == "digital":
@@ -507,7 +535,7 @@ class ControlChannel(object):
             return self.input.isResisting()
         else:
             return False
-        
+
     def hasChanged(self):
         change = self.curVal != self.prevVal
         return change
@@ -539,22 +567,28 @@ class ControlChannel(object):
         else:
             return self.curVal
 
+    def isManuallyCalibrated(self):
+        """checks if a manual v/oct calibration has been recorded by the user"""
+        data = CalibrationData()
+        return data.manually_calibrated
+
+
     def gatherOffset(self, name):
-        filepath = '/home/alarm/QB_Nebulae_V2/Code/misc/'
-        filename = 'calibration_data.txt'
-        val = 0.0
+        """Gathers stored calibration data for generic CV inputs"""
+        caldata = CalibrationData()
         try:
-            with open(filepath + filename, 'r') as myfile:
-                for line in myfile:
-                    if line.startswith(name):
-                        datalist = line.split(',')  
-                        try:
-                            val = float(datalist[1])
-                        except:
-                            print 'list value is not a floating point number:' + datalist[1]
-        except:
-            print 'No file: ' + filepath + filename
-        return val 
+            val = caldata.offsets[name]
+        except KeyError:
+            val = 0.0
+        return val
+
+    def gatherVoctCalibration(self):
+        """
+        Gathers stored calibration data for v/oct input
+        returns a tuple containing the scaling and the offset
+        """
+        caldata = CalibrationData()
+        return (caldata.voct_scaling, caldata.voct_offset)
 
     def update(self):
         #time.sleep(0.001)
