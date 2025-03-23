@@ -578,10 +578,10 @@ if gkfilestate == 1 then
         ;tablecopy giftRA, giftEmpty
         ;tablecopy giftLB, giftEmpty
         ;tablecopy giftRB, giftEmpty
-        giftLA ftgen   0, 0, giMaxRecordBuffer * sr, 7, 0
-        giftRA ftgen   0, 0, giMaxRecordBuffer * sr, 7, 0
-        giftLB ftgen   200, 0, giMaxRecordBuffer * sr, 7, 0
-        giftRB ftgen   201, 0, giMaxRecordBuffer * sr, 7, 0
+        ;giftLA ftgen   0, 0, giMaxRecordBuffer * sr, 7, 0
+        ;giftRA ftgen   0, 0, giMaxRecordBuffer * sr, 7, 0
+        ;giftLB ftgen   200, 0, giMaxRecordBuffer * sr, 7, 0
+        ;giftRB ftgen   201, 0, giMaxRecordBuffer * sr, 7, 0
         klen = giMaxRecordBuffer
         kBufferEmpty = 1
         kActiveBuffer = 0
