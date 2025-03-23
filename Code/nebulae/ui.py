@@ -478,7 +478,7 @@ class UserInterface(object):
             if speed_neg_bright < 0:
                 speed_neg_bright = 0
             if self.currentInstr == "a_granularlooper":
-                if self.controlhandler.channeldict["record"].curVal == 1:
+                if self.controlhandler.channeldict["record"].curVal == 1 and self.controlhandler.altchanneldict["record_alt"].curVal == 0:
                     color_neg = red
                     color_pos = red
                     speed_neg_bright = 1.0
