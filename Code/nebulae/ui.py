@@ -52,11 +52,11 @@ class UserInterface(object):
         user_dir = "/home/alarm/instr/"
         factory_dir = "/home/alarm/QB_Nebulae_V2/Code/instr/"
         pd_dir = "/home/alarm/pd/"
-        sc_dir = "/home/alarm/scsyndef/"
+        sc_dir = "/home/alarm/sc/"
         self.factoryinstr_fhandle = filehandler.FileHandler(factory_dir, ".instr")
         self.userinstr_fhandle = filehandler.FileHandler(user_dir, ".instr")
         self.puredata_fhandle = filehandler.FileHandler(pd_dir, ".pd")
-        self.sc_fhandle = filehandler.FileHandler(sc_dir, ".scsyndef")
+        self.sc_fhandle = filehandler.FileHandler(sc_dir, ".scd")
         cur_bank = self.controlhandler.getInstrSelBank()
         self.bank_shift_counter = 0
         if cur_bank == "factory":
@@ -519,13 +519,6 @@ class UserInterface(object):
     
     def update_speed(self, mode):
         if mode == "normal" or mode == "puredata" or mode == "supercollider":
-            if self.speed_click.risingEdge() == True:
-                self.time_pressed_speed = self.now
-            if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500:
-                self.ignore_next_speed_click = True
-                self.controlhandler.enterInstrSelMode()
-            self.set_speed_amount()
-        elif mode == "puredata":
             if self.speed_click.risingEdge() == True:
                 self.time_pressed_speed = self.now
             if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500:
