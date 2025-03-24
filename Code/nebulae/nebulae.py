@@ -14,7 +14,7 @@ from SuperCollider import SuperCollider
 
 cfg_path = "/home/alarm/QB_Nebulae_V2/Code/config/"
 
-debug = False 
+debug = False
 debug_controls = False
 
 class Nebulae(object):
@@ -29,8 +29,7 @@ class Nebulae(object):
         self.orc_handle = conductor.Conductor() # Initialize Audio File Tables and Csound Score/Orchestra
         #self.currentInstr = "a_granularlooper"
         self.c = None
-        self.pt = None 
-        self.sc = SuperCollider()
+        self.pt = None
         self.ui = None
         self.c_handle = None
         self.led_process = None
@@ -45,7 +44,7 @@ class Nebulae(object):
                     if templist[0] == 'bank':
                         self.new_bank = templist[1]
                     elif templist[0] == 'instr':
-                        self.new_instr = templist[1] 
+                        self.new_instr = templist[1]
         else:
             self.new_bank = 'factory'
             self.new_instr = 'a_granularlooper'
@@ -54,8 +53,7 @@ class Nebulae(object):
         factory_path = "/home/alarm/QB_Nebulae_V2/Code/instr/"
         user_path = "/home/alarm/instr/"
         pd_path = "/home/alarm/pd/"
-        sc_path = "/home/alarm/scsyndef/"
-        if self.new_bank == 'factory': 
+        if self.new_bank == 'factory':
             path = factory_path + self.new_instr + '.instr'
         elif self.new_bank == 'user':
             path = user_path + self.new_instr + '.instr'
@@ -92,7 +90,7 @@ class Nebulae(object):
         self.c.setOption("-odac:hw:0,0")  # Set option for Csound
         if configData.has_key("-B"):
             self.c.setOption("-B"+str(configData.get("-B")[0]))
-        else: 
+        else:
             self.c.setOption("-B512") # Liberal Buffer
 
         if configData.has_key("-b"):
@@ -105,11 +103,11 @@ class Nebulae(object):
             self.c.setOption("-m0")  # Set option for Csound
             self.c.setOption("-d")
         self.c.compileOrc(self.orc_handle.curOrc)     # Compile Orchestra from String
-        self.c.readScore(self.orc_handle.curSco)     # Read in Score generated from notes 
+        self.c.readScore(self.orc_handle.curSco)     # Read in Score generated from notes
         self.c.start() # Start Csound
         self.c_handle = ch.ControlHandler(self.c, self.orc_handle.numFiles(), configData, self.new_instr, bank=self.new_bank) # Create handler for all csound comm.
         self.loadUI()
-        self.pt = ctcsound.CsoundPerformanceThread(self.c.csound()) # Create CsoundPerformanceThread 
+        self.pt = ctcsound.CsoundPerformanceThread(self.c.csound()) # Create CsoundPerformanceThread
         self.c_handle.setCsoundPerformanceThread(self.pt)
         self.pt.play() # Begin Performing the Score in the perforamnce thread
         self.c_handle.updateAll() # Update all values to ensure their at their initial state.
@@ -120,8 +118,9 @@ class Nebulae(object):
     def run(self):
         new_instr = None
         request = False
-        if self.first_run == False:
-            self.c_handle.restoreAltToDefault()
+        # if self.first_run == False:
+        #     print("RESTORING ALT SETTINGS TO DEFAULTS")
+        #     self.c_handle.restoreAltToDefault()
         while (self.pt.status() == 0): # Run a loop to poll for messages, and handle the UI.
             self.ui.update()
             self.c_handle.updateAll()
@@ -138,7 +137,7 @@ class Nebulae(object):
             print "index of new instr is: " + str(self.c_handle.instr_sel_idx)
             self.new_instr = self.ui.getNewInstr()
             print "new instr: " + self.new_instr
-            self.new_bank = self.c_handle.getInstrSelBank() 
+            self.new_bank = self.c_handle.getInstrSelBank()
             print "new bank: " + self.new_bank
             self.c.cleanup()
             self.ui.reload_flag = False # Clear Reload Flag
@@ -173,7 +172,7 @@ class Nebulae(object):
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
             with open(self.instr_cfg, 'w') as f:
                 bankstr = 'bank,'+self.new_bank
-                instrstr = 'instr,'+self.new_instr 
+                instrstr = 'instr,'+self.new_instr
                 f.write(bankstr + '\n')
                 f.write(instrstr + '\n')
                 for line in f:
@@ -181,7 +180,7 @@ class Nebulae(object):
                     if templist[0] == 'bank':
                         self.new_bank = templist[1]
                     elif templist[0] == 'instr':
-                        self.new_instr = templist[1] 
+                        self.new_instr = templist[1]
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
         except:
@@ -210,7 +209,7 @@ class Nebulae(object):
     def start_puredata(self, patch):
         self.log.spill_basic_info()
         if self.c is not None:
-            self.c.cleanup() 
+            self.c.cleanup()
             self.c = None
         self.c_handle = None
         self.currentInstr = patch
@@ -232,7 +231,7 @@ class Nebulae(object):
         self.c_handle.setCsoundPerformanceThread(None)
         self.c_handle.enterPureDataMode()
         self.loadUI()
-        
+
 
     def run_puredata(self):
         new_instr = None
@@ -248,7 +247,7 @@ class Nebulae(object):
             print "Received Reload Request from UI"
             print "index of new instr is: " + str(self.c_handle.instr_sel_idx)
             self.new_instr = self.ui.getNewInstr()
-            self.new_bank = self.c_handle.getInstrSelBank() 
+            self.new_bank = self.c_handle.getInstrSelBank()
             self.ui.reload_flag = False # Clear Reload Flag
             print "Reloading " + self.new_instr + " from " + self.new_bank
             self.cleanup_puredata()
@@ -269,59 +268,13 @@ class Nebulae(object):
             print "Goodbye!"
             sys.exit()
             
-            
-    def run_supercollider(self): ##supercollider
-        if self.c is not None:
-		    self.c.cleanup()
-		    self.c = None
-        request = False
-        while(request != True):  ##while I have no requests from UI
-            self.c_handle.updateAll() ## keep on updating the control values (and sending them to scsynth)
-            self.ui.update() #update the UI
-            request = self.ui.getReloadRequest() ##check whether I got a UI request to change patch
-        if request == True:
-            self.first_run = False
-            print "Received Reload Request from UI"
-            print "index of new instr is: " + str(self.c_handle.instr_sel_idx)
-            self.new_instr = self.ui.getNewInstr()
-            print "new instr: " + self.new_instr
-            self.new_bank = self.c_handle.getInstrSelBank()
-            print "new bank: " + self.new_bank
-            self.ui.reload_flag = False # Clear Reload Flag
-            print "Reloading " + self.new_instr + " from " + self.new_bank
-            # Store bank/instr to config
-            self.writeBootInstr()
-            # Get bank/instr from factory
-            if self.new_bank == "puredata":
-                self.cleanup_sc()
-                self.start_puredata(self.new_instr)
-                self.run_puredata()
-            elif self.new_bank == "supercollider": #added
-                self.cleanup_sc()
-                self.start_supercollider(self.new_instr)
-                self.run_supercollider()
-            else:
-                time.sleep(0.5)
-                self.cleanup_sc()
-                self.start(self.new_instr, self.new_bank)
-                self.run()
-        else:
-            print "Run Loop Ending."
-            self.cleanup_sc()
-            print "Goodbye!"
-            sys.exit()     
-            
-    def cleanup_sc(self):
-        self.sc.free_synth()
-        self.sc.exit()
-       
-    def cleanup_puredata(self): 
+    def cleanup_puredata(self):
         self.pt.terminate()
         self.pt.kill()
 
     def loadUI(self):
         print "Killing LED program"
-        cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
+        cmd = "sudo pkill -15 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
         os.system(cmd)
         if self.ui is None:
             self.ui = ui.UserInterface(self.c_handle) # Create User Interface
@@ -332,7 +285,7 @@ class Nebulae(object):
         self.ui.setCurrentInstr(self.new_instr)
 
     def launch_bootled(self):
-        cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
+        cmd = "sudo pkill -15 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
         os.system(cmd)
         print "Launching LED program"
         fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading"
