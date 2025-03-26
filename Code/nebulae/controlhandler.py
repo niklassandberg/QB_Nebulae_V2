@@ -14,6 +14,7 @@ import wavewriter
 import numpy as np
 import scsender
 
+import soundcardhandler as sch
 
 # Defines for Button/Gate Types
 BUTTON_GATE_GPIO = 0
@@ -44,6 +45,7 @@ class ControlHandler(object):
         self.prev_control_mode = "normal"
         self.configData = configData
         self.in_ticks = 23
+        self.in_ticks_calls = 0
         self.modeChangeControl = None
         self.settings = settings.SettingManager(configData)
         self.settings.read()
@@ -61,6 +63,8 @@ class ControlHandler(object):
         self.writing_buffer = False
         self.buffer_failure = False
         self.performance_thread = None
+
+        self.soundcard_handler = sch.SoundcardHandler()
 
         # Set Defaults/Read Config
         digitalControlList = [
@@ -354,11 +358,12 @@ class ControlHandler(object):
 
     def setInputLevel(self, scalar):
         tick = scalar
-        prev_ticks = self.in_ticks
-        self.in_ticks = tick
-        if prev_ticks != self.in_ticks:
-            cmd = 'amixer set \'Capture\' ' + str(tick)
-            os.system(cmd)
+        if tick != self.in_ticks:
+            self.in_ticks = tick
+            self.soundcard_handler.setInputLevel(tick)
+            #cmd = 'amixer set \'Capture\' ' + str(self.in_ticks)
+            #cmd = 'amixer sset Capture,0 ' + str(self.in_ticks) + ' rear'
+            #os.system(cmd)
 
     def getEndOfLoopState(self):
         return self.eol_state
