@@ -255,6 +255,8 @@ class ControlHandler(object):
             self.pdSock.close()
         if self.scSock.is_connected():
             self.scSock.close()
+        #needed so mixer is up and running.
+        self.soundcard_handler.init()
 
     def enterPureDataMode(self):
         self.prev_control_mode = self.control_mode

@@ -45,6 +45,8 @@ class SoundcardHandler:
             self.capturecontrol = None
             print "Error: Capture control not found"
 
+    def init(self):
+        self.initcapture()
 
     def setInputLevel(self, volume):
 
@@ -62,8 +64,8 @@ class SoundcardHandler:
 
         self.libasound.snd_mixer_selem_set_capture_volume(self.capturecontrol, self.LEFT, ctvol)
         self.libasound.snd_mixer_selem_set_capture_volume(self.capturecontrol, self.RIGHT, ctvol)
-        
+
     def __del__(self):
-        """ Destructor - Cleanup (Python's GC will take care of cleanup, but this is for safety) """
-        print "SoundcardHandler object is being destroyed."
-        # No need to call snd_mixer_open to close, Python handles cleanup.
+        """ Destructor """
+        if self.mixer:
+            self.libasound.snd_mixer_open(ctypes.byref(self.mixer), 0)  # Close mixer
