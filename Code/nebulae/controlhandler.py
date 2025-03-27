@@ -255,8 +255,6 @@ class ControlHandler(object):
             self.pdSock.close()
         if self.scSock.is_connected():
             self.scSock.close()
-        #needed so mixer is up and running.
-        self.soundcard_handler.init()
 
     def enterPureDataMode(self):
         self.prev_control_mode = self.control_mode
@@ -357,6 +355,13 @@ class ControlHandler(object):
             nowvals[name] = self.altchanneldict[name].getPotValue()
             self.altchanneldict[name].setValue(defaultVal)
             self.altchanneldict[name].setModeChangeValue(nowvals[name])
+
+    def resetcriticalresourses(self):
+        print 'resetcriticalresourses called'
+        #TODO: CSOUND DOES SOMETHING TO SOUNDCARD!!!! 
+        self.soundcard_handler.removeLib() #ANV DEN HAR!!!!
+        #self.soundcard_handler.removeMixer()
+        #self.soundcard_handler = sch.SoundcardHandler()
 
     def setInputLevel(self, scalar):
         tick = scalar

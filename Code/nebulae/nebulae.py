@@ -130,6 +130,7 @@ class Nebulae(object):
                     self.c_handle.printAllControls()
             request = self.ui.getReloadRequest()
             if request == True:
+                self.c_handle.resetcriticalresourses()
                 self.cleanup()
         if request == True:
             self.first_run = False
@@ -253,6 +254,7 @@ class Nebulae(object):
                 self.c_handle.printAllControls()
             self.ui.update()
             request = self.ui.getReloadRequest()
+        self.c_handle.resetcriticalresourses()
         if request == True:
             print "Received Reload Request from UI"
             print "index of new instr is: " + str(self.c_handle.instr_sel_idx)
@@ -281,8 +283,8 @@ class Nebulae(object):
             
     def run_supercollider(self): ##supercollider
         if self.c is not None:
-		    self.c.cleanup()
-		    self.c = None
+            self.c.cleanup()
+            self.c = None
         request = False
         while(request != True):  ##while I have no requests from UI
             self.c_handle.updateAll() ## keep on updating the control values (and sending them to scsynth)
