@@ -12,7 +12,7 @@ class SoundcardHandler:
             cls._instance = super(SoundcardHandler, cls).__new__(cls)
         return cls._instance
 
-    def __init__(self, device=b"hw:sndrpiproto", capturecontrol=b"Capture"):
+    def __init__(self, device=b"hw:sndrpiproto", capturecontrol_name=b"Capture"):
 
         self.LEFT = 0
         self.RIGHT = 1
@@ -22,7 +22,8 @@ class SoundcardHandler:
         self.mixer = None
         self.strcap = None
         self.device = device
-        self.capturecontrol = capturecontrol
+        self.capturecontrol_name = capturecontrol_name
+        self.capturecontrol = None
 
         self._log_init("SoundcardHandler")
 
@@ -34,44 +35,38 @@ class SoundcardHandler:
             return True
         try:
             self.libasound = ctypes.CDLL("libasound.so")
-        except OSError:
-            self._log_error("initLib - OSError")
-            return False  # Failed to reload the library
-        
-        # Define function signatures
-        self.libasound.snd_mixer_open.argtypes = [ctypes.POINTER(ctypes.c_void_p), ctypes.c_int]
-        self.libasound.snd_mixer_open.restype = ctypes.c_int
-        self.libasound.snd_mixer_attach.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        self.libasound.snd_mixer_attach.restype = ctypes.c_int
-
-        self.libasound.snd_mixer_detach.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
-        self.libasound.snd_mixer_detach.restype = ctypes.c_int
-
-        self.libasound.snd_mixer_selem_register.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
-        self.libasound.snd_mixer_selem_register.restype = ctypes.c_int
-        self.libasound.snd_mixer_load.argtypes = [ctypes.c_void_p]
-        self.libasound.snd_mixer_load.restype = ctypes.c_int
-        self.libasound.snd_mixer_close.argtypes = [ctypes.c_void_p]
-        self.libasound.snd_mixer_close.restype = ctypes.c_int
-        self.libasound.snd_mixer_find_selem.argtypes = [ctypes.c_void_p, ctypes.c_void_p]
-        self.libasound.snd_mixer_find_selem.restype = ctypes.c_void_p
-        self.libasound.snd_mixer_selem_set_capture_volume.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_long]
-        self.libasound.snd_mixer_selem_set_capture_volume.restype = ctypes.c_int
-
-        self._log_message("initLib end")
-        #new
-        """
-        self.libasound.snd_mixer_selem_id_alloca.argtypes = [ctypes.POINTER(ctypes.POINTER(ctypes.c_void_p))]
-        self.libasound.snd_mixer_selem_id_alloca.restype = None  # This function does not return a value
-        self.libasound.snd_mixer_selem_id_set_index.argtypes = [ctypes.POINTER(ctypes.c_void_p), ctypes.c_uint]
-        self.libasound.snd_mixer_selem_id_set_index.restype = None  # This function does not return a value
-        self.libasound.snd_mixer_selem_id_set_name.argtypes = [ctypes.POINTER(ctypes.c_void_p), ctypes.c_char_p]
-        self.libasound.snd_mixer_selem_id_set_name.restype = None  # This function does not return a value
-        """
-
-        return True
+            self.libasound.snd_mixer_open.argtypes = [ctypes.POINTER(ctypes.c_void_p), ctypes.c_int]
+            self.libasound.snd_mixer_open.restype = ctypes.c_int
+            self.libasound.snd_mixer_attach.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+            self.libasound.snd_mixer_attach.restype = ctypes.c_int
+            self.libasound.snd_mixer_detach.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
+            self.libasound.snd_mixer_detach.restype = ctypes.c_int
+            self.libasound.snd_mixer_selem_register.argtypes = [ctypes.c_void_p, ctypes.c_void_p, ctypes.c_void_p]
+            self.libasound.snd_mixer_selem_register.restype = ctypes.c_int
+            self.libasound.snd_mixer_load.argtypes = [ctypes.c_void_p]
+            self.libasound.snd_mixer_load.restype = ctypes.c_int
+            self.libasound.snd_mixer_close.argtypes = [ctypes.c_void_p]
+            self.libasound.snd_mixer_close.restype = ctypes.c_int
+            self.libasound.snd_mixer_first_elem.argtypes = [ctypes.c_void_p]
+            self.libasound.snd_mixer_first_elem.restype = ctypes.c_void_p
+            self.libasound.snd_mixer_next_elem.argtypes = [ctypes.c_void_p]
+            self.libasound.snd_mixer_next_elem.restype = ctypes.c_void_p
+            self.libasound.snd_mixer_selem_get_name.argtypes = [ctypes.c_void_p]
+            self.libasound.snd_mixer_selem_get_name.restype = ctypes.c_char_p
+            self._log_message("initLib end")
+            return True
+        except OSError as e:
+            self._log_error("OSError loading libasound: %s" % str(e))
+            self.libasound = None
+            return False
+        except Exception as e:
+            self._log_error("Error loading libasound: %s" % str(e))
+            self.libasound = None
+            return False
 
     def initMixer(self):
+
+        self._log_message("initMixer")
 
         if self.mixer is not None:
             return True
@@ -86,35 +81,64 @@ class SoundcardHandler:
             self.device_bytes = self.device.encode('utf-8')
         self.device_c = ctypes.c_char_p(self.device_bytes)
         
+        self._log_message("snd_mixer_open")
         if self.libasound.snd_mixer_open(ctypes.byref(self.mixer), 0) < 0:
             self._log_error("Cannot open ALSA mixer")
             self.mixer = None
             return False
 
+        self._log_message("snd_mixer_attach")
         if self.libasound.snd_mixer_attach(self.mixer, self.device_c) < 0:
             self._log_error("Cannot attach mixer to device")
             self.libasound.snd_mixer_close(self.mixer)
             self.mixer = None
             return False
+        self._log_message("snd_mixer_selem_register")
         if self.libasound.snd_mixer_selem_register(self.mixer, None, None) < 0:
             self._log_error("Cannot register mixer element")
             self.removeMixer()
             self.mixer = None
             return False
+        self._log_message("snd_mixer_load")
         if self.libasound.snd_mixer_load(self.mixer) < 0:
             self._log_error("Cannot load mixer elements")
             self.removeMixer()
             self.mixer = None
             return False
 
-        self.strcap = ctypes.create_string_buffer(self.capturecontrol)
-        self.capturecontrol = self.libasound.snd_mixer_find_selem(self.mixer, self.strcap)
-        if not self.capturecontrol:
-            self._log_error("Error: Capture '"+ self.strcap.value +"' control not found")
+        found_by_name = False
+
+        self.strcap = ctypes.create_string_buffer(self.capturecontrol_name)
+        self._log_message("snd_mixer_find_selem")
+        capture_control_by_name = self.libasound.snd_mixer_find_selem(self.mixer, self.strcap)
+        if capture_control_by_name:
+            self._log_message("Found capture control by name: "+ self.capturecontrol_name)
+            self.capturecontrol = capture_control_by_name
+            found_by_name = True
+        else:
+            self._log_warning("Capture control '"+self.capturecontrol_name+"' not found by name. Trying by index...")
+            self._log_message("snd_mixer_first_elem")
+            elem = self.libasound.snd_mixer_first_elem(self.mixer)
+            while elem:
+                self._log_message("snd_mixer_selem_get_name")
+                elem_name_ptr = self.libasound.snd_mixer_selem_get_name(elem)
+                if elem_name_ptr:
+                    elem_name = ctypes.string_at(elem_name_ptr)
+                    self._log_message("Found mixer element: " + elem_name)
+                    if elem_name == self.capturecontrol_name:
+                        self._log_message("Found capture control '"+self.capturecontrol_name+"' by index.")
+                        self.capturecontrol = elem
+                        found_by_name = True  # Treat as found
+                        break
+                elem = self.libasound.snd_mixer_next_elem(elem)
+
+        self._log_message("if not found_by_name")
+        if not found_by_name:
+            self._log_error("Error: Capture control '"+self.capturecontrol_name+"' not found by name or index.")
             self.removeMixer()
             self.mixer = None
             return False
-        
+
         return True
 
     def removeMixer(self):
