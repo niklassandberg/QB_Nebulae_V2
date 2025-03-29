@@ -11,6 +11,8 @@ import time
 import logger
 import neb_globals
 
+import nebmixer
+
 cfg_path = "/home/alarm/QB_Nebulae_V2/Code/config/"
 
 debug = False 
@@ -111,6 +113,8 @@ class Nebulae(object):
         self.pt = ctcsound.CsoundPerformanceThread(self.c.csound()) # Create CsoundPerformanceThread 
         self.c_handle.setCsoundPerformanceThread(self.pt)
         self.pt.play() # Begin Performing the Score in the perforamnce thread
+        nebmixer.init()
+        nebmixer.enable()
         self.c_handle.updateAll() # Update all values to ensure their at their initial state.
         if reset_settings_flag == True:
             print("Changing Instr File -- Resetting Secondary Settings")
@@ -130,7 +134,7 @@ class Nebulae(object):
                     self.c_handle.printAllControls()
             request = self.ui.getReloadRequest()
             if request == True:
-                self.c_handle.resetcriticalresourses()
+                nebmixer.disable()
                 self.cleanup()
         if request == True:
             self.first_run = False
@@ -214,6 +218,8 @@ class Nebulae(object):
         self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider") #supercollider controlhandler
         self.c_handle.setCsoundPerformanceThread(None)
         self.c_handle.enterSuperColliderMode() ##enters supercollider mode and boots scsynth
+        nebmixer.init()
+        nebmixer.enable()
         self.loadUI()
         
 
@@ -241,6 +247,8 @@ class Nebulae(object):
         self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="puredata")
         self.c_handle.setCsoundPerformanceThread(None)
         self.c_handle.enterPureDataMode()
+        nebmixer.init()
+        nebmixer.enable()
         self.loadUI()
         
 
@@ -254,7 +262,7 @@ class Nebulae(object):
                 self.c_handle.printAllControls()
             self.ui.update()
             request = self.ui.getReloadRequest()
-        self.c_handle.resetcriticalresourses()
+        nebmixer.disable()
         if request == True:
             print "Received Reload Request from UI"
             print "index of new instr is: " + str(self.c_handle.instr_sel_idx)

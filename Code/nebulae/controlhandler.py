@@ -14,7 +14,7 @@ import wavewriter
 import numpy as np
 import scsender
 
-import soundcardhandler as sch
+import nebmixer
 
 # Defines for Button/Gate Types
 BUTTON_GATE_GPIO = 0
@@ -63,8 +63,6 @@ class ControlHandler(object):
         self.writing_buffer = False
         self.buffer_failure = False
         self.performance_thread = None
-
-        self.soundcard_handler = sch.SoundcardHandler()
 
         # Set Defaults/Read Config
         digitalControlList = [
@@ -156,8 +154,6 @@ class ControlHandler(object):
         #self.writeThread = threading.Thread(target=self.writeBufferToAudioFile())
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
-    
-
 
     # Pass Csound Performance Thread Pointer
     def setCsoundPerformanceThread(self, ptr):
@@ -356,18 +352,11 @@ class ControlHandler(object):
             self.altchanneldict[name].setValue(defaultVal)
             self.altchanneldict[name].setModeChangeValue(nowvals[name])
 
-    def resetcriticalresourses(self):
-        print 'resetcriticalresourses called'
-        #TODO: CSOUND DOES SOMETHING TO SOUNDCARD!!!! 
-        self.soundcard_handler.removeLib() #ANV DEN HAR!!!!
-        #self.soundcard_handler.removeMixer()
-        #self.soundcard_handler = sch.SoundcardHandler()
-
     def setInputLevel(self, scalar):
         tick = scalar
         if tick != self.in_ticks:
             self.in_ticks = tick
-            self.soundcard_handler.setInputLevel(tick)
+            nebmixer.setInputLevel(tick)
             #cmd = 'amixer set \'Capture\' ' + str(self.in_ticks)
             #cmd = 'amixer sset Capture,0 ' + str(self.in_ticks) + ' rear'
             #os.system(cmd)
