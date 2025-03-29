@@ -356,7 +356,7 @@ class ControlHandler(object):
         tick = scalar
         if tick != self.in_ticks:
             self.in_ticks = tick
-            nebmixer.setInputLevel(tick)
+            nebmixer.inputLevel(tick)
             #cmd = 'amixer set \'Capture\' ' + str(self.in_ticks)
             #cmd = 'amixer sset Capture,0 ' + str(self.in_ticks) + ' rear'
             #os.system(cmd)

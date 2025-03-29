@@ -7,6 +7,7 @@ RIGHT = 1
 _libasound = None
 _mixer = None
 _capturecontrol_handle = None
+_hifi_output_handle = None  # New global for 'Output Mixer HiFi'
 _enable = True
 
 def _log_message(message):
@@ -18,13 +19,13 @@ def _log_error(message):
 def _log_warning(message):
     print("NebMixer Warning: "+message+"\n")
 
-def _init_lib_once():
+def _loadlid():
     global _libasound
     if _libasound is None:
         _log_message("_init_lib_once")
         try:
             _libasound = ctypes.CDLL("libasound.so")
-            # Define function signatures
+            # Define function signatures (rest remain the same)
             _libasound.snd_mixer_open.argtypes = [ctypes.POINTER(ctypes.c_void_p), ctypes.c_int]
             _libasound.snd_mixer_open.restype = ctypes.c_int
             _libasound.snd_mixer_attach.argtypes = [ctypes.c_void_p, ctypes.c_char_p]
@@ -41,19 +42,21 @@ def _init_lib_once():
             _libasound.snd_mixer_find_selem.restype = ctypes.c_void_p
             _libasound.snd_mixer_selem_set_capture_volume.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_long]
             _libasound.snd_mixer_selem_set_capture_volume.restype = ctypes.c_int
+            _libasound.snd_mixer_selem_set_playback_switch.argtypes = [ctypes.c_void_p, ctypes.c_int, ctypes.c_int]
+            _libasound.snd_mixer_selem_set_playback_switch.restype = ctypes.c_int
             _log_message("_init_lib_once end")
         except OSError:
             _log_error("_init_lib_once - OSError")
             return False
     return True
 
-def init(device= b"hw:sndrpiproto", capturecontrol= b"Capture"):
-    global _mixer, strcap, _capturecontrol_handle
+def init(device= b"hw:sndrpiproto", capturecontrol= b"Capture", hifi_control_name= b"Output Mixer HiFi"):
+    global _mixer, strcap, _capturecontrol_handle, _hifi_output_handle
     _log_message("initMixer")
     if _mixer is not None:
         return True
 
-    if not _init_lib_once():
+    if not _loadlid():
         return False
 
     _mixer = ctypes.c_void_p()  # Mixer handle
@@ -87,7 +90,7 @@ def init(device= b"hw:sndrpiproto", capturecontrol= b"Capture"):
         remove()
         _mixer = None
         return False
-    _log_message("snd_mixer_find_selem")
+    _log_message("snd_mixer_find_selem (capture)")
     strcap = ctypes.create_string_buffer(capturecontrol)
     _capturecontrol_handle = _libasound.snd_mixer_find_selem(_mixer, strcap)
     if not _capturecontrol_handle:
@@ -96,10 +99,18 @@ def init(device= b"hw:sndrpiproto", capturecontrol= b"Capture"):
         _mixer = None
         return False
 
+    _log_message("snd_mixer_find_selem (hifi output)")
+    hifi_strcap = ctypes.create_string_buffer(hifi_control_name)
+    _hifi_output_handle = _libasound.snd_mixer_find_selem(_mixer, hifi_strcap)
+    if not _hifi_output_handle:
+        _log_warning("Warning: HiFi Output '"+ hifi_strcap.value +"' control not found")
+        # It's okay if this control isn't present, the mute functions will just do nothing
+        pass
+
     return True
 
 def remove(device= b"hw:sndrpiproto"):
-    global _mixer, _capturecontrol_handle
+    global _mixer, _capturecontrol_handle, _hifi_output_handle
     _log_message("removeMixer")
     if _mixer is None:
         return True
@@ -120,6 +131,7 @@ def remove(device= b"hw:sndrpiproto"):
         retval = False
     _log_message("removeMixer exit")
     _capturecontrol_handle = None
+    _hifi_output_handle = None
     _mixer = None
     return retval
 
@@ -144,27 +156,32 @@ def _removeLib():
 def enable():
     global _enable
     _enable = True
-    
+    if _libasound is None or _hifi_output_handle is None:
+        return
+    _libasound.snd_mixer_selem_set_playback_switch(_hifi_output_handle, 0, 1)
+
 def disable():
     global _enable
     _enable = False
+    if _libasound is None or _hifi_output_handle is None:
+        return
+    _libasound.snd_mixer_selem_set_playback_switch(_hifi_output_handle, 0, 0)
 
-def setInputLevel(volume):
-    global _capturecontrol_handle, LEFT, RIGHT, _mixer, _capturecontrol
+def inputLevel(volume):
+    global _capturecontrol_handle, LEFT, RIGHT, _mixer
 
     if not _enable:
+        return
+    
+    if not init():
+        return
+
+    if _capturecontrol_handle is None:
+        _log_error("Capture control handle is None. Ensure initMixer was successful.")
         return
 
     volume = max(0, min(31, int(volume)))  # Clamp volume between 0 and 31
     ctvol = ctypes.c_long(volume)
-
-    if not init():
-        return
-
-    #todo: this chould not be nesesary, remove later!!
-    if _capturecontrol_handle is None:
-        _log_error("Capture control handle is None. Ensure initMixer was successful.")
-        return
 
     try:
         global _libasound
