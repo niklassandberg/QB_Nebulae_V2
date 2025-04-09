@@ -9,6 +9,19 @@ import threading
 
 class Encoder:
 
+    # State transition table for full-step state machine
+    _state_machine = {
+        (0, 1): +1,
+        (1, 3): +1,
+        (3, 2): +1,
+        (2, 0): +1,
+
+        (0, 2): -1,
+        (2, 3): -1,
+        (3, 1): -1,
+        (1, 0): -1,
+    }
+
     def __init__(self, pin_a, pin_b):
         self.pin_a = pin_b; # Our Encoders are inverted,
         self.pin_b = pin_a; # Which is why this looks weird
@@ -16,11 +29,10 @@ class Encoder:
         GPIO.setwarnings(False)
         GPIO.setup(self.pin_a, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.pin_b, GPIO.IN, pull_up_down=GPIO.PUD_UP)
+
+        self._last_state = self.rotation_state()
+        self._last_time = time.time()
         self.steps = 0
-        self.last_delta = 0
-        self.r_seq = self.rotation_sequence()
-        self.steps_per_cycle = 4
-        self.remainder = 0
 
     def rotation_state(self):
         a_state = GPIO.input(self.pin_a)
@@ -28,41 +40,39 @@ class Encoder:
         r_state = a_state | b_state << 1
         return r_state
 
-    def rotation_sequence(self):
-        a_state = GPIO.input(self.pin_a)
-        b_state = GPIO.input(self.pin_b)
-        r_seq = (a_state ^ b_state) | b_state << 1
-        return r_seq
-
     def update(self):
-        delta = 0
-        r_seq = self.rotation_sequence()
-        if (r_seq != self.r_seq):
-            delta = (r_seq - self.r_seq) % 4
-            if delta == 3:
-                delta = -1
-            elif delta == 2:
-                delta = int(math.copysign(delta, self.last_delta))
-            self.last_delta = delta
-            self.r_seq = r_seq
-        self.steps += delta
+        new_state = self.rotation_state()
+        transition = (self._last_state, new_state)
+        if transition in self._state_machine:
+            self.steps += self._state_machine[transition]
+            self._last_state = new_state
+
+    def _isr(self, channel):
+        now = time.time()
+        if now - self._last_time < 0.001:  # 1ms debounce
+            return
+        self.update()
+        self._last_time = now
+
 
     def get_steps(self):
         steps = self.steps
         self.steps = 0
         return steps
 
-    def get_cycles(self):
-        self.remainder += self.get_steps()
-        cycles = self.remainder // self.steps_per_cycle
-        self.remainder %= self.steps_per_cycle
+    def get_cycles(self, steps_per_cycle=4):
+        cycles = self.steps // steps_per_cycle
+        self.steps %= steps_per_cycle
         return cycles
 
     def start(self):
-        def isr():
-            self.update()
-        GPIO.add_event_detect(self.pin_a, GPIO.BOTH, isr)
-        GPIO.add_event_detect(self.pin_b, GPIO.BOTH, isr)
+        # Attach ISR to both channels
+        GPIO.add_event_detect(self.pin_a, GPIO.BOTH, callback=self._isr)
+        GPIO.add_event_detect(self.pin_b, GPIO.BOTH, callback=self._isr)
+
+    def cleanup(self):
+        GPIO.remove_event_detect(self.pin_a)
+        GPIO.remove_event_detect(self.pin_b)
 
     class Worker(threading.Thread):
         def __init__(self, pin_a, pin_b):
