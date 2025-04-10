@@ -4,58 +4,56 @@ import RPi.GPIO as GPIO
 import time
 import math
 import threading
-
-# Clockwise sequence for your encoder: 0 -> 1 -> 3 -> 2 -> 0
-SEQ = [0, 1, 3, 2]
-SEQ_LEN = len(SEQ)
+from collections import deque
 
 class Encoder:
+    _valid_sequences = {
+        (0, 1, 3, 2): +1,
+        (1, 3, 2, 0): +1,
+        (3, 2, 0, 1): +1,
+        (2, 0, 1, 3): +1,
+
+        (0, 2, 3, 1): -1,
+        (2, 3, 1, 0): -1,
+        (3, 1, 0, 2): -1,
+        (1, 0, 2, 3): -1,
+    }
 
     def __init__(self, pin_a, pin_b):
-        self.pin_a = pin_a
-        self.pin_b = pin_b
-        self.steps = 0
-        self._seq_index = 0
-        self._prev_seq_index = 1
-        self._prev_prev_seq_index = 2
-        self._last_time = time.time()
+        self.pin_a = pin_b
+        self.pin_b = pin_a
 
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
         GPIO.setup(self.pin_a, GPIO.IN, pull_up_down=GPIO.PUD_UP)
         GPIO.setup(self.pin_b, GPIO.IN, pull_up_down=GPIO.PUD_UP)
 
+        self.steps = 0
+        self._state_history = deque(maxlen=4)
+
+
+        initial_state = self.rotation_state()
+        self._state_history.append(initial_state)
+
     def rotation_state(self):
-        a_state = GPIO.input(self.pin_a)
-        b_state = GPIO.input(self.pin_b)
-        r_state = a_state | b_state << 1
-        return r_state
+        a = GPIO.input(self.pin_a)
+        b = GPIO.input(self.pin_b)
+        return a | (b << 1)
 
     def update(self):
         state = self.rotation_state()
-        next_state = SEQ[(self._seq_index + 1) % SEQ_LEN]
-        prev_state = SEQ[(self._seq_index - 1) % SEQ_LEN]
-        
-        if state == next_state:
-            self._prev_prev_prev_seq_index = self._prev_prev_seq_index
-            self._prev_prev_seq_index = self._prev_seq_index
-            self._prev_seq_index = self._seq_index
-            self._seq_index = (self._seq_index + 1) % SEQ_LEN
-            if self._prev_prev_seq_index != self._seq_index and self._prev_prev_prev_seq_index != self._prev_seq_index and self._prev_prev_prev_seq_index != self._seq_index:
-                self.steps += 1
-            
-        elif state == prev_state:
-            self._prev_prev_prev_seq_index = self._prev_prev_seq_index
-            self._prev_prev_seq_index = self._prev_seq_index
-            self._prev_seq_index = self._seq_index
-            self._seq_index = (self._seq_index - 1) % SEQ_LEN
-            if self._prev_prev_seq_index != self._seq_index and self._prev_prev_prev_seq_index != self._prev_seq_index and self._prev_prev_prev_seq_index != self._seq_index:
-                self.steps -= 1
-        
+        if self._state_history[-1] == state:
+            return
+        self._state_history.append(state)
+        if len(self._state_history) == 4:
+            seq = tuple(self._state_history)
+            if seq in self._valid_sequences:
+                self.steps += self._valid_sequences[seq]
+            self._state_history.popleft()
 
     def _isr(self, channel):
         now = time.time()
-        if now - self._last_time < 0.001:  # 1ms debounce
+        if now - self._last_time < 0.001:
             return
         self.update()
         self._last_time = now
