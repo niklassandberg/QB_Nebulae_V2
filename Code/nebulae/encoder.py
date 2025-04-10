@@ -16,6 +16,8 @@ class Encoder:
         self.pin_b = pin_b
         self.steps = 0
         self._seq_index = 0
+        self._prev_seq_index = 1
+        self._prev_prev_seq_index = 2
         self._last_time = time.time()
 
         GPIO.setmode(GPIO.BCM)
@@ -33,15 +35,23 @@ class Encoder:
         state = self.rotation_state()
         next_state = SEQ[(self._seq_index + 1) % SEQ_LEN]
         prev_state = SEQ[(self._seq_index - 1) % SEQ_LEN]
-
+        
         if state == next_state:
+            self._prev_prev_prev_seq_index = self._prev_prev_seq_index
+            self._prev_prev_seq_index = self._prev_seq_index
+            self._prev_seq_index = self._seq_index
             self._seq_index = (self._seq_index + 1) % SEQ_LEN
-            if self._seq_index == 0:
+            if self._prev_prev_seq_index != self._seq_index and self._prev_prev_prev_seq_index != self._prev_seq_index and self._prev_prev_prev_seq_index != self._seq_index:
                 self.steps += 1
+            
         elif state == prev_state:
+            self._prev_prev_prev_seq_index = self._prev_prev_seq_index
+            self._prev_prev_seq_index = self._prev_seq_index
+            self._prev_seq_index = self._seq_index
             self._seq_index = (self._seq_index - 1) % SEQ_LEN
-            if self._seq_index == 0:
+            if self._prev_prev_seq_index != self._seq_index and self._prev_prev_prev_seq_index != self._prev_seq_index and self._prev_prev_prev_seq_index != self._seq_index:
                 self.steps -= 1
+        
 
     def _isr(self, channel):
         now = time.time()
