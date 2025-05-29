@@ -17,10 +17,8 @@ file,triggered,rising
 file_alt,latching,falling
 nebconfigend
 
-; http://www.csounds.com/manual/html/UsingOptimizing.html
-
 /****************
- MARS AFFECTS 1.5, based on Original 'Effects' / 'World of Echo'
+ MARS AFFECTS 1.5.1, based on Original 'Effects' / 'World of Echo'
 
  Input --> Filter --> VCA --> Delay --> Effect --> Reverb --> Ducking --> Output
 
@@ -71,6 +69,7 @@ nebconfigend
           Delay Damping when feedback makes the output clip
           Tweak Panning and Ducking volume
  #5     : Comment code clean-up
+ %6     : Fixed issue with clock sync/drift, had to drop the multiplier clock out :(
 
 ****************/
 
@@ -80,15 +79,23 @@ instr 1
 ; Init and Variables
 ; ------------------------------------------------------------
 
-kInstrTime init 0
-iCalcDelay init 0.5
-kCalcDelay init iCalcDelay
-kIntervalCnt init 0
-gkClockDelay_sec init iCalcDelay
-gkClockTick init 0
-gkClockOn init 0
-kPulseTime_ms init 0
-iMaxDelayTime init 3
+kInit init 4                      ; how may cycle should the 'init' be (used for not calculating the delay the first x k-cycles)
+
+kClockIn init 0                   ; hold the clock in trigger
+kClockIn_time init 0              ; hold the clock instrument time of an clock in tick
+kIntervalCnt init -1              ; count the number of clock in ticks
+gkClock_tick init 0               ; the actual signal to start the tick logic
+gkClock_tick_count init 0         ; count the number of clock ticks
+
+gkMetroIn init 0                  ; hold the metronome trigger
+gkMetroOn init 0                  ; is the metronome on (the internal clock in freerun)
+
+kPulseTime_ms init 0              ; hold the length of the actual pulse out
+
+iCalcDelay init 0.34              ; the initial average delay time
+kAverageDelay init iCalcDelay     ; the average delay time of several consecutive clock in ticks
+gkDelayTime_sec init iCalcDelay   ; the actual delay time for the delay function
+iMaxDelayTime init 3              ; maximum time between delays (length of delay buffer)
 
 gkPanning scale gkblend, 2, 0  ;  From 0 to 2
 gkInputGainBalance = gkPanning
@@ -104,7 +111,7 @@ gkEffectAmplitude = gkpitch_alt
 gkLFOSpeed = gkblend_alt
 
 gkClockIn = gkreset
-gkClocked = (gkreset_alt == 0 ? 1 : 0)
+gkClocked = gkreset_alt
 
 gkSustainMode = gkfreeze
 gkReverbOnly = 1-gkOverlapCCW
@@ -147,7 +154,7 @@ if (gkSustainMode == 1) then
 endif
 
 kOutputDelayDamping init 1  ; to limit the volume of the Delay when it's to high
-kInstrFreeRunTime_reset init 0  ; to limit the volume of the Delay when it's to high
+
 
 ; ------------------------------------------------------------
 ; Mute and Panning incoming signal and Stereo / 2x Mono mode
@@ -192,7 +199,6 @@ kFilterFrq portk gkFilterFrq * (1/0.625), 0.025
 
 if (kFilterFrq <= 1) then
   ;; Low-Pass
-;  kFilterFrq = kFilterFrq^5 * 22000
   kFilterFrq = kFilterFrq^5 * (sr/2)
 
   kFilterRes = (kFilterRes * 8.5) + 1
@@ -203,7 +209,6 @@ if (kFilterFrq <= 1) then
 else
   ;; High-Pass
   kFilterFrq = (kFilterFrq-1)*(1/0.6)
-;  kFilterFrq = kFilterFrq^4 * 22000
   kFilterFrq = kFilterFrq^4 * (sr/2)
 
   kFilterRes = (kFilterRes * 8.5) + 1
@@ -236,83 +241,78 @@ endif
 ; Clock
 ; ------------------------------------------------------------
 
+if (gkClocked == 0) then
+  if (gkMetroOn == 0) then
+    event "i", 2, 0, -1     ; If freerun, and clock is off, turn metronome on
+  endif
+else
+  kClockIn trigger gkClockIn, 0.5, 0
+  if (gkMetroOn == 1) then
+    turnoff2 2, 0, 1        ; If clocked, and clock is on, turn metronome off
+    gkMetroOn = 0
+  endif
+endif
+
 kIntervalArr[] fillarray iCalcDelay, iCalcDelay, iCalcDelay, iCalcDelay
 kIntervalArr_len init lenarray(kIntervalArr)
 
-kClockIn trigger gkClockIn, 0.5, 0
-
-if (kClockIn == 1) then
-  if (gkClocked == 0) then
-    kInstrFreeRunTime_reset timeinsts   ; reset kInstrFreeRunTime count (it is subtracted from total instr time)
-  endif
-
-  kInstrTime_old = kInstrTime
-  kInstrTime timeinsts
-  kInterval = kInstrTime - kInstrTime_old
+if ((kClockIn == 1) || (gkMetroIn == 1)) then
+  kClockIn_time_old = kClockIn_time
+  kClockIn_time timeinsts
   
-  ; when clock tick is missed, don't change delay immediately and skip new calculation
-  kMissedClock = 0
+  if (kInit == 0) then
+    kInterval = kClockIn_time - kClockIn_time_old
 
-  ;  if (kInterval > (kCalcDelay * 1.80)) && (kInterval < (kCalcDelay * 2.2)) then    ; if the kInterval between two clocks tick is ~2x larger than the current kCalcDelay, it might have missed a tick
-  ;    kMissedClock = 1
-  ;  endif
-
-  if (kMissedClock == 0) && (kInterval < 2) then        ; the interval is less than two seconds
-    kIntervalArr[kIntervalCnt] = kInterval
-    kCalcDelay_temp = kIntervalArr[0]
-    kCalcDelay_temp += kIntervalArr[1]
-    kCalcDelay_temp += kIntervalArr[2]
-    kCalcDelay_temp += kIntervalArr[3]
-    kCalcDelay_temp = kCalcDelay_temp / kIntervalArr_len
-  endif
-  
-  ; tolerance when clock is not 100% stable
-  ;  if (kCalcDelay_temp < (kCalcDelay * 0.97)) || (kCalcDelay_temp > (kCalcDelay * 1.03)) then
-
-  kCalcDelay = kCalcDelay_temp
-
-  if (gkClockOn == 1) && (gkClocked == 0) then
-    turnoff2 2, 0, 1
-    gkClockOn = 0
+    kIntervalCnt = ((kIntervalCnt+1) % kIntervalArr_len)
+    if (kInterval < (iMaxDelayTime-0.1)) then
+      kIntervalArr[kIntervalCnt] = kInterval
+      kAverageDelay_temp  = kIntervalArr[0]
+      kAverageDelay_temp += kIntervalArr[1]
+      kAverageDelay_temp += kIntervalArr[2]
+      kAverageDelay_temp += kIntervalArr[3]
+      kAverageDelay_temp  = kAverageDelay_temp / kIntervalArr_len
+    endif
+    
+    kAverageDelay = kAverageDelay_temp
+    if (kAverageDelay == 0) then
+      kAverageDelay = iCalcDelay
+    endif
   endif
 
-  if (kCalcDelay == 0) then
-    kCalcDelay = iCalcDelay
-  endif
-
-  kIntervalCnt = (kIntervalCnt == (kIntervalArr_len - 1)) ? 0 : kIntervalCnt + 1
-
+  gkClock_tick = 1
 endif
 
 if (gkClocked == 1) then
   kClockDivider scale gkDelayTime, 6, 0
   kClockDivider = floor(kClockDivider)    ; do NOT use a portk before a floor(), as it will never reach the 'x.0000' value!
-
-  if     (kClockDivider = 0) then
-    gkClockDelay_sec = kCalcDelay / 2
+  
+  if (kClockDivider = 0) then
+    kClockDelay_factor = 2
+    gkDelayTime_sec = kAverageDelay / kClockDelay_factor
   elseif (kClockDivider = 1) then
-    gkClockDelay_sec = kCalcDelay / 1.5
+    kClockDelay_factor = 3/2
+    gkDelayTime_sec = kAverageDelay / kClockDelay_factor
   elseif (kClockDivider = 2) then
-    gkClockDelay_sec = kCalcDelay / 1
+    kClockDelay_factor = 1
+    gkDelayTime_sec = kAverageDelay / kClockDelay_factor
   elseif (kClockDivider = 3) then
-    gkClockDelay_sec = kCalcDelay / 0.5
+    kClockDelay_factor = 0.5
+    gkDelayTime_sec = kAverageDelay / kClockDelay_factor
   elseif (kClockDivider = 4) then
-    gkClockDelay_sec = kCalcDelay / 0.33
+    kClockDelay_factor = 1/3
+    gkDelayTime_sec = kAverageDelay / kClockDelay_factor
   elseif (kClockDivider = 5) then
-    gkClockDelay_sec = kCalcDelay / 0.25
+    kClockDelay_factor = 0.25
+    gkDelayTime_sec = kAverageDelay / kClockDelay_factor
   elseif (kClockDivider = 6) then
-    gkClockDelay_sec = kCalcDelay / 0.125
+    kClockDelay_factor = 0.125
+    gkDelayTime_sec = kAverageDelay / kClockDelay_factor
   endif
+
 else
-  gkClockDelay_sec scale gkDelayTime, k(iMaxDelayTime)^(1/3), 0.03125^(1/3)
-  gkClockDelay_sec = gkClockDelay_sec^3
-endif
-
-;printks2 "gkClockDelay_sec %f\n", gkClockDelay_sec
-
-if (gkClockOn == 0) && (kPulseTime_ms <= 0) then
-  event "i", 2, 0, 32000000     ; Start the clock (again) after the gkClockDelay_sec changed
-  gkClockOn = 1
+  gkDelayTime_sec scale gkDelayTime, k(iMaxDelayTime)^(1/3), 0.03125^(1/3)
+  gkDelayTime_sec = gkDelayTime_sec^3
+  kClockDelay_factor = 1
 endif
 
 
@@ -353,8 +353,8 @@ endif
 kDelaySkew_offset portk kDelaySkew_offset, 1
 kDelaySkew_factor portk kDelaySkew_factor, 1
 
-kDelayTimeL_min min (gkClockDelay_sec - ((gkClockDelay_sec * kDelaySkew_offset)/kDelaySkew_factor)), k(iMaxDelayTime)
-kDelayTimeR_min min (gkClockDelay_sec +  (gkClockDelay_sec * kDelaySkew_offset)), k(iMaxDelayTime)
+kDelayTimeL_min min (gkDelayTime_sec - ((gkDelayTime_sec * kDelaySkew_offset)/kDelaySkew_factor)), k(iMaxDelayTime)
+kDelayTimeR_min min (gkDelayTime_sec +  (gkDelayTime_sec * kDelaySkew_offset)), k(iMaxDelayTime)
 
 aDelayTimeL tonex a(kDelayTimeL_min), 1.5, 8
 aDelayTimeR tonex a(kDelayTimeR_min), 1.5, 8
@@ -545,19 +545,26 @@ outs aOutputL, aOutputR
 ; Clock pulse out
 ; ------------------------------------------------------------
 
-kPulseTime_ms init 0
-kPulseTime_ms = (kPulseTime_ms > 0 ? kPulseTime_ms - (1000/kr) : 0)  ; subtract (1000/kr) milliseconds
-kPulseTime_ms max 0, kPulseTime_ms                                ; can't be lower than 0
+kPulseTime_ms = (kPulseTime_ms > 0 ? kPulseTime_ms - (1000/kr) : 0) ; subtract (1000/kr) milliseconds
+kPulseTime_ms max 0, kPulseTime_ms                                  ; can't be lower than 0
 
-if (gkClockTick == 1) then ; freerun clock and clock tick
-  if (kPulseTime_ms <= 0) then
-    kPulseTime_ms = 20   ; ms
+if (gkClock_tick == 1) then
+  gkClock_tick_count = gkClock_tick_count + 1
+  if (gkClock_tick_count >= (1/(kClockDelay_factor))) then
+    gkClock_tick_count = 0
+    if (kPulseTime_ms == 0) then
+      kPulseTime_ms = 20
+    endif
   endif
+  gkClock_tick = 0           ; arm gkClock_tick trigger again
+  ; printks2 "TickTock %f\n", kInterval
 endif
 
 gkeol = kPulseTime_ms     ; set pulse
 kClockIn = 0              ; arm kClockIn trigger again
-gkClockTick = 0           ; arm gkClockTick trigger again
+kClockSync = 0            ; arm kClockSync trigger again
+kInterval = 0
+kInit max 0, (kInit - 1)  ; skip first few cycles from beat measure
 
 endin
 
@@ -567,5 +574,6 @@ endin
 ; ------------------------------------------------------------
 
 instr 2
-  gkClockTick metro 1/gkClockDelay_sec, 1
+  gkMetroIn metro (1/gkDelayTime_sec)*2, 0
+  gkMetroOn = 1
 endin
