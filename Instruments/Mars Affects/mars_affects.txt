@@ -1,6 +1,6 @@
 
 -------------------------------------------------
-MARS AFFECTS v1.5 (code name V), 2025-02-02
+MARS AFFECTS v1.5.1 (code name V), 2025-03-08
 -------------------------------------------------
 Mars Affects, a Filter + VCA + Clocked Delay + Reverb effect instrument for the Qu-Bit Nebulae v2.
 Yes, 'Affects' with an 'A' and Mars with an 'M'.
@@ -9,7 +9,7 @@ Yes, 'Affects' with an 'A' and Mars with an 'M'.
 Features
 -------------------------------------------------
 Stereo delay, which can be Skewed independently to create a differences in Left and Right.
-The delay can be clocked or run freely with a divided/multiplied clock out.
+The delay can run freely or be clocked with a divided clock out.
 Reverb effect which can be enriched with a Chorus/Flanger-like effect.
 The Reverb enrichment can be either an LFO or random.
 
@@ -34,6 +34,7 @@ Makeover    #5: A complete makeover. v1.5 (code name V)
                 Added Stereo VCA / Ducking Effects
                 Added Pre-delay
                 Added internal Clock Out
+Fixed issue #6: Fixed issue with clock sync/drift, had to drop the multiplier clock out :( Fixed in v1.5.1
 
 
 Below the descriptions of all the knobs, buttons and in/outputs.
@@ -44,7 +45,7 @@ Delay Section
 -------------------------------------------------
  * Start        - Clock Divider / Delay Time    ; (12H) Clock Divide when in Clocked Mode; Speed of clock when freerun
  * Density      - Delay Volume amount           ; (12H) Volume of the Delay effect
- * Reset        - Clock Input / Manual Tap      ; (Off) Clocked Mode -> Clock In or Tap speed; Freerun mode -> Reset Clock
+ * Reset        - Clock Input / Manual Tap      ; (Off) Clocked Mode -> Clock In or Tap speed
  * Freeze       - Maximum Wet Effects           ; (Off) 'Max Delay into Reverb' + 'Max Reverb' + '100% Wet'
 
  * Start Alt    - Stereo Delay Skew             ; (Def) Stereo Skew the Left and Right Delay; First setting creates a 'wide effect'
@@ -55,7 +56,7 @@ Delay Section
  * Pulse Out    - Clock Output                  ; Internal Clock out. When clocked, it is the result after dividing the Clock.
 
 -------------------------------------------------
-Reverb Section (Middle three knobs)
+Reverb Section
 -------------------------------------------------
  * Size         - Reverb Size                   ; (12H) Size of the Reverb, also affects pre-delay
  * Overlap      - Reverb Amount / Reverb Only   ; (10H) Reverb Volume amount; After 12 o'clock, dry signal will be removed from Reverb, fully CW = 100% wet.
