@@ -205,7 +205,9 @@ class Nebulae(object):
         floader.reload() #reloads all the files to be sure
         self.orc_handle.refreshFileHandler() #also the audio files
 
-        fullPath = "/home/alarm/sc/" + patch + ".scd"
+        #fullPath = "/home/alarm/sc/" + patch +  ".sc &> /tmp/nebulae_debug_supercollider.log"
+        fullPath = "/home/alarm/sc/" + patch +  ".sc"
+
 
         if debug == False:
             cmd = "sclang".split()
