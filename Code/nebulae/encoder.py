@@ -6,20 +6,52 @@ import math
 import threading
 from collections import deque
 
+
+VALID_SEQ_4 = {
+    (0, 1, 3, 2): +1,
+    (1, 3, 2, 0): +1,
+    (3, 2, 0, 1): +1,
+    (2, 0, 1, 3): +1,
+
+    (0, 2, 3, 1): -1,
+    (2, 3, 1, 0): -1,
+    (3, 1, 0, 2): -1,
+    (1, 0, 2, 3): -1,
+}
+
+VALID_SEQ_3 = {
+    (0, 1, 3): +1,
+    (1, 3, 2): +1,
+    (3, 2, 0): +1,
+    (2, 0, 1): +1,
+
+    (0, 2, 3): -1,
+    (2, 3, 1): -1,
+    (3, 1, 0): -1,
+    (1, 0, 2): -1,
+}
+
+VALID_SEQ_2 = {
+    (0, 1): +1,
+    (1, 3): +1,
+    (3, 2): +1,
+    (2, 0): +1,
+
+    (0, 2): -1,
+    (2, 3): -1,
+    (3, 1): -1,
+    (1, 0): -1,
+}
+
+SEQ_CHOOSE = {
+    2: VALID_SEQ_2,
+    3: VALID_SEQ_3,
+    4: VALID_SEQ_4,
+}
+
 class Encoder:
-    _valid_sequences = {
-        (0, 1, 3, 2): +1,
-        (1, 3, 2, 0): +1,
-        (3, 2, 0, 1): +1,
-        (2, 0, 1, 3): +1,
 
-        (0, 2, 3, 1): -1,
-        (2, 3, 1, 0): -1,
-        (3, 1, 0, 2): -1,
-        (1, 0, 2, 3): -1,
-    }
-
-    def __init__(self, pin_a, pin_b):
+    def __init__(self, pin_a, pin_b, valid_seq_num):
         self.pin_a = pin_b
         self.pin_b = pin_a
 
@@ -35,6 +67,9 @@ class Encoder:
         initial_state = self.rotation_state()
         self._state_history.append(initial_state)
 
+        self._valid_seq_num = valid_seq_num
+        self._valid_seq = SEQ_CHOOSE[valid_seq_num]
+
     def rotation_state(self):
         a = GPIO.input(self.pin_a)
         b = GPIO.input(self.pin_b)
@@ -45,11 +80,12 @@ class Encoder:
         if self._state_history[-1] == state:
             return
         self._state_history.append(state)
-        if len(self._state_history) == 4:
-            seq = tuple(self._state_history)
-            if seq in self._valid_sequences:
-                self.steps += self._valid_sequences[seq]
-            self._state_history.popleft()
+        if len(self._state_history) != self._valid_seq_num:
+            return
+        seq = tuple(self._state_history)
+        if seq in self._valid_seq:
+            self.steps += self._valid_seq[seq]
+        self._state_history.popleft()
 
     def _isr(self, channel):
         now = time.time()
@@ -83,7 +119,7 @@ class Encoder:
             threading.Thread.__init__(self)
             self.lock = threading.Lock()
             self.stopping = False
-            self.encoder = Encoder(pin_a, pin_b)
+            self.encoder = Encoder(pin_a, pin_b,3)
             self.daemon = True
             self.delta = 0
             self.delay = 0.001
