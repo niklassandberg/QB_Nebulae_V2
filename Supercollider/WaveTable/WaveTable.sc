@@ -1,10 +1,10 @@
 s.boot;
-NebulaeInterface.init(s);
+NebInterface.init(s);
 
 s.waitForBoot {
 
-        var path = "/home/alarm/audio/";
-        var regex = "^wt_.*wav$";   // example regexp
+    var path = "/home/alarm/audio/";
+    var regex = "^wt_.*wav$";   // example regexp
 
     var wtSize   = 2048;
     var numTables = 256;
@@ -17,18 +17,18 @@ s.waitForBoot {
         {
             var sigs = bufs.collect { |b|
                 MultiWtOsc.ar(
-                                        NebPitch.kr(20, 1800),
-                                        NebSpeed.kr(0, numTables),
-                                        0, 0,
-                                        bufnum: b, numTables: 1, wtSize: 2048, ratio: 2,
-                                        numOscs: 1, detune: 1.0
-                                )
+                    NebPitch.kr(27.5, 880),
+                    NebSpeed.kr(0, numTables),
+                    0, 0,
+                    bufnum: b, numTables: 1, wtSize: 2048, ratio: 2,
+                    numOscs: 1, detune: 1.0
+                )
             };
 
             var wtScan = NebBlend.kr(0, bufs.size - 1);
 
-                        SelectX.ar(wtScan, sigs) ! 2 * 0.1
-                        //Mix.new(sigs) ! 2 * 0.1
+                NebBlend.ar(wtScan, sigs) ! 2 * 0.1
+                //Mix.new(sigs) ! 2 * 0.1
         }.play;
     };
 
@@ -37,10 +37,10 @@ s.waitForBoot {
         .filesDo { |pathname|
                 if(pathname.extension == "wav"
                 ){
-                        var fname = pathname.fullPath.split($/).last;
-                        if (fname.findRegexp(regex).notNil) {
-                                paths add: pathname.fullPath
-                        }
+                    var fname = pathname.fullPath.split($/).last;
+                    if (fname.findRegexp(regex).notNil) {
+                            paths add: pathname.fullPath
+                    }
                 }
         };
 

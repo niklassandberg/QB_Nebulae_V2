@@ -43,7 +43,14 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
 sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
 
 echo "Running Nebulae"
-#sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py &> /tmp/nebulae_debug_log.log
-sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
 
-exit 
+#sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py &> /tmp/nebulae_debug_log.log
+#sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+while :
+do
+  sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+done
+
+
+
+#exit 

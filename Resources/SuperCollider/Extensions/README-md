@@ -1,0 +1,5 @@
+#put al Extentions in: /usr/share/SuperCollider/Extensions/
+#NOT in ~/.local/share/SuperCollider/Extensions/
+#that because we have root and alarm, Nebulae wants to run in root.
+#But somethimes we want to test in cmd.
+#And then it will by "human error" be user alarm.

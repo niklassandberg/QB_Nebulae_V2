@@ -204,19 +204,23 @@ class Nebulae(object):
         floader = fileloader.FileLoader() 
         floader.reload() #reloads all the files to be sure
         self.orc_handle.refreshFileHandler() #also the audio files
-
-        #fullPath = "/home/alarm/sc/" + patch +  ".sc &> /tmp/nebulae_debug_supercollider.log"
         fullPath = "/home/alarm/sc/" + patch +  ".sc"
-
-
         if debug == False:
             cmd = "sclang".split()
         else:
             cmd = "sclang".split()
-        cmd.append(fullPath)
+        #SOMETHING THAT SDOES NOT WORK
+        #cmd = ["sudo", "-u", "alarm", "sclang", "/home/alarm/sc/" + patch +  ".sc"]
+
+        #FOR DEBUG
+        #cmd = "cat".split()
+        #fullPath = "/home/alarm/sc/" + patch +  ".scd"
+        
+        cmd.append(fullPath)        
+        
         self.st = Popen(cmd)
-        print 'sleeping'
-        time.sleep(2)
+        #print 'sleeping'
+        #time.sleep(2) #todo: what happens if we remove this?
         self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider") #supercollider controlhandler
         self.c_handle.setCsoundPerformanceThread(None)
         self.c_handle.enterSuperColliderMode() ##enters supercollider mode and boots scsynth
@@ -335,9 +339,11 @@ class Nebulae(object):
     def cleanup_sc(self):
         self.st.terminate()
         self.st.kill()
-        cmd = "sudo killall jackd" 
-        os.system(cmd)
-        cmd = "sudo killall scsynth" 
+        #no jack in this new working state:w
+
+        #cmd = "sudo killall jackd" 
+        #os.system(cmd)
+        cmd = "sudo killall sclang scsynth" 
         os.system(cmd)
        
     def cleanup_puredata(self): 

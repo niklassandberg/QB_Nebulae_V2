@@ -1,6 +1,6 @@
 s.boot;
 
-NebulaeInterface.init(s);
+NebInterface.init(s);
 
 SynthDef(\sineSynth, { |freq = 440, amp = 0.1|
     var sig;
