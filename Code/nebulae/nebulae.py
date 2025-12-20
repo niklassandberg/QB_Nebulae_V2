@@ -63,7 +63,7 @@ class Nebulae(object):
         elif self.new_bank == 'puredata':
             path = pd_path + self.new_instr + '.pd'
         elif self.new_bank == 'supercollider':
-            path = sc_path + self.new_instr + '.scd'
+            path = sc_path + self.new_instr + '.sc'
         else:
             print "bank not recocgnized."
             print self.new_bank
@@ -191,10 +191,21 @@ class Nebulae(object):
         except:
             "Could not write config file."
             
+    def start_jack(self):
+        #if os.system("jack_lsp > /dev/null 2>&1") != 0:
+        os.system("killall jackd") #just to be on the safe side.
+        time.sleep(1) #short sleep to ensure that jackd is killed
+        cmd = "jackd -T -ndefault -R -P75 -dalsa -dhw:0 -p128 -n3 -s -r48000 &"
+        os.system(cmd)
+        time.sleep(4) #give jack some time to start
+
             
     def start_supercollider(self, patch): #start sc with the selected synth
+        self.start_jack()
+        
         #self.cleanup_puredata() ##kills pure data
         #self.cleanup()
+        
         if self.c is not None: ##if csound is still alive
             self.c.cleanup() ##kill it
             self.c = None ##set its life to None
@@ -209,12 +220,8 @@ class Nebulae(object):
             cmd = "sclang".split()
         else:
             cmd = "sclang".split()
-        #SOMETHING THAT SDOES NOT WORK
-        #cmd = ["sudo", "-u", "alarm", "sclang", "/home/alarm/sc/" + patch +  ".sc"]
 
-        #FOR DEBUG
-        #cmd = "cat".split()
-        #fullPath = "/home/alarm/sc/" + patch +  ".scd"
+        fullPath = "/home/alarm/sc/" + patch +  ".sc"
         
         cmd.append(fullPath)        
         
@@ -339,12 +346,12 @@ class Nebulae(object):
     def cleanup_sc(self):
         self.st.terminate()
         self.st.kill()
-        #no jack in this new working state:w
-
-        #cmd = "sudo killall jackd" 
-        #os.system(cmd)
+        
         cmd = "sudo killall sclang scsynth" 
         os.system(cmd)
+        cmd = "sudo killall jackd"
+        os.system(cmd)
+
        
     def cleanup_puredata(self): 
         self.pt.terminate()
