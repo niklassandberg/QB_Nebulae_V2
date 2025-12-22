@@ -192,19 +192,23 @@ class Nebulae(object):
             "Could not write config file."
             
     def start_jack(self):
-        #if os.system("jack_lsp > /dev/null 2>&1") != 0:
-        os.system("killall jackd") #just to be on the safe side.
-        time.sleep(1) #short sleep to ensure that jackd is killed
-        cmd = "jackd -T -ndefault -R -P75 -dalsa -dhw:0 -p128 -n3 -s -r48000 &"
-        os.system(cmd)
-        time.sleep(4) #give jack some time to start
+        if os.system("jack_lsp > /dev/null 2>&1") != 0:
+            os.system("killall jackd") #just to be on the safe side.
+            time.sleep(1) #short sleep to ensure that jackd is killed
+            cmd = "jackd -T -ndefault -R -P75 -dalsa -dhw:0 -p128 -n3 -s -r48000 &"
+            #cmd = "jackd &" #TODO: does not pick up jackdrc, dont know why need to fix! 
+            os.system(cmd)
+            time.sleep(4) #give jack some time to start
 
             
     def start_supercollider(self, patch): #start sc with the selected synth
-        self.start_jack()
-        
         #self.cleanup_puredata() ##kills pure data
         #self.cleanup()
+        self.start_jack()
+        
+        #testing if it works, find out why this is stupid!!
+        #TODO: why do I need todo this, this is stupid. But I dont find in the code why idx is not set properly
+        idx = self.c_handle.instr_sel_idx;
         
         if self.c is not None: ##if csound is still alive
             self.c.cleanup() ##kill it
@@ -233,11 +237,16 @@ class Nebulae(object):
         self.c_handle.enterSuperColliderMode() ##enters supercollider mode and boots scsynth
         nebmixer.init()
         nebmixer.enable()
+        
+        self.c_handle.setInstrSelIdx(idx) #sets the idx properly again
         self.loadUI()
         
 
     def start_puredata(self, patch):
         self.log.spill_basic_info()
+        #testing if it works, find out why this is stupid!!
+        #TODO: why do I need todo this, this is stupid. But I dont find in the code why idx is not set properly
+        idx = self.c_handle.instr_sel_idx;
         if self.c is not None:
             self.c.cleanup() 
             self.c = None
@@ -262,6 +271,8 @@ class Nebulae(object):
         self.c_handle.enterPureDataMode()
         nebmixer.init()
         nebmixer.enable()
+
+        self.c_handle.setInstrSelIdx(idx) #sets the idx properly again
         self.loadUI()
         
 
