@@ -13,6 +13,7 @@ import threading
 import wavewriter
 import numpy as np
 import scsender
+#import receiver #this is a problem
 
 import nebmixer
 
@@ -32,6 +33,15 @@ RECORD_GATE_PIN = 24
 
 # Main Class. Holds all ControlChannels
 class ControlHandler(object):
+
+    def on_sc_up(self, addr, data):
+        with self.synthIsUpLock:
+            self.synthIsUp = True
+
+    def synthIsUpStatus(self):
+        with self.synthIsUpLock:
+            return self.synthIsUp
+        
     def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='factory'):
         self.csound = csound # Share csound instance with object
         GPIO.setmode(GPIO.BCM) # init GPIO
@@ -53,6 +63,11 @@ class ControlHandler(object):
         self.now = int(round(time.time() * 1000))
         self.pdSock = pdsender.PdSend()
         self.scSock = scsender.ScSend()
+        #self.sockReceiver = receiver.Receive() #this is a problem
+
+        self.synthIsUpLock = threading.Lock()
+        self.synthIsUp = False
+
         self.currentInstr = instr
         self.currentBank = bank
         self.static_file_idx = 0
@@ -72,6 +87,10 @@ class ControlHandler(object):
         self.defaultConfig = dict()
         self.populateDefaultConfig()
         digitalConfig = dict()
+
+        #self.sockReceiver.add_handler('/sc/up', self.on_sc_up) #this is a problem
+        #self.sockReceiver.start() #this is a problem
+
         for ctrl in digitalControlList:
             if self.configData is not None and self.configData.has_key(ctrl):
                 digitalConfig[ctrl] = self.configData.get(ctrl)
@@ -155,6 +174,11 @@ class ControlHandler(object):
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
 
+    def close(self):
+        self.pdSock.close()
+        self.scSock.close()
+        #self.sockReceiver.close() #this is a problem
+
     # Pass Csound Performance Thread Pointer
     def setCsoundPerformanceThread(self, ptr):
         self.performance_thread = ptr
@@ -231,9 +255,21 @@ class ControlHandler(object):
         if self.pdSock.is_connected(): #kills pure data
             self.pdSock.close()
         if not self.scSock.is_connected():
-            print "Connecting to SC Socket"
+            print "def enterSuperColliderMode: Connecting to SC Socket"
             self.scSock.connect()
+            self.sendScOscMessages()
+
+            #for chn in self.channels:
+            #    chn.getValue()
+
+        for chn in self.channels: #for each of the adc channels
+            print "def enterSuperColliderMode: initializing " + chn.name + " value" + str(chn.getValue())
+        self.sendHandCshakeToSC()
     
+    def sendHandCshakeToSC(self):
+        # Send handshake messages to SC to let it know we're here
+        self.scSock.send("handshake", 1)
+
     def enterNormalMode(self):
         print "entering normal"
         for chn in self.channels:
@@ -276,10 +312,10 @@ class ControlHandler(object):
             self.resistNormalSettings() 
 
             if not self.pdSock.is_connected() and self.control_mode == "puredata" :
-                print "Connecting to PD Socket"
+                print "def enterSecondaryMode: Connecting to PD Socket"
                 self.pdSock.connect()
             if not self.scSock.is_connected() and self.control_mode == "supercollider" :
-                print "Connecting to SC Socket"
+                print "def enterSecondaryMode: Connecting to SC Socket"
                 self.scSock.connect()
 
             self.prev_control_mode = self.control_mode
@@ -411,6 +447,14 @@ class ControlHandler(object):
         if self.editFunctionFlag.has_key(name):
             self.editFunctionFlag[name] = True
 
+    def sendScOscMessages(self):
+        for chn in self.channels: #for each of the adc channels
+            chn.update() 
+            self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
+        for chn in self.altchannels:
+            chn.update() 
+            self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
+
     def updateAll(self): 
         #GPIO.output(self.eol_pin, False) # For debugging
         numChanged = 0
@@ -432,6 +476,7 @@ class ControlHandler(object):
                         self.enterPureDataMode()
                     elif self.prev_control_mode == "supercollider": 
                         self.enterSuperColliderMode() ##added
+
                     else:
                         self.enterNormalMode()
 

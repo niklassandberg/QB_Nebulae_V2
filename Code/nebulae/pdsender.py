@@ -32,8 +32,14 @@ class PdSend():
             print 'Could not send. Did you open a connection?'
 
     def close(self):
-        print 'Closing connection to PD'
-        self.pd.close()
+        try:
+            if self.pd and self.connected:
+                print 'Closing connection to PD'
+                self.pd.close()
+            else:
+                print 'No client to close!!!'
+        except:
+            print 'except closing connection to PD'
         self.connected = False
 
     def format(self, target, val):

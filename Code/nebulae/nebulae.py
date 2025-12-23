@@ -15,7 +15,7 @@ import nebmixer
 
 cfg_path = "/home/alarm/QB_Nebulae_V2/Code/config/"
 
-debug = False 
+debug = True 
 debug_controls = False
 
 class Nebulae(object):
@@ -195,11 +195,24 @@ class Nebulae(object):
         if os.system("jack_lsp > /dev/null 2>&1") != 0:
             os.system("killall jackd") #just to be on the safe side.
             time.sleep(1) #short sleep to ensure that jackd is killed
-            cmd = "jackd -T -ndefault -R -P75 -dalsa -dhw:0 -p128 -n3 -s -r48000 &"
+            cmd = "jackd -T -ndefault -R -P75 -dalsa -dhw:0 -p512 -n3 -s -r48000 &"
             #cmd = "jackd &" #TODO: does not pick up jackdrc, dont know why need to fix! 
             os.system(cmd)
             time.sleep(4) #give jack some time to start
 
+    def waitForSynthOrDie(self):
+        retries = 0
+        while not self.c_handle.synthIsUpStatus():
+            print "synth is not up yet, waiting..."
+            retries += 1
+            if retries > 50:
+                print "Timeout waiting for synth to be up!"
+                break
+            time.sleep(0.1) 
+
+        if retries >= 50 :
+            print "synth is not up after 50 retries! Exiting"
+            sys.exit(50)
             
     def start_supercollider(self, patch): #start sc with the selected synth
         #self.cleanup_puredata() ##kills pure data
@@ -213,6 +226,7 @@ class Nebulae(object):
         if self.c is not None: ##if csound is still alive
             self.c.cleanup() ##kill it
             self.c = None ##set its life to None
+        self.c_handle.close()
         self.c_handle = None
         self.currentIntr = patch
         self.newInstr = patch
@@ -240,7 +254,16 @@ class Nebulae(object):
         
         self.c_handle.setInstrSelIdx(idx) #sets the idx properly again
         self.loadUI()
-        
+
+        #self.waitForSynthOrDie()
+
+        #for some reason first init does not send osc messages
+        # defore sending osc messages, update all controls
+        #self.c_handle.updateAll()
+        #self.ui.update()
+        #self.c_handle.updateAll()
+        #self.ui.update()
+        #self.c_handle.sendScOscMessages()
 
     def start_puredata(self, patch):
         self.log.spill_basic_info()
@@ -250,6 +273,7 @@ class Nebulae(object):
         if self.c is not None:
             self.c.cleanup() 
             self.c = None
+        self.c_handle.close()
         self.c_handle = None
         self.currentInstr = patch
         self.newInstr = patch
