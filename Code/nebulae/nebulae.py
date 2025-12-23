@@ -195,7 +195,7 @@ class Nebulae(object):
         if os.system("jack_lsp > /dev/null 2>&1") != 0:
             os.system("killall jackd") #just to be on the safe side.
             time.sleep(1) #short sleep to ensure that jackd is killed
-            cmd = "jackd -T -ndefault -R -P75 -dalsa -dhw:0 -p512 -n3 -s -r48000 &"
+            cmd = "jackd -T -ndefault -R -P75 -dalsa -dhw:0 -p256 -n3 -s -r48000 &"
             #cmd = "jackd &" #TODO: does not pick up jackdrc, dont know why need to fix! 
             os.system(cmd)
             time.sleep(4) #give jack some time to start
