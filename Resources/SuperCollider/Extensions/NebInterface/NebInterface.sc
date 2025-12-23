@@ -3,8 +3,9 @@ NebInterface {
     classvar server;  // store the server used
     classvar params;  // declare, but don't assign here!
 
+
     *init { |s|
-        server = s;
+        server = s; 
         buses  = Dictionary.new;
 
         // assign the array here instead
@@ -19,12 +20,27 @@ NebInterface {
             \reset_instr, \freeze_instr
         ];
 
-        thisProcess.openUDPPort(3000);
-        ~remote = NetAddr("127.0.0.1", 3001);
+        thisProcess.openUDPPort(3002);
+        ~remote = NetAddr("127.0.0.1", 3003);
 
         params.do { |name|
             this.addBus(name, "/neb/%".format(name));
         };
+
+        OSCdef.new(\loadScFile, { |msg|
+            Server.default.freeAll;
+            SynthDescLib.global.clear;
+            thisProcess.interpreter.executeFile(msg[1]);
+        }, '/loadScFile');
+
+        OSCdef.new(\handshake, { |msg|
+            //TODO: what???
+        }, '/handshake');
+
+        *ready { |s|
+           ~remote.sendMsg("/sc/up", 0);
+        }
+
     }
 
     *addBus { |name, path, def = 0.0|
@@ -35,6 +51,10 @@ NebInterface {
     }
 
     *bus { |name| ^buses[name] }
+    
+    *ready { |s|
+        ~remote.sendMsg("/sc/up", 0);
+    }
 }
 
 

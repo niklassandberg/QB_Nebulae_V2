@@ -208,11 +208,11 @@ class Nebulae(object):
             if retries > 50:
                 print "Timeout waiting for synth to be up!"
                 break
-            time.sleep(0.1) 
+            time.sleep(0.5) 
 
         if retries >= 50 :
-            print "synth is not up after 50 retries! Exiting"
-            sys.exit(50)
+            print "synth is not up after 50 retries!"
+            #sys.exit(50)
             
     def start_supercollider(self, patch): #start sc with the selected synth
         #self.cleanup_puredata() ##kills pure data
@@ -221,7 +221,7 @@ class Nebulae(object):
         
         #testing if it works, find out why this is stupid!!
         #TODO: why do I need todo this, this is stupid. But I dont find in the code why idx is not set properly
-        idx = self.c_handle.instr_sel_idx;
+        idx = self.c_handle.instr_sel_idx
         
         if self.c is not None: ##if csound is still alive
             self.c.cleanup() ##kill it
@@ -255,7 +255,7 @@ class Nebulae(object):
         self.c_handle.setInstrSelIdx(idx) #sets the idx properly again
         self.loadUI()
 
-        #self.waitForSynthOrDie()
+        self.waitForSynthOrDie()
 
         #for some reason first init does not send osc messages
         # defore sending osc messages, update all controls

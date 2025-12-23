@@ -13,7 +13,6 @@ import threading
 import wavewriter
 import numpy as np
 import scsender
-#import receiver #this is a problem
 
 import nebmixer
 
@@ -34,7 +33,7 @@ RECORD_GATE_PIN = 24
 # Main Class. Holds all ControlChannels
 class ControlHandler(object):
 
-    def on_sc_up(self, addr, data):
+    def on_sc_up(self, data, source):
         with self.synthIsUpLock:
             self.synthIsUp = True
 
@@ -63,7 +62,6 @@ class ControlHandler(object):
         self.now = int(round(time.time() * 1000))
         self.pdSock = pdsender.PdSend()
         self.scSock = scsender.ScSend()
-        #self.sockReceiver = receiver.Receive() #this is a problem
 
         self.synthIsUpLock = threading.Lock()
         self.synthIsUp = False
@@ -88,8 +86,7 @@ class ControlHandler(object):
         self.populateDefaultConfig()
         digitalConfig = dict()
 
-        #self.sockReceiver.add_handler('/sc/up', self.on_sc_up) #this is a problem
-        #self.sockReceiver.start() #this is a problem
+        self.scSock.add_listener('/sc/up', self.on_sc_up)
 
         for ctrl in digitalControlList:
             if self.configData is not None and self.configData.has_key(ctrl):
@@ -177,6 +174,7 @@ class ControlHandler(object):
     def close(self):
         self.pdSock.close()
         self.scSock.close()
+        self.synthIsUp = False
         #self.sockReceiver.close() #this is a problem
 
     # Pass Csound Performance Thread Pointer
