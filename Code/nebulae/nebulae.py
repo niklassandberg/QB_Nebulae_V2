@@ -249,6 +249,7 @@ class Nebulae(object):
         self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider") #supercollider controlhandler
         self.c_handle.setCsoundPerformanceThread(None)
         self.c_handle.enterSuperColliderMode() ##enters supercollider mode and boots scsynth
+        self.c_handle.sc_lisen()
         nebmixer.init()
         nebmixer.enable()
         

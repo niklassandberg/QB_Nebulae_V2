@@ -242,6 +242,9 @@ class ControlHandler(object):
     def mode(self):
         return self.control_mode
     
+    def sc_lisen(self):
+        self.scSock.start_listener()
+    
     def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
         self.prev_control_mode = self.control_mode
         self.control_mode = "supercollider"

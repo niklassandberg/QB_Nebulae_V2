@@ -26,13 +26,16 @@ class ScSend():
 
     def __init__(self):
         self.connect()
-        self._start_listener()
+        #self.start_listener()
 
     # -------------------------
     # Sending
     # -------------------------
 
     def connect(self):
+        if self.connected:
+            return
+
         print 'connecting to sc'
         try:
             self.client = OSCClient()
@@ -68,7 +71,11 @@ class ScSend():
     # Receiving
     # -------------------------
 
-    def _start_listener(self):
+    def start_listener(self):
+        
+        if self._running:
+            return True
+        
         try:
             self.server = OSCServer(
                 (self.serverhost, self.resieveport))
@@ -83,8 +90,12 @@ class ScSend():
             self._listener_thread.start()
 
             print 'Listening for SC OSC on port', self.resieveport
+
+            return True
         except:
             print 'Failed to start OSC listener'
+            
+        return False
 
     def _listen_loop(self):
         while self._running:
