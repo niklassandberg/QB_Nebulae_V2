@@ -3,8 +3,20 @@ NebInterface {
     classvar server;  // store the server used
     classvar params;  // declare, but don't assign here!
 
+    classvar initialized = false;
 
     *init { |s|
+        
+        if (initialized && server === s) {
+            "NebInterface already initialized".warn;
+            ^this
+        };
+
+        if (initialized && server !== s) {
+            "NebInterface server changed — reinitializing".warn;
+            this.deinit;
+        };
+
         server = s; 
         buses  = Dictionary.new;
 
@@ -34,13 +46,20 @@ NebInterface {
         }, '/loadScFile');
 
         OSCdef.new(\handshake, { |msg|
-            //TODO: what???
+            ~remote.sendMsg("/sc/ready", 0);
         }, '/handshake');
 
         *ready { |s|
            ~remote.sendMsg("/sc/up", 0);
         }
 
+    }
+
+    *deinit {
+        OSCdef.all.do(_.free);
+        buses.do { |_, b| b.free };
+        buses.clear;
+        initialized = false;
     }
 
     *addBus { |name, path, def = 0.0|
