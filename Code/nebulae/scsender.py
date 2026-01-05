@@ -3,16 +3,18 @@ import sys
 import os
 import threading
 import time
+import logging
 
 sys.path.insert(0, '/home/alarm/QB_Nebulae_V2/Code/nebulae/lib')
 
 from OSC import OSCClient, OSCMessage, OSCServer
 
-class ScSend():
+class ScSend(object):
+
     values = {}
-    serverhost = 'localhost'
-    serverport = 3002 #SC server port
-    resieveport = 3003 #this server port
+    rhost = '127.0.0.1'
+    rPort = 3010 #SC server port
+    sPort = 3011 #this server port
 
     client = None
     server = None
@@ -26,7 +28,33 @@ class ScSend():
 
     def __init__(self):
         self.connect()
-        #self.start_listener()
+        self.synthIsUpLock = threading.Lock()
+        self.synthIsUp = False
+        self.loogerSetup()
+
+    def loogerSetup(self):
+        # Dedicated logger for OSC
+        self.osc_logger = logging.getLogger("OSC")
+        self.osc_logger.setLevel(logging.DEBUG) 
+
+        # File handler
+        fh = logging.FileHandler("/tmp/osc_only.log")
+        fh.setLevel(logging.DEBUG)
+
+        # Formatter
+        formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
+        fh.setFormatter(formatter)
+
+        self.osc_logger.addHandler(fh)
+
+    def on_sc_up(self, addr, data, source):
+        with self.synthIsUpLock:
+            self.osc_logger.debug('NOW SYNTH IS UP!!!!!!!!!')
+            self.synthIsUp = True
+
+    def synthIsUpStatus(self):
+        with self.synthIsUpLock:
+            return self.synthIsUp
 
     # -------------------------
     # Sending
@@ -39,10 +67,10 @@ class ScSend():
         print 'connecting to sc'
         try:
             self.client = OSCClient()
-            self.client.connect((self.serverhost, self.serverport))
+            self.client.connect((self.rhost, self.rPort))
             self.connected = True
             print 'Sending to SC on port {} : {}'.format(
-                self.serverhost, self.serverport)
+                self.rhost, self.rPort)
         except:
             print 'Connection failed - open SC'
 
@@ -78,7 +106,7 @@ class ScSend():
         
         try:
             self.server = OSCServer(
-                (self.serverhost, self.resieveport))
+                (self.rhost, self.sPort))
             self.server.addDefaultHandlers()
 
             self.server.addMsgHandler('default', self._dispatch)
@@ -89,14 +117,14 @@ class ScSend():
             self._listener_thread.daemon = True
             self._listener_thread.start()
 
-            print 'Listening for SC OSC on port', self.resieveport
+            print 'Listening for SC OSC on port', self.sPort
 
             return True
         except:
             print 'Failed to start OSC listener'
             
         return False
-
+ 
     def _listen_loop(self):
         while self._running:
             try:
@@ -107,12 +135,19 @@ class ScSend():
 
     def _dispatch(self, addr, tags, data, source):
         try:
+            self.osc_logger.debug("DISPATCH CALLED: %s", addr)
             if addr in self.callbacks:
+                self.print_osc_debug(addr, tags, data, source, "registered callback")
                 self.callbacks[addr](addr, data, source)
             elif self.default_callback:
+                self.print_osc_debug(addr, tags, data, source, "default callback")
                 self.default_callback(addr, data, source)
         except:
-            print 'Error in OSC callback for', addr
+            logging.error('Error in OSC callback for %s', addr)
+
+    def print_osc_debug(self, addr, tags, data, source, which_callback):
+        self.osc_logger.debug("which_callback(%s), addr(%s), tags(%s), data(%s), source(%s)", which_callback, addr, tags, data, source)
+        
 
     # -------------------------
     # Callback registration
@@ -138,6 +173,8 @@ class ScSend():
     def close(self):
         self._running = False
         self.connected = False
+        with self.synthIsUpLock:
+            self.synthIsUp = False
         try:
             if self.client:
                 print 'Closing client to SC'

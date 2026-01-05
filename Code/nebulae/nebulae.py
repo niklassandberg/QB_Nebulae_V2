@@ -4,6 +4,7 @@ import os
 from subprocess import Popen
 import ctcsound
 import controlhandler as ch
+import controlhandlerSC as chSC
 import conductor
 import ui
 import fileloader
@@ -77,6 +78,7 @@ class Nebulae(object):
 
     def start(self, instr, instr_bank):
         print "Nebulae Starting"
+        self.closeHable()
         if self.currentInstr != self.new_instr:
             reset_settings_flag = True
         else:
@@ -119,6 +121,10 @@ class Nebulae(object):
         if reset_settings_flag == True:
             print("Changing Instr File -- Resetting Secondary Settings")
             self.c_handle.restoreAltToDefault()
+
+    def closeHable(self):
+        if self.c_handle is not None:
+            self.c_handle.close()
 
     def run(self):
         new_instr = None
@@ -222,17 +228,18 @@ class Nebulae(object):
         #testing if it works, find out why this is stupid!!
         #TODO: why do I need todo this, this is stupid. But I dont find in the code why idx is not set properly
         idx = self.c_handle.instr_sel_idx
-        
+         
         if self.c is not None: ##if csound is still alive
             self.c.cleanup() ##kill it
             self.c = None ##set its life to None
-        self.c_handle.close()
+        self.closeHable()
         self.c_handle = None
         self.currentIntr = patch
         self.newInstr = patch
         floader = fileloader.FileLoader() 
         floader.reload() #reloads all the files to be sure
         self.orc_handle.refreshFileHandler() #also the audio files
+        #TODO: change .sc to scd, because scd can have multiple synthdefs... By definition, SC prctice.
         fullPath = "/home/alarm/sc/" + patch +  ".sc"
         if debug == False:
             cmd = "sclang".split()
@@ -246,10 +253,10 @@ class Nebulae(object):
         self.st = Popen(cmd)
         #print 'sleeping'
         #time.sleep(2) #todo: what happens if we remove this?
-        self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider") #supercollider controlhandler
+        self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider") #supercollider controlhandler
         self.c_handle.setCsoundPerformanceThread(None)
+        self.c_handle.start_sc()
         self.c_handle.enterSuperColliderMode() ##enters supercollider mode and boots scsynth
-        self.c_handle.sc_lisen()
         nebmixer.init()
         nebmixer.enable()
         
@@ -274,7 +281,7 @@ class Nebulae(object):
         if self.c is not None:
             self.c.cleanup() 
             self.c = None
-        self.c_handle.close()
+        self.closeHable()
         self.c_handle = None
         self.currentInstr = patch
         self.newInstr = patch

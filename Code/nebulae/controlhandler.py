@@ -33,13 +33,8 @@ RECORD_GATE_PIN = 24
 # Main Class. Holds all ControlChannels
 class ControlHandler(object):
 
-    def on_sc_up(self, data, source):
-        with self.synthIsUpLock:
-            self.synthIsUp = True
-
     def synthIsUpStatus(self):
-        with self.synthIsUpLock:
-            return self.synthIsUp
+        return self.scSock.synthIsUpStatus()
         
     def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='factory'):
         self.csound = csound # Share csound instance with object
@@ -63,7 +58,7 @@ class ControlHandler(object):
         self.pdSock = pdsender.PdSend()
         self.scSock = scsender.ScSend()
 
-        self.synthIsUpLock = threading.Lock()
+        
         self.synthIsUp = False
 
         self.currentInstr = instr
@@ -86,7 +81,7 @@ class ControlHandler(object):
         self.populateDefaultConfig()
         digitalConfig = dict()
 
-        self.scSock.add_listener('/sc/up', self.on_sc_up)
+            
 
         for ctrl in digitalControlList:
             if self.configData is not None and self.configData.has_key(ctrl):
@@ -175,7 +170,11 @@ class ControlHandler(object):
         self.pdSock.close()
         self.scSock.close()
         self.synthIsUp = False
-        #self.sockReceiver.close() #this is a problem
+        #self.sockReceiver.close() #this is a 
+        
+    def start_sc(self):
+        self.scSock.start_listener()
+        self.scSock.add_listener('/sc/up', self.scSock.on_sc_up)
 
     # Pass Csound Performance Thread Pointer
     def setCsoundPerformanceThread(self, ptr):
@@ -241,9 +240,6 @@ class ControlHandler(object):
 
     def mode(self):
         return self.control_mode
-    
-    def sc_lisen(self):
-        self.scSock.start_listener()
     
     def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
         self.prev_control_mode = self.control_mode
