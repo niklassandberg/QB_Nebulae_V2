@@ -12,4 +12,5 @@ Server.default.boot;
 Server.default.waitForBoot {
 	Server.default.sync;
     ~sine = Synth(\sineSynth);
+    NebInterface.ready(s);
 };
