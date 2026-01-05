@@ -1,23 +1,20 @@
 NebInterface {
     classvar buses;   // plain classvar
-    classvar server;  // store the server used
     classvar params;  // declare, but don't assign here!
 
     classvar initialized = false;
 
     *init { |s|
         
-        if (initialized && server === s) {
+        if (initialized) {
             "NebInterface already initialized".warn;
             ^this
         };
 
-        if (initialized && server !== s) {
-            "NebInterface server changed — reinitializing".warn;
-            this.deinit;
-        };
+        //Can be reinit, remove all OSC and buses. 
+        OSCdef.all.do(_.free);
+        if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
 
-        server = s; 
         buses  = Dictionary.new;
 
         // assign the array here instead
@@ -32,8 +29,8 @@ NebInterface {
             \reset_instr, \freeze_instr
         ];
 
-        thisProcess.openUDPPort(3002);
-        ~remote = NetAddr("127.0.0.1", 3003);
+        thisProcess.openUDPPort(3010);
+        ~remote = NetAddr("127.0.0.1", 3011);
 
         params.do { |name|
             this.addBus(name, "/neb/%".format(name));
@@ -46,24 +43,13 @@ NebInterface {
         }, '/loadScFile');
 
         OSCdef.new(\handshake, { |msg|
-            ~remote.sendMsg("/sc/ready", 0);
+            ~remote.sendMsg("/sc/ready", [0]);
         }, '/handshake');
 
-        *ready { |s|
-           ~remote.sendMsg("/sc/up", 0);
-        }
-
-    }
-
-    *deinit {
-        OSCdef.all.do(_.free);
-        buses.do { |_, b| b.free };
-        buses.clear;
-        initialized = false;
     }
 
     *addBus { |name, path, def = 0.0|
-        var b = Bus.control(server, 1);
+        var b = Bus.control(Server.default, 1);
         b.set(def);
         buses[name] = b;
         OSCdef(name, { |msg| b.set(msg[1]) }, path);
@@ -72,7 +58,7 @@ NebInterface {
     *bus { |name| ^buses[name] }
     
     *ready { |s|
-        ~remote.sendMsg("/sc/up", 0);
+        ~remote.sendMsg("/sc/up", [0]);
     }
 }
 
