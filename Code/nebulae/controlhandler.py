@@ -16,6 +16,8 @@ import scsender
 
 import nebmixer
 
+from classlogger import ClassLogger
+
 # Defines for Button/Gate Types
 BUTTON_GATE_GPIO = 0
 BUTTON_SR_GATE_GPIO = 1
@@ -37,6 +39,9 @@ class ControlHandler(object):
         return self.scSock.synthIsUpStatus()
         
     def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='factory'):
+        
+        self.classlog = ClassLogger.loggerSetup(self)
+
         self.csound = csound # Share csound instance with object
         GPIO.setmode(GPIO.BCM) # init GPIO
         GPIO.setwarnings(False) # silence GPIO warnings (this is probably not the best.)
@@ -167,12 +172,14 @@ class ControlHandler(object):
         self.writeThread.start()
 
     def close(self):
+        self.classlog.info("Closing all control handler sockets.")
         self.pdSock.close()
         self.scSock.close()
         self.synthIsUp = False
         #self.sockReceiver.close() #this is a 
         
-    def start_sc(self):
+    def lisenOnSCisUpMessage(self):
+        self.classlog.info("lisenOnSCisUpMessage")
         self.scSock.start_listener()
         self.scSock.add_listener('/sc/up', self.scSock.on_sc_up)
 
@@ -252,23 +259,19 @@ class ControlHandler(object):
         if self.pdSock.is_connected(): #kills pure data
             self.pdSock.close()
         if not self.scSock.is_connected():
-            print "def enterSuperColliderMode: Connecting to SC Socket"
+            self.classlog.info("def enterSuperColliderMode: Connecting to SC Socket")
             self.scSock.connect()
-            self.sendScOscMessages()
-
-            #for chn in self.channels:
-            #    chn.getValue()
-
         for chn in self.channels: #for each of the adc channels
-            print "def enterSuperColliderMode: initializing " + chn.name + " value" + str(chn.getValue())
-        self.sendHandCshakeToSC()
+            self.classlog.info("def enterSuperColliderMode: initializin %s value %s", chn.name, str(chn.getValue()))
+        #TODO: wtf chould this be here?
+        #self.sendHandCshakeToSC()
     
     def sendHandCshakeToSC(self):
         # Send handshake messages to SC to let it know we're here
         self.scSock.send("handshake", 1)
 
     def enterNormalMode(self):
-        print "entering normal"
+        self.classlog.info("entering normal")
         for chn in self.channels:
             chn.muteCSound(False)
         if self.modeChangeControl is not None:
@@ -297,7 +300,7 @@ class ControlHandler(object):
             self.scSock.close()
 
         if not self.pdSock.is_connected():
-            print "Connecting to PD Socket"
+            self.classlog.info("def enterPureDataMode: Connecting to PD Socket")
             self.pdSock.connect()
         self.control_mode = "puredata"
     
@@ -305,14 +308,14 @@ class ControlHandler(object):
         #self.modeChangeControl = "pitch"
         #self.altchanneldict[self.modeChangeControl + "_alt"].setIgnoreNextButton()
         if self.control_mode == "normal" or self.control_mode == "puredata" or self.control_mode == "supercollider":
-            print "entering secondary"
+            self.classlog.info("entering secondary")
             self.resistNormalSettings() 
 
             if not self.pdSock.is_connected() and self.control_mode == "puredata" :
-                print "def enterSecondaryMode: Connecting to PD Socket"
+                self.classlog.info("def enterSecondaryMode: Connecting to PD Socket")
                 self.pdSock.connect()
             if not self.scSock.is_connected() and self.control_mode == "supercollider" :
-                print "def enterSecondaryMode: Connecting to SC Socket"
+                self.classlog.info("def enterSecondaryMode: Connecting to SC Socket")
                 self.scSock.connect()
 
             self.prev_control_mode = self.control_mode
@@ -326,7 +329,7 @@ class ControlHandler(object):
         #self.modeChangeControl = "speed"
         #self.instrchanneldict[self.modeChangeControl + "_instr"].setIgnoreNextButton()
         if self.control_mode == "normal" or self.control_mode == "puredata" or self.control_mode == "supercollider":
-            print "entering instr selector"
+            self.classlog.info("entering instr selector")
             self.control_mode = "instr selector"
         self.settings.update(self.now)
         self.settings.write()
@@ -422,7 +425,7 @@ class ControlHandler(object):
     def handleRecordStatus(self):
         self.record_status_comm.update()
         if self.record_status_comm.fallingEdge() == True:
-            print "Ending recording."
+            self.classlog.info("Ending recording.")
             if self.getAltValue("record_alt") == 0:
                 self.setValue("record", 0)
                 if self.getValue("source") == 1:
@@ -503,11 +506,11 @@ class ControlHandler(object):
                     msgs.append(temp_str)
                 try:
                     self.pdSock.send(msgs)
-                except:
+                except Exception as e:
                     if self.pdSock.is_connected():
-                        print 'Could not send messages to PD. Connected, but error?'
+                        self.classlog.error("pd Could not send messages to PD. Connected, but error?: %s", e)
                     else:
-                        print 'Could not send messgaes to PD. No connection?'
+                        self.classlog.error("pd Could not send messgaes to PD. No connection?': %s", e)
 
             elif self.prev_control_mode =="supercollider": #if we are in sc mode
                 for chn in self.channels: #for each of the adc channels
@@ -557,12 +560,11 @@ class ControlHandler(object):
                 msgs.append(temp_str)
             try:
                 self.pdSock.send(msgs)
-            except:
+            except Exception as e:
                 if self.pdSock.is_connected():
-                    print 'Could not send messages to PD. Connected, but error?'
+                    self.classlog.error("pd: Could not send messages to PD. Connected, but error?: %s", e)
                 else:
-                    print 'Could not send messgaes to PD. No connection?'
-
+                    self.classlog.error("pd: Could not send messgaes to PD. No connection?': %s", e)
         elif self.control_mode =="supercollider": #if we are in sc mode 
             for chn in self.channels: #for each of the adc channels
                 if chn.name != "sourcegate":
@@ -612,14 +614,14 @@ class ControlHandler(object):
                                     self.channeldict[chn.name].setValue(1 - self.channeldict[chn.name].getValue())
                                     #self.writeBufferToAudioFile()
                                     if self.writeThread.isAlive() == False:
-                                        print("Write Thread Starting!")
+                                        self.classlog.info("Write Thread Starting!")
                                         self.writeThread.join()
                                         self.writeThread = threading.Thread(target=self.writeBufferToAudioFile)
                                         self.writeThread.start()
                                         #self.writeThread.start()
                                     else:
-                                        print("Write thread still running.")
-                                print "channel: " + chn.name + " has changed."
+                                        self.classlog.info("Write thread still running.")
+                                self.classlog.info("channel: %s has changed.", chn.name)
                                 self.channeldict["file"].setIgnoreNextButton()
         #GPIO.output(self.eol_pin, True) # for debugging
 
@@ -639,7 +641,7 @@ class ControlHandler(object):
         line += "\nComm Channels:"
         line += "krecordstatus: " + str(self.record_status_comm.getState()) + '\n'
         line += "\n############################\n"
-        print line
+        self.classlog.info(line)
 
     def printAllControlsVerbose(self):
         line = "############################\n"
@@ -659,35 +661,35 @@ class ControlHandler(object):
                 line += "\n"
             line += chn.name + ": " + str(chn.getValue()) + "\t"
         line += "\n############################\n"
-        print line
+        self.classlog.info(line)
 
     def writeBufferToAudioFile(self):
         # Get Tables from csound
         success = False
         silence_audio = False
         if self.csound is not None:
-            print("Started Writing Buffer")
+            self.classlog.info("Started Writing Buffer")
             self.writing_buffer = True
             self.buffer_size_comm.update()
             length = self.buffer_size_comm.getState()
             if (length > 0):
-                print length
+                self.classlog.info(length)
                 if self.performance_thread is not None and silence_audio is True:
                     self.performance_thread.pause()
-                print("Getting tables from Csound")
+                self.classlog.info("Getting tables from Csound")
                 dataLeft = self.csound.table(200)
                 dataRight = self.csound.table(201)
-                print("Jumping to WaveWriter")
+                self.classlog.info("Jumping to WaveWriter")
                 # Format down to 16-bit signed
                 success = self.writer.WriteStereoWaveFile(dataLeft, dataRight, length)
                 if self.performance_thread is not None and silence_audio is True:
                     self.performance_thread.play()
-                print("Finished Writing Buffer")
+                self.classlog.info("Finished Writing Buffer")
             else:
-                print("Buffer is currently empty")
+                self.classlog.info("Buffer is currently empty")
             self.writing_buffer = False
         if success == False:
             self.buffer_failure = True
 
     def dummyThread(self):
-        print "This is a dummy function for initializing a worker thread."
+        self.classlog.info("This is a dummy function for initializing a worker thread.")

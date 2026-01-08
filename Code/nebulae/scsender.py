@@ -1,55 +1,50 @@
 # Courtesy of hecanjob/pippi.pd
 import sys
-import os
 import threading
 import time
 import logging
+
+from classlogger import ClassLogger
 
 sys.path.insert(0, '/home/alarm/QB_Nebulae_V2/Code/nebulae/lib')
 
 from OSC import OSCClient, OSCMessage, OSCServer
 
+
 class ScSend(object):
 
-    values = {}
     rhost = '127.0.0.1'
-    rPort = 3010 #SC server port
-    sPort = 3011 #this server port
-
-    client = None
-    server = None
-    connected = False
-
-    _listener_thread = None
-    _running = False
-
-    callbacks = {}      # address -> function
-    default_callback = None
+    rPort = 3010  # SC server port
+    sPort = 3011  # this server port
 
     def __init__(self):
-        self.connect()
+        # Logger FIRST
+        self.log = ClassLogger.loggerSetup(self)
+
+        # Instance state (not class variables!)
+        self.values = {}
+        self.callbacks = {}
+        self.default_callback = None
+
+        self.client = None
+        self.server = None
+        self.connected = False
+
+        self._listener_thread = None
+        self._running = False
+
         self.synthIsUpLock = threading.Lock()
         self.synthIsUp = False
-        self.loogerSetup()
 
-    def loogerSetup(self):
-        # Dedicated logger for OSC
-        self.osc_logger = logging.getLogger("OSC")
-        self.osc_logger.setLevel(logging.DEBUG) 
+        self.connect()
 
-        # File handler
-        fh = logging.FileHandler("/tmp/osc_only.log")
-        fh.setLevel(logging.DEBUG)
-
-        # Formatter
-        formatter = logging.Formatter('%(asctime)s %(levelname)s: %(message)s')
-        fh.setFormatter(formatter)
-
-        self.osc_logger.addHandler(fh)
+    # -------------------------
+    # Synth status
+    # -------------------------
 
     def on_sc_up(self, addr, data, source):
         with self.synthIsUpLock:
-            self.osc_logger.debug('NOW SYNTH IS UP!!!!!!!!!')
+            self.log.debug("synth is up!")
             self.synthIsUp = True
 
     def synthIsUpStatus(self):
@@ -64,15 +59,15 @@ class ScSend(object):
         if self.connected:
             return
 
-        print 'connecting to sc'
+        self.log.info("Connecting")
         try:
             self.client = OSCClient()
             self.client.connect((self.rhost, self.rPort))
             self.connected = True
-            print 'Sending to SC on port {} : {}'.format(
-                self.rhost, self.rPort)
-        except:
-            print 'Connection failed - open SC'
+            self.log.info(
+                "Sending to %s:%s", self.rhost, self.rPort)
+        except Exception as e:
+            self.log.error("Connection failed: %s", e)
 
     def clear(self):
         self.values = {}
@@ -83,32 +78,29 @@ class ScSend(object):
                 return
 
             addr = "/neb/" + what
-            print "SC OSC sending:", addr
+            self.log.debug("OSC sending: %s", addr)
 
             self.values[what] = value
             msg = OSCMessage()
             msg.setAddress(addr)
             msg.append(value)
 
-            if self.connected:
+            if self.connected and self.client:
                 self.client.send(msg)
-        except:
-            print 'Could not send to SC. Did you open a connection?'
+        except Exception as e:
+            self.log.error("Could not send to: %s", e)
 
     # -------------------------
     # Receiving
     # -------------------------
 
     def start_listener(self):
-        
         if self._running:
             return True
-        
-        try:
-            self.server = OSCServer(
-                (self.rhost, self.sPort))
-            self.server.addDefaultHandlers()
 
+        try:
+            self.server = OSCServer((self.rhost, self.sPort))
+            self.server.addDefaultHandlers()
             self.server.addMsgHandler('default', self._dispatch)
 
             self._running = True
@@ -117,37 +109,44 @@ class ScSend(object):
             self._listener_thread.daemon = True
             self._listener_thread.start()
 
-            print 'Listening for SC OSC on port', self.sPort
-
+            self.log.info("Listening for OSC on port %s", self.sPort)
             return True
-        except:
-            print 'Failed to start OSC listener'
-            
-        return False
- 
+
+        except Exception as e:
+            self.log.error("Failed to start OSC listener: %s", e)
+            self.close_server()
+            return False
+
     def _listen_loop(self):
         while self._running:
             try:
                 self.server.handle_request()
-            except:
-                pass
-            time.sleep(0.01) #low, to not hog CPU. Maybe set higher later if needed.
+            except Exception as e:
+                self.log.error("OSC handle_request error: %s", e)
+            time.sleep(0.01)  # avoid CPU hogging
 
     def _dispatch(self, addr, tags, data, source):
         try:
-            self.osc_logger.debug("DISPATCH CALLED: %s", addr)
-            if addr in self.callbacks:
-                self.print_osc_debug(addr, tags, data, source, "registered callback")
-                self.callbacks[addr](addr, data, source)
-            elif self.default_callback:
-                self.print_osc_debug(addr, tags, data, source, "default callback")
-                self.default_callback(addr, data, source)
-        except:
-            logging.error('Error in OSC callback for %s', addr)
+            self.log.debug("DISPATCH CALLED: %s", addr)
 
-    def print_osc_debug(self, addr, tags, data, source, which_callback):
-        self.osc_logger.debug("which_callback(%s), addr(%s), tags(%s), data(%s), source(%s)", which_callback, addr, tags, data, source)
-        
+            if addr in self.callbacks:
+                self._print_osc_debug(
+                    addr, tags, data, source, "registered callback")
+                self.callbacks[addr](addr, data, source)
+
+            elif self.default_callback:
+                self._print_osc_debug(
+                    addr, tags, data, source, "default callback")
+                self.default_callback(addr, data, source)
+
+        except Exception as e:
+            self.log.error("Error in OSC callback for %s, error: %s", addr, e)
+
+    def _print_osc_debug(self, addr, tags, data, source, which_callback):
+        self.log.debug(
+            "which_callback(%s), addr(%s), tags(%s), data(%s), source(%s)",
+            which_callback, addr, tags, data, source
+        )
 
     # -------------------------
     # Callback registration
@@ -161,9 +160,6 @@ class ScSend(object):
         self.callbacks[address] = callback
 
     def set_default_listener(self, callback):
-        """
-        Called when no address-specific callback exists
-        """
         self.default_callback = callback
 
     # -------------------------
@@ -171,29 +167,33 @@ class ScSend(object):
     # -------------------------
 
     def close(self):
-        self._running = False
-        self.connected = False
-        with self.synthIsUpLock:
-            self.synthIsUp = False
-        try:
-            if self.client:
-                print 'Closing client to SC'
-                self.client.close()
-                self.client = None
-            else:
-                print 'No SC client to close!!!'
-        except:
-            print 'except closing client to SC'
-
-        try:
-            if self.server:
-                print 'Closing server to SC'
-                self.server.close()
-                self.server = None
-            else:
-                print 'No SC server to close!!!'
-        except:
-            print 'except closing server to SC'
+        self.log.info("Closing OSC server and client!!!!")
+        self.close_client()
+        self.close_server()
 
     def is_connected(self):
         return self.connected
+
+    def close_client(self):
+        self.connected = False
+        if self.client is not None:
+            try:
+                self.log.info("Closing OSCclient")
+                self.client.close()
+            except Exception as e:
+                self.log.error("Error closing OSC client: %s", e)
+        else:
+            self.log.info("OSC client is None!!!")
+        self.client = None
+
+    def close_server(self):
+        self._running = False
+        if self.server is not None:
+            try:
+                self.log.info("Closing OSC server")
+                self.server.close()
+            except Exception as e:
+                self.log.error("Error closing OSC server: %s", e)
+        else:
+            self.log.info("OSC server is None!!!")
+        self.server = None

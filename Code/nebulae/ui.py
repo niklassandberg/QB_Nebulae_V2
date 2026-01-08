@@ -137,7 +137,7 @@ class UserInterface(object):
                 elif self.controlhandler.currentBank == 'user':
                     tempidx = self.userinstr_fhandle.getIndex(self.controlhandler.currentInstr) 
                 elif self.controlhandler.currentBank == 'puredata':
-                    tempidx = self.puredatainstr_fhandle.getIndex(self.controlhandler.currentInstr) 
+                    tempidx = self.puredata_fhandle.getIndex(self.controlhandler.currentInstr) 
                 elif self.controlhandler.currentBank == 'supercollider':
                     tempidx = self.sc_fhandle.getIndex(self.controlhandler.currentInstr)
                 self.controlhandler.setInstrSelIdx(tempidx)
@@ -836,7 +836,7 @@ class UserInterface(object):
     def setCurrentInstr(self, instr):
         self.currentInstr = instr
         self.controlhandler.setCurrentInstr(instr)
-        handlers = [self.factoryinstr_fhandle, self.userinstr_fhandle, self.puredata_fhandle]
+        handlers = [self.factoryinstr_fhandle, self.userinstr_fhandle, self.sc_fhandle ,self.puredata_fhandle]
         tempbank = None
         for handle in handlers:
             tempidx = handle.getIndex(instr)
