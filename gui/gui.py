@@ -1,8 +1,11 @@
 from dearpygui import dearpygui as dpg
 from pythonosc.udp_client import SimpleUDPClient
 
+
+#run: py -3 gui.py
+
 # OSC client setup
-client = SimpleUDPClient("127.0.0.1", 3000)
+client = SimpleUDPClient("127.0.0.1", 3010)
 
 # List of knobs with (OSC address, label, x, y, width, height)
 knobs = [

@@ -4,18 +4,20 @@ NebInterface {
 
     classvar initialized = false;
 
+
     *init { |s|
-        
-        if (initialized) {
-            "NebInterface already initialized".warn;
-            ^this
-        };
+       
+        //if (initialized) {
+        //    "NebInterface already initialized".warn;
+        //    ^this
+        //};
 
-        //Can be reinit, remove all OSC and buses. 
-        OSCdef.all.do(_.free);
+        this.softReset(s);
+		
         if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
-
         buses  = Dictionary.new;
+		
+		//OSCdef.all.do(_.free);   // free OSC callbacks
 
         // assign the array here instead
         params = [
@@ -37,15 +39,8 @@ NebInterface {
         };
 
         OSCdef.new(\loadScFile, { |msg|
-            Server.default.freeAll;
-            SynthDescLib.global.clear;
-            thisProcess.interpreter.executeFile(msg[1]);
-        }, '/loadScFile');
-
-        OSCdef.new(\handshake, { |msg|
-            ~remote.sendMsg("/sc/ready", [0]);
-        }, '/handshake');
-
+			msg[1].load;
+        }, '/neb/loadScFile');
     }
 
     *addBus { |name, path, def = 0.0|
@@ -58,10 +53,19 @@ NebInterface {
     *bus { |name| ^buses[name] }
     
     *ready { |s|
-        ~remote.sendMsg("/sc/up", [0]);
+        SystemClock.sched(2.0, { ~remote.sendMsg("/sc/up", 0); nil; });
+        ~remote.sendMsg("/sc/up", 0);
+    }
+
+    *softReset { |s|
+        CmdPeriod.run;           // stop all Routines/Patterns
+		s.freeAll;               // stop all synths
+		s.freeAllBuffers;        // free buffers
+		//currentEnvironment.clear; //find a better GC for this
+
+        "Soft reset complete".postln;
     }
 }
-
 
 NebPitch : UGen {
     *kr { |min = 20, max = 2000|

@@ -85,6 +85,12 @@ then
         sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/startup.scd > /root/.config/SuperCollider/startup.scd"
     fi
 
+    if [ -f /usr/share/SuperCollider/Extensions/NebInterface/NebInterface.sc ]
+    then
+        echo "updating NebInterface.sc"
+        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/SuperColliderExtensions/NebInterface/NebInterface.sc > /usr/share/SuperCollider/Extensions/NebInterface/NebInterface.sc"
+    fi
+
     #mkdir dir if they dont exist
     mkdir -p /home/alarm/sc
 

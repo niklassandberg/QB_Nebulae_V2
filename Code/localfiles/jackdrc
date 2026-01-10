@@ -1,1 +1,1 @@
-/usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:0 -p256 -n3 -s -r48000 &
+/usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:0 -p128 -n3 -s -r48000 &

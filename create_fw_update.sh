@@ -18,6 +18,8 @@ cd temp/
 # Copy Code/ contents to new directory structure
 mkdir -p QB_Nebulae_V2/
 cp -R ../Code QB_Nebulae_V2/
+cp -R ../Resources/SuperCollider/Extensions QB_Nebulae_V2/SuperColliderExtensions
+
 # Go through, and strip any unwanted line endings.
 SEARCHDIR=./QB_Nebulae_V2/Code
 for f in $SEARCHDIR/* $SEARCHDIR/**/*

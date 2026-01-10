@@ -56,7 +56,7 @@ class UserInterface(object):
         self.factoryinstr_fhandle = filehandler.FileHandler(factory_dir, ".instr")
         self.userinstr_fhandle = filehandler.FileHandler(user_dir, ".instr")
         self.puredata_fhandle = filehandler.FileHandler(pd_dir, ".pd")
-        self.sc_fhandle = filehandler.FileHandler(sc_dir, ".sc")
+        self.sc_fhandle = filehandler.FileHandler(sc_dir, ".scd")
         cur_bank = self.controlhandler.getInstrSelBank()
         self.bank_shift_counter = 0
         if cur_bank == "factory":
