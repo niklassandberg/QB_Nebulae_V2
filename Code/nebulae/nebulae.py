@@ -1,7 +1,6 @@
 # Main Nebulae Source File
 import sys
 import os
-from subprocess import Popen
 import ctcsound
 import controlhandler as ch
 import controlhandlerSC as chSC
@@ -11,13 +10,15 @@ import fileloader
 import time
 import logger
 import neb_globals
+import multiprocessing
+import subprocess
 
 import nebmixer
 from classlogger import ClassLogger
 
 cfg_path = "/home/alarm/QB_Nebulae_V2/Code/config/"
 
-debug = True 
+debug = False 
 debug_controls = False
 
 class Nebulae(object):
@@ -81,10 +82,17 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in __init__: %s", e)
 
+    def getSysCores(self):
+        try:
+            return multiprocessing.cpu_count()
+        except Exception as e:
+            self.classlog.error("Error in getSysCores(): %s", e)
+            return 1
+
     def start(self, instr, instr_bank):
         try:
+            #self.start_jack()
             self.classlog.info("Nebulae Starting")
-            self.closeHable()
             if self.currentInstr != self.new_instr:
                 reset_settings_flag = True
             else:
@@ -97,17 +105,26 @@ class Nebulae(object):
             floader.reload()
             self.orc_handle.generate_orc(instr, instr_bank)
             configData = self.orc_handle.getConfigDict()
+            
             self.c.setOption("-iadc:hw:0,0")
-            self.c.setOption("-odac:hw:0,0")  # Set option for Csound
+            self.c.setOption("-odac:hw:0,0") 
+            
+            #self.c.setOption("-iadc") # FOR JACK!!!
+            #self.c.setOption("-odac") # FOR JACK!!!
+            
             if configData.has_key("-B"):
                 self.c.setOption("-B"+str(configData.get("-B")[0]))
             else: 
                 self.c.setOption("-B512") # Liberal Buffer
 
+            #self.c.setOption("-j "+str(self.getSysCores())) # EXPERMENTAL, see if it works!!
+            
             if configData.has_key("-b"):
                 self.c.setOption("-b"+str(configData.get("-b")[0]))
             self.c.setOption("--realtime")
             self.c.setOption("-+rtaudio=alsa") # Set option for Csound
+            #self.c.setOption("-+rtaudio=jack") # FOR JACK!!!
+
             if debug is True:
                 self.c.setOption("-m7")
             else:
@@ -130,14 +147,8 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in start(): %s", e)
 
-    def closeHable(self):
-        try:
-            if self.c_handle is not None:
-                self.c_handle.close()
-        except Exception as e:
-            self.classlog.error("Error in closeHable(): %s", e)
-
     def run(self):
+        self.quit_jack()
         try:
             new_instr = None
             request = False
@@ -152,8 +163,8 @@ class Nebulae(object):
                         self.c_handle.printAllControls()
                 request = self.ui.getReloadRequest()
                 if request == True:
-                    nebmixer.disable()
                     self.cleanup()
+            nebmixer.disable()
             if request == True:
                 self.first_run = False
                 self.classlog.info("Received Reload Request from UI")
@@ -214,19 +225,50 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Could not write config file: %s", e)
 
-    def start_jack(self):
+    def jack_is_running(self):
         try:
-            if os.system("jack_lsp > /dev/null 2>&1") != 0:
-                os.system("killall jackd") #just to be on the safe side.
-                time.sleep(1) #short sleep to ensure that jackd is killed
-                self.classlog.debug("jackd is not running, starting it now...")
-                cmd = "jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:0 -p256 -n3 -s -r48000 &"
-                os.system(cmd)
-                time.sleep(4) # longer sleep to ensure that jackd is started
-                # wait for server to be fully available
-                os.system("jack_wait -w") #todo: this can be maybe unstable, maybe we need to implement a timeout afterwards
-                time.sleep(2) # todo: we got the thing I just wrote on the previous line, put more sleep and observer what happens.
-                self.classlog.debug("jackd is now running!!!!")
+            subprocess.check_call(
+                ["systemctl", "is-active", "--quiet", "jackd.service"]
+            )
+            return True
+        except subprocess.CalledProcessError:
+            return False
+
+    def quit_jack(self):
+        try:
+
+            os.system("sudo systemctl stop jackd.service") 
+
+            retries = 0
+
+            while self.jack_is_running():
+                self.classlog.info("jack is dying, waiting...")
+                retries += 1
+                if retries > 50:
+                    self.classlog.info("Timeout waiting for jack to die!")
+                    break
+                time.sleep(0.5)
+            if retries >= 50:
+                self.classlog.info("jack has not died!")
+        except Exception as e:
+            self.classlog.error("Error in start_jack(): %s", e)
+
+
+    def wait_on_jack(self):
+        try:
+            os.system("sudo systemctl start jackd.service") 
+            retries = 0
+            while not self.jack_is_running():
+                self.classlog.info("jack is not up yet, waiting...")
+                retries += 1
+                if retries > 50:
+                    self.classlog.info("Timeout waiting for jack to be up!")
+                    break
+                time.sleep(0.2)
+            if retries >= 50:
+                self.classlog.info("jack is not up after 50 retries!")
+            os.system("jack_wait -w")
+            self.classlog.debug("jackd is running!!!!")
         except Exception as e:
             self.classlog.error("Error in start_jack(): %s", e)
 
@@ -246,52 +288,74 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in waitForSynthOrDie(): %s", e)
 
-    def start_supercollider(self, patch):
+    def start_supercollider(self, patch, fromSC=False):
         try:
-            self.closeHable()
+            self.classlog.info("start_supercollider!!!!!")
+            nebmixer.disable()
+
             #start sc with the selected synth
-            self.cleanup_puredata() ##kills pure data
             self.cleanup()
-            #self.start_jack()
+            self.wait_on_jack()
+            
             
             if self.c is not None: ##if csound is still alive
                 self.c.cleanup() ##kill it
                 self.c = None ##set its life to None
-            
-            self.c_handle = None
-            self.currentIntr = patch
-            self.newInstr = patch
-            floader = fileloader.FileLoader()
-            floader.reload() #reloads all the files to be sure
-            self.orc_handle.refreshFileHandler() #also the audio files
-            #TODO: change .sc to scd, because scd can have multiple synthdefs... By definition, SC prctice.
-            fullPath = "/home/alarm/sc/" + patch +  ".sc"
-            if debug == False:
-                cmd = "sclang".split()
-            else:
-                cmd = "sclang".split()
 
-            fullPath = "/home/alarm/sc/" + patch +  ".sc"
+            reuseResources = fromSC and self.c_handle is not None and self.st is not None and self.st.poll() is None
             
-            cmd.append(fullPath)  
-            self.st = Popen(cmd)
-            self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider")
-            self.c_handle.setCsoundPerformanceThread(None)
+            if not reuseResources:
+
+                #TODO: EVERY TIME ANYTHING GETS LOADED EVERY FILES GETS MOVED THIS IS STUPID!!!
+                # THIS IS A TEST TO SEE HOW LONG EVERYTHING TAKES!!!
+                #self.c_handle = None
+                self.currentInstr = patch
+                self.newInstr = patch
+                floader = fileloader.FileLoader()
+                floader.reload() #reloads all the files to be sure
+                self.orc_handle.refreshFileHandler() #also the audio files
+
+            fullPath = "/home/alarm/sc/" + patch +  ".scd"
+            
+            if reuseResources:
+            #if fromSC and self.c_handle is not None:
+                self.classlog.info("SuperCollider and is running in the process, reuse!")
+                self.c_handle.loadScSynth(fullPath)
+                self.waitForSCisUp()
+            else:
+                self.classlog.info("Starting SuperCollider process")
+                
+                my_env = os.environ.copy()
+                my_env["C_JACK_DEFAULT_OUTPUTS"] = "system"
+                my_env["SC_JACK_DEFAULT_INPUTS"] = "system"
+                my_env["JACK_NO_START_SERVER"] = "1"
+                command_list = ["sclang", fullPath]
+                self.st = subprocess.Popen(command_list, env=my_env)
+
+                #cmd = "sclang".split()
+                #cmd.append(fullPath)
+                #self.st = subprocess.Popen(cmd)
+                
+                self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider")
+                self.c_handle.setCsoundPerformanceThread(None)
+                self.c_handle.lisenOnSCisUpMessage()
+                self.waitForSCisUp()
+                self.classlog.info("SuperCollider is started.")
+
             self.c_handle.enterSuperColliderMode()
-            self.c_handle.lisenOnSCisUpMessage()
-            self.waitForSCisUp()
-            self.c_handle.sendScOscMessages()
             self.loadUI()
+            self.c_handle.sendScOscMessages()
             self.c_handle.updateAll() # Update all values to ensure their at their initial state.
             nebmixer.init()
             nebmixer.enable()
+
         except Exception as e:
             self.classlog.error("Error in start_supercollider(): %s", e)
 
     def start_puredata(self, patch):
         try:
+            #self.start_jack()
             self.log.spill_basic_info()
-            self.closeHable()
             self.c_handle = None
             self.currentInstr = patch
             self.newInstr = patch
@@ -301,15 +365,15 @@ class Nebulae(object):
             fullPath = "/home/alarm/pd/" + patch + ".pd"
             cmd = "pd -rt -callback -nogui -verbose -audiobuf 5".split() if debug else "pd -rt -callback -nogui -audiobuf 5".split()
             cmd.append(fullPath)
-            self.pt = Popen(cmd)
+            self.pt = subprocess.Popen(cmd)
             self.classlog.info('sleeping')
             time.sleep(2)
             self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="puredata")
             self.c_handle.setCsoundPerformanceThread(None)
             self.c_handle.enterPureDataMode()
+            self.loadUI()
             nebmixer.init()
             nebmixer.enable()
-            self.loadUI()
         except Exception as e:
             self.classlog.error("Error in start_puredata(): %s", e)
 
@@ -332,20 +396,22 @@ class Nebulae(object):
                 self.new_bank = self.c_handle.getInstrSelBank()
                 self.ui.reload_flag = False
                 self.classlog.info("Reloading %s from %s", self.new_instr, self.new_bank)
-                self.cleanup_puredata()
                 self.writeBootInstr()
                 if self.new_bank == "puredata":
+                    self.close_puredata()
                     self.start_puredata(self.new_instr)
                     self.run_puredata()
                 elif self.new_bank == "supercollider":
+                    self.close_puredata()
                     self.start_supercollider(self.new_instr)
                     self.run_supercollider()
                 else:
+                    self.close_puredata()
                     self.start(self.new_instr, self.new_bank)
                     self.run()
             else:
                 self.classlog.info("Run Loop Ending.")
-                self.cleanup_puredata()
+                self.close_puredata()
                 self.classlog.info("Goodbye!")
                 sys.exit()
         except Exception as e:
@@ -353,14 +419,12 @@ class Nebulae(object):
 
     def run_supercollider(self):
         try:
-            if self.c is not None:
-                self.c.cleanup()
-                self.c = None
             request = False
             while(request != True):
                 self.c_handle.updateAll()
                 self.ui.update()
                 request = self.ui.getReloadRequest()
+            nebmixer.disable()
             if request == True:
                 self.first_run = False
                 self.classlog.info("Received Reload Request from UI")
@@ -371,49 +435,70 @@ class Nebulae(object):
                 self.classlog.info("new bank: %s", self.new_bank)
                 self.ui.reload_flag = False
                 self.classlog.info("Reloading %s from %s", self.new_instr, self.new_bank)
+                #self.writeBootInstr()
                 if self.new_bank == "puredata":
-                    self.cleanup_sc()
+                    self.close_sc()
                     self.start_puredata(self.new_instr)
                     self.run_puredata()
                 elif self.new_bank == "supercollider":
-                    self.cleanup_sc()
-                    self.start_supercollider(self.new_instr)
+                    self.start_supercollider(self.new_instr,True)
                     self.run_supercollider()
                 else:
                     time.sleep(0.5)
-                    self.cleanup_sc()
+                    self.close_sc()
                     self.start(self.new_instr, self.new_bank)
                     self.run()
             else:
                 self.classlog.info("Run Loop Ending.")
-                self.cleanup_sc()
+                self.close_sc()
                 self.classlog.info("Goodbye!")
                 sys.exit()
         except Exception as e:
             self.classlog.error("Error in run_supercollider(): %s", e)
 
-    def cleanup_sc(self):
+    def close_sc(self):
         try:
             if self.st is not None:
+                self.classlog.info("Terminating SuperCollider process")
                 self.st.terminate()
-                self.st.kill()
-                #self.st.join() #todo: why does is not exist!!!
-        except Exception as e:
-            self.classlog.error("Error in cleanup_sc(): %s", e)
-        os.system("sudo killall sclang")
-        os.system("sudo killall scsynth") 
-        os.system("sudo killall jackd")
+                self.classlog.info("Waiting for SuperCollider to terminate...")
 
-    def cleanup_puredata(self):
+                timeout = 4.0
+                start = time.time()
+                while self.st.poll() is None:
+                    if time.time() - start > timeout:
+                        self.classlog.error(
+                            "SuperCollider did not terminate in time, killing"
+                        )
+                        self.st.kill()
+                        break
+                time.sleep(0.1)
+        except Exception as e:
+            self.classlog.error("Error in close_sc(): %s", e)
+        #os.system("sudo killall sclang")
+        #os.system("sudo killall scsynth") 
+        #os.system("sudo killall jackd")
+
+    def close_puredata(self):
         try:
-            if self.pt is not None:
-                self.pt.terminate()
-                self.pt.kill()
-                self.pt.join()
+            if self.st is not None:
+                self.classlog.info("Terminating PureData process")
+                self.st.terminate()
+                self.classlog.info("wait on terminating PureData...")
+                timeout = 4.0
+                start = time.time()
+                while self.st.poll() is None:
+                    if time.time() - start > timeout:
+                        self.classlog.error(
+                            "PureData did not terminate in time, killing"
+                        )
+                        self.st.kill()
+                        break
+                    time.sleep(0.1)
         except Exception as e:
             self.classlog.error("Error in cleanup_puredata(): %s", e)
-        os.system("sudo killall pt")
-        os.system("sudo killall jackd")
+        #os.system("sudo killall pt")
+        #os.system("sudo killall jackd")
 
     def loadUI(self):
         try:
@@ -436,7 +521,7 @@ class Nebulae(object):
             os.system(cmd)
             self.classlog.info("Launching LED program")
             fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading"
-            self.led_process = Popen(fullCmd, shell=True)
+            self.led_process = subprocess.Popen(fullCmd, shell=True)
             self.classlog.info('led process created: %s', str(self.led_process))
         except Exception as e:
             self.classlog.error("Error in launch_bootled(): %s", e)

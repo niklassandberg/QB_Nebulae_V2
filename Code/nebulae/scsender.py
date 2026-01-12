@@ -44,12 +44,25 @@ class ScSend(object):
 
     def on_sc_up(self, addr, data, source):
         with self.synthIsUpLock:
+            self.log.debug(
+                "on_sc_up called [ScSend id=%s, synthIsUp=%s]", 
+                id(self), self.synthIsUp
+            )
             self.log.debug("synth is up!")
             self.synthIsUp = True
 
     def synthIsUpStatus(self):
         with self.synthIsUpLock:
+            self.log.debug(
+                "synthIsUpStatus called [ScSend id=%s, synthIsUp=%s]", 
+                id(self), self.synthIsUp
+            )
             return self.synthIsUp
+
+    def setSynthIsDown(self):
+        with self.synthIsUpLock:
+            self.log.debug("SET SYNTH TO DOWN!!!")
+            self.synthIsUp = False
 
     # -------------------------
     # Sending

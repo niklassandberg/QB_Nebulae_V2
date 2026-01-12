@@ -185,6 +185,8 @@ def inputLevel(volume):
 
     try:
         global _libasound
+        if _libasound is None or _hifi_output_handle is None:
+            return
         _libasound.snd_mixer_selem_set_capture_volume(_capturecontrol_handle, LEFT, ctvol)
         _libasound.snd_mixer_selem_set_capture_volume(_capturecontrol_handle, RIGHT, ctvol)
     except OSError:

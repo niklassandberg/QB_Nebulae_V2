@@ -63,9 +63,6 @@ class ControlHandler(object):
         self.pdSock = pdsender.PdSend()
         self.scSock = scsender.ScSend()
 
-        
-        self.synthIsUp = False
-
         self.currentInstr = instr
         self.currentBank = bank
         self.static_file_idx = 0
@@ -170,18 +167,15 @@ class ControlHandler(object):
         #self.writeThread = threading.Thread(target=self.writeBufferToAudioFile())
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
-
-    def close(self):
-        self.classlog.info("Closing all control handler sockets.")
-        self.pdSock.close()
-        self.scSock.close()
-        self.synthIsUp = False
-        #self.sockReceiver.close() #this is a 
         
     def lisenOnSCisUpMessage(self):
         self.classlog.info("lisenOnSCisUpMessage")
         self.scSock.start_listener()
         self.scSock.add_listener('/sc/up', self.scSock.on_sc_up)
+
+    def loadScSynth(self, patch):
+        self.scSock.setSynthIsDown()
+        self.scSock.send('loadScFile', patch)
 
     # Pass Csound Performance Thread Pointer
     def setCsoundPerformanceThread(self, ptr):
@@ -253,8 +247,11 @@ class ControlHandler(object):
         self.control_mode = "supercollider"
         for chn in self.channels: #mutes csound
             chn.muteCSound(True)
+        #TODO: wtf is this!!! self.control_mode = "supercollider" above!!!
         if self.control_mode == "secondary controls":
             self.resistSecondarySettings()
+        self.settings.update(self.now)
+        self.settings.write()
         self.altchanneldict["source_alt"].setValue(0)
         if self.pdSock.is_connected(): #kills pure data
             self.pdSock.close()
@@ -263,13 +260,7 @@ class ControlHandler(object):
             self.scSock.connect()
         for chn in self.channels: #for each of the adc channels
             self.classlog.info("def enterSuperColliderMode: initializin %s value %s", chn.name, str(chn.getValue()))
-        #TODO: wtf chould this be here?
-        #self.sendHandCshakeToSC()
-    
-    def sendHandCshakeToSC(self):
-        # Send handshake messages to SC to let it know we're here
-        self.scSock.send("handshake", 1)
-
+        
     def enterNormalMode(self):
         self.classlog.info("entering normal")
         for chn in self.channels:

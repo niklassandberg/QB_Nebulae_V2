@@ -39,7 +39,8 @@ NebInterface {
         };
 
         OSCdef.new(\loadScFile, { |msg|
-			msg[1].load;
+            var file = msg[1].asString;
+			file.load;
         }, '/neb/loadScFile');
     }
 
