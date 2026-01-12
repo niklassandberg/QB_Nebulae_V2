@@ -44,5 +44,9 @@ sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
 
 echo "Running Nebulae"
 
-#sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py &> /tmp/nebulae_debug_log.log
-sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+#export JACK_DEFAULT_SERVER=default
+#export JACK_SERVER_NAME=default
+#export JACK_NO_AUDIO_RESERVATION=1
+
+sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py &> /tmp/nebulae_stdout.log
+#sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
