@@ -1,23 +1,23 @@
 NebInterface {
     classvar buses;   // plain classvar
     classvar params;  // declare, but don't assign here!
-
+    classvar remote;
     classvar initialized = false;
-
 
     *init { |s|
        
-        //if (initialized) {
-        //    "NebInterface already initialized".warn;
-        //    ^this
-        //};
-
         this.softReset(s);
 		
-        if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
-        buses  = Dictionary.new;
+		if (initialized) {
+            "NebInterface already initialized".warn;
+            ^this
+        };
 		
+		initialized = true;
+
+        //if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
 		//OSCdef.all.do(_.free);   // free OSC callbacks
+        buses  = Dictionary.new;
 
         // assign the array here instead
         params = [
@@ -32,7 +32,7 @@ NebInterface {
         ];
 
         thisProcess.openUDPPort(3010);
-        ~remote = NetAddr("127.0.0.1", 3011);
+        remote = NetAddr("127.0.0.1", 3011);
 
         params.do { |name|
             this.addBus(name, "/neb/%".format(name));
@@ -42,6 +42,7 @@ NebInterface {
             var file = msg[1].asString;
 			file.load;
         }, '/neb/loadScFile');
+
     }
 
     *addBus { |name, path, def = 0.0|
@@ -54,12 +55,13 @@ NebInterface {
     *bus { |name| ^buses[name] }
     
     *ready { |s|
-        SystemClock.sched(2.0, { ~remote.sendMsg("/sc/up", 0); nil; });
-        ~remote.sendMsg("/sc/up", 0);
+        "remote.sendMsg /sc/up !!!".postln;
+        SystemClock.sched(2.0, { remote.sendMsg("/sc/up", 0); nil; });
+        remote.sendMsg("/sc/up", 0);
     }
 
     *softReset { |s|
-        CmdPeriod.run;           // stop all Routines/Patterns
+        //CmdPeriod.run;           // stop all Routines/Patterns
 		s.freeAll;               // stop all synths
 		s.freeAllBuffers;        // free buffers
 		//currentEnvironment.clear; //find a better GC for this
