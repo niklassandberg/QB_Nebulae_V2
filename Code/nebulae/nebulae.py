@@ -91,7 +91,6 @@ class Nebulae(object):
 
     def start(self, instr, instr_bank):
         try:
-            #self.start_jack()
             self.classlog.info("Nebulae Starting")
             if self.currentInstr != self.new_instr:
                 reset_settings_flag = True
@@ -148,7 +147,6 @@ class Nebulae(object):
             self.classlog.error("Error in start(): %s", e)
 
     def run(self):
-        self.quit_jack()
         try:
             new_instr = None
             request = False
@@ -225,52 +223,8 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Could not write config file: %s", e)
 
-    def jack_is_running(self):
-        try:
-            subprocess.check_call(
-                ["systemctl", "is-active", "--quiet", "jackd.service"]
-            )
-            return True
-        except subprocess.CalledProcessError:
-            return False
-
-    def quit_jack(self):
-        try:
-
-            os.system("sudo systemctl stop jackd.service") 
-
-            retries = 0
-
-            while self.jack_is_running():
-                self.classlog.info("jack is dying, waiting...")
-                retries += 1
-                if retries > 50:
-                    self.classlog.info("Timeout waiting for jack to die!")
-                    break
-                time.sleep(0.5)
-            if retries >= 50:
-                self.classlog.info("jack has not died!")
-        except Exception as e:
-            self.classlog.error("Error in start_jack(): %s", e)
-
-
     def wait_on_jack(self):
-        try:
-            os.system("sudo systemctl start jackd.service") 
-            retries = 0
-            while not self.jack_is_running():
-                self.classlog.info("jack is not up yet, waiting...")
-                retries += 1
-                if retries > 50:
-                    self.classlog.info("Timeout waiting for jack to be up!")
-                    break
-                time.sleep(0.2)
-            if retries >= 50:
-                self.classlog.info("jack is not up after 50 retries!")
-            os.system("jack_wait -w")
-            self.classlog.debug("jackd is running!!!!")
-        except Exception as e:
-            self.classlog.error("Error in start_jack(): %s", e)
+        pass #maybe take this and fill in of a old commit.
 
     def waitForSCisUp(self):
         try:
@@ -288,15 +242,43 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in waitForSynthOrDie(): %s", e)
 
+    def start_jack(self):
+        try:
+            if os.system("jack_lsp > /dev/null 2>&1") != 0:
+                os.system("killall jackd") #just to be on the safe side.
+                time.sleep(1) #short sleep to ensure that jackd is killed
+                self.classlog.debug("jackd is not running, starting it now...")
+                cmd = "jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:0 -p256 -n3 -s -r48000 &"
+                os.system(cmd)
+                time.sleep(4) # longer sleep to ensure that jackd is started
+                # wait for server to be fully available
+                os.system("jack_wait -w") #todo: this can be maybe unstable, maybe we need to implement a timeout afterwards
+                time.sleep(2) # todo: we got the thing I just wrote on the previous line, put more sleep and observer what happens.
+                self.classlog.debug("jackd is now running!!!!")
+        except Exception as e:
+            self.classlog.error("Error in start_jack(): %s", e)
+
+    def wait_for_jack_to_die(self, timeout=15):
+        import subprocess, time, logging
+
+        try:
+            start_time = time.time()
+            while subprocess.run(
+                ["jack_lsp"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            ).returncode == 0:
+                if time.time() - start_time > timeout:
+                    raise TimeoutError("jackd did not die within {} seconds".format(timeout))
+                time.sleep(2)
+                self.classlog.debug("jackd has not died yet...")
+        except Exception as e:
+            self.classlog.error("Error in wait_for_jack_to_die(): %s", e)
+
     def start_supercollider(self, patch, fromSC=False):
         try:
             self.classlog.info("start_supercollider!!!!!")
             nebmixer.disable()
 
             #start sc with the selected synth
-            self.cleanup()
-            self.wait_on_jack()
-            
             
             if self.c is not None: ##if csound is still alive
                 self.c.cleanup() ##kill it
@@ -304,19 +286,20 @@ class Nebulae(object):
 
             reuseResources = fromSC and self.c_handle is not None and self.st is not None and self.st.poll() is None
             
-            if not reuseResources:
+            self.currentInstr = patch
+            self.newInstr = patch
 
-                #TODO: EVERY TIME ANYTHING GETS LOADED EVERY FILES GETS MOVED THIS IS STUPID!!!
-                # THIS IS A TEST TO SEE HOW LONG EVERYTHING TAKES!!!
-                #self.c_handle = None
-                self.currentInstr = patch
-                self.newInstr = patch
-                floader = fileloader.FileLoader()
-                floader.reload() #reloads all the files to be sure
-                self.orc_handle.refreshFileHandler() #also the audio files
+            #TODO: HERE IS A HORRIBLE BUG!!! IF WE SELECTED PATSH THAT IS REMOVED WILL RESULT MAYBE IN CRASH!!!!
+            # WE NEED TO ADD A CHECK IF THE FILE EXISTS, ELSE DO SOMETHING ELSE!!!!!
+            #sugestion, copy the choosen instument to a place and let all start_* ise the coppied intrument/patch.
+            # Do it rigth here. Maybe.... AND DO IT ALSO FOR CSOUND AND PD!!!!
 
             fullPath = "/home/alarm/sc/" + patch +  ".scd"
-            
+
+            floader = fileloader.FileLoader() 
+            floader.reload() #reloads all the files to be sure
+            self.orc_handle.refreshFileHandler() #also the audio files
+
             if reuseResources:
             #if fromSC and self.c_handle is not None:
                 self.classlog.info("SuperCollider and is running in the process, reuse!")
@@ -324,21 +307,14 @@ class Nebulae(object):
                 self.waitForSCisUp()
             else:
                 self.classlog.info("Starting SuperCollider process")
-                
-                my_env = os.environ.copy()
-                my_env["C_JACK_DEFAULT_OUTPUTS"] = "system"
-                my_env["SC_JACK_DEFAULT_INPUTS"] = "system"
-                my_env["JACK_NO_START_SERVER"] = "1"
-                command_list = ["sclang", fullPath]
-                self.st = subprocess.Popen(command_list, env=my_env)
-
-                #cmd = "sclang".split()
-                #cmd.append(fullPath)
-                #self.st = subprocess.Popen(cmd)
-                
                 self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider")
+                self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
-                self.c_handle.lisenOnSCisUpMessage()
+
+                #Start SuperCollider Process after handler.
+                self.classlog.info("Starting SuperCollider process")
+                command_list = ["sclang", fullPath]
+                self.st = subprocess.Popen(command_list)
                 self.waitForSCisUp()
                 self.classlog.info("SuperCollider is started.")
 
@@ -424,8 +400,8 @@ class Nebulae(object):
                 self.c_handle.updateAll()
                 self.ui.update()
                 request = self.ui.getReloadRequest()
-            nebmixer.disable()
             if request == True:
+                nebmixer.disable()
                 self.first_run = False
                 self.classlog.info("Received Reload Request from UI")
                 self.classlog.info("index of new instr is: %s", str(self.c_handle.instr_sel_idx))
@@ -457,6 +433,18 @@ class Nebulae(object):
             self.classlog.error("Error in run_supercollider(): %s", e)
 
     def close_sc(self):
+        """ Close SuperCollider Process 
+
+        TODO: 
+
+        THIS NEEDS TO BE WRITEN AS A OSC MESSAGE WHERE SC run, that if we want to close buffer also, write to file etc.:
+
+        OSCdef(\quitSC, { |msg|
+            CmdPeriod.run;   // stop all Patterns
+            "Stopping everything".postln;
+            quit;            // this will still run
+        }, '/quit');
+
         try:
             if self.st is not None:
                 self.classlog.info("Terminating SuperCollider process")
@@ -475,30 +463,35 @@ class Nebulae(object):
                 time.sleep(0.1)
         except Exception as e:
             self.classlog.error("Error in close_sc(): %s", e)
-        #os.system("sudo killall sclang")
-        #os.system("sudo killall scsynth") 
-        #os.system("sudo killall jackd")
+        """
+        os.system("sudo killall sclang")
+        os.system("sudo killall jackd") #chould not be needed but just to be sure
+        self.c_handle.closeSockets()
+        self.wait_for_jack_to_die()
+        self.st = None
 
     def close_puredata(self):
         try:
-            if self.st is not None:
+            if self.pt is not None:
                 self.classlog.info("Terminating PureData process")
-                self.st.terminate()
+                self.pt.terminate()
                 self.classlog.info("wait on terminating PureData...")
                 timeout = 4.0
                 start = time.time()
-                while self.st.poll() is None:
+                while self.pt.poll() is None:
                     if time.time() - start > timeout:
                         self.classlog.error(
                             "PureData did not terminate in time, killing"
                         )
-                        self.st.kill()
+                        self.pt.kill()
                         break
                     time.sleep(0.1)
         except Exception as e:
             self.classlog.error("Error in cleanup_puredata(): %s", e)
-        #os.system("sudo killall pt")
-        #os.system("sudo killall jackd")
+        os.system("sudo killall pt")
+        os.system("sudo killall jackd") #chould not be needed but just to be sure
+        self.wait_for_jack_to_die()
+        self.pt = None
 
     def loadUI(self):
         try:

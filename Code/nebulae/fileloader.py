@@ -1,11 +1,38 @@
 import glob
 import os
-from subprocess import Popen
+import subprocess
+from classlogger import ClassLogger
 import neb_globals
 #import shutil
 
+import endtimer
+
 class FileLoader(object):
+
+    #find /mnt/memory -printf '%P %s %T@\n' #gets hash for the last modified, when if differ, copy result. We dont have rsync.
+    #if rsync: 
+    """
+        import subprocess
+
+        USB = "/mnt/usb/DIR2/"
+        SD  = "/mnt/sd/DIR1/"
+
+        # 1. Dry-run to see if anything changed
+        dry_run = subprocess.call([
+            "rsync", "-a", "--delete", "--dry-run", USB, SD
+        ])
+
+        if dry_run == 0:
+            # dry-run finished, now actually copy
+            subprocess.call(["rsync", "-a", "--delete", USB, SD])
+    """ 
+
+    contentHash = "" # hash of usb content, must be global internal.
+
     def __init__(self):
+        
+        self.classlog = ClassLogger.loggerSetup(self)
+        
         self.states = ["reloading", "idling"]
         self.stateFunctions = {}
         self.stateFunctions["idling"] = None
@@ -35,18 +62,37 @@ class FileLoader(object):
           if self.currentState != "idling":
               self.stateFunctions[self.currentState]
               self.currentState += 1
-              
+    
+    def usbHasModContent(self):
+        prevContentHash = FileLoader.contentHash
+        try:
+            output = subprocess.check_output(
+                "find /mnt/memory -printf '%P %s %T@\\n' | sort | sha256sum",
+                shell=True
+            )
+            FileLoader.contentHash = output.strip().split()[0]
+        except Exception as e:
+            self.classlog.error("Error computing USB content hash: %s", e)
+            FileLoader.contentHash = ""
+        return prevContentHash != FileLoader.contentHash
+    
     def reload(self):
         if neb_globals.remount_fs is True:
             os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
+        t = endtimer.EndTimer()
         self.mount()
         if self.usb_mounted == True:
-            self.launch_bootled(1)
-            self.copyType("audio")
-            self.copyType("instr")
-            self.copyType("pd")
-            self.copyType("sc")
+            if self.usbHasModContent() == True:
+                self.launch_bootled(1)
+                self.copyType("audio")
+                self.copyType("instr")
+                self.copyType("pd")
+                self.copyType("sc")
+                self.classlog.info("Modified content.")
+            else:
+                self.classlog.info("No modified content.")
             self.umount()
+            self.classlog.info("Time it took: %s", t.end())
         else:
             self.launch_bootled(0)
         if self.led_process is not None:
@@ -56,14 +102,14 @@ class FileLoader(object):
             os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
 
     def mount(self):
-        print "Mounting USB Device"
+        self.classlog.info("Mounting USB Device")
         os.system("mount /dev/sda1 /mnt/memory")
         self.usb_mounted = self.isUSBMounted()
 
     def umount(self):
-        print "Unmounting USB Device"
+        self.classlog.info("Unmounting USB Device")
         os.system("umount /dev/sda1" )
-        print "Sync filebuffers to disk."
+        self.classlog.info("Sync filebuffers to disk.")
         os.system("sync")
         self.usb_mounted = self.isUSBMounted()
 
@@ -74,7 +120,7 @@ class FileLoader(object):
                     if "/mnt/memory" in line:
                         return True
         except:
-            print "Could not check for mounted drives."
+            self.classlog.error("Could not check for mounted drives.")
 
         return False
 
@@ -102,10 +148,10 @@ class FileLoader(object):
             cmd = "mkdir -p " + fullDir
             os.system(cmd)
             #fullFile = fullDir + "/*" + ext
-            print "Erasing " + fullDir
+            self.classlog.info("Erasing " + fullDir)
             cmd = "rm " + fullDir + "/*"
             os.system(cmd)
-            print "Contents of " + fullDir + " after erasure:"
+            self.classlog.info("Contents of " + fullDir + " after erasure:")
             cmd = "ls " + fullDir
             os.system(cmd)
             for f in files:
@@ -126,10 +172,10 @@ class FileLoader(object):
     def launch_bootled(self, mode):
         cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
         os.system(cmd)
-        print "Launching LED program"
+        self.classlog.info("Launching LED program")
         if mode == 0:
             fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading"
         else:
             fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loadingusb"
-        self.led_process = Popen(fullCmd, shell=True)
-        print 'led process created: ' + str(self.led_process)
+        self.led_process = subprocess.Popen(fullCmd, shell=True)
+        self.classlog.info('led process created: ' + str(self.led_process))

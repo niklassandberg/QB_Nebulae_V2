@@ -168,10 +168,12 @@ class ControlHandler(object):
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
         
-    def lisenOnSCisUpMessage(self):
-        self.classlog.info("lisenOnSCisUpMessage")
-        self.scSock.start_listener()
+    def startScOscServer(self):
+        self.classlog.info("startScOscServer")
+        self.scSock.connect()
         self.scSock.add_listener('/sc/up', self.scSock.on_sc_up)
+        #TODO: add other listener
+        self.scSock.startServer()
 
     def loadScSynth(self, patch):
         self.scSock.setSynthIsDown()
@@ -242,6 +244,12 @@ class ControlHandler(object):
     def mode(self):
         return self.control_mode
     
+    def closeSockets(self):
+        if self.pdSock.is_connected():
+            self.pdSock.close()
+        if self.scSock.is_connected():
+            self.scSock.close()
+    
     def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
         self.prev_control_mode = self.control_mode
         self.control_mode = "supercollider"
@@ -255,6 +263,7 @@ class ControlHandler(object):
         self.altchanneldict["source_alt"].setValue(0)
         if self.pdSock.is_connected(): #kills pure data
             self.pdSock.close()
+        #TODO: why call this???!!
         if not self.scSock.is_connected():
             self.classlog.info("def enterSuperColliderMode: Connecting to SC Socket")
             self.scSock.connect()
@@ -289,7 +298,6 @@ class ControlHandler(object):
             chn.muteCSound(True)
         if self.scSock.is_connected():
             self.scSock.close()
-
         if not self.pdSock.is_connected():
             self.classlog.info("def enterPureDataMode: Connecting to PD Socket")
             self.pdSock.connect()
@@ -307,6 +315,7 @@ class ControlHandler(object):
                 self.pdSock.connect()
             if not self.scSock.is_connected() and self.control_mode == "supercollider" :
                 self.classlog.info("def enterSecondaryMode: Connecting to SC Socket")
+                #TODO: why call this???!!
                 self.scSock.connect()
 
             self.prev_control_mode = self.control_mode
