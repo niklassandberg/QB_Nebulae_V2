@@ -289,14 +289,9 @@ class Nebulae(object):
             self.currentInstr = patch
             self.newInstr = patch
 
-            #TODO: HERE IS A HORRIBLE BUG!!! IF WE SELECTED PATSH THAT IS REMOVED WILL RESULT MAYBE IN CRASH!!!!
-            # WE NEED TO ADD A CHECK IF THE FILE EXISTS, ELSE DO SOMETHING ELSE!!!!!
-            #sugestion, copy the choosen instument to a place and let all start_* ise the coppied intrument/patch.
-            # Do it rigth here. Maybe.... AND DO IT ALSO FOR CSOUND AND PD!!!!
-
             fullPath = "/home/alarm/sc/" + patch +  ".scd"
-
-            floader = fileloader.FileLoader() 
+            floader = fileloader.FileLoader()
+            fullPath = floader.copyFileInternaly(fullPath,"/tmp/") #this remove bug if patch will be removed with floader.reload()
             floader.reload() #reloads all the files to be sure
             self.orc_handle.refreshFileHandler() #also the audio files
 
@@ -306,6 +301,10 @@ class Nebulae(object):
                 self.c_handle.loadScSynth(fullPath)
                 self.waitForSCisUp()
             else:
+
+                #TODO: I want to do floader.reload() the same time as supercollider starts.
+                #but for that we need to do handchacke instead of this /sc/up call from NebInterface in self.waitForSCisUp().
+
                 self.classlog.info("Starting SuperCollider process")
                 self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider")
                 self.c_handle.startScOscServer()
@@ -315,6 +314,7 @@ class Nebulae(object):
                 self.classlog.info("Starting SuperCollider process")
                 command_list = ["sclang", fullPath]
                 self.st = subprocess.Popen(command_list)
+
                 self.waitForSCisUp()
                 self.classlog.info("SuperCollider is started.")
 

@@ -3,6 +3,7 @@ import os
 import subprocess
 from classlogger import ClassLogger
 import neb_globals
+import shutil
 #import shutil
 
 import endtimer
@@ -75,6 +76,16 @@ class FileLoader(object):
             self.classlog.error("Error computing USB content hash: %s", e)
             FileLoader.contentHash = ""
         return prevContentHash != FileLoader.contentHash
+    
+    def copyFileInternaly(self, filepath, destPath):
+        if os.path.isfile(filepath) and os.path.isdir(destPath):
+            filename = os.path.basename(filepath)
+            destFilePath = os.path.join(destPath, filename)
+            shutil.copy2(filepath, destFilePath)
+            return destFilePath
+        else:
+            self.classlog.error("Invalid file or destination path, returning original filepath.")
+            return filepath 
     
     def reload(self):
         if neb_globals.remount_fs is True:
