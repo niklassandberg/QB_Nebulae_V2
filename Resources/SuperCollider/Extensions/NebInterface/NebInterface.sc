@@ -80,26 +80,21 @@ NebInterface {
 
 		// OSC / MIDI
 		if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
-        OSCdef.all.do(_.free);   // free OSC callbacks
+		OSCdef.all.do(_.free);   // free OSC callbacks
 		MIDIdef.freeAll;
 		
 		//This can just be done at runtime, gives error othervice if compiled
-		//OSCFunc._all.do(_.free)
+		//O.SCFunc._a.ll.do(_.free)
 		
 		//Dont do this, scsynth should be running.
 		//s.quit;
 		//s.boot;
-		
-		
+			
 		s.reset;
-		Routine({
-			if(s.hasBooted) {
-				s.sync; //s.reset; needs to been runned on server.
-				s.sendMsg("/g_new", 1, 0, 0); //add default group, probably removed.
-			};
-		}).play;
-
-        "Soft reset complete".postln;
+		s.sync; //s.reset; needs to been runned on server.
+		s.sendMsg("/g_new", 1, 0, 0); //add default group, probably removed.
+		s.sync;
+		"Soft reset complete".postln;
     }
 }
 
