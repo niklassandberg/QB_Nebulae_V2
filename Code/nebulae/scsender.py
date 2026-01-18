@@ -1,4 +1,6 @@
 # Courtesy of hecanjob/pippi.pd
+# the only documentation find for OSCServer https://www.acmesystems.it/touchosc 
+
 import sys
 import threading
 import time
@@ -69,7 +71,7 @@ class ScSend(object):
     # Sending
     # -------------------------
 
-    def connect(self):
+    def connectSender(self):
         if self._connected:
             self.log.info("No need to connect, is connected")
             return
@@ -110,7 +112,7 @@ class ScSend(object):
     # Receiving
     # -------------------------
 
-    def startServer(self):
+    def startListener(self):
         if self._running:
             return True
         self._running = True
@@ -150,7 +152,7 @@ class ScSend(object):
     # Callback registration
     # -------------------------
 
-    def add_listener(self, address, callback):
+    def addResiver(self, address, callback):
         try:
             if self.server is None:
                 self.log.debug("OSCServer create")

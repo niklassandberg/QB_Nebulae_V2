@@ -226,22 +226,6 @@ class Nebulae(object):
     def wait_on_jack(self):
         pass #maybe take this and fill in of a old commit.
 
-    def waitForSCisUp(self):
-        try:
-            retries = 0
-            while not self.c_handle.synthIsUpStatus():
-                self.classlog.info("synth is not up yet, waiting...")
-                retries += 1
-                if retries > 50:
-                    self.classlog.info("Timeout waiting for synth to be up!")
-                    break
-                time.sleep(0.5)
-            if retries >= 50:
-                self.classlog.info("synth is not up after 50 retries!")
-                #sys.exit(50)
-        except Exception as e:
-            self.classlog.error("Error in waitForSynthOrDie(): %s", e)
-
     def start_jack(self):
         try:
             if os.system("jack_lsp > /dev/null 2>&1") != 0:
@@ -258,17 +242,16 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in start_jack(): %s", e)
 
-    def wait_for_jack_to_die(self, timeout=15):
-        import subprocess, time, logging
-
+    def wait_for_jack_to_die(self):
         try:
-            start_time = time.time()
-            while subprocess.run(
-                ["jack_lsp"], stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL
+            count = 0
+            while subprocess.call(
+                ["jack_lsp"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
             ).returncode == 0:
-                if time.time() - start_time > timeout:
-                    raise TimeoutError("jackd did not die within {} seconds".format(timeout))
-                time.sleep(2)
+                count += 1
+                if count > 10:
+                    raise TimeoutError("jackd did not die within 1 second")
+                time.sleep(0.1)
                 self.classlog.debug("jackd has not died yet...")
         except Exception as e:
             self.classlog.error("Error in wait_for_jack_to_die(): %s", e)
@@ -295,11 +278,10 @@ class Nebulae(object):
             floader.reload() #reloads all the files to be sure
             self.orc_handle.refreshFileHandler() #also the audio files
 
-            if reuseResources:
-            #if fromSC and self.c_handle is not None:
+            if reuseResources and self.c_handle is not None:
                 self.classlog.info("SuperCollider and is running in the process, reuse!")
                 self.c_handle.loadScSynth(fullPath)
-                self.waitForSCisUp()
+                self.c_handle.synthIsUpStatus()
             else:
 
                 #TODO: I want to do floader.reload() the same time as supercollider starts.
@@ -314,8 +296,7 @@ class Nebulae(object):
                 self.classlog.info("Starting SuperCollider process")
                 command_list = ["sclang", fullPath]
                 self.st = subprocess.Popen(command_list)
-
-                self.waitForSCisUp()
+                self.c_handle.synthIsUpStatus()
                 self.classlog.info("SuperCollider is started.")
 
             self.c_handle.enterSuperColliderMode()

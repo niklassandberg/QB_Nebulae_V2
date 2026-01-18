@@ -36,7 +36,20 @@ RECORD_GATE_PIN = 24
 class ControlHandler(object):
 
     def synthIsUpStatus(self):
-        return self.scSock.synthIsUpStatus()
+        try:
+            retries = 0
+            while not self.scSock.synthIsUpStatus():
+                self.classlog.info("synth is not up yet, waiting...")
+                retries += 1
+                if retries > 50:
+                    self.classlog.info("Timeout waiting for synth to be up!")
+                    break
+                time.sleep(0.5)
+            if retries >= 50:
+                self.classlog.info("synth is not up after 50 retries!")
+                #sys.exit(50)
+        except Exception as e:
+            self.classlog.error("Error in waitForSynthOrDie(): %s", e)
         
     def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='factory'):
         
@@ -170,10 +183,10 @@ class ControlHandler(object):
         
     def startScOscServer(self):
         self.classlog.info("startScOscServer")
-        self.scSock.connect()
-        self.scSock.add_listener('/sc/up', self.scSock.on_sc_up)
+        self.scSock.connectSender()
+        self.scSock.addResiver('/sc/up', self.scSock.on_sc_up)
         #TODO: add other listener
-        self.scSock.startServer()
+        self.scSock.startListener()
 
     def loadScSynth(self, patch):
         self.scSock.setSynthIsDown()
@@ -263,10 +276,10 @@ class ControlHandler(object):
         self.altchanneldict["source_alt"].setValue(0)
         if self.pdSock.is_connected(): #kills pure data
             self.pdSock.close()
-        #TODO: why call this???!!
+        #TODO: HERE ADD ALL SUPERCOLLIDER INITS!!!
         if not self.scSock.is_connected():
             self.classlog.info("def enterSuperColliderMode: Connecting to SC Socket")
-            self.scSock.connect()
+            self.scSock.connectSender()
         for chn in self.channels: #for each of the adc channels
             self.classlog.info("def enterSuperColliderMode: initializin %s value %s", chn.name, str(chn.getValue()))
         
@@ -316,7 +329,7 @@ class ControlHandler(object):
             if not self.scSock.is_connected() and self.control_mode == "supercollider" :
                 self.classlog.info("def enterSecondaryMode: Connecting to SC Socket")
                 #TODO: why call this???!!
-                self.scSock.connect()
+                self.scSock.connectSender()
 
             self.prev_control_mode = self.control_mode
             self.control_mode = "secondary controls"
