@@ -1,23 +1,26 @@
 NebInterface {
-    classvar buses;   // plain classvar
-    classvar params;  // declare, but don't assign here!
-    classvar remote;
+    classvar buses;
+	classvar synthDefs;
+    //classvar params;
+	classvar remote;
+
     classvar initialized = false;
 
+	
     *init { |s|
-       
-        this.softReset(s);
-		
-		if (initialized) {
+		var params;
+        if (initialized) {
             "NebInterface already initialized".warn;
-            ^this
+			this.softReset(s);
+            //^this
+        } {
+			thisProcess.openUDPPort(3010);
+            remote = NetAddr("127.0.0.1", 3011);
         };
 		
+		synthDefs = [];
+		buses = Dictionary.new;
 		initialized = true;
-
-        //if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
-		//OSCdef.all.do(_.free);   // free OSC callbacks
-        buses  = Dictionary.new;
 
         // assign the array here instead
         params = [
@@ -30,9 +33,6 @@ NebInterface {
             \record_instr, \file_instr, \source_instr,
             \reset_instr, \freeze_instr
         ];
-
-        thisProcess.openUDPPort(3010);
-        remote = NetAddr("127.0.0.1", 3011);
 
         params.do { |name|
             this.addBus(name, "/neb/%".format(name));
@@ -55,16 +55,49 @@ NebInterface {
     *bus { |name| ^buses[name] }
     
     *ready { |s|
-        "remote.sendMsg /sc/up !!!".postln;
         SystemClock.sched(2.0, { remote.sendMsg("/sc/up", 0); nil; });
         remote.sendMsg("/sc/up", 0);
     }
+	
+    *synthDef { |name, defFunc|
+        synthDefs.add(name);
+        ^SynthDef(name, defFunc);
+    }
 
     *softReset { |s|
-        //CmdPeriod.run;           // stop all Routines/Patterns
-		s.freeAll;               // stop all synths
-		s.freeAllBuffers;        // free buffers
-		//currentEnvironment.clear; //find a better GC for this
+		CmdPeriod.run;
+		s.freeAll;
+		s.freeAllBuffers;
+		
+		synthDefs.do { |name|
+			s.sendMsg("/d_free", name);
+		};
+		
+		// Clocks
+		TempoClock.default.clear;
+		SystemClock.clear;
+		AppClock.clear;
+
+		// OSC / MIDI
+		if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
+        OSCdef.all.do(_.free);   // free OSC callbacks
+		MIDIdef.freeAll;
+		
+		//This can just be done at runtime, gives error othervice if compiled
+		//OSCFunc._all.do(_.free)
+		
+		//Dont do this, scsynth should be running.
+		//s.quit;
+		//s.boot;
+		
+		
+		s.reset;
+		Routine({
+			if(s.hasBooted) {
+				s.sync; //s.reset; needs to been runned on server.
+				s.sendMsg("/g_new", 1, 0, 0); //add default group, probably removed.
+			};
+		}).play;
 
         "Soft reset complete".postln;
     }
