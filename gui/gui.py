@@ -1,8 +1,42 @@
+import sys
+import os
+
+nebulae_path = os.path.abspath(os.path.join(os.path.dirname(__file__), "../Code/nebulae"))
+sys.path.insert(0, nebulae_path) 
+
 from dearpygui import dearpygui as dpg
 from pythonosc.udp_client import SimpleUDPClient
 
-
 #run: py -3 gui.py
+
+from pythonosc import dispatcher, osc_server
+import threading
+from queue import Queue
+
+osc_queue = Queue()
+
+def osc_sc_up(address, *args):
+    print("Synth is up!", flush=True)
+    osc_queue.put((address, args))
+
+def start_osc_server():
+    disp = dispatcher.Dispatcher()
+    disp.map("/sc/up", osc_sc_up)
+
+    server = osc_server.ThreadingOSCUDPServer(
+        ("0.0.0.0", 3011),
+        disp
+    )
+
+    threading.Thread(
+        target=server.serve_forever,
+        daemon=True
+    ).start()
+
+start_osc_server()
+
+
+print("RUNNING UP NOW!", flush=True)
 
 # OSC client setup
 client = SimpleUDPClient("127.0.0.1", 3010)
