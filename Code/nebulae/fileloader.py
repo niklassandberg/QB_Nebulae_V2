@@ -104,11 +104,13 @@ class FileLoader(object):
                 self.classlog.info("No modified content.")
             self.umount()
             self.classlog.info("Time it took: %s", t.end())
-        else:
-            self.launch_bootled(0)
+        #why self.launch_bootled when right after kill it?
+        #else: 
+        #    self.launch_bootled(0)
         if self.led_process is not None:
             # Kill Boot LED
             self.led_process.kill()
+            self.led_process = None
         if neb_globals.remount_fs is True:
             os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
 
