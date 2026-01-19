@@ -262,6 +262,7 @@ class Nebulae(object):
     def start_supercollider(self, patch, fromSC=False):
         try:
             self.classlog.info("start_supercollider!!!!!")
+            self.launch_bootled()
             
             ##if csound is still alive
             if self.c is not None:
@@ -274,7 +275,9 @@ class Nebulae(object):
             fullPathTmp = "/home/alarm/sc/" + patch +  ".scd"
             floader = fileloader.FileLoader()
             fullPath = floader.copyFileInternaly(fullPathTmp,"/tmp/") #this remove bug if patch will be removed with floader.reload()
+            self.kill_bootled()
             floader.reload() #reloads all the files to be sure
+            self.launch_bootled()
             if not os.path.exists(fullPathTmp):
                 fullPath = floader.copyFileInternaly(fullPath,"/home/alarm/sc/") #if no new file, copy it back
             else:
@@ -294,6 +297,8 @@ class Nebulae(object):
             self.c_handle.enterSuperColliderMode()
             self.classlog.info("Load patch!")
             self.c_handle.loadScSynth(fullPath)
+
+            self.kill_bootled()
             
             self.loadUI()
             self.c_handle.sendScOscMessages()
@@ -459,12 +464,20 @@ class Nebulae(object):
             cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
             os.system(cmd)
             self.classlog.info("Launching LED program")
-            fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading"
+            fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading rainbow"
             self.led_process = subprocess.Popen(fullCmd, shell=True)
             self.classlog.info('led process created: %s', str(self.led_process))
         except Exception as e:
             self.classlog.error("Error in launch_bootled(): %s", e)
 
+    def kill_bootled(self):
+        try:
+            if self.led_process is not None:
+                self.classlog.info("Killing LED program")
+                self.led_process.kill()
+                self.led_process = None
+        except Exception as e:
+            self.classlog.error("Error in kill_bootled(): %s", e)
 
 ### NEBULAE ###
 try:

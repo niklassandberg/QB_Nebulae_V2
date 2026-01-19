@@ -1,6 +1,8 @@
 import leddriver
 import time
 import sys
+import random
+import colorsys
 
 def blendColor(color_a, color_b, amount):
     newred = (color_a.red() * (1.0 - amount)) + (color_b.red() * amount)
@@ -39,6 +41,8 @@ if len(sys.argv) > 1:
         tempc = leddriver.Color(r=4095, g=0, b=1024)
     if len(sys.argv) > 2 and sys.argv[2] == "pulse":
         behavior = "pulse"
+    elif len(sys.argv) > 2 and sys.argv[2] == "rainbow":
+        behavior = "rainbow"
     else:
         behavior = "cycle"
 else:
@@ -65,6 +69,43 @@ while True:
         dur = 1000.0
         temptime = now + (i * (dur / 5))
         if behavior == "cycle":
+            bright[i] = abs(((temptime % dur) / (dur / 2)) - 1.0)
+        elif behavior == "rand":
+            #b = int(float(tempc.blue()) * random.uniform(0.9, 1.1)) % 4096
+            #g = int(float(tempc.green()) * random.uniform(0.9, 1.1)) % 4096
+            #r = int(float(tempc.red()) * random.uniform(0.9, 1.1)) % 4096
+            blue = tempc.blue()+int(temptime*10)
+            green = tempc.green()+int(temptime*(-40))
+            red = tempc.red()+int(temptime*30)
+
+            if(blue<0) :
+                blue = 4096 + blue
+            elif(blue>4096) :
+                blue = blue - 4096
+            
+            if(green<0) :
+                green = 4096 + green
+            elif(green>4096) :
+                green = green - 4096
+
+            if(red<0) :
+                red = 4096 + red
+            elif(blue>4096) :
+                red = red - 4096
+
+            #tempc.r = red
+            #tempc.g = green
+            #tempc.b = blue
+            tempc = leddriver.Color(red, green, blue)
+
+            bright[i] = abs(((temptime % dur) / (dur / 2)) - 1.0)
+        elif behavior == "rainbow":
+            hue = (time.time() * 0.3) % 1.0
+            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            r = int(rgb[0] * 4095)
+            g = int(rgb[1] * 4095)
+            b = int(rgb[2] * 4095)
+            tempc = leddriver.Color(r, g, b)
             bright[i] = abs(((temptime % dur) / (dur / 2)) - 1.0)
         else:
             bright[i] = (abs(((now & 400) - 200.0)) / 400.0)  # this is not right and still ugly.
