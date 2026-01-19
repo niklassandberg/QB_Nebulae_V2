@@ -49,7 +49,7 @@ NebInterface {
         OSCdef.new(\quit, { |msg|
             var s = NebInterface.getServer();
             fork {
-                #do init with soft reset, to have it clean.
+                //do init with soft reset, to have it clean.
                 NebInterface.init(s);
                 s.quit;
                 "Soft reset / quit done".postln;
