@@ -184,13 +184,31 @@ class ControlHandler(object):
     def startScOscServer(self):
         self.classlog.info("startScOscServer")
         self.scSock.connectSender()
-        self.scSock.addResiver('/sc/up', self.scSock.on_sc_up)
+        self.scSock.addResiver('/sc/up', self.scSock.scdFileLoaded)
+        self.scSock.addResiver('/neb/ready', self.scSock.setSclangHandshake)
         #TODO: add other listener
         self.scSock.startListener()
+
+    def waitOnScLang(self):
+        self.classlog.info("waitOnScang")
+        self.scSock.zeroSclangHandshake()
+        retries = 0
+        while not self.scSock.sclangHandshakeStatus():
+            self.classlog.info("sclang is not ready yet, waiting...")
+            self.scSock.send('ready', 0)
+            retries += 1
+            if retries > 50:
+                self.classlog.info("Timeout waiting for sclang to be ready!")
+                break
+            time.sleep(0.1)
+        if retries >= 50:
+            self.classlog.info("sclang is not ready after 50 retries!")
+            #sys.exit(50)
 
     def loadScSynth(self, patch):
         self.scSock.setSynthIsDown()
         self.scSock.send('loadScFile', patch)
+        self.synthIsUpStatus()
 
     # Pass Csound Performance Thread Pointer
     def setCsoundPerformanceThread(self, ptr):
@@ -271,12 +289,12 @@ class ControlHandler(object):
     
     def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
         self.prev_control_mode = self.control_mode
-        self.control_mode = "supercollider"
         for chn in self.channels: #mutes csound
             chn.muteCSound(True)
         #TODO: wtf is this!!! self.control_mode = "supercollider" above!!!
         if self.control_mode == "secondary controls":
             self.resistSecondarySettings()
+        self.control_mode = "supercollider"
         self.settings.update(self.now)
         self.settings.write()
         self.altchanneldict["source_alt"].setValue(0)

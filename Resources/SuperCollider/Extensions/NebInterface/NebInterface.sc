@@ -11,12 +11,18 @@ NebInterface {
         var params;
         if (initialized) {
             "NebInterface already initialized".warn;
-            this.softReset(s);
-            //^this
+            if(s.serverRunning) {
+                this.softReset(s);
+            } {
+                ^this;
+            }
         } {
+
             thisProcess.openUDPPort(3010);
             remote = NetAddr("127.0.0.1", 3011);
+            "NEBINTERFACE INIT!!!".warn;
         };
+
 
         server = s;
 
@@ -55,6 +61,11 @@ NebInterface {
                 "Soft reset / quit done".postln;
             };
         }, '/neb/quit');
+
+        OSCdef.new(\ready, { |msg|
+            remote.sendMsg("/neb/ready", 0);
+            "Soft reset / quit done".postln;
+        }, '/neb/ready');
     }
 
     *getServer { ^server }
@@ -69,7 +80,7 @@ NebInterface {
     *bus { |name| ^buses[name] }
 
     *ready { |s|
-        SystemClock.sched(2.0, { remote.sendMsg("/sc/up", 0); nil; });
+        //SystemClock.sched(2.0, { remote.sendMsg("/sc/up", 0); nil; });
         remote.sendMsg("/sc/up", 0);
     }
 

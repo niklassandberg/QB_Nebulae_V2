@@ -35,37 +35,44 @@ class ScSend(object):
         self._running = False
 
         self.synthIsUpLock = threading.Lock()
+        self.sclangIsReadyLock = threading.Lock()
         self.synthIsUp = False
+        self.sclangIsReady = False
 
     # -------------------------
     # Synth status
     # -------------------------
 
-    def on_sc_up(self, addr, tags, data, source):
+    def scdFileLoaded(self, addr, tags, data, source):
         with self.synthIsUpLock:
-            self.log.debug(
-                "on_sc_up called [ScSend id=%s, synthIsUp=%s]", 
-                id(self), self.synthIsUp
-            )
             self.log.debug("synth is up!")
             self.synthIsUp = True
 
     def synthIsUpStatus(self):
         with self.synthIsUpLock:
-            self.log.debug(
-                "synthIsUpStatus called [ScSend id=%s, synthIsUp=%s]", 
-                id(self), self.synthIsUp
-            )
-            self.log.debug("self._running=%s", self._running)
-            self.log.debug("self.connected=%s", self._connected)
+            self.log.debug("synthIsUpStatus=%s", self.synthIsUp)
             return self.synthIsUp
 
     def setSynthIsDown(self):
         self.values = {} #we know this is called in the main thread so no worries.
-        
         with self.synthIsUpLock:
             self.log.debug("SET SYNTH TO DOWN!!!")
             self.synthIsUp = False
+
+    def setSclangHandshake(self, addr, tags, data, source):
+        with self.sclangIsReadyLock:
+            self.log.debug("sclang handshake!")
+            self.sclangIsReady = True
+
+    def sclangHandshakeStatus(self):
+        with self.sclangIsReadyLock:
+            self.log.debug("sclangHandshakeStatus=%s", self.sclangIsReady)
+            return self.sclangIsReady
+
+    def zeroSclangHandshake(self):
+        with self.sclangIsReadyLock:
+            self.log.debug("sclang handshake zero!")
+            self.sclangIsReady = False
 
     # -------------------------
     # Sending
@@ -96,7 +103,7 @@ class ScSend(object):
                 return
 
             addr = "/neb/" + what
-            self.log.debug("OSC sending: %s", addr)
+            #self.log.debug("OSC sending: %s", addr)
 
             self.values[what] = value
             msg = OSCMessage()
@@ -134,7 +141,7 @@ class ScSend(object):
 
     def _listen_loop(self):
         while self._running:
-            self.log.debug("_listen_loop: waiting for request")
+            #self.log.debug("_listen_loop: waiting for request")
             try:
                 self.server.handle_request()
             except Exception as e:

@@ -68,7 +68,7 @@ class Nebulae(object):
             elif self.new_bank == 'puredata':
                 path = pd_path + self.new_instr + '.pd'
             elif self.new_bank == 'supercollider':
-                path = sc_path + self.new_instr + '.sc'
+                path = sc_path + self.new_instr + '.scd'
             else:
                 self.classlog.info("bank not recocgnized.")
                 self.classlog.info(self.new_bank)
@@ -208,6 +208,7 @@ class Nebulae(object):
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
             with open(self.instr_cfg, 'w') as f:
+                self.classlog.debug("bank: %s, instr: %s",self.new_bank,self.new_instr)
                 bankstr = 'bank,'+self.new_bank
                 instrstr = 'instr,'+self.new_instr 
                 f.write(bankstr + '\n')
@@ -261,37 +262,39 @@ class Nebulae(object):
     def start_supercollider(self, patch, fromSC=False):
         try:
             self.classlog.info("start_supercollider!!!!!")
-            nebmixer.disable()
-
-            #start sc with the selected synth
             
-            if self.c is not None: ##if csound is still alive
-                self.c.cleanup() ##kill it
-                self.c = None ##set its life to None
+            ##if csound is still alive
+            if self.c is not None:
+                self.c.cleanup()
+                self.c = None
 
-            reuseResources = fromSC and self.c_handle is not None
-            
             self.currentInstr = patch
             self.newInstr = patch
 
-            fullPath = "/home/alarm/sc/" + patch +  ".scd"
+            fullPathTmp = "/home/alarm/sc/" + patch +  ".scd"
             floader = fileloader.FileLoader()
-            fullPath = floader.copyFileInternaly(fullPath,"/tmp/") #this remove bug if patch will be removed with floader.reload()
+            fullPath = floader.copyFileInternaly(fullPathTmp,"/tmp/") #this remove bug if patch will be removed with floader.reload()
             floader.reload() #reloads all the files to be sure
+            if not os.path.exists(fullPathTmp):
+                fullPath = floader.copyFileInternaly(fullPath,"/home/alarm/sc/") #if no new file, copy it back
+            else:
+                fullPath = fullPathTmp
+
             self.orc_handle.refreshFileHandler() #also the audio files
 
+            reuseResources = fromSC and self.c_handle is not None
             if not reuseResources:
-                self.classlog.info("Starting SuperCollider process")
+                self.classlog.info("init SuperCollider handle")
                 self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider")
                 self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
                 self.st = None #just to be sertain.
+                self.c_handle.waitOnScLang()
 
             self.c_handle.enterSuperColliderMode()
             self.classlog.info("Load patch!")
             self.c_handle.loadScSynth(fullPath)
-            self.c_handle.synthIsUpStatus()
-
+            
             self.loadUI()
             self.c_handle.sendScOscMessages()
             self.c_handle.updateAll() # Update all values to ensure their at their initial state.
@@ -373,8 +376,8 @@ class Nebulae(object):
                 self.c_handle.updateAll()
                 self.ui.update()
                 request = self.ui.getReloadRequest()
+            nebmixer.disable()
             if request == True:
-                nebmixer.disable()
                 self.first_run = False
                 self.classlog.info("Received Reload Request from UI")
                 self.classlog.info("index of new instr is: %s", str(self.c_handle.instr_sel_idx))
@@ -384,7 +387,7 @@ class Nebulae(object):
                 self.classlog.info("new bank: %s", self.new_bank)
                 self.ui.reload_flag = False
                 self.classlog.info("Reloading %s from %s", self.new_instr, self.new_bank)
-                #self.writeBootInstr()
+                self.writeBootInstr()
                 if self.new_bank == "puredata":
                     self.close_sc()
                     self.start_puredata(self.new_instr)
