@@ -46,7 +46,15 @@ then
     then
         echo "updating /etc/systemd/system/nebulae.service for next boot up."
         sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service > /etc/systemd/system/nebulae.service"
+        sudo systemctl --system daemon-reload 
     fi
+    if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/sclang.service ]
+    then
+        echo "updating /etc/systemd/system/sclang.service for next boot up."
+        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/sclang.service > /etc/systemd/system/nsclang.service"
+        sudo systemctl --system daemon-reload 
+    fi
+
     sudo reboot
 elif [ -d /home/alarm/QB_Nebulae_V2/Code/packages ]
 then

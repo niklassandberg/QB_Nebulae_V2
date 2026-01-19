@@ -1,0 +1,15 @@
+[Unit]
+Description=SuperCollider Language Server
+After=network.target sound.target
+
+[Service]
+Type=simple
+User=root
+WorkingDirectory=/root/
+ExecStart=/usr/bin/sclang
+Restart=always
+StandardOutput=journal
+StandardError=journal
+
+[Install]
+WantedBy=multi-user.target
