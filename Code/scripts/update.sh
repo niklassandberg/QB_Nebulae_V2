@@ -81,6 +81,7 @@ then
 
     rm -rf /home/alarm/QB_Nebulae_V2/Code/packages
 
+    #TODO: in wrong elif. Should test -d /home/alarm/QB_Nebulae_V2/Code/localfiles
     echo "Supercollider config"
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/jackdrc ]
     then

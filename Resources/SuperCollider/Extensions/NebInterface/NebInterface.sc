@@ -1,26 +1,28 @@
 NebInterface {
     classvar buses;
-	classvar synthDefs;
+    classvar synthDefs;
     //classvar params;
-	classvar remote;
+    classvar remote;
+    classvar server;
 
     classvar initialized = false;
 
-	
     *init { |s|
-		var params;
+        var params;
         if (initialized) {
             "NebInterface already initialized".warn;
-			this.softReset(s);
+            this.softReset(s);
             //^this
         } {
-			thisProcess.openUDPPort(3010);
+            thisProcess.openUDPPort(3010);
             remote = NetAddr("127.0.0.1", 3011);
         };
-		
-		synthDefs = [];
-		buses = Dictionary.new;
-		initialized = true;
+
+        server = s;
+
+        synthDefs = [];
+        buses = Dictionary.new;
+        initialized = true;
 
         // assign the array here instead
         params = [
@@ -40,10 +42,22 @@ NebInterface {
 
         OSCdef.new(\loadScFile, { |msg|
             var file = msg[1].asString;
-			file.load;
+            file.load;
+            "loaded new file".postln;
         }, '/neb/loadScFile');
 
+        OSCdef.new(\quit, { |msg|
+            var s = NebInterface.getServer();
+            fork {
+                #do init with soft reset, to have it clean.
+                NebInterface.init(s);
+                s.quit;
+                "Soft reset / quit done".postln;
+            };
+        }, '/neb/quit');
     }
+
+    *getServer { ^server }
 
     *addBus { |name, path, def = 0.0|
         var b = Bus.control(Server.default, 1);
@@ -53,50 +67,51 @@ NebInterface {
     }
 
     *bus { |name| ^buses[name] }
-    
+
     *ready { |s|
         SystemClock.sched(2.0, { remote.sendMsg("/sc/up", 0); nil; });
         remote.sendMsg("/sc/up", 0);
     }
-	
+
     *synthDef { |name, defFunc|
         synthDefs.add(name);
         ^SynthDef(name, defFunc);
     }
 
     *softReset { |s|
-		CmdPeriod.run;
-		s.freeAll;
-		s.freeAllBuffers;
-		
-		synthDefs.do { |name|
-			s.sendMsg("/d_free", name);
-		};
-		
-		// Clocks
-		TempoClock.default.clear;
-		SystemClock.clear;
-		AppClock.clear;
+        CmdPeriod.run;
+        s.freeAll;
+        s.freeAllBuffers;
 
-		// OSC / MIDI
-		if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
-		OSCdef.all.do(_.free);   // free OSC callbacks
-		MIDIdef.freeAll;
-		
-		//This can just be done at runtime, gives error othervice if compiled
-		//O.SCFunc._a.ll.do(_.free)
-		
-		//Dont do this, scsynth should be running.
-		//s.quit;
-		//s.boot;
-			
-		s.reset;
-		s.sync; //s.reset; needs to been runned on server.
-		s.sendMsg("/g_new", 1, 0, 0); //add default group, probably removed.
-		s.sync;
-		"Soft reset complete".postln;
+        synthDefs.do { |name|
+                s.sendMsg("/d_free", name);
+        };
+
+        // Clocks
+        TempoClock.default.clear;
+        SystemClock.clear;
+        AppClock.clear;
+
+        // OSC / MIDI
+        if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
+        OSCdef.all.do(_.free);   // free OSC callbacks
+        MIDIdef.freeAll;
+
+        //This can just be done at runtime, gives error othervice if compiled
+        //O.SCFunc._a.ll.do(_.free)
+
+        //Dont do this, scsynth should be running.
+        //s.quit;
+        //s.boot;
+
+        s.reset;
+        s.sync; //s.reset; needs to been runned on server.
+        s.sendMsg("/g_new", 1, 0, 0); //add default group, probably removed.
+        s.sync;
+        "Soft reset complete".postln;
     }
 }
+
 
 NebPitch : UGen {
     *kr { |min = 20, max = 2000|

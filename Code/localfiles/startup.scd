@@ -14,3 +14,4 @@ Server.internal.options.numOutputBusChannels = 2;
 
 s = Server.default;
 
+NebInterface.init(s);

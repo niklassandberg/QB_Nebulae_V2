@@ -262,6 +262,12 @@ class ControlHandler(object):
             self.pdSock.close()
         if self.scSock.is_connected():
             self.scSock.close()
+
+    def closeScSynthProcess(self):
+        try:
+            self.scSock.send("quit", 0)
+        except Exception as e:
+            self.classlog.error("Error in closeScSynthProcess(): %s", e)
     
     def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
         self.prev_control_mode = self.control_mode

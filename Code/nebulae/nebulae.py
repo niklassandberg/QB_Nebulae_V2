@@ -250,8 +250,10 @@ class Nebulae(object):
             ).returncode == 0:
                 count += 1
                 if count > 10:
+                    os.system("sudo killall jakcd")
+                    os.system("sudo killall scsynth")
                     raise TimeoutError("jackd did not die within 1 second")
-                time.sleep(0.1)
+                time.sleep(0.2)
                 self.classlog.debug("jackd has not died yet...")
         except Exception as e:
             self.classlog.error("Error in wait_for_jack_to_die(): %s", e)
@@ -267,7 +269,7 @@ class Nebulae(object):
                 self.c.cleanup() ##kill it
                 self.c = None ##set its life to None
 
-            reuseResources = fromSC and self.c_handle is not None and self.st is not None and self.st.poll() is None
+            reuseResources = fromSC and self.c_handle is not None
             
             self.currentInstr = patch
             self.newInstr = patch
@@ -278,28 +280,18 @@ class Nebulae(object):
             floader.reload() #reloads all the files to be sure
             self.orc_handle.refreshFileHandler() #also the audio files
 
-            if reuseResources and self.c_handle is not None:
-                self.classlog.info("SuperCollider and is running in the process, reuse!")
-                self.c_handle.loadScSynth(fullPath)
-                self.c_handle.synthIsUpStatus()
-            else:
-
-                #TODO: I want to do floader.reload() the same time as supercollider starts.
-                #but for that we need to do handchacke instead of this /sc/up call from NebInterface in self.waitForSCisUp().
-
+            if not reuseResources:
                 self.classlog.info("Starting SuperCollider process")
                 self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider")
                 self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
-
-                #Start SuperCollider Process after handler.
-                self.classlog.info("Starting SuperCollider process")
-                command_list = ["sclang", fullPath]
-                self.st = subprocess.Popen(command_list)
-                self.c_handle.synthIsUpStatus()
-                self.classlog.info("SuperCollider is started.")
+                self.st = None #just to be sertain.
 
             self.c_handle.enterSuperColliderMode()
+            self.classlog.info("Load patch!")
+            self.c_handle.loadScSynth(fullPath)
+            self.c_handle.synthIsUpStatus()
+
             self.loadUI()
             self.c_handle.sendScOscMessages()
             self.c_handle.updateAll() # Update all values to ensure their at their initial state.
@@ -414,39 +406,9 @@ class Nebulae(object):
             self.classlog.error("Error in run_supercollider(): %s", e)
 
     def close_sc(self):
-        """ Close SuperCollider Process 
-
-        TODO: 
-
-        THIS NEEDS TO BE WRITEN AS A OSC MESSAGE WHERE SC run, that if we want to close buffer also, write to file etc.:
-
-        OSCdef(\quitSC, { |msg|
-            CmdPeriod.run;   // stop all Patterns
-            "Stopping everything".postln;
-            quit;            // this will still run
-        }, '/quit');
-
-        try:
-            if self.st is not None:
-                self.classlog.info("Terminating SuperCollider process")
-                self.st.terminate()
-                self.classlog.info("Waiting for SuperCollider to terminate...")
-
-                timeout = 4.0
-                start = time.time()
-                while self.st.poll() is None:
-                    if time.time() - start > timeout:
-                        self.classlog.error(
-                            "SuperCollider did not terminate in time, killing"
-                        )
-                        self.st.kill()
-                        break
-                time.sleep(0.1)
-        except Exception as e:
-            self.classlog.error("Error in close_sc(): %s", e)
-        """
-        os.system("sudo killall sclang")
-        os.system("sudo killall jackd") #chould not be needed but just to be sure
+        #os.system("sudo killall sclang")
+        #os.system("sudo killall jackd") #chould not be needed but just to be sure
+        self.c_handle.closeScSynthProcess()
         self.c_handle.closeSockets()
         self.wait_for_jack_to_die()
         self.st = None
