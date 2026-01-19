@@ -85,10 +85,26 @@ then
         sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/startup.scd > /root/.config/SuperCollider/startup.scd"
     fi
 
-    if [ -f /usr/share/SuperCollider/Extensions/NebInterface/NebInterface.sc ]
-    then
-        echo "updating NebInterface.sc"
-        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/SuperColliderExtensions/NebInterface/NebInterface.sc > /usr/share/SuperCollider/Extensions/NebInterface/NebInterface.sc"
+    DIR1="/home/alarm/QB_Nebulae_V2/SuperColliderExtensions"
+    DIR2="/usr/share/SuperCollider/Extensions"
+
+    if [ -d "$DIR1" ]; then
+        echo "Updating SuperCollider Extensions"
+
+        mkdir -p "$DIR2"
+
+        # Create directory structure
+        find "$DIR1" -type d -mindepth 1 | while read -r d; do
+            mkdir -p "$DIR2/${d#$DIR1/}"
+        done
+
+        # Move files
+        find "$DIR1" -type f | while read -r f; do
+            mv "$f" "$DIR2/${f#$DIR1/}"
+        done
+
+        # Remove empty directories
+        find "$DIR1" -type d -empty -delete
     fi
 
     #mkdir dir if they dont exist
