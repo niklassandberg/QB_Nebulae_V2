@@ -52,7 +52,8 @@ then
     then
         echo "updating /etc/systemd/system/sclang.service for next boot up."
         sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/sclang.service > /etc/systemd/system/nsclang.service"
-        sudo systemctl --system daemon-reload 
+        sudo systemctl --system daemon-reload
+        sudo systemctl enable sclang.service
     fi
 
     sudo reboot

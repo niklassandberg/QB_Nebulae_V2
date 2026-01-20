@@ -78,6 +78,7 @@ class Nebulae(object):
                 self.new_bank = 'factory'
                 self.new_instr = 'a_granularlooper'
             self.first_run = True
+            nebmixer.disable()
             self.last_debug_print = time.time()
         except Exception as e:
             self.classlog.error("Error in __init__: %s", e)
@@ -296,9 +297,11 @@ class Nebulae(object):
 
             self.c_handle.enterSuperColliderMode()
             self.classlog.info("Load patch!")
+            #self.kill_bootled() #maybe warning is because scsynth starts??? Moved here
             self.c_handle.loadScSynth(fullPath)
 
             self.kill_bootled()
+
             
             self.loadUI()
             self.c_handle.sendScOscMessages()
@@ -473,9 +476,9 @@ class Nebulae(object):
     def kill_bootled(self):
         try:
             if self.led_process is not None:
+                self.led_process = None
                 self.classlog.info("Killing LED program")
                 self.led_process.kill()
-                self.led_process = None
         except Exception as e:
             self.classlog.error("Error in kill_bootled(): %s", e)
 

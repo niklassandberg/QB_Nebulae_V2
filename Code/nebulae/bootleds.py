@@ -100,8 +100,8 @@ while True:
 
             bright[i] = abs(((temptime % dur) / (dur / 2)) - 1.0)
         elif behavior == "rainbow":
-            hue = (time.time() * 0.3) % 1.0
-            rgb = colorsys.hsv_to_rgb(hue, 1.0, 1.0)
+            phaser = (time.time() * 2.13) % 1.0
+            rgb = colorsys.hsv_to_rgb(phaser, 1.0, 1.0)
             r = int(rgb[0] * 4095)
             g = int(rgb[1] * 4095)
             b = int(rgb[2] * 4095)
