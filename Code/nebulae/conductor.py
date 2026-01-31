@@ -106,7 +106,7 @@ gipeak[] init 100
             print "Could not write log of current csd"
 
     def numFiles(self):
-        return self.filehandler.numFiles()
+        return self.filehandler.numFiles();
 
     def getConfigDict(self):
         return self.instrparser.getConfigDict()
