@@ -1,34 +1,43 @@
 NebInterface {
     classvar buses;
-    classvar synthDefs;
+	classvar synthDefs;
     //classvar params;
-    classvar remote;
-    classvar server;
+	classvar remote;
+	classvar server;
+	classvar <>onReset;
 
     classvar initialized = false;
+	
+	classvar <>audioPath = nil;
+	
+	classvar <storedBuffers;
 
+	
     *init { |s|
-        var params;
+		var params;
         if (initialized) {
             "NebInterface already initialized".warn;
-            if(s.serverRunning) {
-                this.softReset(s);
-            } {
-                ^this;
-            }
+			if (thisThread.isKindOf(Routine)) {
+				this.prSoftReset(s);
+			} {
+				"Not inside of a Routine, nothing will happens by design.".warn;
+				^this;
+			};
+            //^this
         } {
-
-            thisProcess.openUDPPort(3010);
+			thisProcess.openUDPPort(3010);
             remote = NetAddr("127.0.0.1", 3011);
-            "NEBINTERFACE INIT!!!".warn;
+			onReset = {};
+			storedBuffers = IdentityDictionary.new;
+			if (audioPath.isNil) {
+				audioPath = "/home/alarm/audio/";
+			};
         };
-
-
-        server = s;
-
-        synthDefs = [];
-        buses = Dictionary.new;
-        initialized = true;
+		
+		server = s;
+		synthDefs = [];
+		buses = Dictionary.new;
+		initialized = true;
 
         // assign the array here instead
         params = [
@@ -48,278 +57,201 @@ NebInterface {
 
         OSCdef.new(\loadScFile, { |msg|
             var file = msg[1].asString;
-            file.load;
-            "loaded new file".postln;
+			file.load;
         }, '/neb/loadScFile');
 
-        OSCdef.new(\quit, { |msg|
-            var s = NebInterface.getServer();
-            fork {
-                //do init with soft reset, to have it clean.
-                NebInterface.init(s);
-                s.quit;
-                "Soft reset / quit done".postln;
-            };
-        }, '/neb/quit');
-
-        OSCdef.new(\ready, { |msg|
-            remote.sendMsg("/neb/ready", 0);
-            "Soft reset / quit done".postln;
-        }, '/neb/ready');
     }
 
-    *getServer { ^server }
-
     *addBus { |name, path, def = 0.0|
-        var b = Bus.control(Server.default, 1);
+        var b = Bus.control(server, 1);
         b.set(def);
         buses[name] = b;
         OSCdef(name, { |msg| b.set(msg[1]) }, path);
     }
 
     *bus { |name| ^buses[name] }
-
+    
     *ready { |s|
-        //SystemClock.sched(2.0, { remote.sendMsg("/sc/up", 0); nil; });
+        SystemClock.sched(2.0, { remote.sendMsg("/sc/up", 0); nil; });
         remote.sendMsg("/sc/up", 0);
     }
-
+	
     *synthDef { |name, defFunc|
         synthDefs.add(name);
         ^SynthDef(name, defFunc);
     }
 
-    *softReset { |s|
-        CmdPeriod.run;
-        s.freeAll;
-        s.freeAllBuffers;
+    *prSoftReset { |s|
+	
+		var savedBuffers;
+	
+		CmdPeriod.run;
+		s.freeAll;
+		
+		//s.freeAllBuffers;
+		//Just free that should be freed.
+		savedBuffers = storedBuffers.values.as(Set);
+		Buffer.cachedBuffersDo(s, { |buf|
+			if (savedBuffers.includes(buf).not) {
+				buf.free; 
+			}
+		});
+		
+		synthDefs.do { |name|
+			s.sendMsg("/d_free", name);
+		};
+		
+		// Clocks
+		TempoClock.default.clear;
+		SystemClock.clear;
+		AppClock.clear;
 
-        synthDefs.do { |name|
-                s.sendMsg("/d_free", name);
-        };
-
-        // Clocks
-        TempoClock.default.clear;
-        SystemClock.clear;
-        AppClock.clear;
-
-        // OSC / MIDI
-        if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
-        OSCdef.all.do(_.free);   // free OSC callbacks
-        MIDIdef.freeAll;
-
-        //This can just be done at runtime, gives error othervice if compiled
-        //O.SCFunc._a.ll.do(_.free)
-
-        //Dont do this, scsynth should be running.
-        //s.quit;
-        //s.boot;
-
-        s.reset;
-        s.sync; //s.reset; needs to been runned on server.
-        s.sendMsg("/g_new", 1, 0, 0); //add default group, probably removed.
-        s.sync;
-        "Soft reset complete".postln;
+		// OSC / MIDI
+		if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
+		OSCdef.all.do(_.free);   // free OSC callbacks
+		MIDIdef.freeAll;
+		
+		//This can just be done at runtime, gives error othervice if compiled
+		//O.SCFunc._a.ll.do(_.free)
+		
+		//Dont do this, scsynth should be running.
+		//s.quit;
+		//s.boot;
+			
+		s.reset;
+		s.sync; //s.reset; needs to been runned on server.
+		s.sendMsg("/g_new", 1, 0, 0); //add default group, probably removed.
+		s.sync;
+		
+		onReset.value;
+		"Soft reset complete".postln;
     }
+	
+	*loadBuffers { | path, regex, storeBuff = false, callback |
+	
+		var paths = List.new;
+		var loaded = 0;
+		var buffers;
+
+		PathName(path).filesDo { |pathname|
+			var fname = pathname.fileName;
+			if (fname.findRegexp(regex).notNil) {
+				paths.add([fname.asSymbol, pathname.fullPath]);
+			};
+		};
+
+		buffers = Array.newClear(paths.size);
+
+		paths.do { |pair, i|
+			
+			var fname = pair[0].asSymbol;
+			var fullPath = pair[1];
+			
+			if (storedBuffers.includesKey(fname)) {
+				buffers[i] = storedBuffers[fname];
+				loaded = loaded + 1;
+				
+				if (loaded == paths.size) {
+					callback.(buffers);
+				};
+			} {
+				Buffer.read(server, fullPath, action: { |buf|
+					buffers[i] = buf;
+
+					if (storeBuff) {
+						storedBuffers[fname] = buf;
+					};
+
+					loaded = loaded + 1;
+					if (loaded == paths.size) {
+						callback.(buffers);
+					};
+				});
+			};
+		};
+	}
+	/*
+		Example usage localy:
+			s.waitForBoot {
+				NebInterface.audioPath = "C:/Users/niksan/Desktop/wavetable_kasta";
+				NebInterface.initAndLoadAudio(s, "^wt_.*wav$", true,
+					{ |buffers|
+					"All buffers loaded: %".format(buffers).postln;
+					//doneFunc.(buffers);
+				});
+			};
+	*/
+	*initAndLoadAudio { | s, regex, storeBuff = false, callback |
+		NebInterface.init(s);
+		
+		NebInterface.audioPath.postln;
+		NebInterface.loadBuffers(NebInterface.audioPath, regex, storeBuff, callback);
+	}
 }
 
+// -----------------------------
+// Base generic class
+// -----------------------------
+UGenValueRange : UGen {
+    classvar <mapFunc;
 
-NebPitch : UGen {
-    *kr { |min = 20, max = 2000|
-        ^In.kr(NebInterface.bus(\pitch)).linlin(0, 1, min, max)
+    *initClass {
+        mapFunc = { |x, srclo, srchi, dstlo, dsthi| x.linlin(srclo, srchi, dstlo, dsthi) };   // identity by default
     }
+
+    *kr { |srclo = 0, srchi = 1, min = nil, max = nil|
+        var val;
+		
+		if(min.notNil and: max.isNil) {
+			Error("NebInterface: tre number arguments not valid, 2 or 4 is").throw;
+		};
+		
+		if(min.isNil or: max.isNil) {
+			min = srclo;
+			max = srchi;
+			srclo = 0;
+			srchi = 1;
+		};
+		
+        val = In.kr(NebInterface.bus(this.busKey));
+        ^mapFunc.(val, srclo, srchi, min, max)
+    }
+
+    *function { |f| mapFunc = f; }
 }
 
-NebSpeed : UGen {
-    *kr { |min = 0.0, max = 2.0|
-        ^In.kr(NebInterface.bus(\speed)).linlin(0, 1, min, max)
-    }
-}
+NebPitch         : UGenValueRange { *busKey { ^\pitch } }
+NebSpeed         : UGenValueRange { *busKey { ^\speed } }
+NebStart         : UGenValueRange { *busKey { ^\start } }
+NebSize          : UGenValueRange { *busKey { ^\size } }
+NebBlend         : UGenValueRange { *busKey { ^\blend } }
+NebDensity       : UGenValueRange { *busKey { ^\density } }
+NebOverlap       : UGenValueRange { *busKey { ^\overlap } }
+NebWindow        : UGenValueRange { *busKey { ^\window } }
+NebReset         : UGenValueRange { *busKey { ^\reset } }
+NebFreeze        : UGenValueRange { *busKey { ^\freeze } }
+NebRecord        : UGenValueRange { *busKey { ^\record } }
+NebFile          : UGenValueRange { *busKey { ^\file } }
+NebSource        : UGenValueRange { *busKey { ^\source } }
+NebFilestate     : UGenValueRange { *busKey { ^\filestate } }
+NebSourcegate    : UGenValueRange { *busKey { ^\sourcegate } }
 
-NebStart : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\start)).linlin(0, 1, min, max)
-    }
-}
+NebSpeed_alt     : UGenValueRange { *busKey { ^\speed_alt } }
+NebPitch_alt     : UGenValueRange { *busKey { ^\pitch_alt } }
+NebStart_alt     : UGenValueRange { *busKey { ^\start_alt } }
+NebSize_alt      : UGenValueRange { *busKey { ^\size_alt } }
+NebBlend_alt     : UGenValueRange { *busKey { ^\blend_alt } }
+NebDensity_alt   : UGenValueRange { *busKey { ^\density_alt } }
+NebOverlap_alt   : UGenValueRange { *busKey { ^\overlap_alt } }
+NebWindow_alt    : UGenValueRange { *busKey { ^\window_alt } }
+NebReset_alt     : UGenValueRange { *busKey { ^\reset_alt } }
+NebFreeze_alt    : UGenValueRange { *busKey { ^\freeze_alt } }
+NebSource_alt    : UGenValueRange { *busKey { ^\source_alt } }
+NebRecord_alt    : UGenValueRange { *busKey { ^\record_alt } }
+NebFile_alt      : UGenValueRange { *busKey { ^\file_alt } }
 
-NebSize : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\size)).linlin(0, 1, min, max)
-    }
-}
-
-NebBlend : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\blend)).linlin(0, 1, min, max)
-    }
-}
-
-NebDensity : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\density)).linlin(0, 1, min, max)
-    }
-}
-
-NebOverlap : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\overlap)).linlin(0, 1, min, max)
-    }
-}
-
-NebWindow : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\window)).linlin(0, 1, min, max)
-    }
-}
-
-NebReset : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\reset)).linlin(0, 1, min, max)
-    }
-}
-
-NebFreeze : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\freeze)).linlin(0, 1, min, max)
-    }
-}
-
-NebRecord : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\record)).linlin(0, 1, min, max)
-    }
-}
-
-NebFile : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\file)).linlin(0, 1, min, max)
-    }
-}
-
-NebSource : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\source)).linlin(0, 1, min, max)
-    }
-}
-
-NebFilestate : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\filestate)).linlin(0, 1, min, max)
-    }
-}
-
-NebSourcegate : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\sourcegate)).linlin(0, 1, min, max)
-    }
-}
-
-// ---------- ALT versions ----------
-
-NebSpeed_alt : UGen {
-    *kr { |min = 0.0, max = 2.0|
-        ^In.kr(NebInterface.bus(\speed_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebPitch_alt : UGen {
-    *kr { |min = 20, max = 2000|
-        ^In.kr(NebInterface.bus(\pitch_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebStart_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\start_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebSize_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\size_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebBlend_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\blend_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebDensity_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\density_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebOverlap_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\overlap_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebWindow_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\window_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebReset_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\reset_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebFreeze_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\freeze_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebSource_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\source_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebRecord_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\record_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebFile_alt : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\file_alt)).linlin(0, 1, min, max)
-    }
-}
-
-NebRecord_instr : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\record_instr)).linlin(0, 1, min, max)
-    }
-}
-
-NebFile_instr : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\file_instr)).linlin(0, 1, min, max)
-    }
-}
-
-NebSource_instr : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\source_instr)).linlin(0, 1, min, max)
-    }
-}
-
-NebReset_instr : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\reset_instr)).linlin(0, 1, min, max)
-    }
-}
-
-NebFreeze_instr : UGen {
-    *kr { |min = 0.0, max = 1.0|
-        ^In.kr(NebInterface.bus(\freeze_instr)).linlin(0, 1, min, max)
-    }
-}
+NebRecord_instr  : UGenValueRange { *busKey { ^\record_instr } }
+NebFile_instr    : UGenValueRange { *busKey { ^\file_instr } }
+NebSource_instr  : UGenValueRange { *busKey { ^\source_instr } }
+NebReset_instr   : UGenValueRange { *busKey { ^\reset_instr } }
+NebFreeze_instr  : UGenValueRange { *busKey { ^\freeze_instr } }
