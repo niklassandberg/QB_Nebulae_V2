@@ -16,6 +16,12 @@ var startKnob, densityKnob, blendKnob, speedKnob, pitchKnob, sizeKnob, overlapKn
 var upperText;
 var background_color = Color.new255(0, 0, 40);
 
+
+s.quit; // Stäng av servern om den redan körs
+s.options.inDevice = "MME : MOTU Analog 1-2 (MOTU Audio Wav";
+s.options.outDevice = "MME : MOTU Phones 1-2 (MOTU Audio Wav";
+
+
 // INTERFACE INIT
 NebInterface.audioPath = initAudioPath;
 NebInterface.init(s);
@@ -194,3 +200,6 @@ audioPathBox.doAction;
 filePathBox.doAction;
 
 w.onClose_({ Window.closeAll; s.freeAll; });
+
+
+s.freeAll();

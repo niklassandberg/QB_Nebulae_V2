@@ -1,64 +1,69 @@
 s.waitForBoot {
-	NebInterface.init(s);
-    
-    //TODO: add to scsynth startup (5 minutes)
+
+    NebInterface.init(s);
     s.sync;
-    b = Buffer.alloc(s, s.sampleRate * 5, 2); 
+    b = Buffer.alloc(s, s.sampleRate * 50, 2); 
     s.sync;
 
-	NebInterface.synthDef(\tape, {
+    NebInterface.onBusChange(\reset, { |val|
+        var fileHigh = NebInterface.busValue(\file) > 0.5;
+		var resetHigh = val > 0.5;
+        if( fileHigh && resetHigh ) {
+            b.fill(0, b.numFrames * b.numChannels, 0);
+            "Buffer cleared!!!!!!!!!!".postln;
+        };
+    });
+
+    NebInterface.synthDef(\tape, {
         arg buf, t_trig = 0;
-        var phase, input, oldSignal, mixedSignal, readPhase, writePhase;
-        var rate, rateScale, readHeadLimit = 256;
-        var relativePhase;
-        var filterOldSignal, filterInput;
-
-        var readHead = NebDensity.kr(BufFrames.kr(buf), readHeadLimit ).varlag(0.4);
-
-        var start = NebStart.kr(0, BufFrames.kr(buf) ).varlag(0.4);
-        var size = NebSize.kr(SampleRate.ir, BufFrames.kr(buf)).varlag(0.4);
-        var dry = NebBlend.kr(1,0);
-        var wet = NebBlend.kr(0,1);
-
+        var phase, input, inputFilter, oldSignal, mixedSignal, readPhase;
+        var rate, rateScale, size, start, dry, wet, preLevel, readHead, cutoff;
+        
+        // Kontroller
         var pitchVal = NebPitch.kr(0, 1);
-        var preLevel = NebOverlap.kr(0, 1); //TODO: free param
         rate = LinLin.kr(pitchVal, 0, 1, 0, 1);
         rateScale = BufRateScale.kr(buf) * rate;
+        
+        size = NebSize.kr(100, BufFrames.kr(buf)).varlag(0.4);
+        size = size.clip(0, BufFrames.kr(buf));
+        start = NebStart.kr(0, BufFrames.kr(buf)).varlag(0.4);
+        readHead = NebDensity.kr(256, BufFrames.kr(buf)-256).varlag(0.4);
+        //readHead = size.clip(0, BufFrames.kr(buf)-256);
+        
+        dry = NebBlend.kr(1, 0);
+        wet = NebBlend.kr(0, 1);
+        preLevel = NebOverlap.kr(0, 1);
 
-        // NebSize (antar att det är din andra variabel) ger oss längden (0 till 1) 
-        // multiplicerat med bufferns totala längd
-
-        // 2. PHASOR: Låt den bara gå från 0 till size
-        // Den här rör sig nu i den hastighet du valt (rate)
-        relativePhase = Phasor.ar(t_trig, rateScale, 0, size, 0);
-
-        // 3. ADDERA START: Flytta fönstret till rätt ställe på bandet
-        // Vi använder modulo % för att se till att vi inte kraschar om 
-        // start + relativePhase går utanför bufferns slut
-        phase = (start + relativePhase) % BufFrames.kr(buf);
-
-        // 2. INPUT (Din röst - filtreras för att undvika aliasing i buffern)
-        input = SoundIn.ar([0, 1]);
-        filterInput = LPF.ar(input, (SampleRate.ir * 0.4 * rate.abs).clip(20, 20000));
-
-        // 3. LÄS FRÅN BANDET (Med säkerhetsavstånd för interpolation)
-        // Vi läser 128 samples BAKOM för att låta Cubic-algoritmen jobba ifred.
+        // 1. FAS (Huvudposition)
+        phase = (Phasor.ar(t_trig, rateScale, 0, size, 0) + start) % BufFrames.kr(buf);
         readPhase = (phase - readHead) % BufFrames.kr(buf);
-        oldSignal = BufRd.ar(2, buf, readPhase, loop: 1, interpolation: 4);
 
-        // 4. OVERDUB-LOGIK
-        // Vi blandar input med det vi nyss läste och skriver det till NUET (phase)
-        mixedSignal = Limiter.ar((filterInput*dry) + (oldSignal * preLevel), 0.95);
-        BufWr.ar(mixedSignal, buf, phase, loop: 1);
+        // 2. MANUELL OVERSAMPLING (4-tap Cubic Interpolation)
+        // Vi läser på fyra pyttesmå förskjutna ställen och mixar dem.
+        // Detta tar bort "trappstegen" som skapar det fula digitala gruset.
+        oldSignal = (
+            BufRd.ar(2, buf, readPhase, loop: 1, interpolation: 4) +
+            BufRd.ar(2, buf, readPhase + 0.25, loop: 1, interpolation: 4) +
+            BufRd.ar(2, buf, readPhase + 0.5, loop: 1, interpolation: 4) +
+            BufRd.ar(2, buf, readPhase + 0.75, loop: 1, interpolation: 4)
+        ) * 0.25;
 
-        // 5. UTGÅNG (Monitorering)
-        // För noll latens på din röst: Mixa INPUT direkt med det vi hör från bandet.
-        // Detta gör att din röst alltid är ren, medan "ekot" från bandet följer pitchen.
-		
-		filterOldSignal = LPF.ar(oldSignal, (SampleRate.ir * 0.4 * rate.abs).clip(20, 20000));
-        Out.ar(0, Limiter.ar((input*dry) + (filterOldSignal*wet), 0.95));
+        // 3. DUBBLA FILTER (För "Tape"-karaktär)
+        cutoff = (SampleRate.ir * 0.4 * rate.abs).clip(40, 18000);
+        
+        input = SoundIn.ar([0, 1]);
+        inputFilter = LPF.ar(input, cutoff);
+        oldSignal = LPF.ar(oldSignal, cutoff);
+
+        // 4. OVERDUB & SKRIV
+        mixedSignal = (inputFilter * dry) + (oldSignal * preLevel);
+        BufWr.ar(Limiter.ar(mixedSignal, 0.98), buf, phase, loop: 1);
+
+        // 5. MONITOR
+        Out.ar(0, Limiter.ar((input * dry) + (oldSignal * wet), 0.95));
     }).add;
+
     s.sync;
-    ~tape = Synth(\tape, [\buf, b ]);
+    ~tape = Synth(\tape, [\buf, b]);
     NebInterface.ready(s);
 };

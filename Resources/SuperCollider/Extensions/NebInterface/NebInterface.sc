@@ -10,7 +10,9 @@ NebInterface {
 	
 	classvar <>audioPath = nil;
 	
-	classvar <storedBuffers;
+	classvar <>storedBuffers;
+	classvar busCallbacks;
+	classvar busValues;
 
 	
     *init { |s|
@@ -29,6 +31,8 @@ NebInterface {
             remote = NetAddr("127.0.0.1", 3011);
 			onReset = {};
 			storedBuffers = IdentityDictionary.new;
+			busCallbacks = IdentityDictionary.new;
+			busValues = IdentityDictionary.new;
 			if (audioPath.isNil) {
 				audioPath = "/home/alarm/audio/";
 			};
@@ -59,20 +63,45 @@ NebInterface {
             var file = msg[1].asString;
 			file.load;
         }, '/neb/loadScFile');
+		
+		OSCdef.new(\quit_n, { |msg|
+            var code = "{ s.waitForBoot { NebInterface.init(s); s.quit; NebInterface.storedBuffers.clear; } }";
+			var func = code.compile.value;
+			func.value;
+        }, '/neb/quit');
 
     }
+
+	*onBusChange { |name, action|
+		busCallbacks[name] = action;
+	}
 
     *addBus { |name, path, def = 0.0|
         var b = Bus.control(server, 1);
         b.set(def);
         buses[name] = b;
-        OSCdef(name, { |msg| b.set(msg[1]) }, path);
+        OSCdef(name, { |msg| 
+			var val = msg[1];
+			b.set(val);
+			busValues[name] = val;
+			busCallbacks[name].value(val);
+		}, path);
     }
 
+	/* TODO: remove, will not be used.
+	*addSynthReceiver { |symbol, action|
+		OSCdef(symbol, { |msg| 
+			action.value(msg[3]); 
+		}, "/scsynth/" ++ symbol); // Ändrat + till ++
+	}
+	*/
+
     *bus { |name| ^buses[name] }
+	*busValue { |name| ^busValues[name] ? 0.0 }
     
     *ready { |s|
         SystemClock.sched(2.0, { remote.sendMsg("/sc/up", 0); nil; });
+		storedBuffers = IdentityDictionary.new;
         remote.sendMsg("/sc/up", 0);
     }
 	
@@ -96,6 +125,9 @@ NebInterface {
 				buf.free; 
 			}
 		});
+		savedBuffers.clear;
+
+		busCallbacks.clear;
 		
 		synthDefs.do { |name|
 			s.sendMsg("/d_free", name);
@@ -170,6 +202,7 @@ NebInterface {
 			};
 		};
 	}
+	
 	/*
 		Example usage localy:
 			s.waitForBoot {
@@ -193,10 +226,9 @@ NebInterface {
 // Base generic class
 // -----------------------------
 UGenValueRange : UGen {
-    classvar <mapFunc;
-
-    *initClass {
-        mapFunc = { |x, srclo, srchi, dstlo, dsthi| x.linlin(srclo, srchi, dstlo, dsthi) };   // identity by default
+    
+	*mapFunc { |val, srclo, srchi, min, max|
+        ^val.linlin(srclo, srchi, min, max)
     }
 
     *kr { |srclo = 0, srchi = 1, min = nil, max = nil|
@@ -214,10 +246,8 @@ UGenValueRange : UGen {
 		};
 		
         val = In.kr(NebInterface.bus(this.busKey));
-        ^mapFunc.(val, srclo, srchi, min, max)
+        ^this.mapFunc(val, srclo, srchi, min, max)
     }
-
-    *function { |f| mapFunc = f; }
 }
 
 NebPitch         : UGenValueRange { *busKey { ^\pitch } }
@@ -228,10 +258,25 @@ NebBlend         : UGenValueRange { *busKey { ^\blend } }
 NebDensity       : UGenValueRange { *busKey { ^\density } }
 NebOverlap       : UGenValueRange { *busKey { ^\overlap } }
 NebWindow        : UGenValueRange { *busKey { ^\window } }
-NebReset         : UGenValueRange { *busKey { ^\reset } }
+NebFile          : UGenValueRange { *busKey { ^\file } }
+NebReset : UGenValueRange {
+
+    *busKey { ^\reset } 
+    
+	/*
+    *mapFunc { |val, srclo, srchi, min, max| 
+        var fileSig = NebFile.kr(0, 1);
+		var resetValue = val.linlin(srclo, srchi, min, max);
+		var isHigh = fileSig > 0.5 && resetValue > 0.5;
+        var trigger = Trig1.kr( HPZ1.kr(isHigh) > 0, 0.1);
+        SendReply.kr(trigger, '/scsynth/zeroBuffer');
+        ^resetValue
+    }
+	*/
+
+}
 NebFreeze        : UGenValueRange { *busKey { ^\freeze } }
 NebRecord        : UGenValueRange { *busKey { ^\record } }
-NebFile          : UGenValueRange { *busKey { ^\file } }
 NebSource        : UGenValueRange { *busKey { ^\source } }
 NebFilestate     : UGenValueRange { *busKey { ^\filestate } }
 NebSourcegate    : UGenValueRange { *busKey { ^\sourcegate } }
