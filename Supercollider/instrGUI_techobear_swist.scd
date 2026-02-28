@@ -13,6 +13,9 @@ var filePathBox, audioPathBox;
 var statusLamp, statusAudioPathLamp;
 
 var startKnob, densityKnob, blendKnob, speedKnob, pitchKnob, sizeKnob, overlapKnob, windowKnob;
+
+var buttonFile, buttonReset;
+
 var upperText;
 var background_color = Color.new255(0, 0, 40);
 
@@ -51,6 +54,21 @@ StaticText.new(w, Rect(width/1.28, 180, 200, 100)).stringColor_(Color.white).str
 StaticText.new(w, Rect(width/8.25, 180, 200, 100)).stringColor_(Color.white).string_("density").font_(Font("Yuppy TC", 18));
 StaticText.new(w, Rect(width/3.6, 310, 200, 100)).stringColor_(Color.white).string_("blend").font_(Font("Yuppy TC", 18));
 StaticText.new(w, Rect(width/1.6, 310, 200, 100)).stringColor_(Color.white).string_("window").font_(Font("Yuppy TC", 18));
+
+// --- NY HJÄLPFUNKTION FÖR SYNK ---
+~syncGuiToNeb = {
+    "Syncing GUI knobs to Nebulae...".postln;
+    guiAddr.sendMsg("/neb/start", startKnob.value);
+    guiAddr.sendMsg("/neb/density", densityKnob.value);
+    guiAddr.sendMsg("/neb/blend", blendKnob.value);
+    guiAddr.sendMsg("/neb/speed", speedKnob.value);
+    guiAddr.sendMsg("/neb/pitch", pitchKnob.value);
+    guiAddr.sendMsg("/neb/size", sizeKnob.value);
+    guiAddr.sendMsg("/neb/overlap", overlapKnob.value);
+    guiAddr.sendMsg("/neb/window", windowKnob.value);
+    guiAddr.sendMsg("/neb/file", buttonFile.value);
+    guiAddr.sendMsg("/neb/reset", buttonReset.value);
+};
 
 // HELPERS
 ~bindKnob = { |knob, oscName|
@@ -144,6 +162,40 @@ audioPathBox.action_({ |field|
     };
 });
 
+
+buttonFile = Button.new(w, Rect(50, 420, 40, 40))
+		.states_([
+			["", Color.black, Color.white],
+			["", Color.black, Color.gray]
+		])
+		.action_({ |btn|
+			guiAddr.sendMsg("/neb/file", btn.value);
+			("Sent OSC /neb/file: " ++ btn.value).postln;
+		});
+
+	buttonReset = Button.new(w, Rect(width-90, 420, 40, 40))
+		.states_([
+			["", Color.black, Color.white],
+			["", Color.black, Color.gray]
+		])
+		.action_({ |btn|
+			guiAddr.sendMsg("/neb/reset", btn.value);
+			("Sent OSC /neb/reset: " ++ btn.value).postln;
+		});
+
+	StaticText.new(w, Rect(45, 400, 50, 20))
+		.string_("file")
+		.stringColor_(Color.white)
+		.font_(Font("Yuppy TC", 14))
+		.align_(\center);
+
+	StaticText.new(w, Rect(width-95, 400, 50, 20))
+		.string_("reset")
+		.stringColor_(Color.white)
+		.font_(Font("Yuppy TC", 14))
+		.align_(\center);
+
+
 // INITIAL STATE FOR AUDIO LAMP
 if(NebInterface.audioPath.notNil && File.exists(NebInterface.audioPath)) {
     statusAudioPathLamp.setProperty(\color, Color.green);
@@ -180,6 +232,7 @@ w.view.keyDownAction_ { |view, char, mods|
 	thisProcess.openUDPPort(3011);
     OSCdef(\instrup, { |msg|
         {
+			~syncGuiToNeb.value;
             "GUI is up!".postln;
             statusLamp.setProperty(\color, Color.green);
             statusLamp.refresh;
@@ -203,3 +256,12 @@ w.onClose_({ Window.closeAll; s.freeAll; });
 
 
 s.freeAll();
+
+
+
+
+guiAddr.sendMsg("/neb/file", 1.0);
+guiAddr.sendMsg("/neb/reset", 1.0);
+//Vänta
+guiAddr.sendMsg("/neb/file", 0.0);
+guiAddr.sendMsg("/neb/reset", 0.0);
