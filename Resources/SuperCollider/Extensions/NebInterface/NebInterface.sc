@@ -275,11 +275,13 @@ NebReset : UGenValueRange {
 	*/
 
 }
-NebFreeze        : UGenValueRange { *busKey { ^\freeze } }
 NebRecord        : UGenValueRange { *busKey { ^\record } }
-NebSource        : UGenValueRange { *busKey { ^\source } }
+NebFile          : UGenValueRange { *busKey { ^\file } }
 NebFilestate     : UGenValueRange { *busKey { ^\filestate } }
+NebSource        : UGenValueRange { *busKey { ^\source } }
 NebSourcegate    : UGenValueRange { *busKey { ^\sourcegate } }
+NebReset         : UGenValueRange { *busKey { ^\reset } }
+NebFreeze        : UGenValueRange { *busKey { ^\freeze } }
 
 NebSpeed_alt     : UGenValueRange { *busKey { ^\speed_alt } }
 NebPitch_alt     : UGenValueRange { *busKey { ^\pitch_alt } }
