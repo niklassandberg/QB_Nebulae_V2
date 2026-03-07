@@ -252,7 +252,7 @@ class Nebulae(object):
             ).returncode == 0:
                 count += 1
                 if count > 10:
-                    os.system("sudo killall jakcd")
+                    os.system("sudo killall jackd")
                     os.system("sudo killall scsynth")
                     raise TimeoutError("jackd did not die within 1 second")
                 time.sleep(0.2)
@@ -277,7 +277,7 @@ class Nebulae(object):
             floader = fileloader.FileLoader()
             fullPath = floader.copyFileInternaly(fullPathTmp,"/tmp/") #this remove bug if patch will be removed with floader.reload()
             self.kill_bootled()
-            floader.reload() #reloads all the files to be sure
+            floader.reload()
             self.launch_bootled()
             if not os.path.exists(fullPathTmp):
                 fullPath = floader.copyFileInternaly(fullPath,"/home/alarm/sc/") #if no new file, copy it back

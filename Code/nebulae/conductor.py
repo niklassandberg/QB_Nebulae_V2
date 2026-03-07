@@ -29,6 +29,7 @@ gkfreeze chnexport "freeze", 1
 gkreset chnexport "reset", 1
 gkblend chnexport "blend", 1
 gkrecord chnexport "record", 1
+gkrecordreset chnexport "recordreset", 1
 gkfilestate chnexport "filestate", 1
 gksource chnexport "source", 1
 gksourcegate chnexport "sourcegate", 1

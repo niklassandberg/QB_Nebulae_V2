@@ -103,7 +103,7 @@ class ScSend(object):
                 return
 
             addr = "/neb/" + what
-            #self.log.debug("OSC sending: %s", addr)
+            self.log.debug("OSC sending: %s %s", addr,value)
 
             self.values[what] = value
             msg = OSCMessage()
