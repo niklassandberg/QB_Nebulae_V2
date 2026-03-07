@@ -1,0 +1,71 @@
+# Maintainer: Your Name <your@email.com>
+#
+# SuperCollider 3.14.1 — headless build for Arch Linux ARM on Raspberry Pi 4 (aarch64)
+#
+# Headless means: no IDE (scide), no Qt, scsynth + sclang only.
+#
+# Designed to keep all headers and CMake config files so that external
+# UGens (sc3-plugins, FluCoMa, etc.) can be compiled against this install.
+# The `options=(!strip)` line is intentional — stripping removes debug
+# symbols that can help diagnose plugin ABI issues. Remove it if you want
+# a smaller install.
+#
+# To compile an external UGen later, point CMake at the installed headers:
+#   cmake -DSC_PATH=/usr/share/supercollider ...
+# or use the installed CMake config:
+#   cmake -DSuperCollider_DIR=/usr/lib/cmake/SuperCollider ...
+
+pkgname=supercollider-headless
+pkgver=3.14.1
+pkgrel=1
+pkgdesc="SuperCollider audio synthesis server and language (headless, no IDE, RPi4)"
+arch=('aarch64' 'armv7h')
+url="https://supercollider.github.io"
+license=('GPL3')
+depends=(
+    'jack'           # JACK audio — required by scsynth
+    'libsndfile'     # soundfile I/O
+    'fftw'           # FFT used by several built-in UGens
+    'boost-libs'     # Boost runtime libs (regex, filesystem, etc.)
+    'yaml-cpp'       # YAML parsing
+    'udev'           # HID / udev support in sclang
+    'libxt'          # X toolkit stubs (needed even headless for sclang)
+    'alsa-lib'       # ALSA backend (fallback when JACK not running)
+)
+makedepends=(
+    'cmake'
+    'git'
+    'boost'          # Boost headers for compilation
+    'python'         # build scripts
+    'pkgconf'
+)
+provides=('supercollider')
+conflicts=('supercollider')
+
+# Using the official release tarball with submodules baked in.
+# GitHub auto-generated tarballs do NOT include submodules, so we use git.
+source=(
+    "git+https://github.com/supercollider/supercollider.git#tag=Version-${pkgver}"
+)
+sha256sums=('SKIP')   # git source — integrity guaranteed by tag
+
+# ── Build options ─────────────────────────────────────────────────────────────
+# !strip  → keep debug symbols (helpful when building/debugging UGens)
+# !docs   → skip building HTML docs (speeds up build on RPi)
+options=(!strip !docs)
+
+prepare() {
+    cd "${srcdir}/supercollider"
+
+    # Initialise all submodules (nova-tt, hidapi, boost if vendored, etc.)
+    git submodule update --init --recursive
+}
+
+build() {
+    cd "${srcdir}/supercollider"
+
+    # Out-of-tree build directory
+    mkdir -p build
+    cd build
+
+    cmake .. \
