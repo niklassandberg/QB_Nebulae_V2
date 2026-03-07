@@ -3,3 +3,5 @@
 #that because we have root and alarm, Nebulae wants to run in root.
 #But somethimes we want to test in cmd.
 #And then it will by "human error" be user alarm.
+
+#This move will by automatic now if one does a neb_update.zip
