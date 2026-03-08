@@ -36,7 +36,7 @@ makedepends=(
     'cmake'
     'git'
     'boost'          # Boost headers for compilation
-    'python'         # build scripts
+    #'python'         # build scripts
     'pkgconf'
 )
 provides=('supercollider')
@@ -59,6 +59,17 @@ prepare() {
 
     # Initialise all submodules (nova-tt, hidapi, boost if vendored, etc.)
     git submodule update --init --recursive
+
+    # Fix ARM NEON: get() missing return after assert(false) in vec_neon.hpp.
+    # The sed is too broad and also hits set() (void), so use Python to match
+    # the unique context of get() via the /* @} */ comment that follows it.
+    python -c "
+fn = 'external_libraries/nova-simd/vec/vec_neon.hpp'
+content = open(fn).read()
+old = '        assert(false);\n    }\n    /* @} */'
+new = '        assert(false);\n        return 0.f;\n    }\n    /* @} */'
+open(fn, 'w').write(content.replace(old, new, 1))
+"
 }
 
 build() {
@@ -69,3 +80,33 @@ build() {
     cd build
 
     cmake .. \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DAUDIOAPI=jack \
+        -DLIBSCSYNTH=ON \
+        -DSUPERNOVA=OFF \
+        -DSC_IDE=OFF \
+        -DSC_ED=OFF \
+        -DSC_EL=OFF \
+        -DSC_VIM=OFF \
+        -DSC_QT=OFF \
+        -DNO_X11=ON \
+        -DNATIVE=ON \
+        -DCMAKE_C_FLAGS="${CFLAGS}" \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}"
+    cmake --build . --config Release -- -j3
+}
+
+package() {
+    cd "${srcdir}/supercollider/build"
+    make DESTDIR="${pkgdir}" install
+}
+
+# run: nohup makepkg -s --skipchecksums > build.log 2>&1 &
+# sudo pacman -U --disable-sandbox supercollider-headless-3.14.1-1-armv7h.pkg.tar.xz
+#
+# makepkg
+# nohup - "no hang up". It detaches the process from your terminal session so it keeps running even if SSH disconnects.
+# -s - installs missing dependencies automatically
+# -i - installs the package after building
+# --skipchecksums - checksum is not set in the build file abo
