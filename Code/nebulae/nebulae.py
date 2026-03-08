@@ -231,18 +231,18 @@ class Nebulae(object):
     def start_jack(self):
         try:
             if os.system("jack_lsp > /dev/null 2>&1") != 0:
-                os.system("killall jackd") #just to be on the safe side.
-                time.sleep(1) #short sleep to ensure that jackd is killed
-                self.classlog.debug("jackd is not running, starting it now...")
-                cmd = "jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:0 -p256 -n3 -s -r48000 &"
-                os.system(cmd)
-                time.sleep(4) # longer sleep to ensure that jackd is started
-                # wait for server to be fully available
-                os.system("jack_wait -w") #todo: this can be maybe unstable, maybe we need to implement a timeout afterwards
-                time.sleep(2) # todo: we got the thing I just wrote on the previous line, put more sleep and observer what happens.
-                self.classlog.debug("jackd is now running!!!!")
+                self.classlog.debug("jackd is not running, starting service...")
+                os.system("sudo systemctl start jack")
         except Exception as e:
             self.classlog.error("Error in start_jack(): %s", e)
+
+    def wait_for_jack_to_start(self):
+        try:
+            os.system("jack_wait -w")
+            self.classlog.debug("jackd is now running!!!!")
+        except Exception as e:
+            self.classlog.error("Error in wait_for_jack_to_start(): %s", e)
+
 
     def wait_for_jack_to_die(self):
         try:
@@ -252,8 +252,7 @@ class Nebulae(object):
             ).returncode == 0:
                 count += 1
                 if count > 10:
-                    os.system("sudo killall jackd")
-                    os.system("sudo killall scsynth")
+                    os.system("sudo systemctl stop jack")
                     raise TimeoutError("jackd did not die within 1 second")
                 time.sleep(0.2)
                 self.classlog.debug("jackd has not died yet...")
@@ -270,6 +269,8 @@ class Nebulae(object):
                 self.c.cleanup()
                 self.c = None
 
+            self.start_jack()
+
             self.currentInstr = patch
             self.newInstr = patch
 
@@ -283,6 +284,8 @@ class Nebulae(object):
                 fullPath = floader.copyFileInternaly(fullPath,"/home/alarm/sc/") #if no new file, copy it back
             else:
                 fullPath = fullPathTmp
+                
+            self.wait_for_jack_to_start()
 
             self.orc_handle.refreshFileHandler() #also the audio files
 
@@ -314,7 +317,7 @@ class Nebulae(object):
 
     def start_puredata(self, patch):
         try:
-            #self.start_jack()
+            self.start_jack()
             self.log.spill_basic_info()
             self.c_handle = None
             self.currentInstr = patch
@@ -325,7 +328,11 @@ class Nebulae(object):
             fullPath = "/home/alarm/pd/" + patch + ".pd"
             cmd = "pd -rt -callback -nogui -verbose -audiobuf 5".split() if debug else "pd -rt -callback -nogui -audiobuf 5".split()
             cmd.append(fullPath)
+            
+            self.wait_for_jack_to_start()
+            
             self.pt = subprocess.Popen(cmd)
+            
             self.classlog.info('sleeping')
             time.sleep(2)
             self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="puredata")
@@ -443,7 +450,7 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in cleanup_puredata(): %s", e)
         os.system("sudo killall pt")
-        os.system("sudo killall jackd") #chould not be needed but just to be sure
+        os.system("sudo systemctl stop jack")
         self.wait_for_jack_to_die()
         self.pt = None
 
