@@ -55,7 +55,7 @@ StaticText.new(w, Rect(width/8.25, 180, 200, 100)).stringColor_(Color.white).str
 StaticText.new(w, Rect(width/3.6, 310, 200, 100)).stringColor_(Color.white).string_("blend").font_(Font("Yuppy TC", 18));
 StaticText.new(w, Rect(width/1.6, 310, 200, 100)).stringColor_(Color.white).string_("window").font_(Font("Yuppy TC", 18));
 
-// --- NY HJÄLPFUNKTION FÖR SYNK ---
+// --- SYNK Help function ---
 ~syncGuiToNeb = {
     "Syncing GUI knobs to Nebulae...".postln;
     guiAddr.sendMsg("/neb/start", startKnob.value);
