@@ -296,13 +296,13 @@ class Nebulae(object):
                 self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
                 self.st = None #just to be sertain.
-                self.c_handle.waitOnScLang()
 
             self.c_handle.enterSuperColliderMode()
             self.classlog.info("Load patch!")
             #self.kill_bootled() #maybe warning is because scsynth starts??? Moved here
             self.c_handle.loadScSynth(fullPath)
-
+            #self.c_handle.waitOnScLang() #TODO: THIS IT NOT IMPLEMENTED IN NebInterface.sc, should be a at soft reset, remove osc lisener, synthload is done in scd file, add osc lisener for correct handchacke.
+            
             self.kill_bootled()
 
             
