@@ -17,8 +17,6 @@ class PdSend(object):
         self.pd = None
         self.connected = False
 
-        self.connect()
-
     # -------------------------
     # Connection
     # -------------------------
