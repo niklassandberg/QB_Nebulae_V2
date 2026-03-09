@@ -2,31 +2,29 @@ import os.path
 import os
 
 import cherrypy
-  
 import time
 import glob
 import json
-import cherrypy
 import urllib
-import time
 import socket
 from cherrypy.lib import static
-import imp
-#import file_operations
+import sys
 
 current_dir = os.path.dirname(os.path.abspath(__file__))
-
-file_operations = imp.load_source('file_operations', current_dir + '/file_operations.py')
+sys.path.insert(0, current_dir)
+import file_operations
 
 def get_immediate_subdirectories(dir) :
     return [name for name in os.listdir(dir)
             if os.path.isdir(os.path.join(dir, name))]
 
-config = { '/': 
+config = { '/':
         {
  		'tools.staticdir.on': True,
 		'tools.staticdir.dir': current_dir + '/static/',
 		'tools.staticdir.index': 'index.html',
+		'tools.encode.on': True,
+		'tools.encode.encoding': 'utf-8',
         }
 }
 #base = '/'
@@ -35,7 +33,7 @@ config = { '/':
 class Root():
 
     def tester(self, name):
-        return "TESTdf"
+        return b"TESTdf"
         print ("cool")
     tester.exposed = True
 
@@ -49,7 +47,7 @@ class Root():
 
     def download(self, fpath, cb):
         src = file_operations.BASE_DIR + fpath
-        dl = open(src, 'r').read()
+        dl = open(src, 'rb').read()
         fname = os.path.basename(fpath)
         cherrypy.response.headers['content-type']        = 'application/octet-stream'
         cherrypy.response.headers['content-disposition'] = 'attachment; filename={}'.format(fname)
@@ -81,7 +79,7 @@ class Root():
             #os.remove(zip_path)
         
         cherrypy.response.headers['Content-Type'] = "application/json"
-        return '{"files":[{"name":"x","size":'+str(size)+',"url":"na","thumbnailUrl":"na","deleteUrl":"na","deleteType":"DELETE"}]}'
+        return ('{"files":[{"name":"x","size":'+str(size)+',"url":"na","thumbnailUrl":"na","deleteUrl":"na","deleteType":"DELETE"}]}').encode('utf-8')
         
     upload.exposed = True
   
@@ -90,38 +88,45 @@ class Root():
         ret = ''
         if 'operation' in data :
             cherrypy.response.headers['Content-Type'] = "application/json"
+            result = None
             if data['operation'] == 'set_base_dir' :
-                return file_operations.set_base_dir(data['path'])
+                result = file_operations.set_base_dir(data['path'])
             if data['operation'] == 'get_node' :
-                return file_operations.get_node(data['path'])
+                result = file_operations.get_node(data['path'])
             if data['operation'] == 'create_node' :
-                return file_operations.create(data['path'], data['name'])
+                result = file_operations.create(data['path'], data['name'])
             if data['operation'] == 'rename_node' :
-                return file_operations.rename(data['path'], data['name'])
+                result = file_operations.rename(data['path'], data['name'])
             if data['operation'] == 'delete_node' :
-                return file_operations.delete(data['path'])
+                result = file_operations.delete(data['path'])
             if data['operation'] == 'move_node' :
-                return file_operations.move(data['src'], data['dst'])
+                result = file_operations.move(data['src'], data['dst'])
             if data['operation'] == 'copy_node' :
-                return file_operations.copy(data['src'], data['dst'])
+                result = file_operations.copy(data['src'], data['dst'])
             if data['operation'] == 'unzip_node' :
-                return file_operations.unzip(data['path'])
+                result = file_operations.unzip(data['path'])
             if data['operation'] == 'download_node' :
-                return file_operations.download(data['path'])
+                result = file_operations.download(data['path'])
             if data['operation'] == 'zip_node' :
-                return file_operations.zip(data['path'])
+                result = file_operations.zip(data['path'])
             if data['operation'] == 'mount_usb' :
-                return file_operations.mountUSB()
+                result = file_operations.mountUSB()
             if data['operation'] == 'unmount_usb' :
-                return file_operations.unmountUSB()
+                result = file_operations.unmountUSB()
+            if result is not None:
+                return result.encode('utf-8') if isinstance(result, str) else result
               
         else :
             cherrypy.response.headers['Content-Type'] = "application/json"
-            return "no operation specified"
+            return b"no operation specified"
 
     fmdata.exposed = True
 
-cherrypy.server.socket_host = '0.0.0.0' # put the IP adress here
-cherrypy.config.update({'server.socket_port': 80}) # put the port here
+cherrypy.config.update({
+    'server.socket_host': '0.0.0.0',
+    'server.socket_port': 80,
+    'tools.encode.on': True,
+    'tools.encode.encoding': 'utf-8',
+})
 cherrypy.quickstart(Root(), config=config)
 
