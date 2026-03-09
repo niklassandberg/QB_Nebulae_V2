@@ -51,10 +51,19 @@ then
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/sclang.service ]
     then
         echo "updating /etc/systemd/system/sclang.service for next boot up."
-        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/sclang.service > /etc/systemd/system/nsclang.service"
+        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/sclang.service > /etc/systemd/system/sclang.service"
         sudo systemctl --system daemon-reload
         sudo systemctl enable sclang.service
     fi
+    if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/jack.service ]
+    then
+        echo "updating /etc/systemd/system/jack.service for next boot up."
+        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/jack.service > /etc/systemd/system/jack.service"
+        sudo systemctl --system daemon-reload
+        sudo systemctl disable jack.service
+    fi
+    
+    sudo systemctl --system daemon-reload
 
     sudo reboot
 elif [ -d /home/alarm/QB_Nebulae_V2/Code/packages ]

@@ -92,6 +92,8 @@ class Nebulae(object):
 
     def start(self, instr, instr_bank):
         try:
+            #somehow jack starts at startup sometimes, just to be sure...
+            self.wait_for_jack_to_die()
             self.classlog.info("Nebulae Starting")
             if self.currentInstr != self.new_instr:
                 reset_settings_flag = True
