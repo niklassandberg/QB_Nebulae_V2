@@ -187,8 +187,8 @@ class FileLoader(object):
         os.system(cmd)
         self.classlog.info("Launching LED program")
         if mode == 0:
-            fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading"
+            fullCmd = "python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading"
         else:
-            fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loadingusb"
+            fullCmd = "python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loadingusb"
         self.led_process = subprocess.Popen(fullCmd, shell=True)
         self.classlog.info('led process created: ' + str(self.led_process))

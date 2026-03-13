@@ -38,18 +38,17 @@ class ControlHandler(object):
     def synthIsUpStatus(self):
         try:
             retries = 0
-            while not self.scSock.synthIsUpStatus():
-                self.classlog.info("synth is not up yet, waiting...")
+            self.classlog.info("Waiting for synth handshake...")
+            while not self.scSock.synthIsUpEvent.wait(timeout=0.5):
+                self.classlog.info("synth is not up yet, pinging SC...")
+                self.scSock.pingLoaded()
                 retries += 1
                 if retries > 50:
-                    self.classlog.info("Timeout waiting for synth to be up!")
-                    break
-                time.sleep(0.5)
-            if retries >= 50:
-                self.classlog.info("synth is not up after 50 retries!")
-                #sys.exit(50)
+                    self.classlog.error("Synth did not respond after 50 pings, giving up!")
+                    return
+            self.classlog.info("Synth is up!")
         except Exception as e:
-            self.classlog.error("Error in waitForSynthOrDie(): %s", e)
+            self.classlog.error("Error in synthIsUpStatus(): %s", e)
         
     def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='factory'):
         
@@ -99,7 +98,7 @@ class ControlHandler(object):
             
 
         for ctrl in digitalControlList:
-            if self.configData is not None and self.configData.has_key(ctrl):
+            if self.configData is not None and ctrl in self.configData:
                 digitalConfig[ctrl] = self.configData.get(ctrl)
             else:
                 digitalConfig[ctrl] = self.defaultConfig.get(ctrl)
@@ -471,17 +470,17 @@ class ControlHandler(object):
         
 
     def getEditFunctionFlag(self, name):
-        if self.editFunctionFlag.has_key(name):
+        if name in self.editFunctionFlag:
             return self.editFunctionFlag[name]
         else:
             return False
 
     def clearEditFunctionFlag(self,name):
-        if self.editFunctionFlag.has_key(name):
+        if name in self.editFunctionFlag:
             self.editFunctionFlag[name] = False
 
     def setEditFunctionFlag(self,name):
-        if self.editFunctionFlag.has_key(name):
+        if name in self.editFunctionFlag:
             self.editFunctionFlag[name] = True
 
     def sendScOscMessages(self):
@@ -622,7 +621,7 @@ class ControlHandler(object):
                     chn.setIgnoreHID(False)
                 chn.update()
                 #if abs(chn.getValue() - chn.getPrevValue()) > 0.005 and chn.name != "source":
-                if self.modeChangeValues.has_key(chn.name):
+                if chn.name in self.modeChangeValues:
                     if abs(chn.getValue() - self.modeChangeValues[chn.name]) > 0.005:
                         numChanged += 1
                 ## UNIQUE INSTR HANDLING
@@ -650,7 +649,7 @@ class ControlHandler(object):
                                     self.channeldict[chn.name].setIgnoreNextButton()
                                     self.channeldict[chn.name].setValue(1 - self.channeldict[chn.name].getValue())
                                     #self.writeBufferToAudioFile()
-                                    if self.writeThread.isAlive() == False:
+                                    if self.writeThread.is_alive() == False:
                                         self.classlog.info("Write Thread Starting!")
                                         self.writeThread.join()
                                         self.writeThread = threading.Thread(target=self.writeBufferToAudioFile)

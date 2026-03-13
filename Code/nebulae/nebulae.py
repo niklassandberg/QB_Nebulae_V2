@@ -44,7 +44,7 @@ class Nebulae(object):
             # Check the config file for last instr
             if os.path.isfile(self.instr_cfg) and os.path.getsize(self.instr_cfg) > 0:
                 # Get bank/instr from factory
-                with open(self.instr_cfg, 'rb') as f:
+                with open(self.instr_cfg, 'r') as f:
                     self.classlog.info("Reading bootinstr.txt")
                     for line in f:
                         templist = line.strip().split(',')
@@ -114,14 +114,14 @@ class Nebulae(object):
             #self.c.setOption("-iadc") # FOR JACK!!!
             #self.c.setOption("-odac") # FOR JACK!!!
             
-            if configData.has_key("-B"):
+            if "-B" in configData:
                 self.c.setOption("-B"+str(configData.get("-B")[0]))
-            else: 
+            else:
                 self.c.setOption("-B512") # Liberal Buffer
 
             #self.c.setOption("-j "+str(self.getSysCores())) # EXPERMENTAL, see if it works!!
-            
-            if configData.has_key("-b"):
+
+            if "-b" in configData:
                 self.c.setOption("-b"+str(configData.get("-b")[0]))
             self.c.setOption("--realtime")
             self.c.setOption("-+rtaudio=alsa") # Set option for Csound
@@ -213,15 +213,16 @@ class Nebulae(object):
             with open(self.instr_cfg, 'w') as f:
                 self.classlog.debug("bank: %s, instr: %s",self.new_bank,self.new_instr)
                 bankstr = 'bank,'+self.new_bank
-                instrstr = 'instr,'+self.new_instr 
+                instrstr = 'instr,'+self.new_instr
                 f.write(bankstr + '\n')
                 f.write(instrstr + '\n')
-                for line in f:
-                    templist = line.strip().split(',')
-                    if templist[0] == 'bank':
-                        self.new_bank = templist[1]
-                    elif templist[0] == 'instr':
-                        self.new_instr = templist[1] 
+                #TODO: uncomment, maybe dead code. Do testing and see what happens. If working, remove. If now uncomment.
+                #for line in f:
+                #    templist = line.strip().split(',')
+                #    if templist[0] == 'bank':
+                #        self.new_bank = templist[1]
+                #    elif templist[0] == 'instr':
+                #        self.new_instr = templist[1] 
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
         except Exception as e:
@@ -232,7 +233,7 @@ class Nebulae(object):
 
     def start_jack(self):
         try:
-            if os.system("jack_lsp > /dev/null 2>&1") != 0:
+            if os.system("pgrep jackd > /dev/null 2>&1") != 0:
                 self.classlog.debug("jackd is not running, starting service...")
                 os.system("sudo systemctl start jack")
         except Exception as e:
@@ -240,7 +241,15 @@ class Nebulae(object):
 
     def wait_for_jack_to_start(self):
         try:
-            os.system("jack_wait -w")
+            count = 0
+            while subprocess.call(
+                "pgrep jackd", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ) != 0:
+                count += 1
+                if count > 25:
+                    raise TimeoutError("jackd did not start within 5 seconds")
+                time.sleep(0.2)
+                self.classlog.debug("waiting for jackd to start...")
             self.classlog.debug("jackd is now running!!!!")
         except Exception as e:
             self.classlog.error("Error in wait_for_jack_to_start(): %s", e)
@@ -250,8 +259,8 @@ class Nebulae(object):
         try:
             count = 0
             while subprocess.call(
-                ["jack_lsp"], stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            ).returncode == 0:
+                "pgrep jackd", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+            ) == 0:
                 count += 1
                 if count > 10:
                     os.system("sudo systemctl stop jack")
@@ -303,7 +312,6 @@ class Nebulae(object):
             self.classlog.info("Load patch!")
             #self.kill_bootled() #maybe warning is because scsynth starts??? Moved here
             self.c_handle.loadScSynth(fullPath)
-            #self.c_handle.waitOnScLang() #TODO: THIS IT NOT IMPLEMENTED IN NebInterface.sc, should be a at soft reset, remove osc lisener, synthload is done in scd file, add osc lisener for correct handchacke.
             
             self.kill_bootled()
 
@@ -476,7 +484,7 @@ class Nebulae(object):
             cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
             os.system(cmd)
             self.classlog.info("Launching LED program")
-            fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading rainbow"
+            fullCmd = "python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading rainbow"
             self.led_process = subprocess.Popen(fullCmd, shell=True)
             self.classlog.info('led process created: %s', str(self.led_process))
         except Exception as e:
@@ -485,9 +493,9 @@ class Nebulae(object):
     def kill_bootled(self):
         try:
             if self.led_process is not None:
-                self.led_process = None
                 self.classlog.info("Killing LED program")
                 self.led_process.kill()
+                self.led_process = None
         except Exception as e:
             self.classlog.error("Error in kill_bootled(): %s", e)
 

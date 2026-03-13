@@ -557,7 +557,7 @@ class UserInterface(object):
                     self.controlhandler.setInstrSelNumFiles(self.sc_fhandle.numFiles())
 
             if self.clicked_speed() == 1:
-                print "Clicked Speed from Instr Sel"
+                print("Clicked Speed from Instr Sel")
                 self.reload_flag = True 
         else:
             pass

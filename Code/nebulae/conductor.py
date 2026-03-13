@@ -1,5 +1,6 @@
 import filehandler as fh
 import instrparser
+import neb_globals
 import os
 
 class Conductor(object):
@@ -104,7 +105,7 @@ gipeak[] init 100
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
         except:
-            print "Could not write log of current csd"
+            print("Could not write log of current csd")
 
     def numFiles(self):
         return self.filehandler.numFiles();

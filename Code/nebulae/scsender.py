@@ -1,16 +1,14 @@
 # Courtesy of hecanjob/pippi.pd
-# the only documentation find for OSCServer https://www.acmesystems.it/touchosc 
+# the only documentation find for OSCServer https://www.acmesystems.it/touchosc
 
-import sys
 import threading
 import time
-import logging
 
 from classlogger import ClassLogger
 
-sys.path.insert(0, '/home/alarm/QB_Nebulae_V2/Code/nebulae/lib')
-
-from OSC import OSCClient, OSCMessage, OSCServer
+from pythonosc.udp_client import SimpleUDPClient
+from pythonosc.dispatcher import Dispatcher
+from pythonosc.osc_server import ThreadingOSCUDPServer
 
 
 class ScSend(object):
@@ -29,6 +27,7 @@ class ScSend(object):
 
         self.client = None
         self.server = None
+        self.dispatcher = None
         self._connected = False
 
         self._listener_thread = None
@@ -38,15 +37,17 @@ class ScSend(object):
         self.sclangIsReadyLock = threading.Lock()
         self.synthIsUp = False
         self.sclangIsReady = False
+        self.synthIsUpEvent = threading.Event()
 
     # -------------------------
     # Synth status
     # -------------------------
 
-    def scdFileLoaded(self, addr, tags, data, source):
+    def scdFileLoaded(self, addr, *args):
         with self.synthIsUpLock:
             self.log.debug("synth is up!")
             self.synthIsUp = True
+        self.synthIsUpEvent.set()
 
     def synthIsUpStatus(self):
         with self.synthIsUpLock:
@@ -58,8 +59,14 @@ class ScSend(object):
         with self.synthIsUpLock:
             self.log.debug("SET SYNTH TO DOWN!!!")
             self.synthIsUp = False
+        self.synthIsUpEvent.clear()
 
-    def setSclangHandshake(self, addr, tags, data, source):
+    def pingLoaded(self):
+        if self._connected and self.client:
+            self.log.debug("sending /neb/hasbeenloaded ping")
+            self.client.send_message('/neb/hasbeenloaded', 0)
+
+    def setSclangHandshake(self, addr, *args):
         with self.sclangIsReadyLock:
             self.log.debug("sclang handshake!")
             self.sclangIsReady = True
@@ -85,12 +92,9 @@ class ScSend(object):
 
         self.log.info("Connecting")
         try:
-            self.client = OSCClient()
-            self.client.connect((self.rhost, self.rPort))
+            self.client = SimpleUDPClient(self.rhost, self.rPort)
             self._connected = True
-            self.log.info(
-                "Sending to %s:%s", self.rhost, self.rPort)
-
+            self.log.info("Sending to %s:%s", self.rhost, self.rPort)
         except Exception as e:
             self.log.error("Connection failed: %s", e)
 
@@ -103,15 +107,11 @@ class ScSend(object):
                 return
 
             addr = "/neb/" + what
-            self.log.debug("OSC sending: %s %s", addr,value)
+            self.log.debug("OSC sending: %s %s", addr, value)
 
             self.values[what] = value
-            msg = OSCMessage()
-            msg.setAddress(addr)
-            msg.append(value)
-
             if self._connected and self.client:
-                self.client.send(msg)
+                self.client.send_message(addr, value)
         except Exception as e:
             self.log.error("Could not send to: %s", e)
 
@@ -125,7 +125,6 @@ class ScSend(object):
         self._running = True
 
         try:
-            
             self._listener_thread = threading.Thread(
                 target=self._listen_loop)
             self._listener_thread.daemon = True
@@ -140,16 +139,13 @@ class ScSend(object):
             return False
 
     def _listen_loop(self):
-        while self._running:
-            #self.log.debug("_listen_loop: waiting for request")
-            try:
-                self.server.handle_request()
-            except Exception as e:
-                self.log.error("OSC handle_request error: %s", e)
-                time.sleep(1)  # avoid CPU hogging
+        try:
+            self.server.serve_forever()
+        except Exception as e:
+            self.log.error("OSC server error: %s", e)
         self.log.debug("_listen_loop: stopped listening!!!!")
 
-    def _no_dispatch(self, addr, tags, data, source):
+    def _no_dispatch(self, addr, *args):
         try:
             self.log.error("DISPATCH CALLED MISSED!!!: %s", addr)
         except Exception as e:
@@ -161,14 +157,15 @@ class ScSend(object):
 
     def addResiver(self, address, callback):
         try:
-            if self.server is None:
-                self.log.debug("OSCServer create")
-                self.server = OSCServer((self.shost, self.sPort))
-                self.server.addDefaultHandlers()
-                self.server.addMsgHandler('default', self._no_dispatch)
-                self.log.debug("OSCServer default")
+            if self.dispatcher is None:
+                self.log.debug("OSCServer create dispatcher")
+                self.dispatcher = Dispatcher()
+                self.dispatcher.set_default_handler(self._no_dispatch)
             self.log.debug("OSCServer add_listener")
-            self.server.addMsgHandler(address, callback)
+            self.dispatcher.map(address, callback)
+            if self.server is None:
+                self.server = ThreadingOSCUDPServer((self.shost, self.sPort), self.dispatcher)
+                self.log.debug("OSCServer created")
         except Exception as e:
             self.log.error("Failed add_listener: %s", e)
 
@@ -188,7 +185,6 @@ class ScSend(object):
         if self.client is not None:
             try:
                 self.log.info("Closing OSCclient")
-                self.client.close()
                 self._connected = False
                 self.client = None
             except Exception as e:
@@ -200,10 +196,10 @@ class ScSend(object):
         if self.server is not None:
             try:
                 self.log.info("Closing OSC server")
-                #self._running is the Thread run. If server does not close it is still a problem. Cannot be open.
-                self._running = False 
-                self.server.close()
+                self._running = False
+                self.server.shutdown()
                 self.server = None
+                self.dispatcher = None
             except Exception as e:
                 self.log.error("Error closing OSC server: %s", e)
         else:

@@ -43,9 +43,9 @@ class WaveWriter(object):
                 disk = os.statvfs("/mnt/memory")
                 bytesToWrite = length * self.nchannels* self.sampwidth 
                 bytesAvailable = disk.f_bsize * disk.f_bfree
-                print "Calculated length: " + str(length)
-                print "Bytes to write: " + str(bytesToWrite)
-                print "Bytes available: " + str(bytesAvailable)
+                print("Calculated length: " + str(length))
+                print("Bytes to write: " + str(bytesToWrite))
+                print("Bytes available: " + str(bytesAvailable))
                 sublength = 30 * self.framerate # 1 minute at a time
                 # Write Audio File
                 if bytesToWrite < bytesAvailable:
@@ -64,10 +64,10 @@ class WaveWriter(object):
                                 writesize = (length - idx)
                             print("Writing " + str(writesize) + " samples starting at idx: " + str(idx))
                             end = int(writesize + idx)
-                            interleaved_data = np.ravel(np.column_stack((datal[idx:end] * maxamp, datar[idx:end] * maxamp))).astype('int16', copy=False).tostring()
+                            interleaved_data = np.ravel(np.column_stack((datal[idx:end] * maxamp, datar[idx:end] * maxamp))).astype('int16', copy=False).tobytes()
                             idx += writesize
                             out.writeframesraw(interleaved_data)
-                        out.writeframes('')
+                        out.writeframes(b'')
                         out.close()
                         print("Done.")
                         # Update Tracker of number of files.

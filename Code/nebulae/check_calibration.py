@@ -1,18 +1,19 @@
-#!/bin/python2
+#!/usr/bin/env python3
 import os
 from subprocess import Popen
 import switch
 import calibration_collector
 import sys
+import neb_globals
 import time
 
 def launch_bootled():
     cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
     os.system(cmd)
-    print "Launching LED program"
-    fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py calibration"
+    print("Launching LED program")
+    fullCmd = "python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py calibration"
     led_process = Popen(fullCmd, shell=True)
-    print 'led process created: ' + str(led_process)
+    print('led process created: ' + str(led_process))
  
 def kill_bootled():
     cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
@@ -31,7 +32,7 @@ pitch_click.update()
 if pitch_click.state() == True or arg == 'force':
     launch_bootled()
     #time.sleep(2)
-    print 'Calibration commencing'
+    print('Calibration commencing')
     collector.collect()
     # Clear out settings and factory reset
     if neb_globals.remount_fs is True:
@@ -45,7 +46,7 @@ if pitch_click.state() == True or arg == 'force':
     if neb_globals.remount_fs is True:
         os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
 else:
-    print 'Skipping Calibration'
+    print('Skipping Calibration')
 kill_bootled()
 
 

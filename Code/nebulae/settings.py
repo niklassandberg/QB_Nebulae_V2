@@ -54,22 +54,23 @@ class SettingManager(object):
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
         except:
-            print "Could not write .nebsettings file"
+            print("Could not write .nebsettings file")
 
+    #TODO: maybe use??
     def offloadWrite(self):
         if self.writeProcess is not None:
             if not self.writeProcess.is_alive():
                 #try:
                 #self.writeProcess.terminate()
                 self.writeProcess.join()
-                self.writeProcess = Process(target=self.write(), args=(self.write(),))
+                self.writeProcess = Process(target=self.write, args=())
                 self.writeProcess.start()
                 #except:
                     #print 'Could not restart offload_write sub-process.'
                     #print 'Likely OSError: [ErrNo 12] Cannot allocate memory'
         else:
             #try:
-            self.writeProcess = Process(target=self.offloadWrite(), args=(self.offloadWrite,))
+            self.writeProcess = Process(target=self.offloadWrite, args=())
             self.writeProcess.start()
             #except:
             #    print 'Could not start offload_write sub-process.'
@@ -78,13 +79,13 @@ class SettingManager(object):
     def update(self, now):
         self.lastUpdate = now
         self.lines = []
-        for item in self.settingDict.iterkeys():
+        for item in self.settingDict.keys():
             self.settingDict[item] = self.mutableSettings[item]
             line = str(item) + "," + str(self.settingDict[item]) + "\n"
             self.lines.append(line)
 
     def getDefault(self, key):            
-        if self.defaultDict.has_key(key): 
+        if key in self.defaultDict: 
             item = self.defaultDict[key]
             try:
                 out = float(item)
@@ -95,7 +96,7 @@ class SettingManager(object):
             return out
 
     def load(self,key):
-        if self.settingDict.has_key(key): 
+        if key in self.settingDict:
             try:
                 out = float(self.settingDict[key]) 
             except ValueError:
@@ -127,18 +128,18 @@ class SettingManager(object):
             newKey = tempList[0]
             tempList.pop(0)
             if self.configData is not None:
-                if self.configData.has_key(newKey) and '_alt' in newKey:
-                    if isinstance(self.configData[newKey], basestring):
-                        print 'setting ' + newKey + ' to: ' + str(self.configData[newKey])
+                if newKey in self.configData and '_alt' in newKey:
+                    if isinstance(self.configData[newKey], str):
+                        print('setting ' + newKey + ' to: ' + str(self.configData[newKey]))
                         settingsdict[newKey] = self.configData[newKey]
                     else:
                         try:
                             new_val = float(self.configData[newKey][0])
-                            print 'setting ' + newKey + ' to: ' + str(new_val)
+                            print('setting ' + newKey + ' to: ' + str(new_val))
                             settingsdict[newKey] = new_val
                         except ValueError:
                             settingsdict[newKey] = tempList[0]
-                            print 'complex alt settings are not yet supported.'
+                            print('complex alt settings are not yet supported.')
                         if new_val == None:
                             settingsdict[newKey] = tempList[0]
                 else:
@@ -147,7 +148,7 @@ class SettingManager(object):
                 settingsdict[newKey] = tempList[0]
 
     def hasSetting(self, key):
-        if self.settingDict.has_key(key):
+        if key in self.settingDict:
             return True
         else:
             return False
@@ -156,12 +157,12 @@ class SettingManager(object):
         self.mutableSettings[key] = value
 
     def printSettings(self):
-        print "Printing Settings Now"
-        for item in self.settingDict.iterkeys():
-            print str(item) + "," + str(self.settingDict[item])
-        print "Done Printing Settings"
-        print "Printing Defaults Now"
-        for item in self.defaultDict.iterkeys():
-            print str(item) + "," + str(self.defaultDict[item])
-        print "Done Printing Default"
+        print("Printing Settings Now")
+        for item in self.settingDict.keys():
+            print(str(item) + "," + str(self.settingDict[item]))
+        print("Done Printing Settings")
+        print("Printing Defaults Now")
+        for item in self.defaultDict.keys():
+            print(str(item) + "," + str(self.defaultDict[item]))
+        print("Done Printing Default")
 

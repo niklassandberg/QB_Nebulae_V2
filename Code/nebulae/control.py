@@ -223,9 +223,9 @@ class AdcData(object):
             self.curmaxcv = temp_cv_code
         if temp_cv_code < self.curmincv:
             self.curmincv = temp_cv_code
-        print "########### SIGS ########"
-        print "POT: Current Code: " + str(temp_pot_code) + " Translated Value: " + str(self.raw_pot) + " min: " + str(self.curminpot) + " max: " + str(self.curmaxpot) + " range: " + str(self.curmaxpot - self.curminpot) + " channel " + str(self.pot_channel)
-        print "CV:  Current Code: " + str(temp_cv_code) + " Translated Value: " + str(temp_cv) + " min: " + str(self.curmincv) + " max: " + str(self.curmaxcv) + " range: " + str(self.curmaxcv - self.curmincv) + " channel " + str(self.cv_channel)
+        print("########### SIGS ########")
+        print("POT: Current Code: " + str(temp_pot_code) + " Translated Value: " + str(self.raw_pot) + " min: " + str(self.curminpot) + " max: " + str(self.curmaxpot) + " range: " + str(self.curmaxpot - self.curminpot) + " channel " + str(self.pot_channel))
+        print("CV:  Current Code: " + str(temp_cv_code) + " Translated Value: " + str(temp_cv) + " min: " + str(self.curmincv) + " max: " + str(self.curmaxcv) + " range: " + str(self.curmaxcv - self.curmincv) + " channel " + str(self.cv_channel))
 
 
 class StaticData(object):
@@ -572,9 +572,9 @@ class ControlChannel(object):
                         try:
                             val = float(datalist[1])
                         except:
-                            print 'list value is not a floating point number:' + datalist[1]
+                            print('list value is not a floating point number:' + datalist[1])
         except:
-            print 'No file: ' + filepath + filename
+            print('No file: ' + filepath + filename)
         return val 
 
     def update(self):

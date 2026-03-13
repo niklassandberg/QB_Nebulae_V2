@@ -1,4 +1,4 @@
-#!/bin/python2
+#!/usr/bin/env python3
 import os
 from subprocess import Popen
 import switch
@@ -11,7 +11,7 @@ def launch_bootled():
     cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
     os.system(cmd)
     print('Launching LED program')
-    fullCmd = "python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py wifi pulse"
+    fullCmd = "python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py wifi pulse"
     led_process = Popen(fullCmd, shell=True)
     print('led process created: ' + str(led_process))
  

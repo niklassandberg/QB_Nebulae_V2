@@ -15,7 +15,7 @@ class FileHandler(object):
         self.files.sort(key=lambda v: (v.upper(), v[0].islower()))
         self.fileCount = len(self.files)
         if "audio" in directory:
-            print "Audio Directory Detected - Checking Capacity"
+            print("Audio Directory Detected - Checking Capacity")
             self.conformToSize() 
             self.files = self.files_to_load
             self.fileCount = len(self.files)
@@ -26,16 +26,16 @@ class FileHandler(object):
             b = os.path.getsize(f)
             b /= 1024.0 # conform to KB
             b /= 1024.0 # conform to MB
-            print "File: " + str(f) + " is " + str(b) + " MB"
+            print("File: " + str(f) + " is " + str(b) + " MB")
             if self.totalsize + b < self.maximum_capacity:
                 self.totalsize += b
                 self.files_to_load.append(f)
-        print "Total Size: " + str(self.totalsize) + " MB"
-        print "Printing List of Loaded Files"
-        print "============================="
+        print("Total Size: " + str(self.totalsize) + " MB")
+        print("Printing List of Loaded Files")
+        print("=============================")
         for f in self.files_to_load:
-            print f
-        print "============================="
+            print(f)
+        print("=============================")
                 
             
             

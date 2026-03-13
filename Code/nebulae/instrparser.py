@@ -38,7 +38,7 @@ class InstrParser(object):
         return self.instrString
 
     def configEntry(self, name):
-        if self.configDict.has_key(name):
+        if name in self.configDict:
             return self.configDict.get(name)
         else:
             return None
@@ -50,12 +50,12 @@ class InstrParser(object):
         return self.configDict
 
     def printConfigList(self):
-        print "Printing Config Chunk Now"
+        print("Printing Config Chunk Now")
         for configItem in self.configList:
-            print configItem
-        print "Done printing config chunk"
+            print(configItem)
+        print("Done printing config chunk")
 
     def printInstrString(self):
-        print "printing orchestra string"
-        print self.instrString
-        print "done printing orchestra string"
+        print("printing orchestra string")
+        print(self.instrString)
+        print("done printing orchestra string")

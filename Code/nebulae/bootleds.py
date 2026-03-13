@@ -37,7 +37,7 @@ if len(sys.argv) > 1:
     elif arg == "wifi":
         tempc = purple
     else:
-        print "Unknown LED option"
+        print("Unknown LED option")
         tempc = leddriver.Color(r=4095, g=0, b=1024)
     if len(sys.argv) > 2 and sys.argv[2] == "pulse":
         behavior = "pulse"
@@ -47,19 +47,20 @@ if len(sys.argv) > 1:
         behavior = "cycle"
 else:
     tempc = leddriver.Color()
-    print "No argument present, defaulting to white"
-    print "use any of the following arguments:"
-    print "booting (default)"
-    print "loading"
-    print "updating"
-    print "error"
-    print "calibration"
-    print "You can add a second argument to control if the LEDs will cycle or pulse:"
-    print "pulse"
-    print "cycle (default)"
-    print "Example"
-    print "sudo python2 nebulae/bootleds.py loading pulse"
-    
+    print("No argument present, defaulting to white")
+    print("use any of the following arguments:")
+    print("booting (default)")
+    print("loading")
+    print("updating")
+    print("error")
+    print("calibration")
+    print("You can add a second argument to control if the LEDs will cycle or pulse:")
+    print("pulse")
+    print("cycle (default)")
+    print("Example")
+    print("sudo python3 nebulae/bootleds.py loading pulse")
+    raise SystemExit
+
 
 #try:
 while True:

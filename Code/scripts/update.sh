@@ -4,7 +4,7 @@ sudo mount /dev/sda1 /mnt/memory
 if [ -f /mnt/memory/neb_update.zip ]
 then
     sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
-    python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
+    python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
     echo "neb_update.zip detected."
     echo "Commencing Firmware Update Procedure"
     echo "Creating Backup Directories"
@@ -41,7 +41,7 @@ then
     now=$(date +"%a %D - %T")
     echo "$now - Firmware updated to: $VERSION" >> /mnt/memory/neb_log.txt
     rm -rf /mnt/memory/neb_update.zip
-    sudo python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py force
+    sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py force
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service ]
     then
         echo "updating /etc/systemd/system/nebulae.service for next boot up."
@@ -70,7 +70,7 @@ elif [ -d /home/alarm/QB_Nebulae_V2/Code/packages ]
 then
     echo "detected firmware pacakges to install" 
     sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
-    python2 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
+    python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
 
     echo "install web services"
     sudo cp /home/alarm/QB_Nebulae_V2/Code/web/NebFile/NebFile.service /etc/systemd/system
@@ -81,12 +81,10 @@ then
     sudo pacman --noconfirm -U *.tar.xz
     echo "installed packages"
 
-    echo "install pip2"
+    echo "install pip3 packages"
     cd python
-    sudo python2 pip-20.0.2-py2.py3-none-any.whl/pip install --no-index pip-20.0.2-py2.py3-none-any.whl 
-
     echo "installed pip packages"
-    sudo pip2 install *
+    sudo pip3 install *
     cd /home/alarm
 
     rm -rf /home/alarm/QB_Nebulae_V2/Code/packages

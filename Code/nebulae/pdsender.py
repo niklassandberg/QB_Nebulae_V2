@@ -48,7 +48,7 @@ class PdSend(object):
         try:
             for msg in msgs:
                 msg_str = str(msg) + ';'
-                self.pd.send(msg_str)
+                self.pd.send(msg_str.encode('utf-8'))
                 self.log.debug("Sent to PD: %s", msg_str)
         except Exception as e:
             self.log.error("Could not send to PD: %s", e)

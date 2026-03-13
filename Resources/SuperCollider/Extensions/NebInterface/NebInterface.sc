@@ -61,6 +61,7 @@ NebInterface {
 
         OSCdef.new(\loadScFile, { |msg|
             var file = msg[1].asString;
+            OSCdef(\hasBeenLoaded).free; // remove previous handshake listener before loading new file
 			file.load;
         }, '/neb/loadScFile');
 		
@@ -100,9 +101,10 @@ NebInterface {
 	*busValue { |name| ^busValues[name] ? 0.0 }
     
     *ready { |s|
-        SystemClock.sched(2.0, { remote.sendMsg("/sc/up", 0); nil; });
 		storedBuffers = IdentityDictionary.new;
-        remote.sendMsg("/sc/up", 0);
+        OSCdef.new(\hasBeenLoaded, { |msg|
+            remote.sendMsg("/sc/up", 0);
+        }, '/neb/hasbeenloaded');
     }
 	
     *synthDef { |name, defFunc|

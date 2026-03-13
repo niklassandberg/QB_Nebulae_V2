@@ -117,7 +117,7 @@ class DigitalData(object):
                 self.time_held += 1
             if self.time_held > self.long_press_time:
                 if self.longtouch_cb != None:
-                    print "You long pressed a button"
+                    print("You long pressed a button")
                     self.longtouch_cb()
                 self.time_held = 0
         
@@ -333,7 +333,7 @@ class DigitalData(object):
                         self.ignore_next_btrig = True
                         self.button_pressed = False
                         self.time_held = 0
-                        print "You long pressed a button!"
+                        print("You long pressed a button!")
                         self.longtouch_cb()
 
                 if self.ignore_next_btrig is True:
@@ -387,7 +387,7 @@ class DigitalData(object):
                                 b_trig = False
                             self.button_pressed = False
                             self.time_held = 0
-                            print "You long pressed a button!"
+                            print("You long pressed a button!")
                             self.longtouch_cb()
                 else:
                     if self.edge == "rising":
@@ -406,7 +406,7 @@ class DigitalData(object):
                         b_trig = False
                         self.button_pressed = False
                         self.time_held = 0
-                        print "You long pressed a button!"
+                        print("You long pressed a button!")
                         if self.longtouch_cb is not None:
                             self.longtouch_cb()
                     
@@ -453,7 +453,7 @@ class DigitalData(object):
                     b_trig = False
                     self.button_pressed = False
                     self.time_held = 0
-                    print "You long pressed a button!"
+                    print("You long pressed a button!")
                     if self.longtouch_cb is not None:
                         self.longtouch_cb()
             if self.ignore_next_btrig is True:
