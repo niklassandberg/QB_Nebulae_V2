@@ -5,6 +5,7 @@ import ctypes
 import os
 import fileloader
 import neb_globals
+from classlogger import ClassLogger
 
 class WaveWriter(object):
     def __init__(self):
@@ -29,12 +30,13 @@ class WaveWriter(object):
         self.sampwidth = 2 # for int16_t
         self.framerate = 48000
         self.usbloader = fileloader.FileLoader()
+        self.log = ClassLogger.loggerSetup(self)
 
     def WriteStereoWaveFile(self, datal, datar, length):
         success = False
         self.usbloader.mount()
         if self.usbloader.isUSBMounted():
-            print ("USB Mounted, proceeding")
+            self.log.info("USB Mounted, proceeding")
             filename = self.outpath + self.default_name + str(self.num_written) + self.extension
             # Determine Length (Assumes both arrays are same length)
             maxamp = 32767.0
@@ -43,14 +45,14 @@ class WaveWriter(object):
                 disk = os.statvfs("/mnt/memory")
                 bytesToWrite = length * self.nchannels* self.sampwidth 
                 bytesAvailable = disk.f_bsize * disk.f_bfree
-                print("Calculated length: " + str(length))
-                print("Bytes to write: " + str(bytesToWrite))
-                print("Bytes available: " + str(bytesAvailable))
+                self.log.info("Calculated length: " + str(length))
+                self.log.info("Bytes to write: " + str(bytesToWrite))
+                self.log.info("Bytes available: " + str(bytesAvailable))
                 sublength = 30 * self.framerate # 1 minute at a time
                 # Write Audio File
                 if bytesToWrite < bytesAvailable:
                     try:
-                        print("Writing Audio File. . . ")
+                        self.log.info("Writing Audio File. . . ")
                         out = wave.open(filename, 'wb')
                         out.setnframes(length * self.nchannels)
                         out.setnchannels(self.nchannels)
@@ -62,14 +64,14 @@ class WaveWriter(object):
                                 writesize = sublength
                             else:
                                 writesize = (length - idx)
-                            print("Writing " + str(writesize) + " samples starting at idx: " + str(idx))
+                            self.log.debug("Writing " + str(writesize) + " samples starting at idx: " + str(idx))
                             end = int(writesize + idx)
                             interleaved_data = np.ravel(np.column_stack((datal[idx:end] * maxamp, datar[idx:end] * maxamp))).astype('int16', copy=False).tobytes()
                             idx += writesize
                             out.writeframesraw(interleaved_data)
                         out.writeframes(b'')
                         out.close()
-                        print("Done.")
+                        self.log.info("Done.")
                         # Update Tracker of number of files.
                         self.num_written += 1
                         if neb_globals.remount_fs is True:
@@ -80,13 +82,13 @@ class WaveWriter(object):
                             os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
                         success = True
                     except:
-                        print("Could not write file! -- Inspecific Exception")
+                        self.log.error("Could not write file! -- Inspecific Exception")
                 else:
-                    print("Not enough room to write file.")
+                    self.log.warning("Not enough room to write file.")
             else:
-                print("Buffer is empty. Nothing valuable to write.")
+                self.log.warning("Buffer is empty. Nothing valuable to write.")
         else:
-            print("No USB Present -- not storing buffer")
+            self.log.warning("No USB Present -- not storing buffer")
         self.usbloader.umount()
         return success
         

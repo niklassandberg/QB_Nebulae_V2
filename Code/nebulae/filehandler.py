@@ -1,5 +1,6 @@
 import glob
 import os
+from classlogger import ClassLogger
 
 class FileHandler(object):
     def __init__(self, directory, extensions):
@@ -10,12 +11,13 @@ class FileHandler(object):
         self.totalsize = 0
         self.loadedsize = 0
         self.files_to_load = []
+        self.log = ClassLogger.loggerSetup(self)
         for ext in extensions:
             self.files.extend(glob.glob(directory + '*' + ext))
         self.files.sort(key=lambda v: (v.upper(), v[0].islower()))
         self.fileCount = len(self.files)
         if "audio" in directory:
-            print("Audio Directory Detected - Checking Capacity")
+            self.log.info("Audio Directory Detected - Checking Capacity")
             self.conformToSize() 
             self.files = self.files_to_load
             self.fileCount = len(self.files)
@@ -26,16 +28,16 @@ class FileHandler(object):
             b = os.path.getsize(f)
             b /= 1024.0 # conform to KB
             b /= 1024.0 # conform to MB
-            print("File: " + str(f) + " is " + str(b) + " MB")
+            self.log.info("File: " + str(f) + " is " + str(b) + " MB")
             if self.totalsize + b < self.maximum_capacity:
                 self.totalsize += b
                 self.files_to_load.append(f)
-        print("Total Size: " + str(self.totalsize) + " MB")
-        print("Printing List of Loaded Files")
-        print("=============================")
+        self.log.info("Total Size: " + str(self.totalsize) + " MB")
+        self.log.info("Printing List of Loaded Files")
+        self.log.info("=============================")
         for f in self.files_to_load:
-            print(f)
-        print("=============================")
+            self.log.info(f)
+        self.log.info("=============================")
                 
             
             

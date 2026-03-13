@@ -1,9 +1,11 @@
 # Instr File Parser
+from classlogger import ClassLogger
 
 class InstrParser(object):
     def __init__(self):
         self.configDict = dict() # Container for Config Data
         self.instrString = ""
+        self.log = ClassLogger.loggerSetup(self)
 
     def parse(self, filename, path):
         self.clearConfigDict()
@@ -50,12 +52,12 @@ class InstrParser(object):
         return self.configDict
 
     def printConfigList(self):
-        print("Printing Config Chunk Now")
+        self.log.debug("Printing Config Chunk Now")
         for configItem in self.configList:
-            print(configItem)
-        print("Done printing config chunk")
+            self.log.debug(configItem)
+        self.log.debug("Done printing config chunk")
 
     def printInstrString(self):
-        print("printing orchestra string")
-        print(self.instrString)
-        print("done printing orchestra string")
+        self.log.debug("printing orchestra string")
+        self.log.debug(self.instrString)
+        self.log.debug("done printing orchestra string")

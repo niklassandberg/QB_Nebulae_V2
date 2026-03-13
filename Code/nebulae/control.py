@@ -9,6 +9,7 @@ import os
 import digitaldata
 import time
 import nconfig
+from classlogger import ClassLogger
 
 
 # Hardware SPI configuration:
@@ -84,6 +85,7 @@ class AdcData(object):
         self.count = 0
         self.filtPotVal = 0
         self.filtCVVal = 0
+        self.log = ClassLogger.loggerSetup(self)
         #self.smoothCoeff = 0.125
         ##self.smoothCoeff = 0.33
         self.smoothCoeff = defSmoothCoeff
@@ -223,9 +225,9 @@ class AdcData(object):
             self.curmaxcv = temp_cv_code
         if temp_cv_code < self.curmincv:
             self.curmincv = temp_cv_code
-        print("########### SIGS ########")
-        print("POT: Current Code: " + str(temp_pot_code) + " Translated Value: " + str(self.raw_pot) + " min: " + str(self.curminpot) + " max: " + str(self.curmaxpot) + " range: " + str(self.curmaxpot - self.curminpot) + " channel " + str(self.pot_channel))
-        print("CV:  Current Code: " + str(temp_cv_code) + " Translated Value: " + str(temp_cv) + " min: " + str(self.curmincv) + " max: " + str(self.curmaxcv) + " range: " + str(self.curmaxcv - self.curmincv) + " channel " + str(self.cv_channel))
+        self.log.debug("########### SIGS ########")
+        self.log.debug("POT: Current Code: " + str(temp_pot_code) + " Translated Value: " + str(self.raw_pot) + " min: " + str(self.curminpot) + " max: " + str(self.curmaxpot) + " range: " + str(self.curmaxpot - self.curminpot) + " channel " + str(self.pot_channel))
+        self.log.debug("CV:  Current Code: " + str(temp_cv_code) + " Translated Value: " + str(temp_cv) + " min: " + str(self.curmincv) + " max: " + str(self.curmaxcv) + " range: " + str(self.curmaxcv - self.curmincv) + " channel " + str(self.cv_channel))
 
 
 class StaticData(object):
@@ -437,6 +439,7 @@ class ControlChannel(object):
         GPIO.output(CV_Sel_Pin, True)
         GPIO.output(POT_Sel_Pin, True)
         self.csound = csound
+        self.log = ClassLogger.loggerSetup(self)
         self.name = name
         if self.csound is not None:
             chn, _ = self.csound.channelPtr(self.name, 
@@ -572,9 +575,9 @@ class ControlChannel(object):
                         try:
                             val = float(datalist[1])
                         except:
-                            print('list value is not a floating point number:' + datalist[1])
+                            self.log.error('list value is not a floating point number:' + datalist[1])
         except:
-            print('No file: ' + filepath + filename)
+            self.log.error('No file: ' + filepath + filename)
         return val 
 
     def update(self):

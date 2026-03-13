@@ -11,13 +11,13 @@ _hifi_output_handle = None
 _enable = True
 
 def _log_message(message):
-    print("NebMixer Message: " + message + "\n")
+    pass #print("NebMixer Message: " + message + "\n")
 
 def _log_error(message):
-    print("NebMixer Error: " + message + "\n")
+    pass #print("NebMixer Error: " + message + "\n")
 
 def _log_warning(message):
-    print("NebMixer Warning: " + message + "\n")
+    pass #print("NebMixer Warning: " + message + "\n")
 
 def _loadlid():
     global _libasound

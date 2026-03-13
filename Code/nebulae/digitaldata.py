@@ -2,6 +2,7 @@ import switch as libSwitch
 import shiftregister as libSR
 import time
 import random
+from classlogger import ClassLogger
 # Defines for Button/Gate Types
 BUTTON_GATE_GPIO = 0
 BUTTON_SR_GATE_GPIO = 1
@@ -41,6 +42,7 @@ class DigitalData(object):
         self.ignore_button = False
         self.ignore_gate = False
         self.trig_source = "button"
+        self.log = ClassLogger.loggerSetup(self)
         ## hacky way for making sure LED stays low
         ## when file is >0 at bootup
         if name == "file":
@@ -117,7 +119,7 @@ class DigitalData(object):
                 self.time_held += 1
             if self.time_held > self.long_press_time:
                 if self.longtouch_cb != None:
-                    print("You long pressed a button")
+                    self.log.debug("You long pressed a button")
                     self.longtouch_cb()
                 self.time_held = 0
         
@@ -333,7 +335,7 @@ class DigitalData(object):
                         self.ignore_next_btrig = True
                         self.button_pressed = False
                         self.time_held = 0
-                        print("You long pressed a button!")
+                        self.log.debug("You long pressed a button!")
                         self.longtouch_cb()
 
                 if self.ignore_next_btrig is True:
@@ -387,7 +389,7 @@ class DigitalData(object):
                                 b_trig = False
                             self.button_pressed = False
                             self.time_held = 0
-                            print("You long pressed a button!")
+                            self.log.debug("You long pressed a button!")
                             self.longtouch_cb()
                 else:
                     if self.edge == "rising":
@@ -406,7 +408,7 @@ class DigitalData(object):
                         b_trig = False
                         self.button_pressed = False
                         self.time_held = 0
-                        print("You long pressed a button!")
+                        self.log.debug("You long pressed a button!")
                         if self.longtouch_cb is not None:
                             self.longtouch_cb()
                     

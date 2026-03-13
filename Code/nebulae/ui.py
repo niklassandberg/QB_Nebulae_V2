@@ -7,6 +7,7 @@ import filehandler
 import threading
 import time
 import random
+from classlogger import ClassLogger
 
 sr_pin_next = 7
 sr_pin_source_gate = 6
@@ -19,6 +20,7 @@ sr_pin_reset = 0
 class UserInterface(object):
     def __init__(self, controlhandler):
         self.controlhandler = controlhandler
+        self.log = ClassLogger.loggerSetup(self)
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
         self.currentInstr = None
@@ -557,7 +559,7 @@ class UserInterface(object):
                     self.controlhandler.setInstrSelNumFiles(self.sc_fhandle.numFiles())
 
             if self.clicked_speed() == 1:
-                print("Clicked Speed from Instr Sel")
+                self.log.debug("Clicked Speed from Instr Sel")
                 self.reload_flag = True 
         else:
             pass
