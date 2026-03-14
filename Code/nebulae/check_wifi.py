@@ -32,8 +32,6 @@ speed_click.update()
 if speed_click.state() == True or arg == 'force':
     launch_bootled()
     print('starting wifi')
-    os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt_lite.sh")
-
     os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
 
     os.system("systemctl start nebwifi.service")

@@ -7,9 +7,8 @@ sudo modprobe i2c-dev
 echo "starting bootup LEDs"
 python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py booting &
 
-#moved this to check_wifi, so we can optimised based on if using wifi or not
-#echo "optimizing system."
-#sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt.sh
+echo "optimizing system."
+sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt_lite.sh
 sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_wifi.py
 
 echo "checking for firmware update"
