@@ -29,19 +29,19 @@ else:
 GPIO.setmode(GPIO.BCM)
 speed_click = switch.Switch(26) # Speed Encoder Click GPIO
 speed_click.update() 
-#if speed_click.state() == True or arg == 'force':
-launch_bootled()
-print('starting wifi')
-os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt_lite.sh")
+if speed_click.state() == True or arg == 'force':
+    launch_bootled()
+    print('starting wifi')
+    os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt_lite.sh")
 
-os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
+    os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
 
-os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/start_wifi.sh")
-if neb_globals.remount_fs is True:
-    os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
-#else:
-#    os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt.sh")
-#    print('Skipping wifi')
+    os.system("systemctl start nebwifi.service")
+    if neb_globals.remount_fs is True:
+        os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
+    else:
+        os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt.sh")
+        print('Skipping wifi')
 kill_bootled()
 
 

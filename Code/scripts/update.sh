@@ -62,6 +62,12 @@ then
         sudo systemctl --system daemon-reload
         sudo systemctl disable jack.service
     fi
+    if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/nebwifi.service ]
+    then
+        echo "updating /etc/systemd/system/nebwifi.service for next boot up."
+        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/nebwifi.service > /etc/systemd/system/nebwifi.service"
+        sudo systemctl --system daemon-reload
+    fi
     
     sudo systemctl --system daemon-reload
 
