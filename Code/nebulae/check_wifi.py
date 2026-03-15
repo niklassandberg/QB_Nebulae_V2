@@ -29,7 +29,7 @@ else:
 GPIO.setmode(GPIO.BCM)
 speed_click = switch.Switch(26) # Speed Encoder Click GPIO
 speed_click.update() 
-if speed_click.state() == True or arg == 'force':
+if speed_click.state() == True or arg == 'force' or neb_globals.wifi_always_on:
     launch_bootled()
     print('starting wifi')
     os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")

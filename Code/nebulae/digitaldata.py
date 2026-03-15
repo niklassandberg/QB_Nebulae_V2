@@ -35,7 +35,7 @@ class DigitalData(object):
         self.output_period = 10 # output to csound pulse in ms
         self.led_period = 40 # output to csound pulse in ms
         #self.long_press_time = 63
-        self.ignore_next_btrig = False
+        self.ignore_next_btrig = edge == "falling"
         self.name = name
         self.longtouch_cb = longtouch_cb
         self.inc_order = inc_order
