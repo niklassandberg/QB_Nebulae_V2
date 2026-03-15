@@ -45,5 +45,8 @@ sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
 
 echo "Running Nebulae"
 
-sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py &> /tmp/nebulae_stdout.log
-#sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+#dont do this, you cannot run sudo systemctl stop nebulae.service then.
+#just run: journalctl -u nebulae.service -f for full history, add -n 100 for instance to see last 100 lines
+#sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py &> /tmp/nebulae_stdout.log
+
+sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
