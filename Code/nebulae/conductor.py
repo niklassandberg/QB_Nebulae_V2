@@ -37,7 +37,9 @@ gksourcegate chnexport "sourcegate", 1
 gksourcebuttonstate chnexport "source_state", 1
 gkeol chnexport "eol", 2
 gksizestatus chnexport "sizestatus", 2
-gkrecordstatus chnexport "recordstatus", 2
+gkrecordstatus chnexport "recordstatus", 3
+gkrecordretrig chnexport "recordretrig", 3
+gkBufferEmpty init 1
 gkbufferlength chnexport "bufferlength", 2
 ; secondary controls
 gkloopstart_alt chnexport "start_alt", 1

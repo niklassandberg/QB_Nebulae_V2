@@ -116,6 +116,7 @@ class ControlHandler(object):
             control.ControlChannel(self.csound, "reset", 0, "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=RESET_GATE_PIN,button_pin=libSR.PIN_RESET, config=digitalConfig.get("reset")),
             control.ControlChannel(self.csound, "freeze", self.settings.load("freeze"), "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=FREEZE_GATE_PIN,button_pin=libSR.PIN_FREEZE, config=digitalConfig.get("freeze")),
             control.ControlChannel(self.csound, "record", self.settings.load("record"), "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=RECORD_GATE_PIN,button_pin=libSR.PIN_RECORD, config=digitalConfig.get("record")),
+            control.ControlChannel(self.csound, "recordreset", self.settings.load("record"), "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=RECORD_GATE_PIN,button_pin=libSR.PIN_RECORD, config=digitalConfig.get("recordreset")),
             control.ControlChannel(self.csound, "file", self.settings.load("file"), "digital", data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=NEXT_GATE_PIN,button_pin=libSR.PIN_NEXT,config=digitalConfig.get("file"),maximum=self.numFiles),
             control.ControlChannel(self.csound, "source", self.settings.load("source"), "digital",data_channel=BUTTON_GATE_SR, sr=self.shiftReg, gate_pin=libSR.PIN_SOURCE_GATE,button_pin=libSR.PIN_SOURCE, config=digitalConfig.get("source")),
             control.ControlChannel(self.csound, "filestate", 0, "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=NEXT_GATE_PIN,button_pin=libSR.PIN_NEXT, config=digitalConfig.get("filestate")) ,
@@ -179,6 +180,8 @@ class ControlHandler(object):
         #self.writeThread = threading.Thread(target=self.writeBufferToAudioFile())
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
+        
+        self.record_status_comm.clearState()
         
     def startScOscServer(self):
         self.classlog.info("startScOscServer")
@@ -467,6 +470,12 @@ class ControlHandler(object):
                 if self.getValue("source") == 1:
                     self.setValue("pitch", 0.6)
                     self.setValue("speed", 0.625)
+            else:
+                self.setAltValue("record", 0)
+        elif self.record_status_comm.risingEdge() == True:
+            self.classlog.info("Starting recording.")
+            if self.getAltValue("record_alt") == 1:
+                self.setValue("record", 1)
         
 
     def getEditFunctionFlag(self, name):
