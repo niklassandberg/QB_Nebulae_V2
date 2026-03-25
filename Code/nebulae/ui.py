@@ -51,24 +51,20 @@ class UserInterface(object):
         self.pitch_amount = self.controlhandler.getStaticVal("pitch")
         self.mode = "normal"
 
-        user_dir = "/home/alarm/instr/"
-        factory_dir = "/home/alarm/QB_Nebulae_V2/Code/instr/"
+        instr_dir = "/home/alarm/instr/"
         pd_dir = "/home/alarm/pd/"
         sc_dir = "/home/alarm/sc/"
-        self.factoryinstr_fhandle = filehandler.FileHandler(factory_dir, ".instr")
-        self.userinstr_fhandle = filehandler.FileHandler(user_dir, ".instr")
-        self.puredata_fhandle = filehandler.FileHandler(pd_dir, ".pd")
+        self.instr_fhandle = filehandler.FileHandler(instr_dir, ".instr")
         self.sc_fhandle = filehandler.FileHandler(sc_dir, ".scd")
+        self.puredata_fhandle = filehandler.FileHandler(pd_dir, ".pd")
         cur_bank = self.controlhandler.getInstrSelBank()
         self.bank_shift_counter = 0
-        if cur_bank == "factory":
-            cnt = self.factoryinstr_fhandle.numFiles()
-        elif cur_bank == "user":
-            cnt = self.userinstr_fhandle.numFiles()
-        elif cur_bank == "puredata":
-            cnt = self.puredata_fhandle.numFiles()
+        if cur_bank == "instr":
+            cnt = self.instr_fhandle.numFiles()
         elif cur_bank == "supercollider":
             cnt = self.sc_fhandle.numFiles()
+        elif cur_bank == "puredata":
+            cnt = self.puredata_fhandle.numFiles()
         self.bank_counter = 0
         self.controlhandler.setInstrSelNumFiles(cnt)
         self.reload_flag = False # Flag to reload the whole program. 
@@ -134,14 +130,12 @@ class UserInterface(object):
                 self.animateEditFunction("record")
             elif self.controlhandler.getEditFunctionFlag("source") == True:
                 self.animateEditFunction("source")
-                if self.controlhandler.currentBank == 'factory':
-                    tempidx = self.factoryinstr_fhandle.getIndex(self.controlhandler.currentInstr) 
-                elif self.controlhandler.currentBank == 'user':
-                    tempidx = self.userinstr_fhandle.getIndex(self.controlhandler.currentInstr) 
-                elif self.controlhandler.currentBank == 'puredata':
-                    tempidx = self.puredata_fhandle.getIndex(self.controlhandler.currentInstr) 
-                elif self.controlhandler.currentBank == 'supercollider':
+                if self.controlhandler.currentBank == 'instr':
+                    tempidx = self.instr_fhandle.getIndex(self.controlhandler.currentInstr)
+                elif self.controlhandler.currentBank == 'sc':
                     tempidx = self.sc_fhandle.getIndex(self.controlhandler.currentInstr)
+                elif self.controlhandler.currentBank == 'puredata':
+                    tempidx = self.puredata_fhandle.getIndex(self.controlhandler.currentInstr)
                 self.controlhandler.setInstrSelIdx(tempidx)
                 self.controlhandler.setInstrSelBank(self.controlhandler.currentBank)
                 self.reload_flag = True
@@ -185,14 +179,12 @@ class UserInterface(object):
         values = [0, 0, 0, 0, 0]
         blink = (self.now & 500) > 250
         low_bright = 0.3
-        if self.controlhandler.getInstrSelBank() == "factory":
-            f_handle = self.factoryinstr_fhandle 
-        elif self.controlhandler.getInstrSelBank() == "user":
-            f_handle = self.userinstr_fhandle
-        elif self.controlhandler.getInstrSelBank() == "puredata":
-            f_handle = self.puredata_fhandle
+        if self.controlhandler.getInstrSelBank() == "instr":
+            f_handle = self.instr_fhandle
         elif self.controlhandler.getInstrSelBank() == "supercollider":
             f_handle = self.sc_fhandle
+        elif self.controlhandler.getInstrSelBank() == "puredata":
+            f_handle = self.puredata_fhandle
         idx = self.controlhandler.getInstrSelIdx()
         offset = self.controlhandler.getInstrSelOffset()
         for i in range(0, 5):
@@ -504,18 +496,15 @@ class UserInterface(object):
             self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), speed_pos_bright)
         elif mode == "instr selector":
             tempc = libDriver.Color(0, 4095, 0)
-            if self.controlhandler.getInstrSelBank() == "factory":
+            if self.controlhandler.getInstrSelBank() == "instr":
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 1.0)
                 self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
-            elif self.controlhandler.getInstrSelBank() == "user":
+            elif self.controlhandler.getInstrSelBank() == "supercollider":
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 1.0)
                 self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 0.0)
             elif self.controlhandler.getInstrSelBank() == "puredata":
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 0.0)
                 self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
-            elif self.controlhandler.getInstrSelBank() == "supercollider":
-                self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 0.0)
-                self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 0.0)
         else:
             pass
     
@@ -545,18 +534,15 @@ class UserInterface(object):
             if self.bank_shift_counter >= thresh or self.bank_shift_counter <= -1 * thresh:
                 self.bank_shift_counter = 0
                 self.bank_counter = self.bank_counter+1
-                if self.bank_counter%4 == 0:
-                    self.controlhandler.setInstrSelBank("factory")
-                    self.controlhandler.setInstrSelNumFiles(self.factoryinstr_fhandle.numFiles())
-                if self.bank_counter%4 == 1:
-                    self.controlhandler.setInstrSelBank("user")
-                    self.controlhandler.setInstrSelNumFiles(self.userinstr_fhandle.numFiles())
-                if self.bank_counter%4 == 2:
-                    self.controlhandler.setInstrSelBank("puredata")
-                    self.controlhandler.setInstrSelNumFiles(self.puredata_fhandle.numFiles())
-                if self.bank_counter%4 == 3: 
+                if self.bank_counter%3 == 0:
+                    self.controlhandler.setInstrSelBank("instr")
+                    self.controlhandler.setInstrSelNumFiles(self.instr_fhandle.numFiles())
+                if self.bank_counter%3 == 1:
                     self.controlhandler.setInstrSelBank("supercollider")
                     self.controlhandler.setInstrSelNumFiles(self.sc_fhandle.numFiles())
+                if self.bank_counter%3 == 2:
+                    self.controlhandler.setInstrSelBank("puredata")
+                    self.controlhandler.setInstrSelNumFiles(self.puredata_fhandle.numFiles())
 
             if self.clicked_speed() == 1:
                 self.log.debug("Clicked Speed from Instr Sel")
@@ -752,14 +738,12 @@ class UserInterface(object):
                 self.restoreDefaultsFlag = True
                 self.controlhandler.restoreAltToDefault()
         elif mode == "instr selector":
-            if self.controlhandler.getInstrSelBank() == "factory":
-                f_handle = self.factoryinstr_fhandle 
-            elif self.controlhandler.getInstrSelBank() == "user":
-                f_handle = self.userinstr_fhandle
-            elif self.controlhandler.getInstrSelBank() == "puredata":
-                f_handle = self.puredata_fhandle
+            if self.controlhandler.getInstrSelBank() == "instr":
+                f_handle = self.instr_fhandle
             elif self.controlhandler.getInstrSelBank() == "supercollider":
                 f_handle = self.sc_fhandle
+            elif self.controlhandler.getInstrSelBank() == "puredata":
+                f_handle = self.puredata_fhandle
             if f_handle.numFiles() <= 5:
                 offset = 0
             else:
@@ -821,37 +805,32 @@ class UserInterface(object):
 
     def getNewInstr(self):
         idx = self.controlhandler.getInstrSelIdx()
-        if self.controlhandler.getInstrSelBank() == "factory":
-            if idx < self.factoryinstr_fhandle.numFiles():
-                instr = self.factoryinstr_fhandle.getFilename(idx)
-        elif self.controlhandler.getInstrSelBank() == "user":
-            if idx < self.userinstr_fhandle.numFiles():
-                instr = self.userinstr_fhandle.getFilename(idx)
-        elif self.controlhandler.getInstrSelBank() == "puredata":
-            if idx < self.puredata_fhandle.numFiles():
-                instr = self.puredata_fhandle.getFilename(idx)
+        if self.controlhandler.getInstrSelBank() == "instr":
+            if idx < self.instr_fhandle.numFiles():
+                instr = self.instr_fhandle.getFilename(idx)
         elif self.controlhandler.getInstrSelBank() == "supercollider":
             if idx < self.sc_fhandle.numFiles():
                 instr = self.sc_fhandle.getFilename(idx)
+        elif self.controlhandler.getInstrSelBank() == "puredata":
+            if idx < self.puredata_fhandle.numFiles():
+                instr = self.puredata_fhandle.getFilename(idx)
         return instr
 
     def setCurrentInstr(self, instr):
         self.currentInstr = instr
         self.controlhandler.setCurrentInstr(instr)
-        handlers = [self.factoryinstr_fhandle, self.userinstr_fhandle, self.sc_fhandle ,self.puredata_fhandle]
+        handlers = [self.instr_fhandle, self.sc_fhandle, self.puredata_fhandle]
         tempbank = None
         for handle in handlers:
             tempidx = handle.getIndex(instr)
             if tempidx is not None:
                 tempbank = handle
-                if tempbank == self.factoryinstr_fhandle:
-                    tempbankname = "factory"
-                elif tempbank == self.userinstr_fhandle:
-                    tempbankname = "user"
-                elif tempbank == self.puredata_fhandle:
-                    tempbankname = "puredata"
+                if tempbank == self.instr_fhandle:
+                    tempbankname = "instr"
                 elif tempbank == self.sc_fhandle:
                     tempbankname = "supercollider"
+                elif tempbank == self.puredata_fhandle:
+                    tempbankname = "puredata"
                 break
         # Only udpate if the instr is found
         if tempidx is not None and tempbank is not None:

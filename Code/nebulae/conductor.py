@@ -6,7 +6,7 @@ import os
 class Conductor(object):
     def __init__(self):
         self.instrparser = instrparser.InstrParser()
-        self.source = "factory"
+        self.source = "instr"
         self.instr = "granular_test"
         self.dir = "/home/alarm/audio/"
 
@@ -37,8 +37,8 @@ gksourcegate chnexport "sourcegate", 1
 gksourcebuttonstate chnexport "source_state", 1
 gkeol chnexport "eol", 2
 gksizestatus chnexport "sizestatus", 2
-gkrecordstatus chnexport "recordstatus", 3
-gkrecordretrig chnexport "recordretrig", 3
+gkrecordstatus chnexport "recordstatus", 2
+gkrecordretrig init 0
 gkBufferEmpty init 1
 gkbufferlength chnexport "bufferlength", 2
 ; secondary controls
@@ -63,10 +63,7 @@ gipeak[] init 100
             """
 
         self.source = instr_bank
-        if self.source == "user": # Changed "is" to "==" (danishfurniture)
-            self.instr_dir = "/home/alarm/instr/"
-        else: #if self.source is "factory":
-            self.instr_dir = "/home/alarm/QB_Nebulae_V2/Code/instr/"
+        self.instr_dir = "/home/alarm/instr/"
         self.instrparser.parse(self.instr, self.instr_dir)
         if self.instrparser.configEntry("ksmps") is not None:
             self.preamble = "ksmps = " + str(self.instrparser.configEntry("ksmps")[0]) + "\n"

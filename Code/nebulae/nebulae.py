@@ -53,29 +53,32 @@ class Nebulae(object):
                         elif templist[0] == 'instr':
                             self.new_instr = templist[1] 
             else:
-                self.new_bank = 'factory'
-                self.new_instr = 'a_granularlooper'
+                self.new_bank = 'instr'
+                instr_path = "/home/alarm/instr/"
+                factory_path = "/home/alarm/QB_Nebulae_V2/Code/instr/"
+                if not os.path.isdir(instr_path) or not os.listdir(instr_path):
+                    os.makedirs(instr_path, exist_ok=True)
+                    os.system("cp " + factory_path + "a_granularlooper.instr " + instr_path)
+                instr_files = sorted([f[:-6] for f in os.listdir(instr_path) if f.endswith(".instr")])
+                self.new_instr = instr_files[0] if instr_files else 'a_granularlooper'
             self.currentInstr = self.new_instr
             # Check if file exists, else reset to default instr
-            factory_path = "/home/alarm/QB_Nebulae_V2/Code/instr/"
-            user_path = "/home/alarm/instr/"
+            instr_path = "/home/alarm/instr/"
             pd_path = "/home/alarm/pd/"
             sc_path = "/home/alarm/sc/"
-            if self.new_bank == 'factory': 
-                path = factory_path + self.new_instr + '.instr'
-            elif self.new_bank == 'user':
-                path = user_path + self.new_instr + '.instr'
-            elif self.new_bank == 'puredata':
-                path = pd_path + self.new_instr + '.pd'
+            if self.new_bank == 'instr':
+                path = instr_path + self.new_instr + '.instr'
             elif self.new_bank == 'supercollider':
                 path = sc_path + self.new_instr + '.scd'
+            elif self.new_bank == 'puredata':
+                path = pd_path + self.new_instr + '.pd'
             else:
                 self.classlog.info("bank not recocgnized.")
                 self.classlog.info(self.new_bank)
-                path = 'factory'
+                path = instr_path + 'a_granularlooper.instr'
             if os.path.isfile(path) == False:
                 # set to default instr
-                self.new_bank = 'factory'
+                self.new_bank = 'instr'
                 self.new_instr = 'a_granularlooper'
             self.first_run = True
             nebmixer.disable()

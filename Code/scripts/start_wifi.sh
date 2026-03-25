@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#enable network so wpa_suppliant gets active (buzz sound).
+sudo rfkill unblock wifi
+
 mount /dev/sda1 /mnt/memory
 rm /home/alarm/wifi.log
 if [ -f /mnt/memory/wlan0-wifi ]

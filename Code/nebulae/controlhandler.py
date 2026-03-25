@@ -50,7 +50,7 @@ class ControlHandler(object):
         except Exception as e:
             self.classlog.error("Error in synthIsUpStatus(): %s", e)
         
-    def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='factory'):
+    def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='instr'):
         
         self.classlog = ClassLogger.loggerSetup(self)
 
@@ -88,7 +88,7 @@ class ControlHandler(object):
 
         # Set Defaults/Read Config
         digitalControlList = [
-            "reset", "freeze", "source", "record", "file", "filestate", "sourcegate",
+            "reset", "freeze", "source", "record", "recordreset", "file", "filestate", "sourcegate",
             "reset_alt", "freeze_alt", "source_alt", "record_alt", "file_alt"
         ]
         self.defaultConfig = dict()
@@ -164,7 +164,7 @@ class ControlHandler(object):
         self.sourceStateCtrl = control.ControlChannel(self.csound, "source_state", 0, "digital",data_channel=BUTTON_SR_GATE_NONE, sr=self.shiftReg, button_pin=libSR.PIN_SOURCE, config=["momentary","rising"], longtouch_cb=None)
         ## Clean this stuff up.
         self.instr_sel_idx = 0
-        self.instr_sel_bank = "factory"
+        self.instr_sel_bank = "instr"
         self.instr_sel_offset = 0
         self.instr_sel_numfiles = 5
         self.eol_comm = control.CommChannel(self.csound, "eol")
@@ -180,8 +180,6 @@ class ControlHandler(object):
         #self.writeThread = threading.Thread(target=self.writeBufferToAudioFile())
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
-        
-        self.record_status_comm.clearState()
         
     def startScOscServer(self):
         self.classlog.info("startScOscServer")
@@ -393,6 +391,7 @@ class ControlHandler(object):
             self.defaultConfig["source"] = ["latching", "falling"]
             self.defaultConfig["file"] = ["incremental", "falling"]
             self.defaultConfig["record"] = ["latching", "rising"]
+            self.defaultConfig["recordreset"] = ["momentary", "rising"]
             self.defaultConfig["filestate"] = ["momentary", "rising"]
             self.defaultConfig["reset_alt"] = ["triggered", "rising"]
             self.defaultConfig["freeze_alt"] = ["latching", "rising"]
@@ -408,6 +407,7 @@ class ControlHandler(object):
             self.defaultConfig["source"] = ["latching", "falling"]
             self.defaultConfig["file"] = ["latching", "falling"]
             self.defaultConfig["record"] = ["latching", "rising"]
+            self.defaultConfig["recordreset"] = ["momentary", "rising"]
             self.defaultConfig["filestate"] = ["momentary", "rising"]
             self.defaultConfig["reset_alt"] = ["triggered", "rising"]
             self.defaultConfig["freeze_alt"] = ["latching", "rising"]
@@ -470,12 +470,6 @@ class ControlHandler(object):
                 if self.getValue("source") == 1:
                     self.setValue("pitch", 0.6)
                     self.setValue("speed", 0.625)
-            else:
-                self.setAltValue("record", 0)
-        elif self.record_status_comm.risingEdge() == True:
-            self.classlog.info("Starting recording.")
-            if self.getAltValue("record_alt") == 1:
-                self.setValue("record", 1)
         
 
     def getEditFunctionFlag(self, name):

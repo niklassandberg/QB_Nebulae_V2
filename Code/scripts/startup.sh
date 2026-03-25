@@ -1,5 +1,8 @@
 #!/bin/bash
 
+#disable network by default so wpa_suppliant does not make any sounds.
+sudo rfkill block wifi
+
 #sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
 
 echo "enable i2c"
