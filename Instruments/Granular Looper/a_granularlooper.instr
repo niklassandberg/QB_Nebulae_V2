@@ -8,7 +8,6 @@ reset,triggered,rising
 source,latching,falling
 file,incremental,falling
 record,latching,falling
-recordreset,momentary,rising
 nebconfigend
 
 ;previous settings:
@@ -39,10 +38,6 @@ nebconfigend
 ; gkreset - trigger input for restarting phase to loopstart point.
 ; gksource - toggles between live input source/and usb file sources
 ; gkrecord - toggles record behavior
-; gkrecordreset - 
-;     if == 1 at start and gkrecord == 0 and gkreset == 1 and kBufferEmpty == 1: put gkrecord = 1
-;     if == 1 at start and gkrecord == 1 and gkreset == 1: put gkrecord = 0, gkrecordretrig = 1 (gkrecordretrig will just be used inside csound)
-;     if == 1 at start and gkrecord == 0 and gkrecordretrig == 1: gkrecord = 1, gkrecordretrig = 0
 ; gkfilestate - state of the record button, independent of latching state and gate input.
 ; gksourcegate - separate state for the source gate input. used to repurpose separately from source control.
 ; gkeol - end of sample 1 or 0 essentially high while the sample is resetting to 0.
@@ -221,7 +216,7 @@ giPanMixL   ftgen   0, 0, 256, -24, giPanL, 0.0, 0.0
 giPanMixR   ftgen   0, 0, 256, -24, giPanR, 0.0, 0.0
 
 instr 1
-
+printf "instrument 1 running\n", 1
 ;;;;;;;;;;;;;;;;;;
 ;;;;; inits ;;;;;;
 ;;;;;;;;;;;;;;;;;;
@@ -293,24 +288,6 @@ if gkblend < 0.01 then
 gkblend = 0.0
 elseif gkblend > 0.99 then
 gkblend = 1.0
-endif
-
-
-; gkrecordreset logic
-if gkrecordreset == 1 && gkrecord_alt == 1 then
-    printf "outer block: gkrecord=%d gkreset=%d gkBufferEmpty=%d\n", 1, gkrecord, gkreset, gkBufferEmpty
-    if gkrecord == 0 && gkreset == 1 && gkBufferEmpty == 1 then
-        printf "BAM gkrecordreset 1\n", 1
-        gkrecordstatus = 1
-    elseif gkrecord == 1 && gkreset == 1 then
-        printf "BAM gkrecordreset 2\n", 1
-        gkrecordstatus = 0
-        gkrecordretrig = 1
-    elseif gkrecord == 0 && gkrecordretrig == 1 then
-        printf "BAM gkrecordreset 3\n", 1
-        gkrecordstatus = 1
-        gkrecordretrig = 0
-    endif
 endif
 
 

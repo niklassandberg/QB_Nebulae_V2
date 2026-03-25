@@ -88,7 +88,7 @@ class ControlHandler(object):
 
         # Set Defaults/Read Config
         digitalControlList = [
-            "reset", "freeze", "source", "record", "recordreset", "file", "filestate", "sourcegate",
+            "reset", "freeze", "source", "record", "file", "filestate", "sourcegate",
             "reset_alt", "freeze_alt", "source_alt", "record_alt", "file_alt"
         ]
         self.defaultConfig = dict()
@@ -116,7 +116,6 @@ class ControlHandler(object):
             control.ControlChannel(self.csound, "reset", 0, "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=RESET_GATE_PIN,button_pin=libSR.PIN_RESET, config=digitalConfig.get("reset")),
             control.ControlChannel(self.csound, "freeze", self.settings.load("freeze"), "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=FREEZE_GATE_PIN,button_pin=libSR.PIN_FREEZE, config=digitalConfig.get("freeze")),
             control.ControlChannel(self.csound, "record", self.settings.load("record"), "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=RECORD_GATE_PIN,button_pin=libSR.PIN_RECORD, config=digitalConfig.get("record")),
-            control.ControlChannel(self.csound, "recordreset", self.settings.load("record"), "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=RECORD_GATE_PIN,button_pin=libSR.PIN_RECORD, config=digitalConfig.get("recordreset")),
             control.ControlChannel(self.csound, "file", self.settings.load("file"), "digital", data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=NEXT_GATE_PIN,button_pin=libSR.PIN_NEXT,config=digitalConfig.get("file"),maximum=self.numFiles),
             control.ControlChannel(self.csound, "source", self.settings.load("source"), "digital",data_channel=BUTTON_GATE_SR, sr=self.shiftReg, gate_pin=libSR.PIN_SOURCE_GATE,button_pin=libSR.PIN_SOURCE, config=digitalConfig.get("source")),
             control.ControlChannel(self.csound, "filestate", 0, "digital",data_channel=BUTTON_SR_GATE_GPIO, sr=self.shiftReg, gate_pin=NEXT_GATE_PIN,button_pin=libSR.PIN_NEXT, config=digitalConfig.get("filestate")) ,
@@ -391,7 +390,6 @@ class ControlHandler(object):
             self.defaultConfig["source"] = ["latching", "falling"]
             self.defaultConfig["file"] = ["incremental", "falling"]
             self.defaultConfig["record"] = ["latching", "rising"]
-            self.defaultConfig["recordreset"] = ["momentary", "rising"]
             self.defaultConfig["filestate"] = ["momentary", "rising"]
             self.defaultConfig["reset_alt"] = ["triggered", "rising"]
             self.defaultConfig["freeze_alt"] = ["latching", "rising"]
@@ -407,7 +405,6 @@ class ControlHandler(object):
             self.defaultConfig["source"] = ["latching", "falling"]
             self.defaultConfig["file"] = ["latching", "falling"]
             self.defaultConfig["record"] = ["latching", "rising"]
-            self.defaultConfig["recordreset"] = ["momentary", "rising"]
             self.defaultConfig["filestate"] = ["momentary", "rising"]
             self.defaultConfig["reset_alt"] = ["triggered", "rising"]
             self.defaultConfig["freeze_alt"] = ["latching", "rising"]

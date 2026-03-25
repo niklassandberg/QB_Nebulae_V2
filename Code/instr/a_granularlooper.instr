@@ -290,9 +290,14 @@ gkblend = 0.0
 elseif gkblend > 0.99 then
 gkblend = 1.0
 endif
+
+
+
+
 ;;;;;;;;;;;;;;;;;;;
 ;; phasor config ;;
 ;;;;;;;;;;;;;;;;;;;
+
 ; Set Start and Size
 if gksource == 1 then
     kfilesr = sr
@@ -675,7 +680,9 @@ endif
 if krecordA == 1 then
     krecordA = 0
     krecordB = 1
-    gkrecordstatus = 1
+    if gkrecord_alt == 0 then
+        gkrecordstatus = 1
+    endif
 endif
 if gksource == 0 then
     ablenddry = 0
@@ -739,7 +746,12 @@ if koverlaptrig == 1 then
 endif
 
 ;printks "kbuffsize: %f\t krecordedbuff: %f\tkglen: %f\tklen: %f\tkloopscalar: %f\tkloopstart: %f\n",0.1, kbuffsize, krecordedbuff, kglen, klen, kloopscalar, kloopstart
-gkrecordstatus = krecordB
+if gkrecord_alt == 0 then
+    gkrecordstatus = krecordB
+endif
+
+gkBufferEmpty = kBufferEmpty
+
 ;;;;;;;;;;;;;;;;;;;;;;
 ;;;;; processing ;;;;;
 ;;;;;;;;;;;;;;;;;;;;;;
@@ -977,7 +989,29 @@ instr 2
     ibufftotalsize = p5
     isectionsize = int(4 * sr)
     inumsections = int(ibufftotalsize/isectionsize) + 1
-
+    /*
+    if kresting == 0 then 
+        kresting = ksmps ; for now this makes it ~not very clicky~.
+        if kcopychannel == 0 then
+            kcopystart = ibuffstart + (kcopysection * isectionsize)
+            tablemix giftLB, kcopystart, isectionsize, giftLA, kcopystart, 1.0, giftEmpty, 0, 0.0
+            kcopysection += 1
+            if kcopysection > inumsections - 1 then
+                kcopychannel += 1
+                kcopysection = 0
+            endif
+        else
+            kcopystart = ibuffstart + (kcopysection * isectionsize)
+            tablemix giftRB, kcopystart, isectionsize, giftRA, kcopystart, 1.0, giftEmpty, 0, 0.0
+            kcopysection += 1
+            if kcopysection > inumsections - 1 then
+                turnoff
+            endif
+        endif
+    else
+        kresting -= 1 
+    endif
+    */
     if kresting == 0 then
         kresting = ksmps / 4
         kcopystart = ibuffstart + (kcopysection * isectionsize)
@@ -995,5 +1029,16 @@ instr 2
     else 
         kresting -= 1
     endif
+        
+
+    /*
+    if kcopychannel = 0
+        tablemix giftLB, ibuffstart, ibufftotalsize, giftLA, ibuffstart, 1.0, giftEmpty, 0, 0.0
+        kchannel += 1
+    else
+        tablemix giftRB, ibuffstart, ibufftotalsize, giftRA, ibuffstart, 1.0, giftEmpty, 0, 0.0
+        turnoff
+    endif
+    */
     
 endin
