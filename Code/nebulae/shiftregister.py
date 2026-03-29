@@ -12,6 +12,8 @@ PIN_FREEZE = 4
 PIN_RECORD = 3
 PIN_RESET = 0
 
+DEBOUNCE_COUNT = 3
+
 class ShiftRegister(object):
     def __init__(self):
         self.delay = 10
@@ -19,22 +21,32 @@ class ShiftRegister(object):
         self.dataPin = 5
         self.latchPin = 15
         self.clkPin = 14
-        GPIO.setup(self.dataPin, GPIO.IN) 
+        GPIO.setup(self.dataPin, GPIO.IN)
         GPIO.setup(self.clkPin, GPIO.OUT)
         GPIO.setup(self.latchPin, GPIO.OUT)
         self.values = [-1, -1, -1, -1, -1, -1, -1, -1]
         self.prevValues = [-1, -1, -1, -1, -1, -1, -1, -1]
+        self.rawValues = [-1, -1, -1, -1, -1, -1, -1, -1]
+        self.stableCount = [0, 0, 0, 0, 0, 0, 0, 0]
 
     def update(self):
         for i in range(0, 8):
             self.prevValues[i] = self.values[i]
         GPIO.output(self.latchPin, 1)
         GPIO.output(self.latchPin, 0)
+        raw = [0] * 8
         for i in range(0, 8):
             GPIO.output(self.clkPin, 0)
-            self.values[i] = GPIO.input(self.dataPin)
+            raw[i] = GPIO.input(self.dataPin)
             GPIO.output(self.clkPin, 1)
-            #time.sleep(0.001) 
+        for i in range(0, 8):
+            if raw[i] == self.rawValues[i]:
+                self.stableCount[i] = min(self.stableCount[i] + 1, DEBOUNCE_COUNT)
+            else:
+                self.rawValues[i] = raw[i]
+                self.stableCount[i] = 0
+            if self.stableCount[i] >= DEBOUNCE_COUNT:
+                self.values[i] = raw[i]
     
     def risingEdge(self, index):
         if (self.values[index] == 1 and self.prevValues[index] == 0):
