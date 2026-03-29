@@ -75,6 +75,7 @@ class UserInterface(object):
         self.blink = False
         self.time_pressed_pitch = self.now
         self.ignore_next_pitch_click = False
+        self.pitch_octave_mode = False
         self.ignore_next_speed_click = False
         self.clearAllLEDs()
         self.restoreDefaultsFlag = False

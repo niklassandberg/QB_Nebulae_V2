@@ -106,7 +106,7 @@ class ControlHandler(object):
 
         self.channels = [
             control.ControlChannel(self.csound, "speed", self.settings.load("speed"), "hybrid", 1),
-            control.ControlChannel(self.csound, "pitch", self.settings.load("pitch"), "hybrid", 4),
+            control.ControlChannel(self.csound, "pitch", self.settings.load("pitch"), "hybrid", 4, static_values=[0.0, 0.2, 0.4, 0.6, 0.8, 1.0]),
             control.ControlChannel(self.csound, "start", self.settings.load("start"), "analog", 0), 
             control.ControlChannel(self.csound, "size", self.settings.load("size"), "analog", 6),
             control.ControlChannel(self.csound, "blend",self.settings.load("blend"),"analog", 1, cvchn=3),

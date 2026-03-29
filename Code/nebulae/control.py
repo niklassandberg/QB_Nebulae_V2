@@ -244,7 +244,7 @@ class StaticData(object):
 
 
 class HybridData(object):
-    def __init__(self, channel, name, minimum, maximum, init_val):
+    def __init__(self, channel, name, minimum, maximum, init_val, static_values=None):
         self.init  = init_val
         self.curVal = init_val
         self.curMin = init_val
@@ -286,6 +286,9 @@ class HybridData(object):
         self.last_in = 0.0
         self.staticVal = init_val
         self.ignore_enc = False
+        self.snap_to_values = static_values
+        self.snap_mode = False
+        self.snap_idx = 0
 
     def getValue(self):
         #hyst_amt = 0.0025
@@ -322,10 +325,14 @@ class HybridData(object):
                         temp_rnd = factor_val_neg
             elif self.name == "pitch":
                 tolerance = 0.00208
-                octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]  
-                for octave in octaves:
+                snap_idx = 0
+                for octave in self.snap_to_values if self.snap_to_values is not None else []:
+                    if temp_rnd >= octave :
+                        self.snap_idx = snap_idx
+                    else:
+                        snap_idx = snap_idx + 1
                     if temp_rnd < octave + tolerance and temp_rnd > octave - tolerance:
-                        temp_rnd = octave 
+                        temp_rnd = octave
             if self.stablized is True:
                 if abs(temp_rnd - self.curVal) > 0.005:
                     self.stablized = False
@@ -363,6 +370,9 @@ class HybridData(object):
 
     def setIgnoreHID(self, state):
         self.ignore_enc = state
+
+    def setSnapMode(self, state):
+        self.snap_mode = state
 
     def setValue(self, value):
         if self.ignore_enc is False:
@@ -430,7 +440,7 @@ class CommChannel(object):
 
 # Single Channel of Control Information
 class ControlChannel(object):
-    def __init__(self, csound, name, init = 0, source="static", data_channel=-1, sr=None, gate_pin=-1, button_pin=-1, config=None, minimum=0, maximum=1, cvchn=-2, longtouch_cb=None):
+    def __init__(self, csound, name, init = 0, source="static", data_channel=-1, sr=None, gate_pin=-1, button_pin=-1, config=None, minimum=0, maximum=1, cvchn=-2, longtouch_cb=None, static_values=None):
         GPIO.setmode(GPIO.BCM)
         GPIO.setwarnings(False)
         GPIO.setup(CV_Sel_Pin, GPIO.OUT)
@@ -471,7 +481,7 @@ class ControlChannel(object):
             if self.sr is not None:
                 self.input = digitaldata.DigitalData(self.name, data_channel, gate_pin, button_pin, self.sr, mode, edge, maximum, longtouch_cb, init_val=init)
         elif (source is "hybrid"):
-            self.input = HybridData(data_channel, self.name, minimum, maximum, init_val=self.curVal)
+            self.input = HybridData(data_channel, self.name, minimum, maximum, init_val=self.curVal, static_values=static_values)
 
         if self.source == "analog" or self.source == "hybrid": 
             new_offset = self.gatherOffset(self.name)
@@ -539,6 +549,15 @@ class ControlChannel(object):
     def setIgnoreHID(self, state):
         if self.source == "analog" or self.source == "digital" or self.source == "hybrid":
             self.input.setIgnoreHID(state)
+
+    def setSnapMode(self, state):
+        if self.source == "hybrid":
+            self.input.setSnapMode(state)
+
+    def getSnapValues(self):
+        if self.source == "hybrid":
+            return self.input.snap_to_values
+        return None
 
     def setIgnoreGate(self, state):
         if self.source == "digital":
