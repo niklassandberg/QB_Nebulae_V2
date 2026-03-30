@@ -1,47 +1,68 @@
+/*
+nebconfigbegin
+ksmps,64
+-B,2048
+-b,512
+sr,48000
+freeze,latching,rising
+reset,triggered,rising
+source,latching,falling
+file,incremental,falling
+record,triggered,rising
+nebconfigend
+*/
+
 s.waitForBoot {
 
     NebInterface.init(s);
     s.sync;
 
+    NebInterface.onBusChange(\record, { |val|
+        if( val > 0.5 ) {
+            "GOT RECORD ON".postln;
+            ~clouds.set(\record_sc, 0);
+            AppClock.sched( s.options.blockSize / s.sampleRate, {
+                "SET RECORD OFF".postln;
+                ~clouds.set(\record_sc, 1);
+                nil;
+            });
+        };
+    });
+
     NebInterface.synthDef(\micouds, {
 
         var pos = NebStart.kr(0, 1).varlag(0.2);
-        var dens =NebDensity.kr(0,1);
+        var dens = NebDensity.kr(0,1);
         var drywet = NebBlend.kr(0, 1);
-
-        //var spread = NebSpeed.kr(0, 1);
-
         var nebSpeed = (NebSpeed.kr(0, 1)*8 - 4)*(-1);
-
         var pit = LinExp.kr(NebPitch.kr(0, 1).varlag(0.1), 0, 1, 0.125, 4.0);
-
         var size = NebOverlap.kr(0, 1);
-        var nebSize = NebSize.kr(0, 1).varlag(0.2); //apperantly rvb == spread
+        var nebSize = NebSize.kr(0, 1).varlag(0.2);
         var tex = NebWindow.kr(0, 1);
         var freeze = NebFreeze.kr(0, 1);
-        var record = (freeze < 0.5) * NebRecord.kr(0,1);
-
+        //var record = \record_sc.kr(0);
+        var record = NebRecord.kr(0,1);
         var trig = NebReset.kr(0, 1);
-
-        var fb = 0.0;
-        var rvb = 0.0;
-
-        //var mode = NebSource.kr(0, 1);
-
-        //var modeChoosen = (mode<0.5)*0 + (mode>=0.5)*3;
+        //var record_reset = \record_reset.kr(0);
+        var record_reset = NebFilestate.kr(0, 1);
 
         var input = SoundIn.ar([0, 1]);
+        var feedback = LocalIn.ar(2, 0.0);
 
         var out = MiClouds.ar(
-            input, pit: pit, pos: pos, size: size, dens: dens, tex: tex, drywet: drywet, in_gain: 1.0,
-                    spread: 1.0, rvb: rvb, fb: fb, freeze: freeze, mode: 3, trig: trig, speed: ((record<0.5)*nebSpeed), ssize: ((record<0.5)*size), record: record
+            feedback, pit: pit, pos: pos, size: size, dens: dens, tex: tex, drywet: 1, in_gain: 2.0,
+            spread: 1.0, rvb: 0.0, fb: 0.0, freeze: freeze, mode: 3, trig: trig,
+            speed: nebSpeed, ssize: size, record: record, record_reset: record_reset
         );
 
-        Out.ar(0, Limiter.ar(out*8, 1.0, 0.01));
+        var fb_output = XFade2.ar(out, input, drywet * 2 - 1);
+
+        LocalOut.ar(fb_output);
+        //Out.ar(0, Limiter.ar(fb_output, 1.0, 0.01));
+        Out.ar(0, feedback);
     }).add;
 
     s.sync;
     ~clouds = Synth(\micouds);
     NebInterface.ready(s);
 };
-
