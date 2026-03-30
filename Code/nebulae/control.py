@@ -518,6 +518,10 @@ class ControlChannel(object):
         if self.source == "digital":
             self.input.setIgnoreNextButton()
 
+    def setOutputPeriod(self, ms):
+        if self.source == "digital":
+            self.input.setOutputPeriod(ms)
+
     def setModeChangeValue(self, value_to_resist):
         if self.source == "analog":
             self.input.setResistVal(value_to_resist)

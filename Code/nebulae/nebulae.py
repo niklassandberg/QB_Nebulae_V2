@@ -306,7 +306,10 @@ class Nebulae(object):
             reuseResources = fromSC and self.c_handle is not None
             if not reuseResources:
                 self.classlog.info("init SuperCollider handle")
-                self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="supercollider")
+                self.orc_handle.instrparser.parse(patch, "/home/alarm/sc/", ext='.scd')
+                scConfigData = self.orc_handle.getConfigDict()
+                scConfigData['output_period'] = [self.orc_handle.instrparser.getOutputPeriod()]
+                self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), scConfigData, self.new_instr, bank="supercollider")
                 self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
                 self.st = None #just to be sertain.

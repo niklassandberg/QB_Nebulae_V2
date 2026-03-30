@@ -7,12 +7,12 @@ class InstrParser(object):
         self.instrString = ""
         self.log = ClassLogger.loggerSetup(self)
 
-    def parse(self, filename, path):
+    def parse(self, filename, path, ext='.instr'):
         self.clearConfigDict()
         withinConfigChunk = False
         configList = []
         orcString = ""
-        with open(path + filename + '.instr', 'r') as myfile:
+        with open(path + filename + ext, 'r') as myfile:
             for line in myfile:
                 if line.startswith("nebconfigbegin"):
                     withinConfigChunk = True
@@ -50,6 +50,12 @@ class InstrParser(object):
 
     def getConfigDict(self):
         return self.configDict
+
+    def getOutputPeriod(self):
+        ksmps = int(self.configDict.get("ksmps", ["128"])[0])
+        sr = int(self.configDict.get("sr", ["48000"])[0])
+        block_ms = (ksmps / float(sr)) * 1000.0
+        return max(100.0, block_ms * 75)
 
     def printConfigList(self):
         self.log.debug("Printing Config Chunk Now")

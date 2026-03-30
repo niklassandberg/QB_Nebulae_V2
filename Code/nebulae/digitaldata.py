@@ -97,6 +97,9 @@ class DigitalData(object):
     def setIgnoreNextButton(self):
         self.ignore_next_btrig = True
 
+    def setOutputPeriod(self, ms):
+        self.output_period = ms
+
     def getTrigSource(self):
         return self.trig_source
 

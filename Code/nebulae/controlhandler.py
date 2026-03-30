@@ -97,6 +97,10 @@ class ControlHandler(object):
 
             
 
+        output_period = None
+        if self.configData is not None and 'output_period' in self.configData:
+            output_period = float(self.configData['output_period'][0])
+
         for ctrl in digitalControlList:
             if self.configData is not None and ctrl in self.configData:
                 digitalConfig[ctrl] = self.configData.get(ctrl)
@@ -143,6 +147,11 @@ class ControlHandler(object):
             control.ControlChannel(self.csound, "reset_instr", 0, "digital",data_channel=BUTTON_SR_GATE_NONE, sr=self.shiftReg, button_pin=libSR.PIN_RESET, config=["triggered", "falling"]),
             control.ControlChannel(self.csound, "freeze_instr", 0, "digital",data_channel=BUTTON_SR_GATE_NONE, sr=self.shiftReg, button_pin=libSR.PIN_FREEZE, config=["triggered","falling"])
             ]
+        if output_period is not None:
+            for chn in self.channels + self.altchannels:
+                if digitalConfig.get(chn.name, [None])[0] == "triggered":
+                    chn.setOutputPeriod(output_period)
+
         self.channeldict = {}
         for chn in self.channels:
             self.channeldict[chn.name] = chn
@@ -303,7 +312,7 @@ class ControlHandler(object):
         if not self.scSock.is_connected():
             self.classlog.info("def enterSuperColliderMode: Connecting to SC Socket")
             self.scSock.connectSender()
-        for chn in self.channels: #for each of the adc channels
+        for chn in self.channels:
             self.classlog.info("def enterSuperColliderMode: initializin %s value %s", chn.name, str(chn.getValue()))
         
     def enterNormalMode(self):
