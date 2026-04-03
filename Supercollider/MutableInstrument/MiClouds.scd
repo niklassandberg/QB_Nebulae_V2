@@ -40,26 +40,22 @@ s.waitForBoot {
         var nebSize = NebSize.kr(0, 1).varlag(0.2);
         var tex = NebWindow.kr(0, 1);
         var freeze = NebFreeze.kr(0, 1);
-        //var record = \record_sc.kr(0);
         var record = NebRecord.kr(0,1);
-        var trig = NebReset.kr(0, 1);
-        //var record_reset = \record_reset.kr(0);
+        var record_mode = NebRecord_alt.kr(0,1);
+        var trig = NebFile.kr(0, 1);
+        var phase_reset = NebReset.kr(0, 1);
         var record_reset = NebFilestate.kr(0, 1);
 
         var input = SoundIn.ar([0, 1]);
-        var feedback = LocalIn.ar(2, 0.0);
 
         var out = MiClouds.ar(
-            feedback, pit: pit, pos: pos, size: size, dens: dens, tex: tex, drywet: 1, in_gain: 2.0,
+            input, pit: pit, pos: pos, size: size, dens: dens, tex: tex, drywet: drywet, in_gain: 2.0,
             spread: 1.0, rvb: 0.0, fb: 0.0, freeze: freeze, mode: 3, trig: trig,
-            speed: nebSpeed, ssize: size, record: record, record_reset: record_reset
+            speed: nebSpeed, ssize: nebSize, record: record, record_reset: record_reset, phasor_reset: phase_reset, record_mode: record_mode
         );
 
-        var fb_output = XFade2.ar(out, input, drywet * 2 - 1);
-
-        LocalOut.ar(fb_output);
         //Out.ar(0, Limiter.ar(fb_output, 1.0, 0.01));
-        Out.ar(0, feedback);
+        Out.ar(0, out);
     }).add;
 
     s.sync;
