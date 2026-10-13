@@ -309,6 +309,7 @@ class Nebulae(object):
                 self.orc_handle.instrparser.parse(patch, "/home/alarm/sc/", ext='.scd')
                 scConfigData = self.orc_handle.getConfigDict()
                 scConfigData['output_period'] = [self.orc_handle.instrparser.getOutputPeriod()]
+                scConfigData['holdwithtrigg_combos'] = self.orc_handle.instrparser.getHoldWithTriggCombos()
                 self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), scConfigData, self.new_instr, bank="supercollider")
                 self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
@@ -342,7 +343,7 @@ class Nebulae(object):
             floader.reload()
             self.orc_handle.refreshFileHandler()
             fullPath = "/home/alarm/pd/" + patch + ".pd"
-            cmd = "pd -rt -callback -nogui -verbose -audiobuf 5".split() if debug else "pd -rt -callback -nogui -audiobuf 5".split()
+            cmd = "pd -jack -rt -callback -nogui -verbose".split() if debug else "pd -jack -rt -callback -nogui".split()
             cmd.append(fullPath)
             
             self.wait_for_jack_to_start()
