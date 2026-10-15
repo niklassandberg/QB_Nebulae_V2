@@ -36,6 +36,7 @@ class DigitalData(object):
         self.led_period = 40 # output to csound pulse in ms
         #self.long_press_time = 63
         self.ignore_next_btrig = edge == "falling"
+        self.ignore_until_release = False
         self.name = name
         self.longtouch_cb = longtouch_cb
         self.inc_order = inc_order
@@ -96,6 +97,12 @@ class DigitalData(object):
 
     def setIgnoreNextButton(self):
         self.ignore_next_btrig = True
+
+    def setIgnoredUntilReleased(self):
+        self.ignore_until_release = True
+
+    def isIgnoredUntilReleased(self):
+        return self.ignore_until_release
 
     def setOutputPeriod(self, ms):
         self.output_period = ms
@@ -174,38 +181,44 @@ class DigitalData(object):
     def handle_button(self):
         if self.ignore_button == False:
             raw_button, raw_prev_button = self.getRawValues("button")
-            action = self.getAction(raw_button, raw_prev_button, "button")
-            if self.edge == "falling":
-                self.updateLongPress(raw_button)
-            if self.ignore_next_btrig == True:
-                ### DOESNT AFFECT MOMENTARY
-                if action == 1:
-                    action = 0
-                    self.ignore_next_btrig = False
-                    self.time_held = 0
-                    self.button_pressed = 0
-            if self.mode == "triggered":
-                if action == 1:
-                    self.button_pulse_time = time.time() * 1000.0
-                    self.b_state = 1
-                if self.b_state == 1 and time.time() * 1000.0 - self.button_pulse_time > self.output_period:
-                    self.b_state = 0
-            elif self.mode == "latching":
-                if action == 1:
-                    self.b_state = 1
-                else:
-                    self.b_state = 0
-            elif self.mode == "momentary":
-                ### ONLY RISING
-                if raw_button == 1: 
-                    self.b_state = 1
-                else:
-                    self.b_state = 0
-            elif self.mode == "incremental": 
-                if action == 1:
-                    self.b_state = 1
-            #if self.ignore_button == True:
-            #    self.b_state = 0
+
+            if self.ignore_until_release == False:
+                self.prev_b_state = self.b_state
+                action = self.getAction(raw_button, raw_prev_button, "button")
+                if self.edge == "falling":
+                    self.updateLongPress(raw_button)
+                if self.ignore_next_btrig == True:
+                    ### DOESNT AFFECT MOMENTARY
+                    if action == 1:
+                        action = 0
+                        self.ignore_next_btrig = False
+                        self.time_held = 0
+                        self.button_pressed = 0
+                if self.mode == "triggered":
+                    if action == 1:
+                        self.button_pulse_time = time.time() * 1000.0
+                        self.b_state = 1
+                    if self.b_state == 1 and time.time() * 1000.0 - self.button_pulse_time > self.output_period:
+                        self.b_state = 0
+                elif self.mode == "latching":
+                    if action == 1:
+                        self.b_state = 1
+                    else:
+                        self.b_state = 0
+                elif self.mode == "momentary":
+                    ### ONLY RISING
+                    if raw_button == 1: 
+                        self.b_state = 1
+                    else:
+                        self.b_state = 0
+                elif self.mode == "incremental": 
+                    if action == 1:
+                        self.b_state = 1
+            else:
+                self.b_state = self.prev_b_state
+            if raw_button == 0 and raw_prev_button == 0:
+                self.ignore_until_release = False
+            
 
     def handle_gate(self):
         if "_alt" in self.name:
@@ -259,13 +272,15 @@ class DigitalData(object):
             self.state = 0
         
     def getValue(self):
-        self.prev_state = self.state
         self.handle_button()
         self.handle_gate()
         if self.g_state == 1:
             self.trig_source = "gate"
         elif self.b_state == 1:
             self.trig_source = "button"
+        if self.trig_source == "button" and self.ignore_until_release == True:
+            return self.state
+        self.prev_state = self.state
         if self.mode == "incremental":
             self.handle_incremental_value()
         elif self.mode == "momentary" or self.mode == "triggered":

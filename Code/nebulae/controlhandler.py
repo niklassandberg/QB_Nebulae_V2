@@ -100,6 +100,18 @@ class ControlHandler(object):
         output_period = None
         if self.configData is not None and 'output_period' in self.configData:
             output_period = float(self.configData['output_period'][0])
+        self.output_period = output_period if output_period is not None else 100.0
+
+        self.holdwithtrigg_combos = []
+        if self.configData is not None and 'holdwithtrigg_combos' in self.configData:
+            self.holdwithtrigg_combos = self.configData['holdwithtrigg_combos']
+
+        self.user_defined_values = {
+            "user_defined_1": 0, "user_defined_2": 0, "user_defined_3": 0,
+            "user_defined_4": 0, "user_defined_5": 0, "user_defined_6": 0,
+            "user_defined_7": 0
+        }
+        self.user_defined_pulse_times = {}
 
         for ctrl in digitalControlList:
             if self.configData is not None and ctrl in self.configData:
@@ -492,13 +504,41 @@ class ControlHandler(object):
         if name in self.editFunctionFlag:
             self.editFunctionFlag[name] = True
 
+    def checkHoldWithTrigg(self):
+        suppress = set()
+        for combo in self.holdwithtrigg_combos:
+            hold_name = combo["hold_channel"]
+            trigger_name = combo["trigger_channel"]
+            output_name = combo["output"]
+            if hold_name not in self.channeldict or trigger_name not in self.channeldict:
+                continue
+            hold_chn = self.channeldict[hold_name]
+            trigger_chn = self.channeldict[trigger_name]
+            hold_active = False
+            if hold_chn.source == "digital":
+                raw_state, _ = hold_chn.input.getRawValues("button")
+                hold_active = (raw_state == 1)
+            trigger_fired = (trigger_chn.curVal == 1 and trigger_chn.prevVal == 0)
+            if hold_active and trigger_fired:
+                if output_name in self.user_defined_values:
+                    self.user_defined_values[output_name] = 1
+                    self.user_defined_pulse_times[output_name] = time.time() * 1000.0
+                suppress.add(trigger_name)
+                suppress.add(hold_name)
+                hold_chn.setIgnoredUntilReleased()
+                trigger_chn.setIgnoredUntilReleased()
+                self.classlog.debug("holdwithtrigg: %s + %s -> %s", hold_name, trigger_name, output_name)
+        return suppress
+
     def sendScOscMessages(self):
         for chn in self.channels: #for each of the adc channels
-            chn.update() 
+            chn.update()
             self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
         for chn in self.altchannels:
-            chn.update() 
+            chn.update()
             self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
+        for name, val in self.user_defined_values.items():
+            self.scSock.send(name, val)
 
     def updateAll(self): 
         #GPIO.output(self.eol_pin, False) # For debugging
@@ -610,12 +650,25 @@ class ControlHandler(object):
                     self.classlog.error("pd: Could not send messages to PD. Connected, but error?: %s", e)
                 else:
                     self.classlog.error("pd: Could not send messgaes to PD. No connection?': %s", e)
-        elif self.control_mode =="supercollider": #if we are in sc mode 
-            for chn in self.channels: #for each of the adc channels
+        elif self.control_mode =="supercollider": #if we are in sc mode
+            now_ms = time.time() * 1000.0
+            for k in self.user_defined_values:
+                if self.user_defined_values[k] == 1:
+                    pulse_time = self.user_defined_pulse_times.get(k, 0)
+                    if now_ms - pulse_time > self.output_period:
+                        self.user_defined_values[k] = 0
+                else:
+                    self.user_defined_values[k] = 0
+            for chn in self.channels:
                 if chn.name != "sourcegate":
                     chn.setIgnoreHID(False)
-                chn.update() #update all control values
-                self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
+                chn.update()
+            self.checkHoldWithTrigg()
+            for chn in self.channels:
+                if not chn.isIgnoredUntilReleased():
+                    self.scSock.send(chn.name, chn.getValue())
+            for name, val in self.user_defined_values.items():
+                self.scSock.send(name, val)
 
         else: #includes "normal":4
             filestate = self.channeldict["filestate"].getValue()

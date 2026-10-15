@@ -52,7 +52,8 @@ NebInterface {
             \density_alt, \overlap_alt, \window_alt, \reset_alt, \freeze_alt,
             \source_alt, \record_alt, \file_alt,
             \record_instr, \file_instr, \source_instr,
-            \reset_instr, \freeze_instr
+            \reset_instr, \freeze_instr,
+			\user_defined_1, \user_defined_2, \user_defined_3, \user_defined_4, \user_defined_5, \user_defined_6, \user_defined_7
         ];
 
         params.do { |name|
@@ -176,6 +177,8 @@ NebInterface {
 
 		buffers = Array.newClear(paths.size);
 
+		
+
 		paths.do { |pair, i|
 			
 			var fname = pair[0].asSymbol;
@@ -208,7 +211,8 @@ NebInterface {
 	/*
 		Example usage localy:
 			s.waitForBoot {
-				NebInterface.audioPath = "C:/Users/niksan/Desktop/wavetable_kasta";
+				//Never to be set in scd files (line below)!!!
+				//NebInterface.audioPath = "C:/Users/niksan/Desktop/wavetable_kasta"; //this is just for GUI / testing on desktop!! 
 				NebInterface.initAndLoadAudio(s, "^wt_.*wav$", true,
 					{ |buffers|
 					"All buffers loaded: %".format(buffers).postln;
@@ -302,3 +306,11 @@ NebFile_instr    : UGenValueRange { *busKey { ^\file_instr } }
 NebSource_instr  : UGenValueRange { *busKey { ^\source_instr } }
 NebReset_instr   : UGenValueRange { *busKey { ^\reset_instr } }
 NebFreeze_instr  : UGenValueRange { *busKey { ^\freeze_instr } }
+
+NebUserDefined1    : UGenValueRange { *busKey { ^\user_defined_1 } }
+NebUserDefined2    : UGenValueRange { *busKey { ^\user_defined_2 } }
+NebUserDefined3    : UGenValueRange { *busKey { ^\user_defined_3 } }
+NebUserDefined4    : UGenValueRange { *busKey { ^\user_defined_4 } }
+NebUserDefined5    : UGenValueRange { *busKey { ^\user_defined_5 } }
+NebUserDefined6    : UGenValueRange { *busKey { ^\user_defined_6 } }
+NebUserDefined7    : UGenValueRange { *busKey { ^\user_defined_7 } }

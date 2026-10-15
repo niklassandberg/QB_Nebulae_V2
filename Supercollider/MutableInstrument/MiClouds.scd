@@ -8,6 +8,7 @@ freeze,latching,rising
 reset,triggered,rising
 source,latching,falling
 file,incremental,falling
+file,holdwithtrigg,reset,trigger,user_defined_1
 record,triggered,rising
 nebconfigend
 */
@@ -44,13 +45,16 @@ s.waitForBoot {
         var record_mode = NebRecord_alt.kr(0,1);
         var trig = NebFile.kr(0, 1);
         var phase_reset = NebReset.kr(0, 1);
-        var record_reset = NebFilestate.kr(0, 1);
+        var record_reset = NebUserDefined1.kr(0, 1);
+        //var record_reset = NebFilestate.kr(0, 1);
+        var spread = NebSize_alt.kr(0, 1);
+        var rvb = NebStart_alt.kr(0, 1);
 
         var input = SoundIn.ar([0, 1]);
 
         var out = MiClouds.ar(
             input, pit: pit, pos: pos, size: size, dens: dens, tex: tex, drywet: drywet, in_gain: 2.0,
-            spread: 1.0, rvb: 0.0, fb: 0.0, freeze: freeze, mode: 3, trig: trig,
+            spread: spread, rvb: rvb, fb: 0.0, freeze: freeze, mode: 3, trig: trig,
             speed: nebSpeed, ssize: nebSize, record: record, record_reset: record_reset, phasor_reset: phase_reset, record_mode: record_mode
         );
 

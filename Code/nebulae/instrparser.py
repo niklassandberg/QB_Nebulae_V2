@@ -29,12 +29,22 @@ class InstrParser(object):
 
     def populateDict(self):
         tempList = []
+        self.holdWithTriggList = []
         for line in self.configList:
             strippedLine = line.rstrip()
             tempList = strippedLine.split(",")
             newKey = tempList[0]
             tempList.pop(0)
-            self.configDict[newKey] = tempList
+            if len(tempList) > 0 and tempList[0] == "holdwithtrigg":
+                if len(tempList) >= 4:
+                    self.holdWithTriggList.append({
+                        "hold_channel": newKey,
+                        "trigger_channel": tempList[1],
+                        "action": tempList[2],
+                        "output": tempList[3]
+                    })
+            else:
+                self.configDict[newKey] = tempList
 
     def getInstrString(self):
         return self.instrString
@@ -47,6 +57,10 @@ class InstrParser(object):
     
     def clearConfigDict(self):
         self.configDict.clear()
+        self.holdWithTriggList = []
+
+    def getHoldWithTriggCombos(self):
+        return self.holdWithTriggList if hasattr(self, 'holdWithTriggList') else []
 
     def getConfigDict(self):
         return self.configDict

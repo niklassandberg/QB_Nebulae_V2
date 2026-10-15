@@ -518,6 +518,16 @@ class ControlChannel(object):
         if self.source == "digital":
             self.input.setIgnoreNextButton()
 
+    def setIgnoredUntilReleased(self):
+        if self.source == "digital":
+            self.input.setIgnoredUntilReleased()
+
+    def isIgnoredUntilReleased(self):
+        if self.source == "digital":
+            return self.input.isIgnoredUntilReleased()
+        else:
+            return False
+
     def setOutputPeriod(self, ms):
         if self.source == "digital":
             self.input.setOutputPeriod(ms)
