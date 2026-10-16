@@ -1,6 +1,12 @@
 ################################################
 # Create Firmware Update File for the Nebulae
 #
+# sh create_fw_update.sh            normal firmware
+# sh create_fw_update.sh --hwtest   firmware that runs the nebio hardware
+#                                   test (Code/nebio/tools/hwtest.py) at boot
+#                                   instead of nebulae. Install a normal
+#                                   firmware afterwards to go back.
+#
 # Nebulae expects a file called "neb_update.zip"
 #
 # Using the .zip extension was an oversight,
@@ -19,6 +25,11 @@ cd temp/
 mkdir -p QB_Nebulae_V2/
 cp -R ../Code QB_Nebulae_V2/
 cp -R ../Resources/SuperCollider/Extensions QB_Nebulae_V2/SuperColliderExtensions
+if [ "$1" = "--hwtest" ]
+then
+    echo "Hardware test firmware: startup.sh will run hwtest.py instead of nebulae"
+    touch QB_Nebulae_V2/Code/hwtest_mode
+fi
 
 # Go through, and strip any unwanted line endings.
 SEARCHDIR=./QB_Nebulae_V2/Code

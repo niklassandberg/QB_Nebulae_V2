@@ -45,6 +45,36 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
 sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/environment > /etc/environment"
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
 
+# Hardware test firmware (create_fw_update.sh --hwtest): run the nebio
+# hardware test instead of nebulae. The log goes to the USB stick
+# (hwtest_log.txt), or /tmp when no stick is in. Ends with exit 0 so
+# nebulae.service (Restart=on-failure) does not restart startup.sh.
+if [ -f /home/alarm/QB_Nebulae_V2/Code/hwtest_mode ]
+then
+    echo "hardware test mode"
+    HWLOG=/tmp/hwtest_log.txt
+    if sudo mount /dev/sda1 /mnt/memory
+    then
+        HWLOG=/mnt/memory/hwtest_log.txt
+    fi
+    # Build again: update.sh may just have installed libgpiod/liblo from the stick.
+    sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
+    sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh > /tmp/nebio_build.log 2>&1
+    BUILD=$?
+    sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
+    sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
+    if [ $BUILD -ne 0 ]
+    then
+        echo "hardware test: nebio build failed"
+        sudo bash -c "{ echo '==== nebio build FAILED' \$(date); pkg-config --modversion libgpiod liblo; cat /tmp/nebio_build.log; } >> $HWLOG 2>&1"
+        python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py error &
+    else
+        sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebio/tools/hwtest.py --headless --log $HWLOG
+    fi
+    sync
+    exit 0
+fi
+
 #sudo systemctl start sclang.service
 
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw

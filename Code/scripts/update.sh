@@ -127,12 +127,14 @@ then
 
     sudo reboot
 else
-    FC=`ls -l /mnt/memory/*.tar.xz | wc -l` 
+    # Arch packages on the stick (.tar.xz, or .tar.zst which newer packages use),
+    # e.g. libgpiod and liblo for nebio.
+    FC=`ls /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst 2>/dev/null | wc -l`
     if [ $FC -gt 0 ] 
     then 
         echo "Packages detected"
-	sudo pacman --noconfirm -U /mnt/memory/*.tar.xz
-        rm /mnt/memory/*.tar.xz
+	sudo pacman --noconfirm -U `ls /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst 2>/dev/null`
+        rm -f /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst
     else  
       echo "No Update Detected"
     fi
