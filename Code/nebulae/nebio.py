@@ -55,8 +55,9 @@ def lib():
         "nebio_encoder_id": (c_int, [c_int, c_int]),
         "nebio_encoder_steps": (c_int, [c_int]),
         "nebio_set_eol": (None, [c_int]),
-        "nebio_set_input_rates": (c_int, [c_int, c_int]),
+        "nebio_set_input_rates": (c_int, [c_int, c_int, c_int]),
         "nebio_input_scan_hz": (c_int, []),
+        "nebio_input_digital_hz": (c_int, []),
         "nebio_input_adc_hz": (c_int, []),
         "nebio_led_set_button": (None, [c_int, c_double]),
         "nebio_led_set_rgb": (None, [c_int, c_double, c_double, c_double, c_double]),
@@ -160,20 +161,23 @@ def set_eol(high):
     inputs().nebio_set_eol(1 if high else 0)
 
 
-def set_input_rates(scan_hz, adc_hz):
+def set_input_rates(scan_hz, digital_hz, adc_hz):
     """Rates of the nebio input thread, changeable at any time.
-    scan_hz (100-2000, default 1000): shift register, clicks, encoders.
+    scan_hz (100-2000, default 1000): encoders, read every scan.
+    digital_hz (1..scan_hz, default 1000): shift register (buttons, source
+    gate), encoder clicks.
     adc_hz (1..scan_hz, default 500): knobs and CV; also the highest rate
     updateAll() can run at, since each snapshot waits for new ADC data.
-    Returns the rates in use (scan_hz, adc_hz) after rounding."""
-    if lib().nebio_set_input_rates(int(scan_hz), int(adc_hz)) != 0:
+    digital_hz and adc_hz are rounded to every nth scan.
+    Returns the rates in use (scan_hz, digital_hz, adc_hz)."""
+    if lib().nebio_set_input_rates(int(scan_hz), int(digital_hz), int(adc_hz)) != 0:
         _log.error("nebio: %s", last_error())
     return input_rates()
 
 
 def input_rates():
     l = lib()
-    return l.nebio_input_scan_hz(), l.nebio_input_adc_hz()
+    return l.nebio_input_scan_hz(), l.nebio_input_digital_hz(), l.nebio_input_adc_hz()
 
 
 def stats():

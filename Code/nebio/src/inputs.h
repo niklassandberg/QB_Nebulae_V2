@@ -65,10 +65,13 @@ public:
     void setEol(int high);
     void stats(char *buf, size_t len);
 
-    // Scan rate (100-2000 Hz) and ADC rate (<= scan rate; rounded to every
-    // nth scan). Takes effect on the next scan. 0 = ok, -1 = invalid.
-    int setRates(int scanHz, int adcHz);
+    // Scan rate (100-2000 Hz, encoders are read every scan), digital rate
+    // (shift register, clicks, polled gates) and ADC rate, both <= scan rate
+    // and rounded to every nth scan. Takes effect on the next scan.
+    // 0 = ok, -1 = invalid.
+    int setRates(int scanHz, int digitalHz, int adcHz);
     int scanHz() const;
+    int digitalHz() const;
     int adcHz() const;
 
 private:
@@ -93,8 +96,10 @@ private:
     std::atomic<bool> stop_{false};
     bool gatesPolled_ = false;
 
-    // Rates, see setRates(). Default: scan 1000 Hz, ADC every 2nd scan (500 Hz).
+    // Rates, see setRates(). Default: scan 1000 Hz, digital every scan
+    // (1000 Hz), ADC every 2nd scan (500 Hz).
     std::atomic<int> scanPeriodUs_{1000};
+    std::atomic<int> digitalEveryNth_{1};
     std::atomic<int> adcEveryNth_{2};
 
     // Live state, guarded by mutex_

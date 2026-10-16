@@ -108,36 +108,48 @@ Inputs &Inputs::instance() {
     return *inputs;
 }
 
-int Inputs::setRates(int scanHz, int adcHz) {
-    if (scanHz < kMinScanHz || scanHz > kMaxScanHz || adcHz < 1 || adcHz > scanHz) {
-        logError("invalid input rates: scan %d Hz (allowed %d-%d), adc %d Hz (allowed 1-scan)",
-                 scanHz, kMinScanHz, kMaxScanHz, adcHz);
+int Inputs::setRates(int scanHz, int digitalHz, int adcHz) {
+    if (scanHz < kMinScanHz || scanHz > kMaxScanHz || digitalHz < 1 || digitalHz > scanHz ||
+        adcHz < 1 || adcHz > scanHz) {
+        logError("invalid input rates: scan %d Hz (allowed %d-%d), digital %d Hz and adc %d Hz "
+                 "(allowed 1-scan)", scanHz, kMinScanHz, kMaxScanHz, digitalHz, adcHz);
         return -1;
     }
     int periodUs = 1000000 / scanHz;
-    int nth = (scanHz + adcHz / 2) / adcHz;  // ADC runs every nth scan, rounded
-    if (nth < 1) nth = 1;
+    // Digital inputs and ADC run every nth scan, rounded.
+    int digitalNth = (scanHz + digitalHz / 2) / digitalHz;
+    int adcNth = (scanHz + adcHz / 2) / adcHz;
+    if (digitalNth < 1) digitalNth = 1;
+    if (adcNth < 1) adcNth = 1;
     {
         std::lock_guard<std::mutex> lock(mutex_);
         scanPeriodUs_.store(periodUs, std::memory_order_relaxed);
-        adcEveryNth_.store(nth, std::memory_order_relaxed);
+        digitalEveryNth_.store(digitalNth, std::memory_order_relaxed);
+        adcEveryNth_.store(adcNth, std::memory_order_relaxed);
         applyDebounce();
     }
-    logInfo("input rates: scan %d Hz, adc %d Hz", 1000000 / periodUs, 1000000 / periodUs / nth);
+    logInfo("input rates: scan (encoders) %d Hz, digital %d Hz, adc %d Hz", this->scanHz(),
+            this->digitalHz(), this->adcHz());
     return 0;
 }
 
 int Inputs::scanHz() const { return 1000000 / scanPeriodUs_.load(std::memory_order_relaxed); }
+
+int Inputs::digitalHz() const {
+    return 1000000 / scanPeriodUs_.load(std::memory_order_relaxed) /
+           digitalEveryNth_.load(std::memory_order_relaxed);
+}
 
 int Inputs::adcHz() const {
     return 1000000 / scanPeriodUs_.load(std::memory_order_relaxed) /
            adcEveryNth_.load(std::memory_order_relaxed);
 }
 
-// Debounce counts are in scans; keep the button debounce time at
-// kButtonDebounceUs whatever the scan rate is. Caller holds mutex_.
+// Debounce counts are in digital reads; keep the button debounce time at
+// kButtonDebounceUs whatever the rates are. Caller holds mutex_.
 void Inputs::applyDebounce() {
-    const int periodUs = scanPeriodUs_.load(std::memory_order_relaxed);
+    const int periodUs = scanPeriodUs_.load(std::memory_order_relaxed) *
+                         digitalEveryNth_.load(std::memory_order_relaxed);
     int need = (kButtonDebounceUs + periodUs / 2) / periodUs;
     if (need < 1) need = 1;
     for (int i = 0; i < 8; ++i) srDebounce_[i].need = i == kSrGateBit ? 0 : need;
@@ -269,16 +281,21 @@ void Inputs::run() {
     while (!stop_) {
         int64_t start = nowNs();
 
-        uint8_t sr = 0;
-        bool srOk = readShiftRegister(sr);
-        bool polledOk = polled_.getAll(levels);
-
         // Rates can be changed from Python at any time; read them once per scan.
         // Relaxed: compiles to a plain load (no barrier); one scan with a mixed
-        // old/new pair after a change is harmless.
+        // old/new set after a change is harmless.
         const int periodUs = scanPeriodUs_.load(std::memory_order_relaxed);
+        const int digitalNth = digitalEveryNth_.load(std::memory_order_relaxed);
         const int adcNth = adcEveryNth_.load(std::memory_order_relaxed);
+        // Encoders every scan; shift register + clicks (+ polled gates) every
+        // digitalNth scan; ADCs every adcNth scan.
+        bool digitalScan = (tick % static_cast<uint64_t>(digitalNth)) == 0;
         bool adcScan = (tick % static_cast<uint64_t>(adcNth)) == 0;
+
+        uint8_t sr = 0;
+        bool srOk = digitalScan && readShiftRegister(sr);
+        // One read for all polled pins (encoders and clicks share the request).
+        bool polledOk = polled_.getAll(levels);
         uint16_t codes[2][8];
         bool adcOk[2] = {false, false};
         if (adcScan) {
@@ -291,7 +308,7 @@ void Inputs::run() {
             if (srOk) {
                 for (int i = 0; i < 8; ++i) srBits_[i].transition(srDebounce_[i].feed((sr >> i) & 1));
             }
-            if (polledOk) {
+            if (polledOk && digitalScan) {
                 for (size_t i = 0; i < polledPins.size(); ++i) {
                     int s = pinSlot(static_cast<int>(polledPins[i]));
                     if (s >= 0) pinBits_[s].transition(pinDebounce_[s].feed(levels[i]));
