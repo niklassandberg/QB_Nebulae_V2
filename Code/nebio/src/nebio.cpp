@@ -56,6 +56,9 @@ int nebio_adc_code(int device, int channel) { return Inputs::instance().adcCode(
 int nebio_encoder_id(int pin_a, int pin_b) { return Inputs::instance().encoderId(pin_a, pin_b); }
 int nebio_encoder_steps(int id) { return Inputs::instance().encoderSteps(id); }
 void nebio_set_eol(int high) { Inputs::instance().setEol(high); }
+int nebio_set_input_rates(int scan_hz, int adc_hz) { return Inputs::instance().setRates(scan_hz, adc_hz); }
+int nebio_input_scan_hz(void) { return Inputs::instance().scanHz(); }
+int nebio_input_adc_hz(void) { return Inputs::instance().adcHz(); }
 
 // ---- LEDs ------------------------------------------------------------------
 

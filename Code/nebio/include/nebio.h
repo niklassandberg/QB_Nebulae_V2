@@ -49,6 +49,15 @@ NEBIO_API int nebio_encoder_id(int pin_a, int pin_b);
 NEBIO_API int nebio_encoder_steps(int id);
 /* End-of-loop gate output (GPIO 16). */
 NEBIO_API void nebio_set_eol(int high);
+/* Input thread rates, can be changed at any time (takes effect on the next
+ * scan). scan_hz 100-2000 (default 1000): shift register, clicks, encoders.
+ * adc_hz 1..scan_hz (default 500): both MCP3208, rounded to every nth scan;
+ * it is also the maximum snapshot (updateAll) rate. Button debounce stays
+ * 8 ms. Returns 0, or -1 for invalid values (rates unchanged). */
+NEBIO_API int nebio_set_input_rates(int scan_hz, int adc_hz);
+/* Rates in use (after rounding). */
+NEBIO_API int nebio_input_scan_hz(void);
+NEBIO_API int nebio_input_adc_hz(void);
 
 /* ---- LEDs -------------------------------------------------------------- */
 

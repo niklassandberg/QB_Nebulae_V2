@@ -24,9 +24,11 @@ const std::vector<unsigned> kGates = {4, 25, 23, 24};  // freeze, reset, next, r
 // NOTE: GPIO 7/8 (POT/CV select in control.py) are the SPI chip selects and
 // are owned by the spidev driver, so they are deliberately not touched here.
 
-constexpr int kScanPeriodUs = 1000;
-constexpr int kAdcEveryNthScan = 2;
-constexpr int kButtonDebounce = 8;   // scans (~8 ms)
+// Scan/ADC rates: default 1000/500 Hz (inputs.h), Python can change them at
+// run time (nebio_set_input_rates).
+constexpr int kMinScanHz = 100;
+constexpr int kMaxScanHz = 2000;
+constexpr int kButtonDebounceUs = 8000;  // buttons/clicks, kept at 8 ms for any scan rate
 constexpr int kSrGateBit = 6;        // source gate arrives through the shift register
 constexpr uint32_t kSpiHz = 1000000;  // MCP3208.py
 
@@ -106,6 +108,43 @@ Inputs &Inputs::instance() {
     return *inputs;
 }
 
+int Inputs::setRates(int scanHz, int adcHz) {
+    if (scanHz < kMinScanHz || scanHz > kMaxScanHz || adcHz < 1 || adcHz > scanHz) {
+        logError("invalid input rates: scan %d Hz (allowed %d-%d), adc %d Hz (allowed 1-scan)",
+                 scanHz, kMinScanHz, kMaxScanHz, adcHz);
+        return -1;
+    }
+    int periodUs = 1000000 / scanHz;
+    int nth = (scanHz + adcHz / 2) / adcHz;  // ADC runs every nth scan, rounded
+    if (nth < 1) nth = 1;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        scanPeriodUs_.store(periodUs, std::memory_order_relaxed);
+        adcEveryNth_.store(nth, std::memory_order_relaxed);
+        applyDebounce();
+    }
+    logInfo("input rates: scan %d Hz, adc %d Hz", 1000000 / periodUs, 1000000 / periodUs / nth);
+    return 0;
+}
+
+int Inputs::scanHz() const { return 1000000 / scanPeriodUs_.load(std::memory_order_relaxed); }
+
+int Inputs::adcHz() const {
+    return 1000000 / scanPeriodUs_.load(std::memory_order_relaxed) /
+           adcEveryNth_.load(std::memory_order_relaxed);
+}
+
+// Debounce counts are in scans; keep the button debounce time at
+// kButtonDebounceUs whatever the scan rate is. Caller holds mutex_.
+void Inputs::applyDebounce() {
+    const int periodUs = scanPeriodUs_.load(std::memory_order_relaxed);
+    int need = (kButtonDebounceUs + periodUs / 2) / periodUs;
+    if (need < 1) need = 1;
+    for (int i = 0; i < 8; ++i) srDebounce_[i].need = i == kSrGateBit ? 0 : need;
+    for (int s = 0; s < slotCount_; ++s)
+        if (pinDebounce_[s].need > 0) pinDebounce_[s].need = need;
+}
+
 int Inputs::pinSlot(int pin) const {
     if (pin < 0 || pin >= 64) return -1;
     return slotOfPin_[pin];
@@ -151,9 +190,14 @@ int Inputs::init() {
         pinDebounce_[s] = Debounce();
         pinDebounce_[s].need = debounce;
     };
-    addSlot(kClickPitch, kButtonDebounce);
-    addSlot(kClickSpeed, kButtonDebounce);
-    for (unsigned g : kGates) addSlot(g, 0);
+    addSlot(kClickPitch, 1);  // debounced; applyDebounce() sets the scan count
+    addSlot(kClickSpeed, 1);
+    for (unsigned g : kGates) addSlot(g, 0);  // gates: no debounce
+    for (int i = 0; i < 8; ++i) srDebounce_[i] = Debounce();
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        applyDebounce();
+    }
 
     // Start from the real levels, so a button held at boot is seen at once
     // (check_wifi.py / check_calibration.py read a single value).
@@ -168,11 +212,7 @@ int Inputs::init() {
         snapPin_[s] = level;
     }
     // Shift register starts at 0 and needs a stable read, like shiftregister.py.
-    for (int i = 0; i < 8; ++i) {
-        srDebounce_[i] = Debounce();
-        srDebounce_[i].need = i == kSrGateBit ? 0 : kButtonDebounce;
-        srBits_[i].reset(0);
-    }
+    for (int i = 0; i < 8; ++i) srBits_[i].reset(0);
     snapSr_ = 0;
 
     for (Encoder &e : enc_) {
@@ -233,7 +273,12 @@ void Inputs::run() {
         bool srOk = readShiftRegister(sr);
         bool polledOk = polled_.getAll(levels);
 
-        bool adcScan = (tick % kAdcEveryNthScan) == 0;
+        // Rates can be changed from Python at any time; read them once per scan.
+        // Relaxed: compiles to a plain load (no barrier); one scan with a mixed
+        // old/new pair after a change is harmless.
+        const int periodUs = scanPeriodUs_.load(std::memory_order_relaxed);
+        const int adcNth = adcEveryNth_.load(std::memory_order_relaxed);
+        bool adcScan = (tick % static_cast<uint64_t>(adcNth)) == 0;
         uint16_t codes[2][8];
         bool adcOk[2] = {false, false};
         if (adcScan) {
@@ -277,9 +322,9 @@ void Inputs::run() {
         int64_t took = (nowNs() - start) / 1000;
         if (took > worstScanUs_) worstScanUs_ = took;
 
-        next += kScanPeriodUs * 1000LL;
+        next += periodUs * 1000LL;
         int64_t now = nowNs();
-        if (next < now - 10LL * kScanPeriodUs * 1000LL) next = now;  // fell behind, don't burst
+        if (next < now - 10LL * periodUs * 1000LL) next = now;  // fell behind, don't burst
         timespec ts;
         ts.tv_sec = next / 1000000000LL;
         ts.tv_nsec = next % 1000000000LL;

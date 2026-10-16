@@ -1,6 +1,7 @@
 // inputs.h - input thread: shift register, gate/click GPIOs, encoders, ADCs.
 //
-// The thread scans at 1 kHz (ADC every 2nd tick). Python takes snapshots;
+// The thread scans at 1 kHz (ADC every 2nd tick) by default; both rates can be
+// changed at run time with setRates(). Python takes snapshots;
 // every bit that changes between two snapshots is stretched so Python sees
 // the press/pulse for at least one snapshot, in order.
 #pragma once
@@ -64,12 +65,19 @@ public:
     void setEol(int high);
     void stats(char *buf, size_t len);
 
+    // Scan rate (100-2000 Hz) and ADC rate (<= scan rate; rounded to every
+    // nth scan). Takes effect on the next scan. 0 = ok, -1 = invalid.
+    int setRates(int scanHz, int adcHz);
+    int scanHz() const;
+    int adcHz() const;
+
 private:
     Inputs() = default;
     void run();
     void runEdges();
     bool readShiftRegister(uint8_t &bits);
     int pinSlot(int pin) const;
+    void applyDebounce();
 
     // Hardware
     GpioLines srOut_;    // clock, latch
@@ -84,6 +92,10 @@ private:
     std::atomic<bool> running_{false};
     std::atomic<bool> stop_{false};
     bool gatesPolled_ = false;
+
+    // Rates, see setRates(). Default: scan 1000 Hz, ADC every 2nd scan (500 Hz).
+    std::atomic<int> scanPeriodUs_{1000};
+    std::atomic<int> adcEveryNth_{2};
 
     // Live state, guarded by mutex_
     mutable std::mutex mutex_;
