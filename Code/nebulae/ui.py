@@ -1,7 +1,6 @@
-import RPi.GPIO as GPIO
 import encoder as libEnc
 import shiftregister as libSR
-import leddriver as libDriver
+import nebio as libDriver # LedDriver/Color backed by the nebio C++ library
 import switch as libSwitch
 import filehandler
 import threading
@@ -21,8 +20,6 @@ class UserInterface(object):
     def __init__(self, controlhandler):
         self.controlhandler = controlhandler
         self.log = ClassLogger.loggerSetup(self)
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
         self.currentInstr = None
         self.ledState = 1
         self.ledDriver = libDriver.LedDriver()
@@ -781,7 +778,6 @@ class UserInterface(object):
         self.encoder_pitch.stop()
         self.encoder_speed.stop()
         self.ledDriver.cleanup()
-        GPIO.cleanup()
 
     def getReloadRequest(self):
         return self.reload_flag

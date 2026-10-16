@@ -10,6 +10,13 @@ sudo modprobe i2c-dev
 echo "starting bootup LEDs"
 python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py booting &
 
+# nebio (C++ hardware/OSC library) must exist before any Python script that
+# reads buttons or knobs (check_wifi.py, check_calibration.py, nebulae.py).
+echo "building nebio (only if changed)"
+sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
+sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh
+sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
+
 echo "optimizing system."
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt_lite.sh
 sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_wifi.py

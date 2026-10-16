@@ -1,6 +1,3 @@
-# Import SPI library (for hardware SPI) and MCP3008 library.
-import Adafruit_GPIO.SPI as SPI
-import RPi.GPIO as GPIO
 import ctcsound
 import switch as libSwitch
 import shiftregister as libSR
@@ -13,6 +10,7 @@ import threading
 import wavewriter
 import numpy as np
 import scsender
+import nebio
 
 import nebmixer
 
@@ -39,7 +37,7 @@ class ControlHandler(object):
         try:
             retries = 0
             self.classlog.info("Waiting for synth handshake...")
-            while not self.scSock.synthIsUpEvent.wait(timeout=0.5):
+            while not self.scSock.waitSynthIsUp(timeout=0.5):
                 self.classlog.info("synth is not up yet, pinging SC...")
                 self.scSock.pingLoaded()
                 retries += 1
@@ -55,11 +53,8 @@ class ControlHandler(object):
         self.classlog = ClassLogger.loggerSetup(self)
 
         self.csound = csound # Share csound instance with object
-        GPIO.setmode(GPIO.BCM) # init GPIO
-        GPIO.setwarnings(False) # silence GPIO warnings (this is probably not the best.)
-        self.eol_pin = 16
+        nebio.inputs() # all hardware is owned by nebio
         self.eol_state = False
-        GPIO.setup(self.eol_pin, GPIO.OUT)
         self.shiftReg = libSR.ShiftRegister()
         self.numFiles = numberFiles
         self.control_mode = "normal"
@@ -450,9 +445,9 @@ class ControlHandler(object):
         self.size_status_comm.update()
         if self.size_status_comm.getState() == 0:
             if self.eol_comm.getState() > 0:
-                GPIO.output(self.eol_pin, False)
+                nebio.set_eol(False)
             else:
-                GPIO.output(self.eol_pin, True)
+                nebio.set_eol(True)
         #    if self.eol_comm.getState() == 1:
         #        self.eol_comm.clearState()
         #        GPIO.output(self.eol_pin, False)
@@ -464,7 +459,7 @@ class ControlHandler(object):
         #           GPIO.output(self.eol_pin, True) 
         #           self.eol_state = False
         else:
-            GPIO.output(self.eol_pin, True)
+            nebio.set_eol(True)
 
     # Listens for changes in the actual recording state of CSound
     def handleRecordStatus(self):

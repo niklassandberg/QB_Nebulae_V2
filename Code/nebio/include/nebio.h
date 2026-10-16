@@ -1,0 +1,124 @@
+/*
+ * nebio - hardware and communication layer for QB Nebulae V2.
+ *
+ * Loaded into the Python process (nebulae.py) with ctypes. Owns:
+ *   - inputs:  CD4021 shift register, gate/click GPIOs, encoders, 2x MCP3208
+ *   - outputs: PCA9685 LEDs, reset LED (GPIO 12), end-of-loop out (GPIO 16)
+ *   - comms:   OSC to/from sclang (UDP 3010/3011), text to Pure Data (TCP 3000)
+ *
+ * Threads inside the library never call into Python. Python asks.
+ * All functions are safe to call from any Python thread.
+ */
+#ifndef NEBIO_H
+#define NEBIO_H
+
+#ifdef __cplusplus
+extern "C" {
+#endif
+
+#define NEBIO_API __attribute__((visibility("default")))
+
+/* ---- lifetime ---------------------------------------------------------- */
+
+/* Opens GPIO/SPI and starts the input thread. Idempotent. 0 = ok. */
+NEBIO_API int nebio_inputs_init(void);
+/* Opens I2C/PCA9685 + reset LED and starts the LED threads. Idempotent. */
+NEBIO_API int nebio_leds_init(void);
+/* Stops all threads and releases hardware. Safe to call more than once. */
+NEBIO_API void nebio_shutdown(void);
+/* Text of the last error (static buffer, valid until the next error). */
+NEBIO_API const char *nebio_last_error(void);
+
+/* ---- inputs ------------------------------------------------------------ */
+
+/* Freezes one consistent picture of all inputs. Waits (max ~10 ms) for a
+ * fresh ADC scan so every call sees new hardware data. Short presses and
+ * gate pulses that happened between two snapshots are stretched so they are
+ * visible for at least one snapshot. Returns the snapshot number, -1 on error. */
+NEBIO_API long long nebio_snapshot(void);
+/* Shift register bits (bit i = CD4021 input i) from the last snapshot. */
+NEBIO_API int nebio_sr_bits(void);
+/* Raw level (0/1) of a BCM pin from the last snapshot, -1 if not an input. */
+NEBIO_API int nebio_gpio_level(int bcm_pin);
+/* 12-bit code of an MCP3208 channel from the last snapshot.
+ * device 0 = CV (spidev0.0), device 1 = POT (spidev0.1). */
+NEBIO_API int nebio_adc_code(int device, int channel);
+/* Encoder id for a (pin_a, pin_b) pair as given to encoder.Worker, -1 if unknown. */
+NEBIO_API int nebio_encoder_id(int pin_a, int pin_b);
+/* Steps since the last call (then reset to 0). */
+NEBIO_API int nebio_encoder_steps(int id);
+/* End-of-loop gate output (GPIO 16). */
+NEBIO_API void nebio_set_eol(int high);
+
+/* ---- LEDs -------------------------------------------------------------- */
+
+/* Button LED ids */
+#define NEBIO_LED_RECORD 0
+#define NEBIO_LED_NEXT   1
+#define NEBIO_LED_SOURCE 2
+#define NEBIO_LED_FREEZE 3
+#define NEBIO_LED_RESET  4
+/* RGB LED ids */
+#define NEBIO_RGB_PITCH_POS 0
+#define NEBIO_RGB_PITCH_NEG 1
+#define NEBIO_RGB_SPEED_POS 2
+#define NEBIO_RGB_SPEED_NEG 3
+
+/* Staged until nebio_led_commit(), except the reset LED which is immediate
+ * (as the old GPIO PWM implementation was). */
+NEBIO_API void nebio_led_set_button(int id, double brightness);
+NEBIO_API void nebio_led_set_rgb(int id, double r, double g, double b, double brightness);
+/* Makes staged LED values visible. Writes happen in the LED thread. */
+NEBIO_API void nebio_led_commit(void);
+
+/* Boot/loading animations (same look as bootleds.py), drawn on top of the
+ * normal LED state until stopped. color: "booting", "loading", "loadingusb",
+ * "updating", "error", "calibration", "wifi". behavior: "cycle", "pulse", "rainbow". */
+NEBIO_API void nebio_led_animation(const char *color, const char *behavior);
+NEBIO_API void nebio_led_animation_stop(void);
+
+/* ---- SuperCollider (OSC) ----------------------------------------------- */
+
+NEBIO_API int  nebio_sc_open_sender(void);      /* to 127.0.0.1:3010 */
+NEBIO_API void nebio_sc_close_sender(void);
+NEBIO_API int  nebio_sc_sender_open(void);
+NEBIO_API int  nebio_sc_start_listener(void);   /* on :3011 */
+NEBIO_API void nebio_sc_stop_listener(void);
+NEBIO_API int  nebio_sc_listener_running(void);
+
+/* "/neb/<name> value", only sent when the value changed (as scsender did). */
+NEBIO_API void nebio_sc_send_int(const char *name, int value);
+NEBIO_API void nebio_sc_send_float(const char *name, double value);
+NEBIO_API void nebio_sc_send_bool(const char *name, int value);
+NEBIO_API void nebio_sc_send_string(const char *name, const char *value);
+/* Sends to a full OSC path without the change check. */
+NEBIO_API void nebio_sc_send_path_int(const char *path, int value);
+/* Forgets the last sent values, so everything is sent again. */
+NEBIO_API void nebio_sc_clear_cache(void);
+
+/* Set by "/sc/up" from sclang. */
+NEBIO_API int  nebio_sc_synth_is_up(void);
+NEBIO_API void nebio_sc_set_synth_down(void);   /* also clears the cache */
+/* Set by "/neb/ready" from sclang. */
+NEBIO_API int  nebio_sc_handshake(void);
+NEBIO_API void nebio_sc_zero_handshake(void);
+
+/* ---- Pure Data (TCP text) ---------------------------------------------- */
+
+/* Starts connecting in the background (retries until connected or closed). */
+NEBIO_API void nebio_pd_connect(void);
+NEBIO_API void nebio_pd_close(void);
+NEBIO_API int  nebio_pd_is_connected(void);
+/* Sends raw bytes ("name value;name value;"). Never blocks. 0 = sent. */
+NEBIO_API int  nebio_pd_send(const char *data, int len);
+
+/* ---- diagnostics ------------------------------------------------------- */
+
+/* One line with scan rate, snapshot rate and worst scan time. */
+NEBIO_API const char *nebio_stats(void);
+
+#ifdef __cplusplus
+}
+#endif
+
+#endif

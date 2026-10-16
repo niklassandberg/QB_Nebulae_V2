@@ -1,173 +1,102 @@
-# Courtesy of hecanjob/pippi.pd
-# the only documentation find for OSCServer https://www.acmesystems.it/touchosc
+# OSC communication with sclang. The OSC sender and listener run inside the
+# nebio C++ library (liblo); this class keeps the old ScSend interface.
+#   send:   127.0.0.1:3010  "/neb/<name> value"
+#   listen: :3011           "/sc/up", "/neb/ready"
 
-import threading
 import time
 
+import nebio
 from classlogger import ClassLogger
-
-from pythonosc.udp_client import SimpleUDPClient
-from pythonosc.dispatcher import Dispatcher
-from pythonosc.osc_server import ThreadingOSCUDPServer
 
 
 class ScSend(object):
 
-    rhost = '127.0.0.1'
-    shost = '0.0.0.0'
     rPort = 3010  # SC server port
     sPort = 3011  # this server port
 
+    # OSC addresses handled inside nebio; anything else is logged there.
+    _handled = ('/sc/up', '/neb/ready')
+
     def __init__(self):
-        # Logger FIRST
         self.log = ClassLogger.loggerSetup(self)
-
-        # Instance state (not class variables!)
-        self.values = {}
-
-        self.client = None
-        self.server = None
-        self.dispatcher = None
-        self._connected = False
-
-        self._listener_thread = None
-        self._running = False
-
-        self.synthIsUpLock = threading.Lock()
-        self.sclangIsReadyLock = threading.Lock()
-        self.synthIsUp = False
-        self.sclangIsReady = False
-        self.synthIsUpEvent = threading.Event()
+        self.lib = nebio.lib()
 
     # -------------------------
     # Synth status
     # -------------------------
 
-    def scdFileLoaded(self, addr, *args):
-        with self.synthIsUpLock:
-            self.log.debug("synth is up!")
-            self.synthIsUp = True
-        self.synthIsUpEvent.set()
-
     def synthIsUpStatus(self):
-        with self.synthIsUpLock:
-            self.log.debug("synthIsUpStatus=%s", self.synthIsUp)
-            return self.synthIsUp
+        status = self.lib.nebio_sc_synth_is_up() != 0
+        self.log.debug("synthIsUpStatus=%s", status)
+        return status
+
+    def waitSynthIsUp(self, timeout):
+        """True as soon as sclang sent /sc/up, False after timeout seconds."""
+        end = time.time() + timeout
+        while True:
+            if self.lib.nebio_sc_synth_is_up():
+                return True
+            if time.time() >= end:
+                return False
+            time.sleep(0.01)
 
     def setSynthIsDown(self):
-        self.values = {} #we know this is called in the main thread so no worries.
-        with self.synthIsUpLock:
-            self.log.debug("SET SYNTH TO DOWN!!!")
-            self.synthIsUp = False
-        self.synthIsUpEvent.clear()
+        self.log.debug("SET SYNTH TO DOWN!!!")
+        self.lib.nebio_sc_set_synth_down()
 
     def pingLoaded(self):
-        if self._connected and self.client:
+        if self.lib.nebio_sc_sender_open():
             self.log.debug("sending /neb/hasbeenloaded ping")
-            self.client.send_message('/neb/hasbeenloaded', 0)
-
-    def setSclangHandshake(self, addr, *args):
-        with self.sclangIsReadyLock:
-            self.log.debug("sclang handshake!")
-            self.sclangIsReady = True
+            self.lib.nebio_sc_send_path_int(b'/neb/hasbeenloaded', 0)
 
     def sclangHandshakeStatus(self):
-        with self.sclangIsReadyLock:
-            self.log.debug("sclangHandshakeStatus=%s", self.sclangIsReady)
-            return self.sclangIsReady
+        status = self.lib.nebio_sc_handshake() != 0
+        self.log.debug("sclangHandshakeStatus=%s", status)
+        return status
 
     def zeroSclangHandshake(self):
-        with self.sclangIsReadyLock:
-            self.log.debug("sclang handshake zero!")
-            self.sclangIsReady = False
+        self.log.debug("sclang handshake zero!")
+        self.lib.nebio_sc_zero_handshake()
 
     # -------------------------
     # Sending
     # -------------------------
 
     def connectSender(self):
-        if self._connected:
+        if self.lib.nebio_sc_sender_open():
             self.log.info("No need to connect, is connected")
             return
-
         self.log.info("Connecting")
-        try:
-            self.client = SimpleUDPClient(self.rhost, self.rPort)
-            self._connected = True
-            self.log.info("Sending to %s:%s", self.rhost, self.rPort)
-        except Exception as e:
-            self.log.error("Connection failed: %s", e)
+        if self.lib.nebio_sc_open_sender() == 0:
+            self.log.info("Sending to 127.0.0.1:%s", self.rPort)
+        else:
+            self.log.error("Connection failed: %s", nebio.last_error())
 
     def clear(self):
-        self.values = {}
+        self.lib.nebio_sc_clear_cache()
 
     def send(self, what, value):
-        try:
-            if what in self.values and self.values[what] == value:
-                return
-
-            addr = "/neb/" + what
-            self.log.debug("OSC sending: %s %s", addr, value)
-
-            self.values[what] = value
-            if self._connected and self.client:
-                self.client.send_message(addr, value)
-        except Exception as e:
-            self.log.error("Could not send to: %s", e)
+        # Only changed values are sent (checked in nebio).
+        nebio.sc_send(what, value)
 
     # -------------------------
     # Receiving
     # -------------------------
 
     def startListener(self):
-        if self._running:
+        if self.lib.nebio_sc_listener_running():
             return True
-        self._running = True
-
-        try:
-            self._listener_thread = threading.Thread(
-                target=self._listen_loop)
-            self._listener_thread.daemon = True
-            self._listener_thread.start()
-
+        if self.lib.nebio_sc_start_listener() == 0:
             self.log.info("Listening for OSC on port %s", self.sPort)
             return True
-
-        except Exception as e:
-            self.log.error("Failed to start OSC listener: %s", e)
-            self.close_server()
-            return False
-
-    def _listen_loop(self):
-        try:
-            self.server.serve_forever()
-        except Exception as e:
-            self.log.error("OSC server error: %s", e)
-        self.log.debug("_listen_loop: stopped listening!!!!")
-
-    def _no_dispatch(self, addr, *args):
-        try:
-            self.log.error("DISPATCH CALLED MISSED!!!: %s", addr)
-        except Exception as e:
-            self.log.error("Error in OSC callback for %s, error: %s", addr, e)
-
-    # -------------------------
-    # Callback registration
-    # -------------------------
+        self.log.error("Failed to start OSC listener: %s", nebio.last_error())
+        return False
 
     def addResiver(self, address, callback):
-        try:
-            if self.dispatcher is None:
-                self.log.debug("OSCServer create dispatcher")
-                self.dispatcher = Dispatcher()
-                self.dispatcher.set_default_handler(self._no_dispatch)
-            self.log.debug("OSCServer add_listener")
-            self.dispatcher.map(address, callback)
-            if self.server is None:
-                self.server = ThreadingOSCUDPServer((self.shost, self.sPort), self.dispatcher)
-                self.log.debug("OSCServer created")
-        except Exception as e:
-            self.log.error("Failed add_listener: %s", e)
+        # /sc/up and /neb/ready are handled inside nebio and read through
+        # synthIsUpStatus()/sclangHandshakeStatus(); callbacks are not used.
+        if address not in self._handled:
+            self.log.error("OSC address %s is not handled by nebio", address)
 
     # -------------------------
     # Shutdown
@@ -179,28 +108,18 @@ class ScSend(object):
         self.close_server()
 
     def is_connected(self):
-        return self._connected or self._running
+        return bool(self.lib.nebio_sc_sender_open() or self.lib.nebio_sc_listener_running())
 
     def close_client(self):
-        if self.client is not None:
-            try:
-                self.log.info("Closing OSCclient")
-                self._connected = False
-                self.client = None
-            except Exception as e:
-                self.log.error("Error closing OSC client: %s", e)
+        if self.lib.nebio_sc_sender_open():
+            self.log.info("Closing OSCclient")
+            self.lib.nebio_sc_close_sender()
         else:
             self.log.info("OSC client is None!!!")
 
     def close_server(self):
-        if self.server is not None:
-            try:
-                self.log.info("Closing OSC server")
-                self._running = False
-                self.server.shutdown()
-                self.server = None
-                self.dispatcher = None
-            except Exception as e:
-                self.log.error("Error closing OSC server: %s", e)
+        if self.lib.nebio_sc_listener_running():
+            self.log.info("Closing OSC server")
+            self.lib.nebio_sc_stop_listener()
         else:
             self.log.info("OSC server is None!!!")

@@ -14,6 +14,7 @@ import multiprocessing
 import subprocess
 
 import nebmixer
+import nebio
 from classlogger import ClassLogger
 
 cfg_path = "/home/alarm/QB_Nebulae_V2/Code/config/"
@@ -486,23 +487,19 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in loadUI(): %s", e)
 
+    # The loading animation runs inside nebio (same look as bootleds.py), so
+    # no second process writes to the LED driver.
     def launch_bootled(self):
         try:
-            cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
-            os.system(cmd)
-            self.classlog.info("Launching LED program")
-            fullCmd = "python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading rainbow"
-            self.led_process = subprocess.Popen(fullCmd, shell=True)
-            self.classlog.info('led process created: %s', str(self.led_process))
+            self.classlog.info("Starting loading LED animation")
+            nebio.led_animation("loading", "rainbow")
         except Exception as e:
             self.classlog.error("Error in launch_bootled(): %s", e)
 
     def kill_bootled(self):
         try:
-            if self.led_process is not None:
-                self.classlog.info("Killing LED program")
-                self.led_process.kill()
-                self.led_process = None
+            self.classlog.info("Stopping loading LED animation")
+            nebio.led_animation_stop()
         except Exception as e:
             self.classlog.error("Error in kill_bootled(): %s", e)
 

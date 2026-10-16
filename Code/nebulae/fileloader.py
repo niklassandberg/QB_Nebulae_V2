@@ -7,6 +7,7 @@ import shutil
 #import shutil
 
 import endtimer
+import nebio
 
 class FileLoader(object):
 
@@ -108,8 +109,8 @@ class FileLoader(object):
         #else: 
         #    self.launch_bootled(0)
         if self.led_process is not None:
-            # Kill Boot LED
-            self.led_process.kill()
+            # Stop the USB loading animation
+            nebio.led_animation_stop()
             self.led_process = None
         if neb_globals.remount_fs is True:
             os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
@@ -182,13 +183,11 @@ class FileLoader(object):
     def getState(self):
         return self.currentState
 
+    # Runs inside nebio (same look as bootleds.py), no second LED process.
     def launch_bootled(self, mode):
-        cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
-        os.system(cmd)
-        self.classlog.info("Launching LED program")
+        self.classlog.info("Starting loading LED animation")
         if mode == 0:
-            fullCmd = "python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loading"
+            nebio.led_animation("loading")
         else:
-            fullCmd = "python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py loadingusb"
-        self.led_process = subprocess.Popen(fullCmd, shell=True)
-        self.classlog.info('led process created: ' + str(self.led_process))
+            nebio.led_animation("loadingusb")
+        self.led_process = True # animation running, stopped at the end of reload()

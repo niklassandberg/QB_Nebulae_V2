@@ -1,57 +1,40 @@
-# Courtesy of hecanjob/pippi.pd
-import socket
+# Text messages to Pure Data over TCP ("name value;"), sent by the nebio C++
+# library. Open PD with [netreceive 3000]. Keeps the old PdSend interface.
+import nebio
 from classlogger import ClassLogger
 
 
 class PdSend(object):
-    pdhost = 'localhost'
-    # pdhost = "192.168.0.33"
     sport = 3000
-    rport = 3001
 
     def __init__(self):
-        # Logger first
         self.log = ClassLogger.loggerSetup(self)
-
-        # Instance state
-        self.pd = None
-        self.connected = False
+        self.lib = nebio.lib()
+        self.warned = False
 
     # -------------------------
     # Connection
     # -------------------------
 
     def connect(self):
+        # Connects in the background and retries until PD answers or close().
         self.log.info("Connecting to PD")
-        try:
-            self.pd = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-            self.log.info("Created socket.")
-            self.pd.connect((self.pdhost, self.sport))
-            self.connected = True
-            self.log.info("Sending to PD on port %s", self.sport)
-
-        except Exception as e:
-            self.log.error(
-                "Connection failed - open PD with [netreceive %s]: %s",
-                self.sport, e
-            )
+        self.lib.nebio_pd_connect()
 
     # -------------------------
     # Sending
     # -------------------------
 
     def send(self, msgs):
-        if not self.connected or not self.pd:
-            self.log.warning("PD socket not connected. Cannot send messages.")
+        if not self.lib.nebio_pd_is_connected():
+            if not self.warned: # the connect runs in the background, warn once
+                self.log.warning("PD socket not connected. Cannot send messages.")
+                self.warned = True
             return
-
-        try:
-            for msg in msgs:
-                msg_str = str(msg) + ';'
-                self.pd.send(msg_str.encode('utf-8'))
-                self.log.debug("Sent to PD: %s", msg_str)
-        except Exception as e:
-            self.log.error("Could not send to PD: %s", e)
+        self.warned = False
+        data = ''.join(str(msg) + ';' for msg in msgs).encode('utf-8')
+        if self.lib.nebio_pd_send(data, len(data)) != 0:
+            self.log.error("Could not send to PD: %s", nebio.last_error())
 
     # -------------------------
     # Utilities
@@ -66,15 +49,11 @@ class PdSend(object):
     # -------------------------
 
     def close(self):
-        if self.pd and self.connected:
-            try:
-                self.log.info("Closing connection to PD")
-                self.pd.close()
-            except Exception as e:
-                self.log.error("Error closing PD connection: %s", e)
+        if self.lib.nebio_pd_is_connected():
+            self.log.info("Closing connection to PD")
         else:
             self.log.warning("No PD client to close.")
-        self.connected = False
+        self.lib.nebio_pd_close()
 
     def is_connected(self):
-        return self.connected
+        return self.lib.nebio_pd_is_connected() != 0

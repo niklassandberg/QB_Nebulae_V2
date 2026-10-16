@@ -113,21 +113,13 @@ then
 
     if [ -d "$DIR1" ]; then
         echo "Updating SuperCollider Extensions"
-
         mkdir -p "$DIR2"
-
-        # Create directory structure
-        find "$DIR1" -type d -mindepth 1 | while read -r d; do
-            mkdir -p "$DIR2/${d#$DIR1/}"
+        # Remove and replace
+        for item in "$DIR1"/*; do
+            rm -rf "$DIR2/$(basename "$item")"
         done
-
-        # Move files
-        find "$DIR1" -type f | while read -r f; do
-            mv "$f" "$DIR2/${f#$DIR1/}"
-        done
-
-        # Remove empty directories
-        find "$DIR1" -type d -empty -delete
+        mv "$DIR1"/* "$DIR2"/
+        rm -rf "$DIR1"
     fi
 
     #mkdir dir if they dont exist

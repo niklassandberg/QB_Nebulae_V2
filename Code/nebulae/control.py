@@ -1,6 +1,5 @@
-import Adafruit_GPIO.SPI as SPI
-import RPi.GPIO as GPIO
 import MCP3208
+import nebio
 import ctcsound
 import switch as libSwitch
 import shiftregister as libSR
@@ -12,14 +11,9 @@ import nconfig
 from classlogger import ClassLogger
 
 
-# Hardware SPI configuration:
-SPI_PORT   = 0
-SPI_DEVICE_CV = 0
-SPI_DEVICE_POT = 1
-
-POT_Sel_Pin = 7
-CV_Sel_Pin = 8
-EOL_OUT_PIN = 16
+# Hardware SPI configuration (read by nebio):
+SPI_DEVICE_CV = nebio.ADC_CV
+SPI_DEVICE_POT = nebio.ADC_POT
 
 # Defines for Button/Gate Types
 BUTTON_GATE_GPIO = 0
@@ -94,9 +88,9 @@ class AdcData(object):
         self.stable_delta = 0.0
         self.last_in = 0.0
         if (pot_channel >= 0):
-            self.mcp_pot = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_POT))
+            self.mcp_pot = MCP3208.MCP3208(SPI_DEVICE_POT)
         if (cv_channel >= 0):
-            self.mcp_cv = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_CV))
+            self.mcp_cv = MCP3208.MCP3208(SPI_DEVICE_CV)
         if self.name == "start":
             self.smoothCoeff = defStartCoeff
 
@@ -274,8 +268,8 @@ class HybridData(object):
         self.range = self.maximum - self.minimum
         self.channel = channel
         if (channel >= 0):
-            self.mcp_cv = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_CV))
-            self.mcp_pot = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_POT))
+            self.mcp_cv = MCP3208.MCP3208(SPI_DEVICE_CV)
+            self.mcp_pot = MCP3208.MCP3208(SPI_DEVICE_POT)
         self.average = 0.0
         self.analogVal = 0.0
         self.filtVal = 0.0
@@ -431,13 +425,7 @@ class CommChannel(object):
 # Single Channel of Control Information
 class ControlChannel(object):
     def __init__(self, csound, name, init = 0, source="static", data_channel=-1, sr=None, gate_pin=-1, button_pin=-1, config=None, minimum=0, maximum=1, cvchn=-2, longtouch_cb=None):
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
-        GPIO.setup(CV_Sel_Pin, GPIO.OUT)
-        GPIO.setup(POT_Sel_Pin, GPIO.OUT)
-        GPIO.setup(EOL_OUT_PIN, GPIO.OUT)
-        GPIO.output(CV_Sel_Pin, True)
-        GPIO.output(POT_Sel_Pin, True)
+        nebio.inputs() # GPIO, SPI and the end-of-loop output are owned by nebio
         self.csound = csound
         self.log = ClassLogger.loggerSetup(self)
         self.name = name
