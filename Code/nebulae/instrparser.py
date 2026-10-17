@@ -48,6 +48,11 @@ class InstrParser(object):
     def clearConfigDict(self):
         self.configDict.clear()
 
+    # Same as on feature_userDefinedSupercollider (80bc280); the list is only
+    # parsed there, so on this branch it is always empty.
+    def getHoldWithTriggCombos(self):
+        return self.holdWithTriggList if hasattr(self, 'holdWithTriggList') else []
+
     def getConfigDict(self):
         return self.configDict
 

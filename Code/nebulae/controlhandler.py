@@ -9,7 +9,6 @@ import time
 import threading
 import wavewriter
 import numpy as np
-import scsender
 import nebio
 
 import nebmixer
@@ -49,21 +48,6 @@ RECORD_GATE_PIN = 24
 # Main Class. Holds all ControlChannels
 class ControlHandler(object):
 
-    def synthIsUpStatus(self):
-        try:
-            retries = 0
-            self.classlog.info("Waiting for synth handshake...")
-            while not self.scSock.waitSynthIsUp(timeout=0.5):
-                self.classlog.info("synth is not up yet, pinging SC...")
-                self.scSock.pingLoaded()
-                retries += 1
-                if retries > 50:
-                    self.classlog.error("Synth did not respond after 50 pings, giving up!")
-                    return
-            self.classlog.info("Synth is up!")
-        except Exception as e:
-            self.classlog.error("Error in synthIsUpStatus(): %s", e)
-        
     def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='instr'):
         
         self.classlog = ClassLogger.loggerSetup(self)
@@ -95,7 +79,6 @@ class ControlHandler(object):
         self.updateAllLogCount = 0
         self.updateAllLogTime = self.now
         self.pdSock = pdsender.PdSend()
-        self.scSock = scsender.ScSend()
 
         self.currentInstr = instr
         self.currentBank = bank
@@ -211,35 +194,6 @@ class ControlHandler(object):
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
         
-    def startScOscServer(self):
-        self.classlog.info("startScOscServer")
-        self.scSock.connectSender()
-        self.scSock.addResiver('/sc/up', self.scSock.scdFileLoaded)
-        self.scSock.addResiver('/neb/ready', self.scSock.setSclangHandshake)
-        #TODO: add other listener
-        self.scSock.startListener()
-
-    def waitOnScLang(self):
-        self.classlog.info("waitOnScang")
-        self.scSock.zeroSclangHandshake()
-        retries = 0
-        while not self.scSock.sclangHandshakeStatus():
-            self.classlog.info("sclang is not ready yet, waiting...")
-            self.scSock.send('ready', 0)
-            retries += 1
-            if retries > 50:
-                self.classlog.info("Timeout waiting for sclang to be ready!")
-                break
-            time.sleep(0.1)
-        if retries >= 50:
-            self.classlog.info("sclang is not ready after 50 retries!")
-            #sys.exit(50)
-
-    def loadScSynth(self, patch):
-        self.scSock.setSynthIsDown()
-        self.scSock.send('loadScFile', patch)
-        self.synthIsUpStatus()
-
     # Pass Csound Performance Thread Pointer
     def setCsoundPerformanceThread(self, ptr):
         self.performance_thread = ptr
@@ -305,38 +259,11 @@ class ControlHandler(object):
     def mode(self):
         return self.control_mode
     
+    # SCControlHandler also closes its SC socket.
     def closeSockets(self):
         if self.pdSock.is_connected():
             self.pdSock.close()
-        if self.scSock.is_connected():
-            self.scSock.close()
 
-    def closeScSynthProcess(self):
-        try:
-            self.scSock.send("quit", 0)
-        except Exception as e:
-            self.classlog.error("Error in closeScSynthProcess(): %s", e)
-    
-    def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
-        self.prev_control_mode = self.control_mode
-        for chn in self.channels: #mutes csound
-            chn.muteCSound(True)
-        #TODO: wtf is this!!! self.control_mode = "supercollider" above!!!
-        if self.control_mode == "secondary controls":
-            self.resistSecondarySettings()
-        self.control_mode = "supercollider"
-        self.settings.update(self.now)
-        self.settings.write()
-        self.altchanneldict["source_alt"].setValue(0)
-        if self.pdSock.is_connected(): #kills pure data
-            self.pdSock.close()
-        #TODO: HERE ADD ALL SUPERCOLLIDER INITS!!!
-        if not self.scSock.is_connected():
-            self.classlog.info("def enterSuperColliderMode: Connecting to SC Socket")
-            self.scSock.connectSender()
-        for chn in self.channels:
-            self.classlog.info("def enterSuperColliderMode: initializin %s value %s", chn.name, str(chn.getValue()))
-        
     def enterNormalMode(self):
         self.classlog.info("entering normal")
         for chn in self.channels:
@@ -352,8 +279,6 @@ class ControlHandler(object):
         self.control_mode = "normal"
         if self.pdSock.is_connected():
             self.pdSock.close()
-        if self.scSock.is_connected():
-            self.scSock.close()
 
     def enterPureDataMode(self):
         self.prev_control_mode = self.control_mode
@@ -363,8 +288,6 @@ class ControlHandler(object):
             self.resistSecondarySettings()
         for chn in self.channels:
             chn.muteCSound(True)
-        if self.scSock.is_connected():
-            self.scSock.close()
         if not self.pdSock.is_connected():
             self.classlog.info("def enterPureDataMode: Connecting to PD Socket")
             self.pdSock.connect()
@@ -380,10 +303,6 @@ class ControlHandler(object):
             if not self.pdSock.is_connected() and self.control_mode == "puredata" :
                 self.classlog.info("def enterSecondaryMode: Connecting to PD Socket")
                 self.pdSock.connect()
-            if not self.scSock.is_connected() and self.control_mode == "supercollider" :
-                self.classlog.info("def enterSecondaryMode: Connecting to SC Socket")
-                #TODO: why call this???!!
-                self.scSock.connectSender()
 
             self.prev_control_mode = self.control_mode
             self.control_mode = "secondary controls"
@@ -514,17 +433,9 @@ class ControlHandler(object):
         if name in self.editFunctionFlag:
             self.editFunctionFlag[name] = True
 
-    def sendScOscMessages(self):
-        for chn in self.channels: #for each of the adc channels
-            chn.update() 
-            self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
-        for chn in self.altchannels:
-            chn.update() 
-            self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
-
-    def updateAll(self): 
-        #GPIO.output(self.eol_pin, False) # For debugging
-        numChanged = 0
+    # Start of every updateAll(): time stamp and the call counter, logged
+    # every 10 s (for CPU measurements).
+    def countUpdateAll(self):
         self.now = int(round(time.time() * 1000))
         self.updateAllCount += 1
         if self.now - self.updateAllLogTime >= 10000:
@@ -534,24 +445,25 @@ class ControlHandler(object):
             self.classlog.info("nebio: %s", nebio.stats())
             self.updateAllLogCount = self.updateAllCount
             self.updateAllLogTime = self.now
-        self.shiftReg.update()
+
+    # Holding the source button enters secondary controls, releasing it goes
+    # back to the previous mode.
+    def handleSourceHold(self):
         self.sourceStateCtrl.update()
         #print "source state: " + str(self.sourceStateCtrl.getValue())
-        if self.sourceStateCtrl.getValue() == 1 and self.sourceStateCtrl.getPrevValue() == 0: 
+        if self.sourceStateCtrl.getValue() == 1 and self.sourceStateCtrl.getPrevValue() == 0:
             self.prep_mode_change = True
             self.prep_mode_change_time = self.now
             #for chn in self.channeldict:
-        elif self.sourceStateCtrl.getValue() == 0: 
+        elif self.sourceStateCtrl.getValue() == 0:
             for chn in self.channels:
                 self.modeChangeValues[chn.name] = chn.getValue()
             if self.sourceStateCtrl.getPrevValue() == 1:
                 self.prep_mode_change = False
                 if self.control_mode == "secondary controls":
+                    # SCControlHandler overrides enterNormalMode() to go back to supercollider mode
                     if self.prev_control_mode == "puredata":
                         self.enterPureDataMode()
-                    elif self.prev_control_mode == "supercollider": 
-                        self.enterSuperColliderMode() ##added
-
                     else:
                         self.enterNormalMode()
 
@@ -561,7 +473,24 @@ class ControlHandler(object):
             self.channeldict["source"].setIgnoreNextButton()
             #self.altchanneldict["source_alt"].setIgnoreNextButton()
 
-        if self.control_mode != "puredata" and self.control_mode != "supercollider":
+    def updateInstrSelector(self):
+        #self.exit_instrmode_chn.update()
+        for idx, chn in enumerate(self.instr_sel_controls):
+            chn.update()
+            if chn.getValue() == 1:
+                sel_idx = idx + self.instr_sel_offset
+                if sel_idx < self.instr_sel_numfiles:
+                    self.instr_sel_idx = sel_idx
+
+    # Csound and Pure Data. SCControlHandler has its own updateAll().
+    def updateAll(self):
+        #GPIO.output(self.eol_pin, False) # For debugging
+        numChanged = 0
+        self.countUpdateAll()
+        self.shiftReg.update()
+        self.handleSourceHold()
+
+        if self.control_mode != "puredata":
             self.handleEndOfLoop()
             self.handleRecordStatus()
         #self.printAllControls()
@@ -587,14 +516,6 @@ class ControlHandler(object):
                     else:
                         self.classlog.error("pd Could not send messgaes to PD. No connection?': %s", e)
 
-            elif self.prev_control_mode =="supercollider": #if we are in sc mode
-                for chn in self.channels: #for each of the adc channels
-                    chn.update() 
-                    self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
-                for chn in self.altchannels:
-                    chn.update() 
-                    self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
-
             else: # normal
                 for chn in self.channels:
                     chn.update()
@@ -616,14 +537,8 @@ class ControlHandler(object):
             #        self.restoreAltToDefault()
             
         elif self.control_mode == "instr selector":
-            #self.exit_instrmode_chn.update()
-            for idx, chn in enumerate(self.instr_sel_controls):
-                chn.update()
-                if chn.getValue() == 1:
-                    sel_idx = idx + self.instr_sel_offset
-                    if sel_idx < self.instr_sel_numfiles:
-                        self.instr_sel_idx = sel_idx
-                
+            self.updateInstrSelector()
+
         elif self.control_mode == "puredata":
             time.sleep(0.001)
             msgs = []
@@ -640,12 +555,6 @@ class ControlHandler(object):
                     self.classlog.error("pd: Could not send messages to PD. Connected, but error?: %s", e)
                 else:
                     self.classlog.error("pd: Could not send messgaes to PD. No connection?': %s", e)
-        elif self.control_mode =="supercollider": #if we are in sc mode 
-            for chn in self.channels: #for each of the adc channels
-                if chn.name != "sourcegate":
-                    chn.setIgnoreHID(False)
-                chn.update() #update all control values
-                self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
 
         else: #includes "normal":4
             filestate = self.channeldict["filestate"].getValue()

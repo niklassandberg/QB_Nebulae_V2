@@ -304,7 +304,9 @@ class Nebulae(object):
 
             self.orc_handle.refreshFileHandler() #also the audio files
 
-            reuseResources = fromSC and self.c_handle is not None
+            # Only an SCControlHandler can be reused (a Csound/PD handler has no
+            # SC updateAll() and no OSC listener).
+            reuseResources = fromSC and isinstance(self.c_handle, chSC.SCControlHandler)
             if not reuseResources:
                 self.classlog.info("init SuperCollider handle")
                 self.orc_handle.instrparser.parse(patch, "/home/alarm/sc/", ext='.scd')
@@ -444,7 +446,9 @@ class Nebulae(object):
     def close_sc(self):
         #os.system("sudo killall sclang")
         #os.system("sudo killall jackd") #chould not be needed but just to be sure
-        self.c_handle.closeScSynthProcess()
+        # c_handle is not an SCControlHandler if start_supercollider() failed early
+        if isinstance(self.c_handle, chSC.SCControlHandler):
+            self.c_handle.closeScSynthProcess()
         self.c_handle.closeSockets()
         self.wait_for_jack_to_die()
         self.st = None
