@@ -61,6 +61,13 @@ NEBIO_API int nebio_set_input_rates(int scan_hz, int digital_hz, int adc_hz);
 NEBIO_API int nebio_input_scan_hz(void);
 NEBIO_API int nebio_input_digital_hz(void);
 NEBIO_API int nebio_input_adc_hz(void);
+/* Fast GPIO: shift register and polled pins read through /dev/gpiomem (no
+ * syscall per access) instead of libgpiod. Pi 1-4 only. Switching on checks
+ * the board and pin functions and runs a self-check; on any problem it stays
+ * on libgpiod and returns -1 (see nebio_last_error). Off by default.
+ * Requires nebio_inputs_init() first. Returns 0 when the requested state is in use. */
+NEBIO_API int nebio_set_fast_gpio(int on);
+NEBIO_API int nebio_fast_gpio(void);
 
 /* ---- LEDs -------------------------------------------------------------- */
 

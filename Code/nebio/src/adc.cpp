@@ -42,22 +42,30 @@ bool Mcp3208::readAll(uint16_t codes[8]) {
     uint8_t tx[8][3];
     uint8_t rx[8][3];
     spi_ioc_transfer xfer[8];
+    int chans[8];
+    int n = 0;
+    for (int ch = 0; ch < 8; ++ch)
+        if (mask_ & (1u << ch)) chans[n++] = ch;
+    if (n == 0) return true;
     std::memset(xfer, 0, sizeof(xfer));
     std::memset(rx, 0, sizeof(rx));
-    for (int ch = 0; ch < 8; ++ch) {
+    for (int i = 0; i < n; ++i) {
+        int ch = chans[i];
         // Start bit + single-ended, channel split over two bytes (see MCP3208.py).
-        tx[ch][0] = 0b110 | (ch > 3 ? 1 : 0);
-        tx[ch][1] = static_cast<uint8_t>((ch & 3) << 6);
-        tx[ch][2] = 0;
-        xfer[ch].tx_buf = reinterpret_cast<unsigned long>(tx[ch]);
-        xfer[ch].rx_buf = reinterpret_cast<unsigned long>(rx[ch]);
-        xfer[ch].len = 3;
-        xfer[ch].speed_hz = speedHz_;
-        xfer[ch].bits_per_word = 8;
-        xfer[ch].cs_change = ch < 7 ? 1 : 0;  // release CS between conversions
+        tx[i][0] = 0b110 | (ch > 3 ? 1 : 0);
+        tx[i][1] = static_cast<uint8_t>((ch & 3) << 6);
+        tx[i][2] = 0;
+        xfer[i].tx_buf = reinterpret_cast<unsigned long>(tx[i]);
+        xfer[i].rx_buf = reinterpret_cast<unsigned long>(rx[i]);
+        xfer[i].len = 3;
+        xfer[i].speed_hz = speedHz_;
+        xfer[i].bits_per_word = 8;
+        xfer[i].cs_change = i < n - 1 ? 1 : 0;  // release CS between conversions
     }
-    if (ioctl(fd_, SPI_IOC_MESSAGE(8), xfer) < 0) return false;
-    for (int ch = 0; ch < 8; ++ch) codes[ch] = ((rx[ch][1] << 8) | rx[ch][2]) & 0xFFF;
+    // SPI_IOC_MESSAGE(n) needs a compile-time n in C++; same request number:
+    const unsigned long request = _IOC(_IOC_WRITE, SPI_IOC_MAGIC, 0, SPI_MSGSIZE(n));
+    if (ioctl(fd_, request, xfer) < 0) return false;
+    for (int i = 0; i < n; ++i) codes[chans[i]] = ((rx[i][1] << 8) | rx[i][2]) & 0xFFF;
     return true;
 }
 

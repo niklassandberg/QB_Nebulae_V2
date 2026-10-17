@@ -11,6 +11,7 @@
 #include <cstdint>
 #include <mutex>
 #include <thread>
+#include <vector>
 
 #include "adc.h"
 #include "gpio.h"
@@ -74,11 +75,21 @@ public:
     int digitalHz() const;
     int adcHz() const;
 
+    // Fast GPIO: shift register and polled pins through /dev/gpiomem instead
+    // of libgpiod (see gpiomem.h). Switching on checks the board and the pin
+    // functions and runs a self-check (fast and libgpiod reads compared) in the
+    // input thread; on any problem it stays on libgpiod. 0 = ok, -1 = refused.
+    int setFastGpio(bool on);
+    bool fastGpio() const { return fastGpio_.load(std::memory_order_relaxed); }
+
 private:
     Inputs() = default;
     void run();
     void runEdges();
     bool readShiftRegister(uint8_t &bits);
+    bool readShiftRegisterFast(uint8_t &bits);
+    void readPolledFast(const std::vector<unsigned> &pins, std::vector<int> &levels);
+    bool fastSelfCheck();
     int pinSlot(int pin) const;
     void applyDebounce();
 
@@ -101,6 +112,11 @@ private:
     std::atomic<int> scanPeriodUs_{1000};
     std::atomic<int> digitalEveryNth_{1};
     std::atomic<int> adcEveryNth_{2};
+
+    // Fast GPIO, see setFastGpio(). Off by default.
+    std::atomic<bool> fastGpio_{false};
+    std::atomic<bool> fastRequest_{false};  // Python asks the input thread to self-check
+    std::atomic<int> fastResult_{0};        // 1 ok, -1 failed
 
     // Live state, guarded by mutex_
     mutable std::mutex mutex_;

@@ -12,12 +12,16 @@ public:
     bool open(const std::string &device, uint32_t speedHz);
     void close();
     bool ok() const { return fd_ >= 0; }
-    // Reads all 8 channels in one ioctl. Returns false on error.
+    // Channels to read (bit n = channel n). Unread channels keep the value
+    // codes[] already holds. Default: all 8.
+    void setChannelMask(uint8_t mask) { mask_ = mask; }
+    // Reads the masked channels in one ioctl. Returns false on error.
     bool readAll(uint16_t codes[8]);
 
 private:
     int fd_ = -1;
     uint32_t speedHz_ = 1000000;
+    uint8_t mask_ = 0xFF;
 };
 
 }  // namespace nebio

@@ -61,6 +61,8 @@ int nebio_set_input_rates(int scan_hz, int digital_hz, int adc_hz) {
 }
 int nebio_input_scan_hz(void) { return Inputs::instance().scanHz(); }
 int nebio_input_digital_hz(void) { return Inputs::instance().digitalHz(); }
+int nebio_set_fast_gpio(int on) { return Inputs::instance().setFastGpio(on != 0); }
+int nebio_fast_gpio(void) { return Inputs::instance().fastGpio() ? 1 : 0; }
 int nebio_input_adc_hz(void) { return Inputs::instance().adcHz(); }
 
 // ---- LEDs ------------------------------------------------------------------

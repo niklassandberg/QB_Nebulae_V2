@@ -58,6 +58,8 @@ def lib():
         "nebio_set_input_rates": (c_int, [c_int, c_int, c_int]),
         "nebio_input_scan_hz": (c_int, []),
         "nebio_input_digital_hz": (c_int, []),
+        "nebio_set_fast_gpio": (c_int, [c_int]),
+        "nebio_fast_gpio": (c_int, []),
         "nebio_input_adc_hz": (c_int, []),
         "nebio_led_set_button": (None, [c_int, c_double]),
         "nebio_led_set_rgb": (None, [c_int, c_double, c_double, c_double, c_double]),
@@ -178,6 +180,21 @@ def set_input_rates(scan_hz, digital_hz, adc_hz):
 def input_rates():
     l = lib()
     return l.nebio_input_scan_hz(), l.nebio_input_digital_hz(), l.nebio_input_adc_hz()
+
+
+def set_fast_gpio(on):
+    """Shift register and encoder/click pins through /dev/gpiomem instead of
+    libgpiod (no syscall per access). Pi 1-4 only. Switching on checks the
+    board and pin functions and runs a self-check; if anything is wrong nebio
+    stays on libgpiod. Call after the inputs are running. Returns True when
+    fast GPIO is in use."""
+    if inputs().nebio_set_fast_gpio(1 if on else 0) != 0:
+        _log.error("nebio: %s", last_error())
+    return fast_gpio()
+
+
+def fast_gpio():
+    return bool(lib().nebio_fast_gpio())
 
 
 def stats():

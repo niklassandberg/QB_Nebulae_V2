@@ -1,0 +1,52 @@
+==== cpustat 2026-10-17 00:27:42
+label:      Csound a_granularlooper, nebio 1200/400/400 + skip pot 3/4, fast GPIO off, no user input
+host:       alarmpi 5.15.43-2-rpi-ARCH armv7l, 4 cores
+cpu freq:   performance 1200 MHz
+window:     300 s, sample every 1 s
+nebio:      yes (2026-10-17_00:25)
+nebulae.py: md5 e67c4c6f8289
+running:
+    347 /bin/bash -c exec tail -f /dev/null | /usr/bin/sclang &> /tmp/sclang.log
+    359 /usr/bin/sclang
+    518 sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+    520 python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+
+measured:   273 intervals, 300 s
+
+program       min %   mean %    p95 %    max %   mean Pi%   max RSS
+           (of one core, like top)                                                
+python        130.0    135.9    140.1    142.5       34.0   303.7 MB
+sclang          0.0      0.0      0.0      0.0        0.0    28.1 MB
+scsynth    not running
+pd         not running
+csound     not running
+jackd      not running
+total Pi       24.1     36.2     42.8     45.2   (whole Pi, all 4 cores = 100 %)
+temp           40.4     42.7     43.8     44.8   (deg C)
+
+whole Pi split (% of all 4 cores): user 31.6, system 5.1, irq 0.0, idle 63.3
+The programs above use 34.0 % of the Pi. The rest is other processes and kernel/interrupt
+work; this kernel counts interrupts during idle as system time without any process.
+
+python processes (mean % of one core):
+     520  135.9 %  python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py 
+
+python threads, busiest first (mean / max % of one core).
+nebio and Csound threads run inside nebulae.py; the first thread is the python main loop.
+  pid    520 tid    553 python3            65.5 % /   69.7 %
+  pid    520 tid    520 python3            53.9 % /   58.7 %   (main thread)
+  pid    520 tid    542 python3            13.4 % /   15.6 %
+  pid    520 tid    551 python3             1.3 % /    2.8 %
+  pid    520 tid    537 python3             1.2 % /    2.7 %
+  pid    520 tid    552 python3             0.6 % /    1.8 %
+  pid    520 tid    543 python3             0.0 % /    1.8 %
+
+interrupts per second (all cores), busiest first:
+      6291 /s  IPI3:  Function call interrupts
+      5600 /s  33:    GICv2 150 Level fe204000.spi
+      2305 /s  26:    GICv2 30 Level arch_timer
+      1112 /s  34:    GICv2 149 Level fe804000.i2c
+        94 /s  42:    GICv2 119 Level DMA IRQ
+        94 /s  41:    GICv2 118 Level DMA IRQ
+        18 /s  IPI2:  Rescheduling interrupts
+        15 /s  45:    GICv2 158 Level mmc1, mmc0

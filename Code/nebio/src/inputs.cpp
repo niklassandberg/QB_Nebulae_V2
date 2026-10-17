@@ -7,6 +7,7 @@
 #include <cstring>
 #include <vector>
 
+#include "gpiomem.h"
 #include "log.h"
 
 namespace nebio {
@@ -31,6 +32,19 @@ constexpr int kMaxScanHz = 2000;
 constexpr int kButtonDebounceUs = 8000;  // buttons/clicks, kept at 8 ms for any scan rate
 constexpr int kSrGateBit = 6;        // source gate arrives through the shift register
 constexpr uint32_t kSpiHz = 1000000;  // MCP3208.py
+// Knob ADC channels in use: 0 start, 1 blend, 2 density, 5 window, 6 size,
+// 7 overlap (controlhandler.py). 3 and 4 are not connected to a knob, so they
+// are not read (2 SPI transfers less per scan). All 8 CV channels are used.
+constexpr uint8_t kPotChannels = 0b11100111;
+
+// Fast GPIO (see gpiomem.h): every latch/clock level is held for at least
+// this long, whatever the scan rate (CD4021 needs a few hundred ns at 3.3 V;
+// the libgpiod path takes microseconds per step). A higher scan or digital
+// rate means more reads per second, never shorter pulses.
+constexpr int64_t kFastPulseNs = 1000;
+// Self-check before switching to fast GPIO: reads compared both ways.
+constexpr int kFastCheckRounds = 50;
+constexpr int kFastCheckMaxMismatch = 5;  // inputs may change between the two reads
 
 int64_t nowNs() {
     timespec ts;
@@ -193,6 +207,7 @@ int Inputs::init() {
 
     adc_[0].open("/dev/spidev0.0", kSpiHz);
     adc_[1].open("/dev/spidev0.1", kSpiHz);
+    adc_[1].setChannelMask(kPotChannels);
 
     // Slots for the pins Python reads through switch.py.
     auto addSlot = [&](unsigned pin, int debounce) {
@@ -273,6 +288,105 @@ bool Inputs::readShiftRegister(uint8_t &bits) {
     return true;
 }
 
+namespace {
+
+// Busy-waits at least ns (vDSO clock, no syscall).
+void spinNs(int64_t ns) {
+    int64_t end = nowNs() + ns;
+    while (nowNs() < end) {
+    }
+}
+
+}  // namespace
+
+// Same sequence as readShiftRegister(), through /dev/gpiomem, every level held
+// for at least kFastPulseNs.
+bool Inputs::readShiftRegisterFast(uint8_t &bits) {
+    GpioMem &m = GpioMem::instance();
+    const uint32_t latch = 1u << kSrLatch, clock = 1u << kSrClock, data = 1u << kSrData;
+    m.write(latch, 0);
+    spinNs(kFastPulseNs);
+    m.write(0, latch);
+    spinNs(kFastPulseNs);
+    bits = 0;
+    for (int i = 0; i < 8; ++i) {
+        m.write(0, clock);
+        spinNs(kFastPulseNs);
+        if (m.levels() & data) bits |= static_cast<uint8_t>(1 << i);
+        m.write(clock, 0);
+        spinNs(kFastPulseNs);
+    }
+    return true;
+}
+
+void Inputs::readPolledFast(const std::vector<unsigned> &pins, std::vector<int> &levels) {
+    uint32_t lev = GpioMem::instance().levels();
+    levels.resize(pins.size());
+    for (size_t i = 0; i < pins.size(); ++i) levels[i] = (lev >> pins[i]) & 1;
+}
+
+// Runs in the input thread (so nothing else clocks the shift register).
+bool Inputs::fastSelfCheck() {
+    const std::vector<unsigned> &pins = polled_.pins();
+    std::vector<int> slow, fast;
+    int srMismatch = 0, pinMismatch = 0;
+    for (int r = 0; r < kFastCheckRounds; ++r) {
+        uint8_t a = 0, b = 0;
+        if (!readShiftRegister(a) || !readShiftRegisterFast(b)) return false;
+        if (a != b) ++srMismatch;
+        if (!polled_.getAll(slow)) return false;
+        readPolledFast(pins, fast);
+        if (slow != fast) ++pinMismatch;
+    }
+    if (srMismatch > kFastCheckMaxMismatch || pinMismatch > kFastCheckMaxMismatch) {
+        logError("fast GPIO self-check failed (%d/%d shift register and %d/%d pin reads differ), "
+                 "staying on libgpiod", srMismatch, kFastCheckRounds, pinMismatch, kFastCheckRounds);
+        return false;
+    }
+    logInfo("fast GPIO self-check ok (%d/%d and %d/%d reads differ)", srMismatch, kFastCheckRounds,
+            pinMismatch, kFastCheckRounds);
+    return true;
+}
+
+int Inputs::setFastGpio(bool on) {
+    if (!on) {
+        fastGpio_.store(false, std::memory_order_relaxed);
+        logInfo("fast GPIO off (libgpiod)");
+        return 0;
+    }
+    if (!running_ || !srOut_.ok() || !srIn_.ok() || !polled_.ok()) {
+        logError("fast GPIO: inputs not running");
+        return -1;
+    }
+    GpioMem &m = GpioMem::instance();
+    if (!m.open()) return -1;
+    // Only switch if the pins are set up the way libgpiod requested them:
+    // latch/clock outputs, data and polled pins inputs. Read only.
+    if (m.function(kSrLatch) != 1 || m.function(kSrClock) != 1 || m.function(kSrData) != 0) {
+        logError("fast GPIO: unexpected pin functions (latch %d, clock %d, data %d)",
+                 m.function(kSrLatch), m.function(kSrClock), m.function(kSrData));
+        return -1;
+    }
+    for (unsigned p : polled_.pins()) {
+        if (p > 31 || m.function(p) != 0) {
+            logError("fast GPIO: pin %u is not an input (function %d)", p, m.function(p));
+            return -1;
+        }
+    }
+    m.setWritable((1u << kSrLatch) | (1u << kSrClock));
+    // The input thread runs the self-check at the start of its next scan.
+    fastResult_.store(0);
+    fastRequest_.store(true);
+    for (int i = 0; i < 200 && fastRequest_.load(); ++i)
+        std::this_thread::sleep_for(std::chrono::milliseconds(10));
+    if (fastRequest_.load()) {
+        fastRequest_.store(false);
+        logError("fast GPIO: self-check did not run");
+        return -1;
+    }
+    return fastResult_.load() == 1 ? 0 : -1;
+}
+
 void Inputs::run() {
     std::vector<int> levels;
     const std::vector<unsigned> &polledPins = polled_.pins();
@@ -292,11 +406,24 @@ void Inputs::run() {
         bool digitalScan = (tick % static_cast<uint64_t>(digitalNth)) == 0;
         bool adcScan = (tick % static_cast<uint64_t>(adcNth)) == 0;
 
+        if (fastRequest_.load(std::memory_order_relaxed)) {  // from setFastGpio(true)
+            bool ok = fastSelfCheck();
+            fastGpio_.store(ok, std::memory_order_relaxed);
+            fastResult_.store(ok ? 1 : -1);
+            fastRequest_.store(false);
+            if (ok) logInfo("fast GPIO on (/dev/gpiomem, %s)", GpioMem::instance().board().c_str());
+        }
+        const bool fast = fastGpio_.load(std::memory_order_relaxed);
+
         uint8_t sr = 0;
-        bool srOk = digitalScan && readShiftRegister(sr);
+        bool srOk = digitalScan && (fast ? readShiftRegisterFast(sr) : readShiftRegister(sr));
         // One read for all polled pins (encoders and clicks share the request).
-        bool polledOk = polled_.getAll(levels);
-        uint16_t codes[2][8];
+        bool polledOk = true;
+        if (fast)
+            readPolledFast(polledPins, levels);
+        else
+            polledOk = polled_.getAll(levels);
+        uint16_t codes[2][8] = {};  // channels not read (see kPotChannels) stay 0
         bool adcOk[2] = {false, false};
         if (adcScan) {
             adcOk[0] = adc_[0].readAll(codes[0]);
@@ -416,9 +543,10 @@ void Inputs::stats(char *buf, size_t len) {
     double secs = (now - lastStatNs_) / 1e9;
     uint64_t scans = scans_, snaps = snapshots_;
     if (secs <= 0) secs = 1;
-    std::snprintf(buf, len, "scan %.0f Hz, snapshot %.0f Hz, worst scan %lld us",
+    std::snprintf(buf, len, "scan %.0f Hz, snapshot %.0f Hz, worst scan %lld us, gpio %s",
                   (scans - lastStatScans_) / secs, (snaps - lastStatSnaps_) / secs,
-                  static_cast<long long>(worstScanUs_.exchange(0)));
+                  static_cast<long long>(worstScanUs_.exchange(0)),
+                  fastGpio() ? "fast" : "libgpiod");
     lastStatScans_ = scans;
     lastStatSnaps_ = snaps;
     lastStatNs_ = now;

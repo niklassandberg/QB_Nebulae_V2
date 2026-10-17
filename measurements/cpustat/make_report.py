@@ -134,7 +134,7 @@ def build():
     s = []
     s.append(p("nebio vs. Original Firmware: CPU", H1))
     s.append(p("QB Nebulae V2 (RPi4) &middot; nebio (<b>feature_newHardWareHandling</b>) against the "
-               "original firmware (<b>0419df1</b>) &middot; measured 2026-10-16 on the device", SUB))
+               "original firmware (<b>0419df1</b>) &middot; measured 2026-10-16 and 17 on the device", SUB))
     s.append(Spacer(1, 6))
 
     # 1 ------------------------------------------------------------------
@@ -146,8 +146,11 @@ def build():
     s.append(table([
         ["", "Original (0419df1)", "nebio, matched rates", "Difference"],
         ["updateAll() calls/s", "400.3 (388-407)", "399.9 (399.2-400.2)", "same rate, nebio steadier"],
-        ["<b>Whole Pi busy</b> (4 cores = 100 %)", "35.7 %", "<b>31.8 %</b>", "<b>-3.9 points (-11 %)</b>"],
+        ["<b>Control overhead</b> (python3 minus the Csound thread, % of one core)", "78.9 %",
+         "<b>70.4 %</b>", "<b>-8.5 points (-11 %)</b>"],
         ["<b>Python main loop</b> (% of one core)", "71.1 %", "<b>52.5 %</b>", "<b>-18.6 (-26 %)</b>"],
+        ["Whole Pi busy (4 cores = 100 %)", "35.7 %", "31.8 %", "-3.9 points (Csound load similar "
+         "in these two runs)"],
         ["CPU time per updateAll() pass", "1.78 ms", "<b>1.31 ms</b>", "<b>-26 %</b>"],
         ["I2C interrupts/s (LED writes)", "5 702", "<b>1 111</b>", "<b>-81 %</b>"],
         ["Inter-core interrupts/s", "16 140", "6 619", "-59 %"],
@@ -155,13 +158,18 @@ def build():
     ], [52 * mm, 33 * mm, 35 * mm, W - 120 * mm]))
     s.append(Spacer(1, 4))
     s += bullets([
+        "<b>Control overhead</b> is the fair measure: the Csound thread's load depends on the knob "
+        "settings (more grains are stacked at some settings) and changed between 49.5 and 65.5 % "
+        "of a core across the runs, so it is left out. What remains is the firmware's own work.",
+        "<b>The firmware's own work costs 8.5 points of a core less with nebio</b>, including "
+        "nebio's input thread (14.8 % of a core), which replaces the two Python encoder threads "
+        "and the hardware reads in the main loop.",
         "<b>Each updateAll() pass is 26 % cheaper</b>: the Python side no longer does the SPI and "
         "GPIO reads itself, it reads a snapshot that nebio has already filled.",
-        "<b>The whole Pi does the same job with 11 % less CPU</b>, including nebio's own input "
-        "thread (14.8 % of one core), which replaces the two Python encoder threads and the "
-        "hardware reads in the main loop.",
         "<b>LED writes dropped by 81 %</b>, because nebio only writes LEDs that changed.",
-        "<b>The first comparison looked worse</b> (section 5) because nebio then ran updateAll() "
+        "<b>Optimisations inside nebio afterwards</b> (section 5) gave about 2 more points of a "
+        "core: skipping 2 unused ADC channels and an optional fast GPIO path (section 6).",
+        "<b>The first comparison looked worse</b> (section 7) because nebio then ran updateAll() "
         "about 25 % more often and scanned the hardware 2.5 times as often as the original. "
         "That was more work, not more cost per unit of work.",
         "<b>To look at:</b> nebio's input thread is sometimes held up for several milliseconds "
@@ -267,7 +275,7 @@ def build():
         ["fe804000.i2c", "5 702", "<b>1 111</b>", "LED writes to the PCA9685"],
         ["DMA IRQ x 2", "94 + 94", "94 + 94", "audio (Csound, 512-frame blocks). Same"],
     ], [40 * mm, 20 * mm, 20 * mm, W - 80 * mm]))
-    s.append(p("The extra kernel time seen in the first comparison (section 5) is gone: with matched "
+    s.append(p("The extra kernel time seen in the first comparison (section 7) is gone: with matched "
                "rates the measured programs explain almost all of the Pi's load.", BODY))
 
     # 4 ------------------------------------------------------------------
@@ -286,7 +294,95 @@ def build():
     ])
 
     # 5 ------------------------------------------------------------------
-    s.append(p("5. First comparison: SC bank, nebio at its default rates", H2))
+    s.append(p("5. Optimisations inside nebio", H2))
+    s.append(p("After the matched comparison, three ideas to lower nebio's own cost were tried, each "
+               "measured separately (same rates 1200/400/400, Csound a_granularlooper, 5 minutes):"))
+    s.append(table([
+        ["Optimisation", "Result", "Kept?"],
+        ["<b>Skip the unused knob ADC channels 3 and 4</b> (read 14 instead of 16 channels; all 8 CV "
+         "channels are still read)", "SPI interrupts 6 391 -> <b>5 600/s (-12.4 %)</b>, input thread "
+         "14.8 -> <b>13.4 %</b> of a core", "<b>yes</b>"],
+        ["<b>SPI polling mode</b> (kernel parameter spi_bcm2835.polling_limit_us 30 -> 100, set at "
+         "run time)", "SPI interrupts 6 414 -> 0/s, but whole Pi 32.9 -> <b>36.4 %</b>: the thread "
+         "busy-waits instead of sleeping", "<b>no</b>, set back to 30"],
+        ["<b>Fast GPIO</b>: shift register and encoder/click pins through /dev/gpiomem instead of "
+         "libgpiod (about 10 400 fewer syscalls/s)", "input thread 13.6 -> <b>13.1 %</b> of a core "
+         "(measured back to back, fast off/on)", "<b>in the code, off by default</b> (flag, section 6)"],
+    ], [68 * mm, 70 * mm, W - 138 * mm]))
+    s.append(Spacer(1, 6))
+    s.append(table([
+        ["Run (% of one core)", "python3", "- Csound", "= control overhead", "main loop", "input handling"],
+        ["Original (0419df1)", "130.7", "51.8", "<b>78.9</b>", "71.1", "5.8 (2 encoder threads)"],
+        ["nebio, matched rates", "119.9", "49.5", "<b>70.4</b>", "52.5", "14.8"],
+        ["nebio + skip pot 3/4", "135.9", "65.5", "<b>70.4</b>", "53.9", "13.4"],
+        ["nebio + skip pot 3/4, fast GPIO off", "132.4", "61.7", "<b>70.7</b>", "53.9", "13.6"],
+        ["nebio + skip pot 3/4, fast GPIO on", "131.1", "61.7", "<b>69.4</b>", "53.2", "13.1"],
+    ], [52 * mm, 18 * mm, 18 * mm, 28 * mm, 20 * mm, W - 136 * mm]))
+    s.append(p("The fast GPIO off/on pair was measured back to back, each right after a restart, with "
+               "the same Csound load (61.7 % in both). updateAll() ran at 399.8-399.9/s in all nebio "
+               "runs. The main loop varies by about 1 point between runs.", NOTE))
+    s.append(p("<b>Why the gain is small.</b> On the Pi 4 a GPIO syscall costs only about 1 &micro;s, so "
+               "removing 10 400 of them per second saves about 1.2 % of a core, and the 1 &micro;s "
+               "safety pulses of the fast path (18 per shift-register read, busy-waited) cost about "
+               "0.7 % back. Most of the input thread's 13 % is waking up 1200 times per second for "
+               "the encoders and the 14 SPI transfers per ADC read, not the GPIO access. The worst "
+               "scan time (section 4) did not change, which confirms that it is a scheduling issue, "
+               "not a syscall one. The bigger levers are now the Python main loop (about 53 % of a "
+               "core) and the encoder scan rate (section 10).", BODY))
+
+    # 6 ------------------------------------------------------------------
+    s.append(p("6. Fast GPIO: how to switch it on", H2))
+    s.append(p("Fast GPIO is <b>off by default</b>. It is kept in the code because it can matter on "
+               "slower boards such as the Raspberry Pi 3, where syscalls cost more."))
+    s.append(table([
+        ["Where", "What"],
+        ["<b>Switch (measuring phase)</b>", "<font face='Courier'>/home/alarm/nebio_fast_gpio</font>: "
+         "if this file exists when nebulae starts, fast GPIO is switched on. Delete it to switch off."],
+        ["Code/nebulae/controlhandler.py", "<font face='Courier'>NEBIO_FAST_GPIO_FLAG</font> (next to the "
+         "NEBIO_*_HZ rates) and in <font face='Courier'>ControlHandler.__init__()</font>, right after "
+         "<font face='Courier'>nebio.set_input_rates(...)</font>: "
+         "<font face='Courier'>nebio.set_fast_gpio(True)</font> when the file exists"],
+        ["Python API (Code/nebulae/nebio.py)", "<font face='Courier'>nebio.set_fast_gpio(True/False)</font> "
+         "returns True when fast GPIO is in use; <font face='Courier'>nebio.fast_gpio()</font>. Call "
+         "after the inputs are running."],
+        ["C API (Code/nebio/include/nebio.h)", "<font face='Courier'>nebio_set_fast_gpio(int on)</font>, "
+         "<font face='Courier'>nebio_fast_gpio()</font>"],
+        ["Implementation", "Code/nebio/src/gpiomem.h/.cpp (register access), inputs.cpp "
+         "(readShiftRegisterFast, readPolledFast, fastSelfCheck, setFastGpio)"],
+    ], [52 * mm, W - 52 * mm]))
+    s.append(p("Switching it on, on the Pi (the root file system is read-only):", BODY))
+    s.append(Preformatted("sudo sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw\n"
+                          "sudo touch /home/alarm/nebio_fast_gpio        # rm -f ... to switch off\n"
+                          "sudo sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro\n"
+                          "sudo systemctl restart nebulae.service", CODE))
+    s.append(p("Check in /tmp/nebulae_logging.log and the journal:", BODY))
+    s.append(Preformatted("nebio fast GPIO requested (/home/alarm/nebio_fast_gpio): on\n"
+                          "[nebio] INFO: fast GPIO self-check ok (0/50 and 0/50 reads differ)\n"
+                          "[nebio] INFO: fast GPIO on (/dev/gpiomem, BCM2711 (Pi 4))\n"
+                          "nebio: scan 1200 Hz, snapshot 400 Hz, worst scan ... us, gpio fast", CODE))
+    s.append(p("Safety", H3))
+    s += bullets([
+        "<b>Boards:</b> only BCM2835/2836/2837/2711 (Pi 1-4, Zero), recognised from the device tree. "
+        "They share the GPIO register layout; /dev/gpiomem hides the different base addresses. "
+        "Anything else (e.g. Pi 5) is refused and nebio stays on libgpiod.",
+        "<b>Pin functions are never changed.</b> libgpiod still requests the lines and sets "
+        "direction and pulls. Before switching, nebio reads the function registers (read only) and "
+        "refuses unless latch/clock (GPIO 15/14) are outputs and the data and encoder/click pins "
+        "are inputs.",
+        "<b>Only two pins can be written</b> through the fast path: latch and clock, enforced by a "
+        "fixed write mask.",
+        "<b>Pulse width does not depend on the rates:</b> every latch/clock level is held at least "
+        "1 &micro;s (the CD4021 needs a few hundred ns at 3.3 V). Raising the scan or digital rate "
+        "gives more reads per second, never shorter pulses. Rates are clamped (scan 100-2000 Hz).",
+        "<b>Self-check:</b> in the input thread, 50 shift-register and 50 pin reads are compared "
+        "between the fast path and libgpiod; with more than 5 differences it stays on libgpiod.",
+        "<b>Tested on the Pi 4:</b> read-only check of the registers first, then the self-check "
+        "(0/50 differences) and a hand test of all buttons and both encoders, which worked as before.",
+        "<b>Not tested on a Pi 3 yet.</b> nebio itself needs libgpiod 2 (kernel 5.10 or newer) there.",
+    ])
+
+    # 7 ------------------------------------------------------------------
+    s.append(p("7. First comparison: SC bank, nebio at its default rates", H2))
     s.append(p("Measured earlier the same day, before the rates were matched. nebio then scanned at "
                "1000 Hz and read the ADCs at 500 Hz, so updateAll() could run about 500 times per "
                "second against the original's ~408 (measured later with the counter):"))
@@ -307,8 +403,8 @@ def build():
                "rates and disappeared when they were matched. These SC numbers are kept for "
                "reference; the comparison in sections 1-3 is the valid one.", BODY))
 
-    # 6 ------------------------------------------------------------------
-    s.append(p("6. Hardware test (nebio)", H2))
+    # 8 ------------------------------------------------------------------
+    s.append(p("8. Hardware test (nebio)", H2))
     s += bullets([
         "hwtest.py ran at boot instead of nebulae (firmware built with "
         "<font face='Courier'>create_fw_update.sh --hwtest</font>), log on the USB stick.",
@@ -318,8 +414,8 @@ def build():
         "<b>Audio:</b> played during the test, 0 underruns.",
     ])
 
-    # 7 ------------------------------------------------------------------
-    s.append(p("7. Other findings", H2))
+    # 9 ------------------------------------------------------------------
+    s.append(p("9. Other findings", H2))
     s += bullets([
         "The Pi is <b>32 bit (armv7h)</b>, not aarch64.",
         "sudo asks for the root password; pacman 7 needs <font face='Courier'>--disable-sandbox</font> "
@@ -336,19 +432,24 @@ def build():
         "then. Not related to nebio.",
     ])
 
-    # 8 ------------------------------------------------------------------
-    s.append(p("8. Next steps", H2))
+    # 10 -----------------------------------------------------------------
+    s.append(p("10. Next steps", H2))
     s.append(table([
         ["Step", "Why"],
-        ["Real-time priority for nebio's input thread (below the audio)", "worst scan 4-6 ms, section 4"],
+        ["<b>Python main loop</b>: fewer updateAll() passes (e.g. 200/s, needs the knob smoothing "
+         "retuned) or cheaper Python code in updateAll()", "the biggest cost left: about 53 % of a core"],
+        ["<b>Encoder scan rate</b>: read the encoders at e.g. 600 Hz, or by interrupt", "1200 wake-ups/s "
+         "are most of the input thread's 13 %"],
+        ["Real-time priority for nebio's input thread (below the audio)", "worst scan 4-7 ms, "
+         "section 4; not CPU, but timing"],
         ["Measure the SC and PD banks with matched rates", "only Csound is compared like for like so far"],
+        ["Test fast GPIO on a Pi 3", "where syscalls cost more, the gain may be larger"],
+        ["Fix update.sh: build nebio before check_calibration.py", "the calibration check fails right "
+         "after an update because libnebio.so is not built yet"],
         ["Decide the default rates (and remove the counter later)", "keep the setter for tuning"],
-        ["Check encoder feel and knob smoothing at 400 updateAll()/s", "filters work per pass; 400/s "
-         "is the original's rate, so it should feel the same"],
         ["Name the nebio threads (pthread_setname_np)", "easier to read in top and cpustat"],
         ["Optional: run with a scan rate that is not a multiple of 100 Hz (e.g. 1170/390/390)",
-         "only to confirm the cause of the per-second swing (section 3 note); does not change the "
-         "results"],
+         "only to confirm the cause of the per-second swing (section 3 note)"],
     ], [95 * mm, W - 95 * mm]))
 
     s.append(KeepTogether([p("Files", H3), table([
@@ -359,6 +460,11 @@ def build():
         ["nebio_matched_updateall_20261016.log", "nebio: updateAll() rate, nebio rates, worst scan"],
         ["orig_sc_20261016_102031.txt / .csv", "original, SC bank (first comparison)"],
         ["nebio_sc_20261016_084140.txt / .csv", "nebio default rates, SC bank (first comparison)"],
+        ["nebio_opt2_cs_granular_20261017_002742.txt / .csv", "nebio + skip pot 3/4"],
+        ["nebio_fastgpio_off_cs_granular_20261017_004525.txt / .csv", "nebio + skip pot 3/4, fast GPIO off"],
+        ["nebio_fastgpio_on_cs_granular_20261017_003852.txt / .csv", "nebio + skip pot 3/4, fast GPIO on"],
+        ["nebio_opt2_updateall_20261017.log, nebio_fastgpio_updateall_20261017.log", "updateAll() rate, "
+         "nebio rates, worst scan, fast GPIO state"],
         ["make_report.py", "builds this PDF"],
     ], [92 * mm, W - 92 * mm]), p("All files are in measurements/cpustat/. The measurement script is "
                                   "Code/scripts/cpustat.sh.", NOTE)]))

@@ -19,6 +19,7 @@ pkg_check_modules(LIBLO REQUIRED IMPORTED_TARGET liblo)
 add_library(nebio SHARED
   src/nebio.cpp
   src/gpio.cpp
+  src/gpiomem.cpp
   src/adc.cpp
   src/inputs.cpp
   src/leds.cpp

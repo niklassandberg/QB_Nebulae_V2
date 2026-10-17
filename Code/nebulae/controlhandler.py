@@ -24,6 +24,22 @@ BUTTON_GPIO_GATE_SR = 3
 BUTTON_GPIO_GATE_NONE = 4
 BUTTON_SR_GATE_NONE = 5
 
+# nebio input rates, set to read the hardware as often as the original
+# firmware (0419df1) did, so the CPU use can be compared:
+# - shift register, encoder clicks and ADCs were read once per updateAll(),
+#   measured about 400 times/s -> digital 400 Hz, ADC 400 Hz. The ADC rate is
+#   also the highest rate updateAll() can run at.
+# - encoders were polled by their own threads with sleep(0.001), just under
+#   1 kHz -> scan 1200 Hz (every 3rd scan gives exactly 400 Hz for the rest).
+# - button debounce: original 3 equal reads, nebio 8 ms = 3 reads at 400 Hz.
+NEBIO_SCAN_HZ = 1200
+NEBIO_DIGITAL_HZ = 400
+NEBIO_ADC_HZ = 400
+# Fast GPIO (shift register + encoder/click pins through /dev/gpiomem, see
+# Code/nebio/src/gpiomem.h). For the measuring phase it is switched on only
+# when this file exists, so it can be tried without a new firmware.
+NEBIO_FAST_GPIO_FLAG = "/home/alarm/nebio_fast_gpio"
+
 FREEZE_GATE_PIN = 4
 RESET_GATE_PIN = 25
 NEXT_GATE_PIN = 23
@@ -56,6 +72,13 @@ class ControlHandler(object):
         nebio.inputs() # all hardware is owned by nebio
         self.eol_state = False
         self.shiftReg = libSR.ShiftRegister()
+        self.classlog.info("nebio input rates (scan, digital, adc): %s",
+                           nebio.set_input_rates(NEBIO_SCAN_HZ, NEBIO_DIGITAL_HZ, NEBIO_ADC_HZ))
+        if os.path.exists(NEBIO_FAST_GPIO_FLAG):
+            self.classlog.info("nebio fast GPIO requested (%s): %s", NEBIO_FAST_GPIO_FLAG,
+                               "on" if nebio.set_fast_gpio(True) else "refused, using libgpiod")
+        else:
+            self.classlog.info("nebio fast GPIO: off (libgpiod)")
         self.numFiles = numberFiles
         self.control_mode = "normal"
         self.prev_control_mode = "normal"
@@ -67,6 +90,10 @@ class ControlHandler(object):
         self.settings.read()
         self.saveFlag = 0
         self.now = int(round(time.time() * 1000))
+        # updateAll() call counter, logged every 10 s (for CPU measurements)
+        self.updateAllCount = 0
+        self.updateAllLogCount = 0
+        self.updateAllLogTime = self.now
         self.pdSock = pdsender.PdSend()
         self.scSock = scsender.ScSend()
 
@@ -499,6 +526,14 @@ class ControlHandler(object):
         #GPIO.output(self.eol_pin, False) # For debugging
         numChanged = 0
         self.now = int(round(time.time() * 1000))
+        self.updateAllCount += 1
+        if self.now - self.updateAllLogTime >= 10000:
+            self.classlog.info("updateAll: %.1f calls/s (total %d)",
+                               (self.updateAllCount - self.updateAllLogCount) * 1000.0 / (self.now - self.updateAllLogTime),
+                               self.updateAllCount)
+            self.classlog.info("nebio: %s", nebio.stats())
+            self.updateAllLogCount = self.updateAllCount
+            self.updateAllLogTime = self.now
         self.shiftReg.update()
         self.sourceStateCtrl.update()
         #print "source state: " + str(self.sourceStateCtrl.getValue())
