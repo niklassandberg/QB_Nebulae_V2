@@ -24,6 +24,9 @@ cd temp/
 # Copy Code/ contents to new directory structure
 mkdir -p QB_Nebulae_V2/
 cp -R ../Code QB_Nebulae_V2/
+# nebio is built on the Nebulae itself; a local build dir would be for the wrong
+# machine and its CMake cache for the wrong path.
+rm -rf QB_Nebulae_V2/Code/nebio/build
 cp -R ../Resources/SuperCollider/Extensions QB_Nebulae_V2/SuperColliderExtensions
 if [ "$1" = "--hwtest" ]
 then

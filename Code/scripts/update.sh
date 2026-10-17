@@ -41,6 +41,10 @@ then
     now=$(date +"%a %D - %T")
     echo "$now - Firmware updated to: $VERSION" >> /mnt/memory/neb_log.txt
     rm -rf /mnt/memory/neb_update.zip
+    # The new firmware has no nebio build yet, and check_calibration.py reads
+    # the knobs through nebio, so build it first (file system is still rw).
+    echo "building nebio for the new firmware"
+    sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh
     sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py force
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service ]
     then
