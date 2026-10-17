@@ -762,10 +762,9 @@ class UserInterface(object):
                 #l = self.puredata_fhandle.getFileNames()
                 #for name in l:
                 #    print name
-                if self.currentInstr in self.puredata_fhandle.getFileNames():
-                    self.controlhandler.enterPureDataMode()
-                else:
-                    self.controlhandler.enterNormalMode()
+                # SC and PD control handlers override enterNormalMode()
+                # to go back to supercollider/puredata mode.
+                self.controlhandler.enterNormalMode()
         self.set_pitch_leds(mode)
 
     def set_rgb(self, name, r, g, b, bright=1.0):

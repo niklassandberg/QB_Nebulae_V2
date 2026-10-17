@@ -2,7 +2,6 @@ import ctcsound
 import switch as libSwitch
 import shiftregister as libSR
 import control
-import pdsender
 import os
 import settings
 import time
@@ -78,7 +77,6 @@ class ControlHandler(object):
         self.updateAllCount = 0
         self.updateAllLogCount = 0
         self.updateAllLogTime = self.now
-        self.pdSock = pdsender.PdSend()
 
         self.currentInstr = instr
         self.currentBank = bank
@@ -259,10 +257,9 @@ class ControlHandler(object):
     def mode(self):
         return self.control_mode
     
-    # SCControlHandler also closes its SC socket.
+    # Csound has no sockets; SCControlHandler and PDControlHandler close theirs.
     def closeSockets(self):
-        if self.pdSock.is_connected():
-            self.pdSock.close()
+        pass
 
     def enterNormalMode(self):
         self.classlog.info("entering normal")
@@ -277,32 +274,13 @@ class ControlHandler(object):
         self.altchanneldict["source_alt"].setValue(0)
         self.prev_control_mode = self.control_mode
         self.control_mode = "normal"
-        if self.pdSock.is_connected():
-            self.pdSock.close()
 
-    def enterPureDataMode(self):
-        self.prev_control_mode = self.control_mode
-        if self.modeChangeControl is not None:
-            self.channeldict[self.modeChangeControl].setIgnoreNextButton()
-        if self.control_mode == "secondary controls":
-            self.resistSecondarySettings()
-        for chn in self.channels:
-            chn.muteCSound(True)
-        if not self.pdSock.is_connected():
-            self.classlog.info("def enterPureDataMode: Connecting to PD Socket")
-            self.pdSock.connect()
-        self.control_mode = "puredata"
-    
     def enterSecondaryMode(self):
         #self.modeChangeControl = "pitch"
         #self.altchanneldict[self.modeChangeControl + "_alt"].setIgnoreNextButton()
         if self.control_mode == "normal" or self.control_mode == "puredata" or self.control_mode == "supercollider":
             self.classlog.info("entering secondary")
-            self.resistNormalSettings() 
-
-            if not self.pdSock.is_connected() and self.control_mode == "puredata" :
-                self.classlog.info("def enterSecondaryMode: Connecting to PD Socket")
-                self.pdSock.connect()
+            self.resistNormalSettings()
 
             self.prev_control_mode = self.control_mode
             self.control_mode = "secondary controls"
@@ -461,11 +439,9 @@ class ControlHandler(object):
             if self.sourceStateCtrl.getPrevValue() == 1:
                 self.prep_mode_change = False
                 if self.control_mode == "secondary controls":
-                    # SCControlHandler overrides enterNormalMode() to go back to supercollider mode
-                    if self.prev_control_mode == "puredata":
-                        self.enterPureDataMode()
-                    else:
-                        self.enterNormalMode()
+                    # SCControlHandler/PDControlHandler override enterNormalMode()
+                    # to go back to supercollider/puredata mode
+                    self.enterNormalMode()
 
         if self.prep_mode_change == True and self.now - self.prep_mode_change_time > 175:# and numChanged > 0:
             self.enterSecondaryMode()
@@ -482,7 +458,7 @@ class ControlHandler(object):
                 if sel_idx < self.instr_sel_numfiles:
                     self.instr_sel_idx = sel_idx
 
-    # Csound and Pure Data. SCControlHandler has its own updateAll().
+    # Csound. SCControlHandler and PDControlHandler have their own updateAll().
     def updateAll(self):
         #GPIO.output(self.eol_pin, False) # For debugging
         numChanged = 0
@@ -490,40 +466,18 @@ class ControlHandler(object):
         self.shiftReg.update()
         self.handleSourceHold()
 
-        if self.control_mode != "puredata":
-            self.handleEndOfLoop()
-            self.handleRecordStatus()
+        self.handleEndOfLoop()
+        self.handleRecordStatus()
         #self.printAllControls()
 
         if self.control_mode == "secondary controls":
-            if self.prev_control_mode == "puredata":          
-                time.sleep(0.001)
-                msgs = []
-                for chn in self.channels:
-                    #chn.setIgnoreHID(False)
-                    chn.update()
-                    temp_str = chn.name + ' ' + str(chn.getValue())
-                    msgs.append(temp_str)
-                for chn in self.altchannels:
-                    chn.update()
-                    temp_str = chn.name + ' ' + str(chn.getValue())
-                    msgs.append(temp_str)
-                try:
-                    self.pdSock.send(msgs)
-                except Exception as e:
-                    if self.pdSock.is_connected():
-                        self.classlog.error("pd Could not send messages to PD. Connected, but error?: %s", e)
-                    else:
-                        self.classlog.error("pd Could not send messgaes to PD. No connection?': %s", e)
-
-            else: # normal
-                for chn in self.channels:
-                    chn.update()
-                for chn in self.altchannels:
-                    chn.update()
-                    self.settings.save(chn.name, chn.getValue())
-                if self.currentInstr == "a_granularlooper":
-                    self.channeldict["file"].input.setIncOrder(self.altchanneldict["file_alt"].getValue()) 
+            for chn in self.channels:
+                chn.update()
+            for chn in self.altchannels:
+                chn.update()
+                self.settings.save(chn.name, chn.getValue())
+            if self.currentInstr == "a_granularlooper":
+                self.channeldict["file"].input.setIncOrder(self.altchanneldict["file_alt"].getValue())
 
             in_scalar = self.altchanneldict["speed_alt"].getValue()
             self.setInputLevel(in_scalar)
@@ -538,23 +492,6 @@ class ControlHandler(object):
             
         elif self.control_mode == "instr selector":
             self.updateInstrSelector()
-
-        elif self.control_mode == "puredata":
-            time.sleep(0.001)
-            msgs = []
-            for chn in self.channels:
-                if chn.name != "sourcegate":
-                    chn.setIgnoreHID(False)
-                chn.update()
-                temp_str = chn.name + ' ' + str(chn.getValue())
-                msgs.append(temp_str)
-            try:
-                self.pdSock.send(msgs)
-            except Exception as e:
-                if self.pdSock.is_connected():
-                    self.classlog.error("pd: Could not send messages to PD. Connected, but error?: %s", e)
-                else:
-                    self.classlog.error("pd: Could not send messgaes to PD. No connection?': %s", e)
 
         else: #includes "normal":4
             filestate = self.channeldict["filestate"].getValue()

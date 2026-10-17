@@ -4,6 +4,7 @@ import os
 import ctcsound
 import controlhandler as ch
 import controlhandlerSC as chSC
+import controlhandlerPD as chPD
 import conductor
 import ui
 import fileloader
@@ -355,7 +356,7 @@ class Nebulae(object):
             
             self.classlog.info('sleeping')
             time.sleep(2)
-            self.c_handle = ch.ControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="puredata")
+            self.c_handle = chPD.PDControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="puredata")
             self.c_handle.setCsoundPerformanceThread(None)
             self.c_handle.enterPureDataMode()
             self.loadUI()

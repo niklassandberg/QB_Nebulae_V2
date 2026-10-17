@@ -1,4 +1,4 @@
-import controlhandler
+import controlhandlerPD
 import ui
 from subprocess import Popen
 import sys
@@ -9,7 +9,7 @@ cmd = "pd -nogui -verbose -rt -audiobuf 5".split()
 cmd.append(fullPath)
 pt = Popen(cmd)
 request = False
-ch = controlhandler.ControlHandler(None, 0, None)
+ch = controlhandlerPD.PDControlHandler(None, 0, None)
 ch.enterPureDataMode()
 ui = ui.UserInterface(ch)
 while(request != True):

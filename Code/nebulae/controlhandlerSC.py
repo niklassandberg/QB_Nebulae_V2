@@ -86,8 +86,6 @@ class SCControlHandler(ControlHandler):
         self.settings.update(self.now)
         self.settings.write()
         self.altchanneldict["source_alt"].setValue(0)
-        if self.pdSock.is_connected(): #kills pure data
-            self.pdSock.close()
         #TODO: HERE ADD ALL SUPERCOLLIDER INITS!!!
         if not self.scSock.is_connected():
             self.classlog.info("def enterSuperColliderMode: Connecting to SC Socket")
