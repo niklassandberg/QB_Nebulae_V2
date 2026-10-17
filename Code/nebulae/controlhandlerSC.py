@@ -10,6 +10,64 @@ class SCControlHandler(ControlHandler):
         super(SCControlHandler, self).__init__(*args, **kwargs)
         self.scSock = scsender.ScSend()
 
+    def closeSockets(self):
+        super(SCControlHandler, self).closeSockets()
+        if self.scSock.is_connected():
+            self.scSock.close()
+
+    def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
+        self.prev_control_mode = self.control_mode
+        for chn in self.channels: #mutes csound
+            chn.muteCSound(True)
+        if self.control_mode == "secondary controls":
+            self.resistSecondarySettings()
+        self.control_mode = "supercollider"
+        self.settings.update(self.now)
+        self.settings.write()
+        self.altchanneldict["source_alt"].setValue(0)
+        #TODO: HERE ADD ALL SUPERCOLLIDER INITS!!!
+        if not self.scSock.is_connected():
+            self.classlog.info("def enterSuperColliderMode: Connecting to SC Socket")
+            self.scSock.connectSender()
+        for chn in self.channels:
+            self.classlog.info("def enterSuperColliderMode: initializin %s value %s", chn.name, str(chn.getValue()))
+
+    # The SC bank has no Csound "normal" mode: leaving secondary controls or the
+    # instr selector (ui.py) goes back to supercollider mode.
+    def enterNormalMode(self):
+        self.enterSuperColliderMode()
+
+    def enterSecondaryMode(self):
+        if not self.scSock.is_connected() and self.control_mode == "supercollider" :
+            self.classlog.info("def enterSecondaryMode: Connecting to SC Socket")
+            #TODO: why call this???!!
+            self.scSock.connectSender()
+        super(SCControlHandler, self).enterSecondaryMode()
+
+    # Only the supercollider part of ControlHandler.updateAll(): no Csound
+    # (end of loop, record status, file handling) and no Pure Data.
+    def updateAll(self):
+        self.countUpdateAll()
+        self.shiftReg.update()
+        self.handleSourceHold()
+
+        if self.control_mode == "secondary controls":
+            self.sendScOscMessages() # all channels and alt channels
+            self.setInputLevel(self.altchanneldict["speed_alt"].getValue())
+        elif self.control_mode == "instr selector":
+            self.updateInstrSelector()
+        else: # supercollider
+            for chn in self.channels: #for each of the adc channels
+                if chn.name != "sourcegate":
+                    chn.setIgnoreHID(False)
+                chn.update() #update all control values
+                self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
+
+    # specific supercollider things
+
+
+
+
     def startScOscServer(self):
         self.classlog.info("startScOscServer")
         self.scSock.connectSender()
@@ -56,11 +114,6 @@ class SCControlHandler(ControlHandler):
         self.scSock.send('loadScFile', patch)
         self.synthIsUpStatus()
 
-    def closeSockets(self):
-        super(SCControlHandler, self).closeSockets()
-        if self.scSock.is_connected():
-            self.scSock.close()
-
     def closeScSynthProcess(self):
         try:
             self.scSock.send("quit", 0)
@@ -75,51 +128,3 @@ class SCControlHandler(ControlHandler):
             chn.update()
             self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
 
-    def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
-        self.prev_control_mode = self.control_mode
-        for chn in self.channels: #mutes csound
-            chn.muteCSound(True)
-        #TODO: wtf is this!!! self.control_mode = "supercollider" above!!!
-        if self.control_mode == "secondary controls":
-            self.resistSecondarySettings()
-        self.control_mode = "supercollider"
-        self.settings.update(self.now)
-        self.settings.write()
-        self.altchanneldict["source_alt"].setValue(0)
-        #TODO: HERE ADD ALL SUPERCOLLIDER INITS!!!
-        if not self.scSock.is_connected():
-            self.classlog.info("def enterSuperColliderMode: Connecting to SC Socket")
-            self.scSock.connectSender()
-        for chn in self.channels:
-            self.classlog.info("def enterSuperColliderMode: initializin %s value %s", chn.name, str(chn.getValue()))
-
-    # The SC bank has no Csound "normal" mode: leaving secondary controls or the
-    # instr selector (ui.py) goes back to supercollider mode.
-    def enterNormalMode(self):
-        self.enterSuperColliderMode()
-
-    def enterSecondaryMode(self):
-        if not self.scSock.is_connected() and self.control_mode == "supercollider" :
-            self.classlog.info("def enterSecondaryMode: Connecting to SC Socket")
-            #TODO: why call this???!!
-            self.scSock.connectSender()
-        super(SCControlHandler, self).enterSecondaryMode()
-
-    # Only the supercollider part of ControlHandler.updateAll(): no Csound
-    # (end of loop, record status, file handling) and no Pure Data.
-    def updateAll(self):
-        self.countUpdateAll()
-        self.shiftReg.update()
-        self.handleSourceHold()
-
-        if self.control_mode == "secondary controls":
-            self.sendScOscMessages() # all channels and alt channels
-            self.setInputLevel(self.altchanneldict["speed_alt"].getValue())
-        elif self.control_mode == "instr selector":
-            self.updateInstrSelector()
-        else: # supercollider
-            for chn in self.channels: #for each of the adc channels
-                if chn.name != "sourcegate":
-                    chn.setIgnoreHID(False)
-                chn.update() #update all control values
-                self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
