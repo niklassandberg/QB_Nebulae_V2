@@ -17,7 +17,8 @@
 echo "Creating Nebulae Firmware Update"
 # Get Current Location
 dir="$(pwd)"
-# Create Temp Locations
+
+rm -rf temp/
 mkdir -p temp/
 # Move to Temp Location
 cd temp/
