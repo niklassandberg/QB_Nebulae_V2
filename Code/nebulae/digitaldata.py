@@ -10,6 +10,7 @@ BUTTON_GATE_SR = 2
 BUTTON_GPIO_GATE_SR = 3
 BUTTON_GPIO_GATE_NONE = 4
 BUTTON_SR_GATE_NONE = 5
+DEFAULT_OUTPUT_PERIOD = 10 # output to csound pulse in ms
 class DigitalData(object):
     def __init__(self, name, button_gate_mode, gate_pin, button_pin, sr, mode="latching", edge="falling", maximum=1, longtouch_cb=None, inc_order=0, init_val=0):
         self.b_state = 0
@@ -32,7 +33,7 @@ class DigitalData(object):
         self.time_held = 0
         self.button_pressed = False
         self.long_press_time = 300
-        self.output_period = 10 # output to csound pulse in ms
+        self.output_period = DEFAULT_OUTPUT_PERIOD
         self.led_period = 40 # output to csound pulse in ms
         #self.long_press_time = 63
         self.ignore_next_btrig = edge == "falling"
@@ -99,6 +100,16 @@ class DigitalData(object):
 
     def setOutputPeriod(self, ms):
         self.output_period = ms
+
+    # New mode/edge from the next patch (reused SCControlHandler). A new mode
+    # starts from 0, as the old state means something else in it.
+    def setMode(self, mode, edge):
+        if mode != self.mode:
+            self.mode = mode
+            self.state = self.prev_state = self.led_state = 0
+            self.b_state = self.g_state = 0
+        self.edge = edge
+        self.ignore_next_btrig = edge == "falling"
 
     def getTrigSource(self):
         return self.trig_source

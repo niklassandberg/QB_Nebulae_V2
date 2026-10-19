@@ -46,6 +46,7 @@ private:
 
     static int onSynthUp(const char *, const char *, lo_arg **, int, lo_message, void *);
     static int onReady(const char *, const char *, lo_arg **, int, lo_message, void *);
+    static int onLed(const char *, const char *, lo_arg **, int, lo_message, void *);
     static int onOther(const char *, const char *, lo_arg **, int, lo_message, void *);
     static void onError(int num, const char *msg, const char *where);
 

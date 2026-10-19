@@ -55,6 +55,15 @@ int nebio_gpio_level(int bcm_pin) { return Inputs::instance().gpioLevel(bcm_pin)
 int nebio_adc_code(int device, int channel) { return Inputs::instance().adcCode(device, channel); }
 int nebio_encoder_id(int pin_a, int pin_b) { return Inputs::instance().encoderId(pin_a, pin_b); }
 int nebio_encoder_steps(int id) { return Inputs::instance().encoderSteps(id); }
+void nebio_encoder_set_raw(int id, int on) {
+    if (id < 0 || id > 1) return;
+    Inputs::instance().setEncoderRaw(id, on != 0);
+    // pitch (0) -> NEBIO_RGB_PITCH_POS/NEG, speed (1) -> NEBIO_RGB_SPEED_POS/NEG
+    Leds::instance().setScOwned(id * 2, on != 0);
+    Leds::instance().setScOwned(id * 2 + 1, on != 0);
+}
+int nebio_encoder_raw(int id) { return Inputs::instance().encoderRaw(id) ? 1 : 0; }
+void nebio_encoder_set_click(int id, int on) { Inputs::instance().setEncoderClick(id, on != 0); }
 void nebio_set_eol(int high) { Inputs::instance().setEol(high); }
 int nebio_set_input_rates(int scan_hz, int digital_hz, int adc_hz) {
     return Inputs::instance().setRates(scan_hz, digital_hz, adc_hz);
@@ -76,6 +85,7 @@ void nebio_led_animation(const char *color, const char *behavior) {
     Leds::instance().animation(color ? color : "", behavior ? behavior : "");
 }
 void nebio_led_animation_stop(void) { Leds::instance().animationStop(); }
+void nebio_led_clear_sc(void) { Leds::instance().clearSc(); }
 
 // ---- SuperCollider ---------------------------------------------------------
 

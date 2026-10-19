@@ -6,6 +6,7 @@ import controlhandler as ch
 import controlhandlerSC as chSC
 import controlhandlerPD as chPD
 import conductor
+import scparser
 import ui
 import fileloader
 import time
@@ -36,6 +37,7 @@ class Nebulae(object):
             self.classlog.info("Nebulae Initializing")
             self.instr_cfg = cfg_path + "bootinstr.txt"
             self.orc_handle = conductor.Conductor() # Initialize Audio File Tables and Csound Score/Orchestra
+            self.sc_parser = scparser.ScParser() # nebconfig block of the .scd
             #self.currentInstr = "a_granularlooper"
             self.c = None
             self.pt = None 
@@ -308,21 +310,23 @@ class Nebulae(object):
             # Only an SCControlHandler can be reused (a Csound/PD handler has no
             # SC updateAll() and no OSC listener).
             reuseResources = fromSC and isinstance(self.c_handle, chSC.SCControlHandler)
+            self.sc_parser.parse(patch, "/home/alarm/sc/")
+            scConfigData = self.sc_parser.getConfigDict()
+            scConfigData['output_period'] = [self.sc_parser.getOutputPeriod()]
+            scConfigData['holdwithtrigg_combos'] = self.sc_parser.getHoldWithTriggCombos()
             if not reuseResources:
                 self.classlog.info("init SuperCollider handle")
-                self.orc_handle.instrparser.parse(patch, "/home/alarm/sc/", ext='.scd')
-                scConfigData = self.orc_handle.getConfigDict()
-                scConfigData['output_period'] = [self.orc_handle.instrparser.getOutputPeriod()]
-                scConfigData['holdwithtrigg_combos'] = self.orc_handle.instrparser.getHoldWithTriggCombos()
                 self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), scConfigData, self.new_instr, bank="supercollider")
                 self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
                 self.st = None #just to be sertain.
+            self.c_handle.setConfig(self.sc_parser) # rawencoder or hybrid speed/pitch, as the .scd declares
 
             self.c_handle.enterSuperColliderMode()
             self.classlog.info("Load patch!")
             #self.kill_bootled() #maybe warning is because scsynth starts??? Moved here
             self.c_handle.loadScSynth(fullPath)
+            self.c_handle.startRawEncoders() # patch is running: sclang takes its rawencoders
             
             self.kill_bootled()
 
@@ -413,6 +417,8 @@ class Nebulae(object):
                 self.ui.update()
                 request = self.ui.getReloadRequest()
             nebmixer.disable()
+            if isinstance(self.c_handle, chSC.SCControlHandler):
+                self.c_handle.setRawActive(False) # give the encoders back to Python
             if request == True:
                 self.first_run = False
                 self.classlog.info("Received Reload Request from UI")

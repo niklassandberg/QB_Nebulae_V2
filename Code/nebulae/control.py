@@ -375,6 +375,28 @@ class HybridData(object):
 
                 
 
+# Encoder whose value is owned by sclang (rawencoder in a .scd). While active,
+# nebio sends the steps and the click straight to sclang and sclang drives the
+# encoder's LEDs. sclang also saves the value. This class keeps no value: it
+# only switches that routing.
+class RawEncoderData(object):
+    def __init__(self, name):
+        self.name = name
+
+    # nebio ignores a call that doesn't change the state.
+    def setActive(self, state):
+        nebio.encoder_set_raw(self.name, state)
+
+    def getValue(self):
+        return 0.0
+
+    def setValue(self, value):
+        pass
+
+    def setIgnoreHID(self, state):
+        pass
+
+
 # Single Channel of Return Communication from CSound
 class CommChannel(object):
     def __init__(self, csound, name):
@@ -460,6 +482,8 @@ class ControlChannel(object):
                 self.input = digitaldata.DigitalData(self.name, data_channel, gate_pin, button_pin, self.sr, mode, edge, maximum, longtouch_cb, init_val=init)
         elif (source is "hybrid"):
             self.input = HybridData(data_channel, self.name, minimum, maximum, init_val=self.curVal)
+        elif (source == "rawencoder"):
+            self.input = RawEncoderData(self.name)
 
         if self.source == "analog" or self.source == "hybrid": 
             new_offset = self.gatherOffset(self.name)
@@ -509,6 +533,10 @@ class ControlChannel(object):
     def setOutputPeriod(self, ms):
         if self.source == "digital":
             self.input.setOutputPeriod(ms)
+
+    def setMode(self, mode, edge):
+        if self.source == "digital":
+            self.input.setMode(mode, edge)
 
     def setModeChangeValue(self, value_to_resist):
         if self.source == "analog":

@@ -63,6 +63,15 @@ public:
     int adcCode(int device, int channel) const;
     int encoderId(int pinA, int pinB) const;
     int encoderSteps(int id);
+    // Raw encoder (rawencoder in a .scd): steps and click edges go straight
+    // from the input thread to sclang (/neb/enc/<name>, /neb/enc/<name>/click)
+    // and encoderSteps() returns 0. Switching off while the click is held
+    // sends the release, so sclang always gets press + release.
+    void setEncoderRaw(int id, bool on);
+    bool encoderRaw(int id) const;
+    // Click only (a hybrid encoder in a SuperCollider patch): the click edges
+    // go to sclang as for a raw encoder, the steps stay with Python.
+    void setEncoderClick(int id, bool on);
     void setEol(int high);
     void stats(char *buf, size_t len);
 
@@ -92,6 +101,9 @@ private:
     bool fastSelfCheck();
     int pinSlot(int pin) const;
     void applyDebounce();
+    bool clickPressed(int id) const;
+    void sendRawEncoders(const int clickLevel[2]);
+    void routeChanged(int id, bool clickBefore);
 
     // Hardware
     GpioLines srOut_;    // clock, latch
@@ -139,7 +151,20 @@ private:
     uint64_t snapAdcGen_ = 0;
     long long snapCount_ = 0;
 
-    Encoder enc_[2];
+    Encoder enc_[2];  // 0 = pitch, 1 = speed (encoderId)
+
+    // Raw encoders, guarded by rawMutex_ (taken before mutex_, never after).
+    struct RawState {
+        std::atomic<bool> on{false};     // steps and click to sclang
+        std::atomic<bool> click{false};  // click only to sclang
+        bool pressed = false;      // press sent to sclang, release not yet
+        bool waitRelease = false;  // held when the click was routed: skip until released
+        int lastDir = 0;           // direction of the last steps read, as ui.py's *_inc_dir
+        bool sendsClick() const { return on || click; }
+    };
+    std::mutex rawMutex_;
+    RawState raw_[2];
+    std::atomic<bool> anyRaw_{false};  // any steps or clicks routed to sclang
 
     // Stats
     std::atomic<uint64_t> scans_{0};

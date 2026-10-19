@@ -1,7 +1,13 @@
 import time
 
+import control
+import nebio
 import scsender
-from controlhandler import ControlHandler
+import digitaldata
+from controlhandler import ControlHandler, DIGITAL_CONTROLS
+
+# Encoders a .scd can declare as "rawencoder" in its nebconfig block.
+RAW_ENCODERS = ("speed", "pitch")
 
 # Control handler for the SuperCollider bank. Owns the OSC link to sclang (scSock).
 class SCControlHandler(ControlHandler):
@@ -9,11 +15,79 @@ class SCControlHandler(ControlHandler):
     def __init__(self, *args, **kwargs):
         super(SCControlHandler, self).__init__(*args, **kwargs)
         self.scSock = scsender.ScSend()
+        self.rawReady = False  # patch loaded, sclang can take the raw encoders
+        # Both channels of each encoder, built once: encoders[name][source].
+        self.encoders = dict()
+        for name in RAW_ENCODERS:
+            self.encoders[name] = dict()
+            self.encoders[name]["hybrid"] = self.channeldict[name] # built by ControlHandler
+            self.encoders[name]["rawencoder"] = control.ControlChannel(None, name, 0, "rawencoder")
 
     def closeSockets(self):
+        self.setRawActive(False)
         super(SCControlHandler, self).closeSockets()
         if self.scSock.is_connected():
             self.scSock.close()
+
+    # ---- rawencoder -------------------------------------------------------
+
+    def rawChannels(self):
+        return [chn for chn in self.channels if chn.source == "rawencoder"]
+
+    # Called for every patch, also when this handler is reused for the next
+    # .scd: speed/pitch become rawencoder or hybrid as the patch declares them.
+    # The channel keeps its place in self.channels, resistNormalSettings()
+    # pairs channels[i] with altchannels[i].
+    def setConfig(self, scParser):
+        self.setRawActive(False)
+        self.rawReady = False
+        nebio.led_clear_sc()  # the old patch's LED colours
+        for name in RAW_ENCODERS:
+            source = scParser.getType(name)
+            old = self.channeldict[name]
+            new = self.encoders[name][source]
+            if new is old:
+                continue
+            self.channels[self.channels.index(old)] = new
+            self.channeldict[name] = new
+            self.classlog.info("%s: %s", name, source)
+        self.setButtonConfig(scParser)
+
+    # Button mode and edge as the .scd declares them (e.g. freeze,latching,rising),
+    # else the default, the same as ControlHandler.__init__ does for a new handler.
+    def setButtonConfig(self, scParser):
+        output_period = scParser.getOutputPeriod()
+        for ctrl in DIGITAL_CONTROLS:
+            chn = self.channeldict.get(ctrl) or self.altchanneldict.get(ctrl)
+            config = scParser.configEntry(ctrl) or self.defaultConfig.get(ctrl)
+            if chn is None or config is None or len(config) < 2:
+                continue
+            chn.setMode(config[0], config[1])
+            if config[0] == "triggered":
+                chn.setOutputPeriod(output_period)
+            else:
+                chn.setOutputPeriod(digitaldata.DEFAULT_OUTPUT_PERIOD)
+
+    # Declared rawencoder by the loaded .scd (in supercollider mode Python
+    # never sets its value or LEDs).
+    def isRaw(self, name):
+        chn = self.channeldict.get(name)
+        return chn is not None and chn.source == "rawencoder"
+
+    # Raw routing in nebio: only in supercollider mode and once the patch is loaded.
+    # Also the press/release of both encoders (raw or hybrid) goes to sclang
+    # in the same window, so a patch always knows when speed/pitch are clicked.
+    def setRawActive(self, state):
+        for chn in self.rawChannels():
+            chn.input.setActive(state)
+        for name in RAW_ENCODERS:
+            nebio.encoder_set_click(name, state)
+
+    # After loadScSynth(): the patch is running, sclang can take the raw encoders.
+    def startRawEncoders(self):
+        self.rawReady = True
+        if self.control_mode == "supercollider":
+            self.setRawActive(True)
 
     def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
         self.prev_control_mode = self.control_mode
@@ -31,6 +105,8 @@ class SCControlHandler(ControlHandler):
             self.scSock.connectSender()
         for chn in self.channels:
             self.classlog.info("def enterSuperColliderMode: initializin %s value %s", chn.name, str(chn.getValue()))
+        if self.rawReady:
+            self.setRawActive(True)
 
     # The SC bank has no Csound "normal" mode: leaving secondary controls or the
     # instr selector (ui.py) goes back to supercollider mode.
@@ -42,7 +118,12 @@ class SCControlHandler(ControlHandler):
             self.classlog.info("def enterSecondaryMode: Connecting to SC Socket")
             #TODO: why call this???!!
             self.scSock.connectSender()
+        self.setRawActive(False)  # Python needs the encoders in secondary controls
         super(SCControlHandler, self).enterSecondaryMode()
+
+    def enterInstrSelMode(self):
+        self.setRawActive(False)  # and in the instr selector
+        super(SCControlHandler, self).enterInstrSelMode()
 
     # Only the supercollider part of ControlHandler.updateAll(): no Csound
     # (end of loop, record status, file handling) and no Pure Data.
@@ -58,6 +139,8 @@ class SCControlHandler(ControlHandler):
             self.updateInstrSelector()
         else: # supercollider
             for chn in self.channels: #for each of the adc channels
+                if chn.source == "rawencoder":
+                    continue # nebio and sclang handle it
                 if chn.name != "sourcegate":
                     chn.setIgnoreHID(False)
                 chn.update() #update all control values
@@ -122,6 +205,8 @@ class SCControlHandler(ControlHandler):
 
     def sendScOscMessages(self):
         for chn in self.channels: #for each of the adc channels
+            if chn.source == "rawencoder":
+                continue # nebio and sclang handle it
             chn.update()
             self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
         for chn in self.altchannels:

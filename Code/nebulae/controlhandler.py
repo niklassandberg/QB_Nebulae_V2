@@ -43,6 +43,11 @@ RESET_GATE_PIN = 25
 NEXT_GATE_PIN = 23
 RECORD_GATE_PIN = 24
 
+# Buttons whose mode and edge a patch can set in its nebconfig block (e.g. freeze,latching,rising).
+DIGITAL_CONTROLS = [
+    "reset", "freeze", "source", "record", "file", "filestate", "sourcegate",
+    "reset_alt", "freeze_alt", "source_alt", "record_alt", "file_alt"
+]
 
 # Main Class. Holds all ControlChannels
 class ControlHandler(object):
@@ -90,10 +95,6 @@ class ControlHandler(object):
         self.performance_thread = None
 
         # Set Defaults/Read Config
-        digitalControlList = [
-            "reset", "freeze", "source", "record", "file", "filestate", "sourcegate",
-            "reset_alt", "freeze_alt", "source_alt", "record_alt", "file_alt"
-        ]
         self.defaultConfig = dict()
         self.populateDefaultConfig()
         digitalConfig = dict()
@@ -104,7 +105,7 @@ class ControlHandler(object):
         if self.configData is not None and 'output_period' in self.configData:
             output_period = float(self.configData['output_period'][0])
 
-        for ctrl in digitalControlList:
+        for ctrl in DIGITAL_CONTROLS:
             if self.configData is not None and ctrl in self.configData:
                 digitalConfig[ctrl] = self.configData.get(ctrl)
             else:
@@ -192,6 +193,10 @@ class ControlHandler(object):
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
         
+    # rawencoder only exists in the SuperCollider bank (SCControlHandler).
+    def isRaw(self, name):
+        return False
+
     # Pass Csound Performance Thread Pointer
     def setCsoundPerformanceThread(self, ptr):
         self.performance_thread = ptr

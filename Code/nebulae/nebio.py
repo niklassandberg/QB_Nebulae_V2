@@ -36,6 +36,9 @@ RGB_LEDS = {"pitch_pos": 0, "pitch_neg": 1, "speed_pos": 2, "speed_neg": 3}
 ADC_CV = 0
 ADC_POT = 1
 
+# Encoder ids, as nebio_encoder_id() returns them for ui.py's pins.
+ENCODERS = {"pitch": 0, "speed": 1}
+
 
 def lib():
     global _lib
@@ -54,6 +57,9 @@ def lib():
         "nebio_adc_code": (c_int, [c_int, c_int]),
         "nebio_encoder_id": (c_int, [c_int, c_int]),
         "nebio_encoder_steps": (c_int, [c_int]),
+        "nebio_encoder_set_raw": (None, [c_int, c_int]),
+        "nebio_encoder_raw": (c_int, [c_int]),
+        "nebio_encoder_set_click": (None, [c_int, c_int]),
         "nebio_set_eol": (None, [c_int]),
         "nebio_set_input_rates": (c_int, [c_int, c_int, c_int]),
         "nebio_input_scan_hz": (c_int, []),
@@ -66,6 +72,7 @@ def lib():
         "nebio_led_commit": (None, []),
         "nebio_led_animation": (None, [c_char_p, c_char_p]),
         "nebio_led_animation_stop": (None, []),
+        "nebio_led_clear_sc": (None, []),
         "nebio_sc_open_sender": (c_int, []),
         "nebio_sc_close_sender": (None, []),
         "nebio_sc_sender_open": (c_int, []),
@@ -159,6 +166,24 @@ def encoder_steps(enc_id):
     return inputs().nebio_encoder_steps(enc_id)
 
 
+def encoder_set_raw(name, on):
+    """rawencoder: nebio sends the steps and clicks of encoder `name`
+    ("speed"/"pitch") straight to sclang, and sclang drives its two LEDs.
+    Off: back to Python (encoder_steps(), ui.py LEDs)."""
+    inputs().nebio_encoder_set_raw(ENCODERS[name], 1 if on else 0)
+
+
+def encoder_raw(name):
+    return bool(inputs().nebio_encoder_raw(ENCODERS[name]))
+
+
+def encoder_set_click(name, on):
+    """Click only: nebio sends the press/release of encoder `name` to sclang
+    (/neb/enc/<name>/click 1/0), the steps and LEDs stay with Python.
+    A raw encoder always sends its click."""
+    inputs().nebio_encoder_set_click(ENCODERS[name], 1 if on else 0)
+
+
 def set_eol(high):
     inputs().nebio_set_eol(1 if high else 0)
 
@@ -225,6 +250,12 @@ def led_animation(color, behavior="cycle"):
 
 def led_animation_stop():
     leds().nebio_led_animation_stop()
+
+
+def led_clear_sc():
+    """Forgets the encoder LED colours sclang sent (new patch). Does not
+    start the LED threads (no bootleds.py kill)."""
+    lib().nebio_led_clear_sc()
 
 
 class Color(object):

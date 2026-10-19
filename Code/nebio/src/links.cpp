@@ -9,8 +9,10 @@
 #include <unistd.h>
 
 #include <chrono>
+#include <cstdint>
 #include <cstring>
 
+#include "leds.h"
 #include "log.h"
 
 namespace nebio {
@@ -22,6 +24,22 @@ constexpr const char *kScListenPort = "3011";  // scsender.py sPort
 constexpr int kPdPort = 3000;                  // pdsender.py sport
 constexpr int kPdConnectTimeoutMs = 200;
 constexpr int kPdRetryMs = 250;
+
+// Index = NEBIO_RGB_* id
+constexpr const char *kLedPath[4] = {"/sc/led/pitch_pos", "/sc/led/pitch_neg",
+                                     "/sc/led/speed_pos", "/sc/led/speed_neg"};
+
+// OSC number argument as double (sclang sends f, i or d), false if it is not a number.
+bool argNumber(const char *types, lo_arg **argv, int argc, int i, double &out) {
+    if (i >= argc || !types) return false;
+    switch (types[i]) {
+        case 'f': out = argv[i]->f; return true;
+        case 'i': out = argv[i]->i; return true;
+        case 'd': out = argv[i]->d; return true;
+        case 'h': out = static_cast<double>(argv[i]->h); return true;
+        default: return false;
+    }
+}
 }  // namespace
 
 // ---- SuperCollider -------------------------------------------------------
@@ -59,6 +77,20 @@ int ScLink::onReady(const char *, const char *, lo_arg **, int, lo_message, void
     return 0;
 }
 
+int ScLink::onLed(const char *path, const char *types, lo_arg **argv, int argc, lo_message,
+                  void *user) {
+    int id = static_cast<int>(reinterpret_cast<intptr_t>(user));
+    double rgb[3];
+    for (int k = 0; k < 3; ++k) {
+        if (!argNumber(types, argv, argc, k, rgb[k])) {
+            logError("%s: expected r g b (0-4095)", path);
+            return 0;
+        }
+    }
+    Leds::instance().setScRgb(id, rgb[0], rgb[1], rgb[2]);
+    return 0;
+}
+
 int ScLink::onOther(const char *path, const char *, lo_arg **, int, lo_message, void *) {
     logError("OSC message not handled: %s", path ? path : "?");
     return 0;
@@ -74,6 +106,9 @@ bool ScLink::startListener() {
     }
     lo_server_thread_add_method(server_, "/sc/up", nullptr, &ScLink::onSynthUp, nullptr);
     lo_server_thread_add_method(server_, "/neb/ready", nullptr, &ScLink::onReady, nullptr);
+    for (intptr_t id = 0; id < 4; ++id)
+        lo_server_thread_add_method(server_, kLedPath[id], nullptr, &ScLink::onLed,
+                                    reinterpret_cast<void *>(id));
     lo_server_thread_add_method(server_, nullptr, nullptr, &ScLink::onOther, nullptr);
     if (lo_server_thread_start(server_) != 0) {
         logError("could not start OSC listener thread");

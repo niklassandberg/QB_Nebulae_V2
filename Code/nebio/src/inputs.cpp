@@ -8,6 +8,7 @@
 #include <vector>
 
 #include "gpiomem.h"
+#include "links.h"
 #include "log.h"
 
 namespace nebio {
@@ -21,6 +22,10 @@ constexpr unsigned kSrClock = 14;
 constexpr unsigned kEolPin = 16;   // control.py EOL_OUT_PIN
 constexpr unsigned kClickPitch = 22;  // ui.py
 constexpr unsigned kClickSpeed = 26;
+// Per encoder id (0 = pitch, 1 = speed): click pin and OSC paths for raw mode.
+constexpr unsigned kEncClick[2] = {kClickPitch, kClickSpeed};
+constexpr const char *kEncStepsPath[2] = {"/neb/enc/pitch", "/neb/enc/speed"};
+constexpr const char *kEncClickPath[2] = {"/neb/enc/pitch/click", "/neb/enc/speed/click"};
 const std::vector<unsigned> kGates = {4, 25, 23, 24};  // freeze, reset, next, record
 // NOTE: GPIO 7/8 (POT/CV select in control.py) are the SPI chip selects and
 // are owned by the spidev driver, so they are deliberately not touched here.
@@ -424,6 +429,7 @@ void Inputs::run() {
         else
             polledOk = polled_.getAll(levels);
         uint16_t codes[2][8] = {};  // channels not read (see kPotChannels) stay 0
+        int clickLevel[2] = {-1, -1};  // debounced click levels, -1 = not read this scan
         bool adcOk[2] = {false, false};
         if (adcScan) {
             adcOk[0] = adc_[0].readAll(codes[0]);
@@ -439,6 +445,10 @@ void Inputs::run() {
                 for (size_t i = 0; i < polledPins.size(); ++i) {
                     int s = pinSlot(static_cast<int>(polledPins[i]));
                     if (s >= 0) pinBits_[s].transition(pinDebounce_[s].feed(levels[i]));
+                }
+                for (int id = 0; id < 2; ++id) {
+                    int s = pinSlot(static_cast<int>(kEncClick[id]));
+                    if (s >= 0) clickLevel[id] = pinDebounce_[s].stable;
                 }
             }
             if (adcScan) {
@@ -460,6 +470,7 @@ void Inputs::run() {
                 e.update(a | (b << 1));
             }
         }
+        if (anyRaw_.load(std::memory_order_relaxed)) sendRawEncoders(clickLevel);
 
         ++tick;
         ++scans_;
@@ -533,7 +544,85 @@ int Inputs::encoderId(int pinA, int pinB) const {
 
 int Inputs::encoderSteps(int id) {
     if (id < 0 || id > 1) return 0;
+    if (raw_[id].on) return 0;  // the input thread sends them to sclang
     return enc_[id].steps.exchange(0);
+}
+
+bool Inputs::clickPressed(int id) const {
+    std::lock_guard<std::mutex> lock(mutex_);
+    int s = pinSlot(static_cast<int>(kEncClick[id]));
+    return s >= 0 && pinDebounce_[s].stable == 0;  // pulled up, pressed = 0
+}
+
+void Inputs::setEncoderRaw(int id, bool on) {
+    if (id < 0 || id > 1) return;
+    std::lock_guard<std::mutex> lock(rawMutex_);
+    RawState &r = raw_[id];
+    if (r.on == on) return;
+    enc_[id].steps.exchange(0);  // steps from before the switch belong to nobody
+    r.lastDir = 0;
+    bool clickBefore = r.sendsClick();
+    r.on = on;
+    routeChanged(id, clickBefore);
+    logInfo("encoder %s: %s", id == 0 ? "pitch" : "speed", on ? "raw (sclang)" : "hybrid (python)");
+}
+
+void Inputs::setEncoderClick(int id, bool on) {
+    if (id < 0 || id > 1) return;
+    std::lock_guard<std::mutex> lock(rawMutex_);
+    RawState &r = raw_[id];
+    if (r.click == on) return;
+    bool clickBefore = r.sendsClick();
+    r.click = on;
+    routeChanged(id, clickBefore);
+}
+
+// rawMutex_ held. Click routing started: a click held now is skipped until it
+// is released. Stopped: a press already sent gets its release.
+void Inputs::routeChanged(int id, bool clickBefore) {
+    RawState &r = raw_[id];
+    bool clickNow = r.sendsClick();
+    if (!clickBefore && clickNow) {
+        r.pressed = false;
+        r.waitRelease = clickPressed(id);
+    } else if (clickBefore && !clickNow && r.pressed) {
+        ScLink::instance().sendPathInt(kEncClickPath[id], 0);
+        r.pressed = false;
+    }
+    anyRaw_ = raw_[0].sendsClick() || raw_[1].sendsClick();
+}
+
+bool Inputs::encoderRaw(int id) const {
+    if (id < 0 || id > 1) return false;
+    return raw_[id].on;
+}
+
+// Input thread, every scan while an encoder's steps or click go to sclang.
+void Inputs::sendRawEncoders(const int clickLevel[2]) {
+    std::lock_guard<std::mutex> lock(rawMutex_);
+    for (int id = 0; id < 2; ++id) {
+        RawState &r = raw_[id];
+        if (!r.sendsClick()) continue;
+        if (r.on) {
+            // As ui.py does for a hybrid encoder: the first steps after a
+            // direction change are dropped, so a single glitch step backwards
+            // (worn or bouncing contacts) never reaches sclang.
+            int steps = enc_[id].steps.exchange(0);
+            if (steps != 0) {
+                int dir = steps > 0 ? 1 : -1;
+                if (dir == r.lastDir) ScLink::instance().sendPathInt(kEncStepsPath[id], steps);
+                r.lastDir = dir;
+            }
+        }
+        if (clickLevel[id] < 0) continue;
+        bool pressed = clickLevel[id] == 0;
+        if (r.waitRelease) {
+            if (!pressed) r.waitRelease = false;
+        } else if (pressed != r.pressed) {
+            r.pressed = pressed;
+            ScLink::instance().sendPathInt(kEncClickPath[id], pressed ? 1 : 0);
+        }
+    }
 }
 
 void Inputs::setEol(int high) { eolOut_.set(kEolPin, high ? 1 : 0); }

@@ -351,18 +351,11 @@ class UserInterface(object):
         if self.speed_click.state() == True:
             inc = 0
         if self.speed_delay == -1:
-            if inc > 0:
-                if self.speed_inc_dir == 1:
-                    self.speed_amount += 0.001 * inc * inc * inc
-                    self.speed_inc_dir = 1
-                else:
-                    self.speed_inc_dir = 1
-            elif inc < 0:
-                if self.speed_inc_dir == -1:
-                    self.speed_amount -= 0.001 * (-1 * inc) * (-1 * inc) * (-1 * inc)
-                    self.speed_inc_dir = -1
-                else:
-                    self.speed_inc_dir = -1
+            if inc != 0:
+                direction = 1 if inc > 0 else -1
+                if self.speed_inc_dir == direction: # first step after a direction change is ignored
+                    self.speed_amount += 0.001 * inc ** 3
+                self.speed_inc_dir = direction
         else:
             if self.now > self.speed_delay:
                 self.speed_delay = -1
@@ -381,14 +374,11 @@ class UserInterface(object):
     def set_alt_speed_amount(self):
         self.alt_speed_amount = self.controlhandler.getAltValue("speed_alt")
         inc = self.get_delta("speed")
-        if inc > 0:
-            self.alt_speed_amount += 1
-        elif inc < 0:
-            self.alt_speed_amount -= 1
+        if inc != 0:
+            self.alt_speed_amount += 1 if inc > 0 else -1 # one step per reading, however fast it is turned
         if self.alt_speed_amount > 32:
             self.alt_speed_amount = 32
         elif self.alt_speed_amount < 0:
-            #self.alt_speed_amount = 0.0
             self.alt_speed_amount = 0
         if self.clicked_speed() == 1:
             #self.alt_speed_amount = 0.710 # 23/32 = 0dB input gain
@@ -512,7 +502,8 @@ class UserInterface(object):
             if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500:
                 self.ignore_next_speed_click = True
                 self.controlhandler.enterInstrSelMode()
-            self.set_speed_amount()
+            if not self.controlhandler.isRaw("speed"): # rawencoder: value is sclang's
+                self.set_speed_amount()
         elif mode == "secondary controls":
             self.set_alt_speed_amount()
         elif mode == "instr selector":
@@ -546,7 +537,8 @@ class UserInterface(object):
                 self.reload_flag = True 
         else:
             pass
-        self.set_speed_leds(mode)
+        if not (mode == "supercollider" and self.controlhandler.isRaw("speed")): # rawencoder: LEDs are sclang's
+            self.set_speed_leds(mode)
 
     def set_pitch_amount(self):
         self.pitch_amount = self.controlhandler.getStaticVal("pitch")
@@ -728,9 +720,12 @@ class UserInterface(object):
         if mode == "normal" or mode == "puredata" or mode == "supercollider":
             if self.pitch_click.risingEdge() == True:
                 self.time_pressed_pitch = self.now
-            self.set_pitch_amount()
+            if not self.controlhandler.isRaw("pitch"): # rawencoder: value is sclang's
+                self.set_pitch_amount()
         elif mode == "secondary controls":
-            self.set_alt_pitch_amount()
+            # TODO: next version: pitch_alt can be declared raw too (sclang sets it).
+            if not self.controlhandler.isRaw("pitch"): # rawencoder: pitch_alt is not set either
+                self.set_alt_pitch_amount()
             if self.pitch_click.risingEdge() == True:
                 self.restoreDefaultsFlag = True
                 self.controlhandler.restoreAltToDefault()
@@ -765,7 +760,8 @@ class UserInterface(object):
                 # SC and PD control handlers override enterNormalMode()
                 # to go back to supercollider/puredata mode.
                 self.controlhandler.enterNormalMode()
-        self.set_pitch_leds(mode)
+        if not (mode in ("supercollider", "secondary controls") and self.controlhandler.isRaw("pitch")): # rawencoder: LEDs are not set by ui
+            self.set_pitch_leds(mode)
 
     def set_rgb(self, name, r, g, b, bright=1.0):
         self.ledDriver.set_rgb(name, r, g, b, bright)       

@@ -191,9 +191,51 @@ void Leds::setButton(int id, double brightness) {
 void Leds::setRgb(int id, double r, double g, double b, double brightness) {
     if (id < 0 || id > 3) return;
     std::lock_guard<std::mutex> lock(mutex_);
+    if (scOwned_[id]) return;  // sclang drives this LED
     staged_[kRgbChannel[id][0]] = rgbOff(r, brightness);
     staged_[kRgbChannel[id][1]] = rgbOff(g, brightness);
     staged_[kRgbChannel[id][2]] = rgbOff(b, brightness);
+}
+
+// Staged and committed at once: sclang's colours do not wait for Python's
+// next commit.
+void Leds::showRgb(int id, const int off[3]) {
+    for (int k = 0; k < 3; ++k) staged_[kRgbChannel[id][k]] = committed_[kRgbChannel[id][k]] = off[k];
+    dirty_ = true;
+}
+
+void Leds::setScRgb(int id, double r, double g, double b) {
+    if (id < 0 || id > 3) return;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        const double rgb[3] = {r, g, b};
+        for (int k = 0; k < 3; ++k) {
+            double c = !(rgb[k] > 0) ? 0 : (rgb[k] > 4095 ? 4095 : rgb[k]);  // from sclang: clamp, NaN -> 0
+            scRgb_[id][k] = rgbOff(c, 1.0);
+        }
+        scValid_[id] = true;
+        if (!scOwned_[id]) return;
+        showRgb(id, scRgb_[id]);
+    }
+    cv_.notify_all();
+}
+
+void Leds::setScOwned(int id, bool owned) {
+    if (id < 0 || id > 3) return;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        if (scOwned_[id] == owned) return;
+        scOwned_[id] = owned;
+        if (!owned) return;  // Python sets the LED on its next update
+        const int off[3] = {kLedOff, kLedOff, kLedOff};
+        showRgb(id, scValid_[id] ? scRgb_[id] : off);
+    }
+    cv_.notify_all();
+}
+
+void Leds::clearSc() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (bool &v : scValid_) v = false;
 }
 
 void Leds::commit() {

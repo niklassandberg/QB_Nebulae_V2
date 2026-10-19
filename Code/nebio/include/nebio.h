@@ -45,8 +45,21 @@ NEBIO_API int nebio_gpio_level(int bcm_pin);
 NEBIO_API int nebio_adc_code(int device, int channel);
 /* Encoder id for a (pin_a, pin_b) pair as given to encoder.Worker, -1 if unknown. */
 NEBIO_API int nebio_encoder_id(int pin_a, int pin_b);
-/* Steps since the last call (then reset to 0). */
+/* Steps since the last call (then reset to 0). Always 0 while the encoder is raw. */
 NEBIO_API int nebio_encoder_steps(int id);
+/* Raw encoder (rawencoder in a .scd), id from nebio_encoder_id (0 = pitch,
+ * 1 = speed). On: the input thread sends the steps as "/neb/enc/<name> i" and
+ * the click edges as "/neb/enc/<name>/click i" (1 pressed, 0 released)
+ * straight to sclang, and sclang owns the encoder's two RGB LEDs
+ * ("/sc/led/<name>_pos|_neg r g b"). Off: steps go back to
+ * nebio_encoder_steps() and the LEDs back to Python; a click held at that
+ * moment gets its release sent. */
+NEBIO_API void nebio_encoder_set_raw(int id, int on);
+NEBIO_API int  nebio_encoder_raw(int id);
+/* Click only: the click edges go to sclang ("/neb/enc/<name>/click i") as for
+ * a raw encoder, the steps and LEDs stay with Python. For hybrid encoders in a
+ * SuperCollider patch. A raw encoder always sends its click. */
+NEBIO_API void nebio_encoder_set_click(int id, int on);
 /* End-of-loop gate output (GPIO 16). */
 NEBIO_API void nebio_set_eol(int high);
 /* Input thread rates, can be changed at any time (takes effect on the next
@@ -95,6 +108,8 @@ NEBIO_API void nebio_led_commit(void);
  * "updating", "error", "calibration", "wifi". behavior: "cycle", "pulse", "rainbow". */
 NEBIO_API void nebio_led_animation(const char *color, const char *behavior);
 NEBIO_API void nebio_led_animation_stop(void);
+/* Forgets the colours sclang sent for the encoder LEDs (new patch). */
+NEBIO_API void nebio_led_clear_sc(void);
 
 /* ---- SuperCollider (OSC) ----------------------------------------------- */
 

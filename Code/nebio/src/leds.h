@@ -44,11 +44,20 @@ public:
     void animation(const std::string &color, const std::string &behavior);
     void animationStop();
 
+    // sclang's colour for an RGB LED (/sc/led/<led>, 0-4095 per colour). It is
+    // always remembered, and shown while sclang owns the LED; then setRgb()
+    // from Python is ignored for it. Taking ownership shows the remembered
+    // colour (off if sclang has sent none since clearSc()).
+    void setScRgb(int id, double r, double g, double b);
+    void setScOwned(int id, bool owned);
+    void clearSc();  // new patch: forget sclang's colours
+
 private:
     Leds() = default;
     void run();
     void runResetPwm();
     void renderAnimation(int out[16], int &resetDuty);
+    void showRgb(int id, const int off[3]);  // caller holds mutex_
 
     Pca9685 pca_;
     GpioLines resetLed_;
@@ -64,6 +73,11 @@ private:
     int committed_[16];
     int written_[16];
     bool writtenValid_ = false;
+
+    // sclang's RGB colours (as PCA9685 off values), guarded by mutex_
+    int scRgb_[4][3];
+    bool scValid_[4] = {false, false, false, false};
+    bool scOwned_[4] = {false, false, false, false};
 
     // Animation
     bool animating_ = false;
