@@ -34,6 +34,9 @@ class WaveWriter(object):
 
     def WriteStereoWaveFile(self, datal, datar, length):
         success = False
+        # Csound's channel value is a float; Python 3's wave module only
+        # takes a whole number of frames (struct.error otherwise).
+        length = int(length)
         self.usbloader.mount()
         if self.usbloader.isUSBMounted():
             self.log.info("USB Mounted, proceeding")
