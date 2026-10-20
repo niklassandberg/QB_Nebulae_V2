@@ -195,6 +195,12 @@ class DigitalData(object):
                     self.ignore_next_btrig = False
                     self.time_held = 0
                     self.button_pressed = 0
+                elif raw_button == 0:
+                    # Only the press going on right now is ignored. Up and
+                    # nothing ignored (not held when the flag was set, e.g. at
+                    # an instr load, or a rising edge button released after a
+                    # source hold): drop it, or it eats the next real press.
+                    self.ignore_next_btrig = False
             if self.mode == "triggered":
                 if action == 1:
                     self.button_pulse_time = time.time() * 1000.0
