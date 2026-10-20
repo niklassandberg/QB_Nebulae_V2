@@ -82,6 +82,7 @@ nebio shows sclang's last LED values again, so sclang never needs to resend them
 | Address | Args | Meaning |
 |---|---|---|
 | `/sc/led/<led>` | `i` r, `i` g, `i` b (0–4095, same scale as `libDriver.Color`) | Sets one LED. `<led>` is `speed_pos`, `speed_neg`, `pitch_pos` or `pitch_neg`. Always remembered by nebio, but only shown while that encoder is raw (sclang owns the LED). Values are clamped to 0–4095. |
+| `/sc/clip` | none | The audio input clipped. Sent by NebInterface's clip detector (started in `init`) for every 128 samples (2.7 ms at 48 kHz) that clipped, like Csound's check per block. nebio counts them (`nebio_sc_clip_count`); in `secondary controls` ui.py makes all four encoder LEDs red while the reports come (8 ms after each), so they flicker with the signal. Csound does the same with its `inclip` channel (`conductor.py`). |
 
 There are no save or load messages: sclang reads and writes its own file.
 

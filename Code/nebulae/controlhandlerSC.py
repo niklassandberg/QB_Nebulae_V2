@@ -83,6 +83,10 @@ class SCControlHandler(ControlHandler):
         for name in RAW_ENCODERS:
             nebio.encoder_set_click(name, state)
 
+    # NebInterface's input clip detector reports to nebio (/sc/clip).
+    def inputClipCount(self):
+        return nebio.sc_clip_count()
+
     # After loadScSynth(): the patch is running, sclang can take the raw encoders.
     def startRawEncoders(self):
         self.rawReady = True

@@ -8,6 +8,14 @@ import time
 import random
 from classlogger import ClassLogger
 
+# Input clipping in secondary controls: the four encoder LEDs are red while
+# the engine reports digital clipping, so they flicker with the signal (and
+# are not taken for record, steady red). SuperCollider and Csound both check
+# every 128 samples (2.7 ms at 48 kHz); red lasts CLIP_HOLD_MS after a report,
+# three of those windows, so a clip that goes on stays red between reports
+# (this loop runs about every 2.5 ms).
+CLIP_HOLD_MS = 8
+
 sr_pin_next = 7
 sr_pin_source_gate = 6
 sr_pin_source = 5
@@ -70,6 +78,10 @@ class UserInterface(object):
         self.ignore_next_speed_click = False
         self.clearAllLEDs()
         self.restoreDefaultsFlag = False
+        self.clip_handler = None   # controlhandler whose inputClipCount() is followed
+        self.clip_count = 0
+        self.clip_time = -CLIP_HOLD_MS
+        self.clip_shown = False
 
     def update(self):
         self.now = int(round(time.time() * 1000))
@@ -80,6 +92,7 @@ class UserInterface(object):
         self.delta_p = self.encoder_pitch.get_steps()
         self.delta_s = self.encoder_speed.get_steps()
         self.mode = self.controlhandler.mode()
+        self.trackInputClip()
 
         if self.mode == "secondary controls":
             if self.restoreDefaultsFlag == True:
@@ -155,7 +168,36 @@ class UserInterface(object):
 
         self.update_speed(self.mode)
         self.update_pitch(self.mode)
+        if self.mode == "secondary controls":
+            self.showInputClip()
     
+    # Follows the input clip count of the engine (every update, so a clip from
+    # long ago never shows when secondary controls is entered). A new
+    # controlhandler (instr load) starts its own count: that is no clip.
+    def trackInputClip(self):
+        count = self.controlhandler.inputClipCount()
+        if self.clip_handler is not self.controlhandler:
+            self.clip_handler = self.controlhandler
+        elif count != self.clip_count:
+            self.clip_time = self.now
+        self.clip_count = count
+
+    def inputClipped(self):
+        return self.now - self.clip_time < CLIP_HOLD_MS
+
+    # Drawn over what update_speed()/update_pitch() set in this update.
+    def showInputClip(self):
+        if self.inputClipped():
+            for name in ("speed_pos", "speed_neg", "pitch_pos", "pitch_neg"):
+                self.set_rgb(name, 4095, 0, 0, 1.0)
+            self.clip_shown = True
+        elif self.clip_shown:
+            self.clip_shown = False
+            # A rawencoder pitch is not redrawn in secondary controls: clear it.
+            if self.controlhandler.isRaw("pitch"):
+                self.set_rgb("pitch_pos", 4095, 4095, 4095, 0.0)
+                self.set_rgb("pitch_neg", 4095, 4095, 4095, 0.0)
+
     def clearAllLEDs(self):
         self.set_rgb("pitch_pos", 4095, 4095, 4095, 0.0)
         self.set_rgb("pitch_neg", 4095, 4095, 4095, 0.0)
