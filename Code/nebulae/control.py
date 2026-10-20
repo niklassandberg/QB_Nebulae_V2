@@ -412,11 +412,14 @@ class CommChannel(object):
         else:
             self.channel = None
 
+    # Read straight from the channel memory (the pointer from channelPtr),
+    # not with controlChannel(name): same value, without the name lookup and
+    # ctypes call every update. The .orc chnexports these, so Csound writes
+    # that memory with plain stores either way.
     def update(self):
         if self.channel is not None:
-            temp = self.csound.controlChannel(self.name)
             self.prev_state = self.state
-            self.state = temp[0]
+            self.state = float(self.channel[0])
             if self.state > 0.0 and self.prev_state < 1.0:
                 self.rising_edge_flag = True
             else:

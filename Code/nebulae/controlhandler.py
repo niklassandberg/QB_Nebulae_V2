@@ -88,7 +88,6 @@ class ControlHandler(object):
         self.static_file_idx = 0
         self.prep_mode_change = False
         self.prep_mode_change_time = self.now
-        self.modeChangeValues = {}
         self.writer = wavewriter.WaveWriter() 
         self.writing_buffer = False
         self.buffer_failure = False
@@ -446,8 +445,6 @@ class ControlHandler(object):
             self.prep_mode_change_time = self.now
             #for chn in self.channeldict:
         elif self.sourceStateCtrl.getValue() == 0:
-            for chn in self.channels:
-                self.modeChangeValues[chn.name] = chn.getValue()
             if self.sourceStateCtrl.getPrevValue() == 1:
                 self.prep_mode_change = False
                 if self.control_mode == "secondary controls":
@@ -473,7 +470,6 @@ class ControlHandler(object):
     # Csound. SCControlHandler and PDControlHandler have their own updateAll().
     def updateAll(self):
         #GPIO.output(self.eol_pin, False) # For debugging
-        numChanged = 0
         self.countUpdateAll()
         self.shiftReg.update()
         self.handleSourceHold()
@@ -507,55 +503,53 @@ class ControlHandler(object):
 
         else: #includes "normal":4
             filestate = self.channeldict["filestate"].getValue()
+            file_edit = filestate == 1 or filestate == True
             source_state = self.getValue("source")
-            if self.getAltValue("freeze_alt") == 1 and self.currentInstr == "a_granularlooper":
+            granular = self.currentInstr == "a_granularlooper"
+            if self.getAltValue("freeze_alt") == 1 and granular:
                 self.channeldict["source"].setIgnoreGate(True)
             else:
                 self.channeldict["source"].setIgnoreGate(False)
-                        
+            save = self.settings.save
+
             for chn in self.channels:
-                if chn.name != "sourcegate":
+                name = chn.name
+                if name != "sourcegate":
                     chn.setIgnoreHID(False)
                 chn.update()
-                #if abs(chn.getValue() - chn.getPrevValue()) > 0.005 and chn.name != "source":
-                if chn.name in self.modeChangeValues:
-                    if abs(chn.getValue() - self.modeChangeValues[chn.name]) > 0.005:
-                        numChanged += 1
                 ## UNIQUE INSTR HANDLING
-                if self.currentInstr == "a_granularlooper":
-                    if chn.name == "file":
-                        if source_state == 1:
-                            chn.setValue(self.static_file_idx)
-                        else:
-                            self.static_file_idx = self.getValue("file")
-                if chn.name != "filestate":
-                    if chn.source == "hybrid":
-                        self.settings.save(chn.name, chn.getStaticVal())
+                if granular and name == "file":
+                    if source_state == 1:
+                        chn.setValue(self.static_file_idx)
                     else:
-                        self.settings.save(chn.name, chn.getValue())
-                    if chn.source == "digital" and chn.name != "file": 
-                        if filestate == 1 or filestate == True:
-                            if chn.hasChanged() == True and chn.getTrigSource() == "button":
-                                if chn.name == "reset":
-                                    self.setEditFunctionFlag(chn.name)
-                                elif chn.name == "source":
-                                    self.setEditFunctionFlag(chn.name) 
-                                    self.channeldict[chn.name].setIgnoreNextButton()
-                                elif chn.name == "freeze":
-                                    self.setEditFunctionFlag(chn.name) 
-                                    self.channeldict[chn.name].setIgnoreNextButton()
-                                    self.channeldict[chn.name].setValue(1 - self.channeldict[chn.name].getValue())
-                                    #self.writeBufferToAudioFile()
-                                    if self.writeThread.is_alive() == False:
-                                        self.classlog.info("Write Thread Starting!")
-                                        self.writeThread.join()
-                                        self.writeThread = threading.Thread(target=self.writeBufferToAudioFile)
-                                        self.writeThread.start()
-                                        #self.writeThread.start()
-                                    else:
-                                        self.classlog.info("Write thread still running.")
-                                self.classlog.info("channel: %s has changed.", chn.name)
-                                self.channeldict["file"].setIgnoreNextButton()
+                        self.static_file_idx = chn.getValue()
+                if name != "filestate":
+                    if chn.source == "hybrid":
+                        save(name, chn.getStaticVal())
+                    else:
+                        save(name, chn.getValue())
+                    if file_edit and chn.source == "digital" and name != "file":
+                        if chn.hasChanged() == True and chn.getTrigSource() == "button":
+                            if chn.name == "reset":
+                                self.setEditFunctionFlag(chn.name)
+                            elif chn.name == "source":
+                                self.setEditFunctionFlag(chn.name) 
+                                self.channeldict[chn.name].setIgnoreNextButton()
+                            elif chn.name == "freeze":
+                                self.setEditFunctionFlag(chn.name) 
+                                self.channeldict[chn.name].setIgnoreNextButton()
+                                self.channeldict[chn.name].setValue(1 - self.channeldict[chn.name].getValue())
+                                #self.writeBufferToAudioFile()
+                                if self.writeThread.is_alive() == False:
+                                    self.classlog.info("Write Thread Starting!")
+                                    self.writeThread.join()
+                                    self.writeThread = threading.Thread(target=self.writeBufferToAudioFile)
+                                    self.writeThread.start()
+                                    #self.writeThread.start()
+                                else:
+                                    self.classlog.info("Write thread still running.")
+                            self.classlog.info("channel: %s has changed.", chn.name)
+                            self.channeldict["file"].setIgnoreNextButton()
         #GPIO.output(self.eol_pin, True) # for debugging
 
     def printAllControls(self):
