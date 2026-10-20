@@ -29,6 +29,9 @@ NebInterface {
 	classvar settingBuses;
 	// Layout of the .scstate file. Version 0 (no \version key) was the state dictionary alone.
 	classvar stateVersion = 1;
+	// Input clip detector (started by init): a sample at or above this level
+	// counts as clipped; Nebulae turns the speed LEDs red in secondary controls.
+	classvar <>clipThreshold = 0.999;
 	// The NebPatch init gave back; +1 on every init, so an older NebPatch knows it's stale.
 	classvar patch;
 	classvar <generation = 0;
@@ -103,8 +106,26 @@ NebInterface {
 			func.value;
         }, '/neb/quit');
 
+		this.prStartClipDetector;
 		^patch
     }
+
+	/* Watches the audio input for clipping (too much input gain: the codec's
+	   ADC reaches full scale) and tells nebio (/sc/clip) for every 128 samples
+	   (2.7 ms at 48 kHz) that clipped, the same as Csound's check per block
+	   (ksmps 128, conductor.py). Runs at the tail of the server, outside the patch's
+	   synths; init starts it again after the soft reset of the next patch. */
+	*prStartClipDetector {
+		OSCdef(\nebInputClip, { remote.sendMsg("/sc/clip") }, '/neb/inputclip');
+		{
+			var in = SoundIn.ar([0, 1]).abs;
+			var clipped = (in[0] >= clipThreshold) + (in[1] >= clipThreshold);
+			var tick = Impulse.ar(SampleRate.ir / 128); // every 128 samples
+			var window = Peak.ar(clipped, tick);       // any clip since the last tick
+			SendReply.ar(tick * (Delay1.ar(window) > 0), '/neb/inputclip');
+			nil
+		}.play(RootNode(server), addAction: \addToTail);
+	}
 
 	*onBusChange { |name, action|
 		busCallbacks[name] = action;

@@ -183,6 +183,7 @@ class ControlHandler(object):
         self.size_status_comm = control.CommChannel(self.csound, "sizestatus")
         self.record_status_comm = control.CommChannel(self.csound, "recordstatus")
         self.buffer_size_comm = control.CommChannel(self.csound, "bufferlength")
+        self.inclip_comm = control.CommChannel(self.csound, "inclip") # conductor.py INPUT_CLIP_INSTR
         self.eol_gate_timer = 0
         self.reset_led_pin = 12
         #GPIO.setup(self.reset_led_pin, GPIO.OUT)
@@ -196,6 +197,12 @@ class ControlHandler(object):
     # rawencoder only exists in the SuperCollider bank (SCControlHandler).
     def isRaw(self, name):
         return False
+
+    # Grows while the audio input clips (ui.py: encoder LEDs flicker red in
+    # secondary controls). Csound counts it in "inclip"; without Csound (PD) it stays 0.
+    def inputClipCount(self):
+        self.inclip_comm.update()
+        return self.inclip_comm.getState()
 
     # Pass Csound Performance Thread Pointer
     def setCsoundPerformanceThread(self, ptr):

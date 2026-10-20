@@ -91,6 +91,12 @@ int ScLink::onLed(const char *path, const char *types, lo_arg **argv, int argc, 
     return 0;
 }
 
+// NebInterface's input clip detector (every 128 samples that clipped).
+int ScLink::onClip(const char *, const char *, lo_arg **, int, lo_message, void *) {
+    ++instance().clipCount;
+    return 0;
+}
+
 int ScLink::onOther(const char *path, const char *, lo_arg **, int, lo_message, void *) {
     logError("OSC message not handled: %s", path ? path : "?");
     return 0;
@@ -109,6 +115,7 @@ bool ScLink::startListener() {
     for (intptr_t id = 0; id < 4; ++id)
         lo_server_thread_add_method(server_, kLedPath[id], nullptr, &ScLink::onLed,
                                     reinterpret_cast<void *>(id));
+    lo_server_thread_add_method(server_, "/sc/clip", nullptr, &ScLink::onClip, nullptr);
     lo_server_thread_add_method(server_, nullptr, nullptr, &ScLink::onOther, nullptr);
     if (lo_server_thread_start(server_) != 0) {
         logError("could not start OSC listener thread");

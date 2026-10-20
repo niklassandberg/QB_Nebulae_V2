@@ -112,6 +112,7 @@ void nebio_sc_set_synth_down(void) {
 }
 int nebio_sc_handshake(void) { return ScLink::instance().handshake; }
 void nebio_sc_zero_handshake(void) { ScLink::instance().handshake = false; }
+int nebio_sc_clip_count(void) { return ScLink::instance().clipCount; }
 
 // ---- Pure Data -------------------------------------------------------------
 

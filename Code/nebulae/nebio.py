@@ -89,6 +89,7 @@ def lib():
         "nebio_sc_set_synth_down": (None, []),
         "nebio_sc_handshake": (c_int, []),
         "nebio_sc_zero_handshake": (None, []),
+        "nebio_sc_clip_count": (c_int, []),
         "nebio_pd_connect": (None, []),
         "nebio_pd_close": (None, []),
         "nebio_pd_is_connected": (c_int, []),
@@ -299,6 +300,12 @@ class LedDriver(object):
 # ---------------------------------------------------------------------------
 # SuperCollider / Pure Data
 # ---------------------------------------------------------------------------
+
+def sc_clip_count():
+    """Number of times sclang reported that the audio input clipped
+    (/sc/clip). Only changes matter."""
+    return lib().nebio_sc_clip_count()
+
 
 def sc_send(name, value):
     l = lib()

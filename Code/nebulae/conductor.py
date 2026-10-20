@@ -3,6 +3,21 @@ import instrparser
 import neb_globals
 import os
 
+# Added to every orchestra: counts the k-cycles in which the audio input
+# reached full scale (the codec's ADC clipped, e.g. too much input gain).
+# ControlHandler reads "inclip"; ui.py makes the four encoder LEDs flicker red
+# in secondary controls while it changes.
+INPUT_CLIP_INSTR = """
+instr NebInputClip
+ain1, ain2 ins
+kpeak1 max_k ain1, 1, 1
+kpeak2 max_k ain2, 1, 1
+if kpeak1 >= 0.999 || kpeak2 >= 0.999 then
+  gkinclip = gkinclip + 1
+endif
+endin
+"""
+
 class Conductor(object):
     def __init__(self):
         self.instrparser = instrparser.InstrParser()
@@ -38,6 +53,7 @@ gkeol chnexport "eol", 2
 gksizestatus chnexport "sizestatus", 2
 gkrecordstatus chnexport "recordstatus", 2
 gkbufferlength chnexport "bufferlength", 2
+gkinclip chnexport "inclip", 2
 ; secondary controls
 gkloopstart_alt chnexport "start_alt", 1
 gkloopsize_alt chnexport "size_alt", 1
@@ -71,6 +87,7 @@ gipeak[] init 100
         else:
             self.preamble += "sr = 48000\n"
         isco = "f 0 2147483641\n" + "i1 1 -10\n" #Start the longest possible score, and force i1 to run for length of score
+        isco += "i \"NebInputClip\" 0 -1\n" # input clip detector, always on (see INPUT_CLIP_INSTR)
         fsco_lines = []
         glen_arrayinit = []
         stereo_ftgen = []
@@ -87,7 +104,7 @@ gipeak[] init 100
         fsco = ''.join(fsco_lines)
         self.arrayinitlines = ''.join(glen_arrayinit)
         sco = isco + fsco
-        self.curOrc = self.preamble + self.orcheader + self.arrayinitlines + self.instrparser.getInstrString()
+        self.curOrc = self.preamble + self.orcheader + self.arrayinitlines + self.instrparser.getInstrString() + INPUT_CLIP_INSTR
         self.curSco = sco
         try:
             if neb_globals.remount_fs is True:
