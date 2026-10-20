@@ -16,6 +16,13 @@ from classlogger import ClassLogger
 # (this loop runs about every 2.5 ms).
 CLIP_HOLD_MS = 8
 
+# The encoder LED colours (set_speed_leds/set_pitch_leds) are worked out at
+# most every LED_DRAW_MS (100 Hz), not every update (~400 Hz): no one sees
+# the difference and it was about a fifth of the main loop's CPU. Encoders,
+# clicks and buttons are still read every update (the encoder step size is
+# cubed per reading, so reading less often would change how it feels).
+LED_DRAW_MS = 10
+
 sr_pin_next = 7
 sr_pin_source_gate = 6
 sr_pin_source = 5
@@ -82,9 +89,14 @@ class UserInterface(object):
         self.clip_count = 0
         self.clip_time = -CLIP_HOLD_MS
         self.clip_shown = False
+        self.led_draw_time = -LED_DRAW_MS
+        self.draw_leds = True
 
     def update(self):
         self.now = int(round(time.time() * 1000))
+        self.draw_leds = self.now - self.led_draw_time >= LED_DRAW_MS
+        if self.draw_leds:
+            self.led_draw_time = self.now
         if self.reload_flag == False:
             self.ledDriver.update()
         self.pitch_click.update() 
@@ -193,6 +205,7 @@ class UserInterface(object):
             self.clip_shown = True
         elif self.clip_shown:
             self.clip_shown = False
+            self.led_draw_time = -LED_DRAW_MS   # normal colours back next update, not up to LED_DRAW_MS later
             # A rawencoder pitch is not redrawn in secondary controls: clear it.
             if self.controlhandler.isRaw("pitch"):
                 self.set_rgb("pitch_pos", 4095, 4095, 4095, 0.0)
@@ -577,7 +590,7 @@ class UserInterface(object):
                     self.reload_flag = True
         else:
             pass
-        if not (mode == "supercollider" and self.controlhandler.isRaw("speed")): # rawencoder: LEDs are sclang's
+        if self.draw_leds and not (mode == "supercollider" and self.controlhandler.isRaw("speed")): # rawencoder: LEDs are sclang's
             self.set_speed_leds(mode)
 
     # Bank change in the instr selector. The slot of the bank that is left is
@@ -820,7 +833,7 @@ class UserInterface(object):
                 # SC and PD control handlers override enterNormalMode()
                 # to go back to supercollider/puredata mode.
                 self.controlhandler.enterNormalMode()
-        if not (mode in ("supercollider", "secondary controls") and self.controlhandler.isRaw("pitch")): # rawencoder: LEDs are not set by ui
+        if self.draw_leds and not (mode in ("supercollider", "secondary controls") and self.controlhandler.isRaw("pitch")): # rawencoder: LEDs are not set by ui
             self.set_pitch_leds(mode)
 
     def set_rgb(self, name, r, g, b, bright=1.0):
