@@ -57,7 +57,7 @@ class FileHandler(object):
 
     def getIndex(self, name):
         for i, f in enumerate(self.files):
-            if name in f:
+            if os.path.splitext(os.path.basename(f))[0] == name:
                 return i
         return None
 

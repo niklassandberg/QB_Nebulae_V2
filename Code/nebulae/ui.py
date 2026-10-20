@@ -48,12 +48,7 @@ class UserInterface(object):
         self.pitch_amount = self.controlhandler.getStaticVal("pitch")
         self.mode = "normal"
 
-        instr_dir = "/home/alarm/instr/"
-        pd_dir = "/home/alarm/pd/"
-        sc_dir = "/home/alarm/sc/"
-        self.instr_fhandle = filehandler.FileHandler(instr_dir, ".instr")
-        self.sc_fhandle = filehandler.FileHandler(sc_dir, ".scd")
-        self.puredata_fhandle = filehandler.FileHandler(pd_dir, ".pd")
+        self.refreshFileHandlers()
         cur_bank = self.controlhandler.getInstrSelBank()
         self.bank_shift_counter = 0
         if cur_bank == "instr":
@@ -62,7 +57,7 @@ class UserInterface(object):
             cnt = self.sc_fhandle.numFiles()
         elif cur_bank == "puredata":
             cnt = self.puredata_fhandle.numFiles()
-        self.bank_counter = 0
+        self.instr_sel_saved = {} # bank -> (idx, offset) selected when that bank was left
         self.controlhandler.setInstrSelNumFiles(cnt)
         self.reload_flag = False # Flag to reload the whole program. 
         self.alt_file_bright = 0.0
@@ -129,7 +124,7 @@ class UserInterface(object):
                 self.animateEditFunction("source")
                 if self.controlhandler.currentBank == 'instr':
                     tempidx = self.instr_fhandle.getIndex(self.controlhandler.currentInstr)
-                elif self.controlhandler.currentBank == 'sc':
+                elif self.controlhandler.currentBank == 'supercollider':
                     tempidx = self.sc_fhandle.getIndex(self.controlhandler.currentInstr)
                 elif self.controlhandler.currentBank == 'puredata':
                     tempidx = self.puredata_fhandle.getIndex(self.controlhandler.currentInstr)
@@ -521,24 +516,47 @@ class UserInterface(object):
 
             if self.bank_shift_counter >= thresh or self.bank_shift_counter <= -1 * thresh:
                 self.bank_shift_counter = 0
-                self.bank_counter = self.bank_counter+1
-                if self.bank_counter%3 == 0:
-                    self.controlhandler.setInstrSelBank("instr")
-                    self.controlhandler.setInstrSelNumFiles(self.instr_fhandle.numFiles())
-                if self.bank_counter%3 == 1:
-                    self.controlhandler.setInstrSelBank("supercollider")
-                    self.controlhandler.setInstrSelNumFiles(self.sc_fhandle.numFiles())
-                if self.bank_counter%3 == 2:
-                    self.controlhandler.setInstrSelBank("puredata")
-                    self.controlhandler.setInstrSelNumFiles(self.puredata_fhandle.numFiles())
+                # Next bank (from the one shown) that has files; empty banks
+                # are skipped. If no other bank has any, it stays where it is.
+                banks = [("instr", self.instr_fhandle), ("supercollider", self.sc_fhandle),
+                         ("puredata", self.puredata_fhandle)]
+                names = [b for b, _ in banks]
+                start = names.index(cur_bank) if cur_bank in names else 0
+                for step in range(1, 3):
+                    bank, f_handle = banks[(start + step) % 3]
+                    if f_handle.numFiles() > 0:
+                        self.setInstrSelBank(bank, f_handle)
+                        break
 
             if self.clicked_speed() == 1:
                 self.log.debug("Clicked Speed from Instr Sel")
-                self.reload_flag = True 
+                # Never load a slot that has nothing (e.g. a bank emptied by a USB load).
+                if self.controlhandler.getInstrSelIdx() < self.instrSelHandle().numFiles():
+                    self.reload_flag = True
         else:
             pass
         if not (mode == "supercollider" and self.controlhandler.isRaw("speed")): # rawencoder: LEDs are sclang's
             self.set_speed_leds(mode)
+
+    # Bank change in the instr selector. The slot of the bank that is left is
+    # saved, and the new bank gets back the slot it had when it was left (e.g.
+    # supercollider 5 -> csound -> supercollider is on 5 again). A bank not
+    # visited yet keeps the current slot. If that slot is empty in the new bank
+    # (e.g. 5 in a csound bank with one instr), the first instr is selected, so
+    # a click never loads a slot that has nothing.
+    def setInstrSelBank(self, bank, f_handle):
+        numfiles = f_handle.numFiles()
+        idx = self.controlhandler.getInstrSelIdx()
+        offset = self.controlhandler.getInstrSelOffset()
+        self.instr_sel_saved[self.controlhandler.getInstrSelBank()] = (idx, offset)
+        idx, offset = self.instr_sel_saved.get(bank, (idx, offset))
+        if idx >= numfiles:
+            idx, offset = 0, 0
+        offset = min(offset, max(0, numfiles - 5))
+        self.controlhandler.setInstrSelBank(bank)
+        self.controlhandler.setInstrSelNumFiles(numfiles)
+        self.controlhandler.setInstrSelIdx(idx)
+        self.controlhandler.setInstrSelOffset(offset)
 
     def set_pitch_amount(self):
         self.pitch_amount = self.controlhandler.getStaticVal("pitch")
@@ -794,6 +812,15 @@ class UserInterface(object):
                 self.alt_file_bright = random.random()
         self.set_button_led("next", self.alt_file_bright)
 
+    # File handler of the bank shown in the instr selector.
+    def instrSelHandle(self):
+        bank = self.controlhandler.getInstrSelBank()
+        if bank == "supercollider":
+            return self.sc_fhandle
+        elif bank == "puredata":
+            return self.puredata_fhandle
+        return self.instr_fhandle
+
     def getNewInstr(self):
         idx = self.controlhandler.getInstrSelIdx()
         if self.controlhandler.getInstrSelBank() == "instr":
@@ -807,7 +834,16 @@ class UserInterface(object):
                 instr = self.puredata_fhandle.getFilename(idx)
         return instr
 
+    # The instr selector's file lists. Read again on every instr load
+    # (setCurrentInstr): the load copies new files from the USB stick first,
+    # and the UI object lives as long as Nebulae runs.
+    def refreshFileHandlers(self):
+        self.instr_fhandle = filehandler.FileHandler("/home/alarm/instr/", ".instr")
+        self.sc_fhandle = filehandler.FileHandler("/home/alarm/sc/", ".scd")
+        self.puredata_fhandle = filehandler.FileHandler("/home/alarm/pd/", ".pd")
+
     def setCurrentInstr(self, instr):
+        self.refreshFileHandlers()
         self.currentInstr = instr
         self.controlhandler.setCurrentInstr(instr)
         handlers = [self.instr_fhandle, self.sc_fhandle, self.puredata_fhandle]
@@ -825,13 +861,14 @@ class UserInterface(object):
                 break
         # Only udpate if the instr is found
         if tempidx is not None and tempbank is not None:
-            if tempidx < 5:
-                self.controlhandler.setInstrSelIdx(tempidx)
-                self.controlhandler.setInstrSelOffset(0)
-            else:
-                self.controlhandler.setInstrSelIdx(tempidx % 5)
-                self.controlhandler.setInstrSelOffset(tempidx / 5)
+            # The index is the position in the whole bank (as everywhere in the
+            # instr selector); the offset scrolls the 5 buttons so that it is
+            # shown, on the last button if it is the 6th or later.
+            self.controlhandler.setInstrSelIdx(tempidx)
+            self.controlhandler.setInstrSelOffset(0 if tempidx < 5 else tempidx - 4)
             self.controlhandler.setInstrSelBank(tempbankname)
+            # A new controlhandler (bank change) starts with 5 files.
+            self.controlhandler.setInstrSelNumFiles(tempbank.numFiles())
 
     def blendColor(self, color_a, color_b, amount):
         newred = (color_a.red() * (1.0 - amount)) + (color_b.red() * amount)
