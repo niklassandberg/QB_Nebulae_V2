@@ -43,6 +43,9 @@ NEBIO_API int nebio_gpio_level(int bcm_pin);
 /* 12-bit code of an MCP3208 channel from the last snapshot.
  * device 0 = CV (spidev0.0), device 1 = POT (spidev0.1). */
 NEBIO_API int nebio_adc_code(int device, int channel);
+/* All 16 codes of the last snapshot in one call: out[device * 8 + channel].
+ * Copies min(n, 16) codes, returns how many. */
+NEBIO_API int nebio_adc_codes(int *out, int n);
 /* Encoder id for a (pin_a, pin_b) pair as given to encoder.Worker, -1 if unknown. */
 NEBIO_API int nebio_encoder_id(int pin_a, int pin_b);
 /* Steps since the last call (then reset to 0). Always 0 while the encoder is raw. */

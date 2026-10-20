@@ -53,6 +53,7 @@ long long nebio_snapshot(void) { return Inputs::instance().snapshot(); }
 int nebio_sr_bits(void) { return Inputs::instance().srBits(); }
 int nebio_gpio_level(int bcm_pin) { return Inputs::instance().gpioLevel(bcm_pin); }
 int nebio_adc_code(int device, int channel) { return Inputs::instance().adcCode(device, channel); }
+int nebio_adc_codes(int *out, int n) { return Inputs::instance().adcCodes(out, n); }
 int nebio_encoder_id(int pin_a, int pin_b) { return Inputs::instance().encoderId(pin_a, pin_b); }
 int nebio_encoder_steps(int id) { return Inputs::instance().encoderSteps(id); }
 void nebio_encoder_set_raw(int id, int on) {

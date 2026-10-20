@@ -22,8 +22,12 @@ class Nebio(object):
 _log = ClassLogger.loggerSetup(Nebio())
 _lib = None
 _inputs_ready = False
+_inputs_lib = None   # lib() once the inputs run: the per-loop calls skip inputs()
 _leds_ready = False
 _last_snapshot = 0.0
+# ADC codes of the last snapshot, out[device * 8 + channel]: fetched in one
+# call per snapshot instead of one call per adc_code().
+_adc = (ctypes.c_int * 16)()
 
 # Python switch.Switch objects normally read the snapshot taken once per
 # updateAll(). Scripts without a ControlHandler (check_wifi.py,
@@ -55,6 +59,7 @@ def lib():
         "nebio_sr_bits": (c_int, []),
         "nebio_gpio_level": (c_int, [c_int]),
         "nebio_adc_code": (c_int, [c_int, c_int]),
+        "nebio_adc_codes": (c_int, [ctypes.POINTER(c_int), c_int]),
         "nebio_encoder_id": (c_int, [c_int, c_int]),
         "nebio_encoder_steps": (c_int, [c_int]),
         "nebio_encoder_set_raw": (None, [c_int, c_int]),
@@ -124,30 +129,33 @@ def shutdown():
 
 def inputs():
     """Starts the input thread once (GPIO, shift register, ADCs, encoders)."""
-    global _inputs_ready
+    global _inputs_ready, _inputs_lib
     if not _inputs_ready:
         if lib().nebio_inputs_init() != 0:
             _log.error("nebio inputs init failed: %s", last_error())
         _inputs_ready = True
+        _inputs_lib = lib()
     return lib()
 
 
 def snapshot():
     """One consistent picture of all inputs. Called once per updateAll()."""
     global _last_snapshot
-    n = inputs().nebio_snapshot()
+    l = _inputs_lib or inputs()
+    n = l.nebio_snapshot()
+    l.nebio_adc_codes(_adc, 16)
     _last_snapshot = time.time()
     return n
 
 
 def sr_bits():
-    return inputs().nebio_sr_bits()
+    return (_inputs_lib or inputs()).nebio_sr_bits()
 
 
 def gpio_level(pin):
     if time.time() - _last_snapshot > SNAPSHOT_MAX_AGE:
         snapshot()
-    level = inputs().nebio_gpio_level(pin)
+    level = (_inputs_lib or inputs()).nebio_gpio_level(pin)
     if level < 0:
         _log.error("nebio: GPIO %d is not an input handled by nebio", pin)
         return 1
@@ -155,7 +163,10 @@ def gpio_level(pin):
 
 
 def adc_code(device, channel):
-    return inputs().nebio_adc_code(device, channel)
+    """12-bit code from the last snapshot (as nebio_adc_code)."""
+    if not _inputs_ready:
+        inputs()
+    return _adc[device * 8 + channel]
 
 
 def encoder_id(pin_a, pin_b):
@@ -171,6 +182,9 @@ def encoder_set_raw(name, on):
     ("speed"/"pitch") straight to sclang, and sclang drives its two LEDs.
     Off: back to Python (encoder_steps(), ui.py LEDs)."""
     inputs().nebio_encoder_set_raw(ENCODERS[name], 1 if on else 0)
+    # nebio shows sclang's colours on those LEDs meanwhile: Python's last
+    # values are no longer what is staged, so they must be sent again.
+    _rgb_last.clear()
 
 
 def encoder_raw(name):
@@ -274,23 +288,39 @@ class Color(object):
         return self.b
 
 
+# Last values sent to nebio, so the per-loop calls with the same value are
+# skipped. The RGB one is cleared by encoder_set_raw() (sclang's colours).
+_button_last = {}
+_rgb_last = {}
+
+
 class LedDriver(object):
     """Same interface as leddriver.LedDriver. Values are staged and become
-    visible on update(), which ui.py calls once per loop."""
+    visible on update(), which ui.py calls once per loop. Only values that
+    changed reach nebio, and update() commits only when something was staged."""
 
     def __init__(self):
         self.lib = leds()
+        self.staged = True   # commit once at start
 
     def update(self):
-        self.lib.nebio_led_commit()
+        if self.staged:
+            self.staged = False
+            self.lib.nebio_led_commit()
 
     def set_button_led(self, name, value):
-        if name in BUTTON_LEDS:
+        if name in BUTTON_LEDS and _button_last.get(name) != value:
+            _button_last[name] = value
+            self.staged = True
             self.lib.nebio_led_set_button(BUTTON_LEDS[name], value)
 
     def set_rgb(self, name, r, g, b, bright):
         if name in RGB_LEDS:
-            self.lib.nebio_led_set_rgb(RGB_LEDS[name], r, g, b, bright)
+            v = (r, g, b, bright)
+            if _rgb_last.get(name) != v:
+                _rgb_last[name] = v
+                self.staged = True
+                self.lib.nebio_led_set_rgb(RGB_LEDS[name], r, g, b, bright)
 
     def cleanup(self):
         pass
@@ -300,13 +330,36 @@ class LedDriver(object):
 # SuperCollider / Pure Data
 # ---------------------------------------------------------------------------
 
+# Last value sent per name: nebio skips unchanged values too, but checking
+# here first saves the ctypes call. Same rule as nebio (==, 1 == 1.0).
+# Cleared with nebio's cache (sc_forget_sent).
+_sc_last = {}
+_sc_names = {}
+
+
+def sc_forget_sent():
+    """Everything is sent again (with nebio_sc_clear_cache/set_synth_down)."""
+    _sc_last.clear()
+
+
 def sc_send(name, value):
+    if name in _sc_last and _sc_last[name] == value:
+        return
+    _sc_last[name] = value
+    bname = _sc_names.get(name)
+    if bname is None:
+        bname = _sc_names[name] = _b(name)
     l = lib()
-    if isinstance(value, bool):
-        l.nebio_sc_send_bool(_b(name), 1 if value else 0)
-    elif isinstance(value, numbers.Integral):
-        l.nebio_sc_send_int(_b(name), int(value))
+    t = type(value)
+    if t is float:
+        l.nebio_sc_send_float(bname, value)
+    elif t is int:
+        l.nebio_sc_send_int(bname, value)
+    elif t is bool:
+        l.nebio_sc_send_bool(bname, 1 if value else 0)
+    elif isinstance(value, numbers.Integral):   # e.g. numpy ints
+        l.nebio_sc_send_int(bname, int(value))
     elif isinstance(value, numbers.Real):
-        l.nebio_sc_send_float(_b(name), float(value))
+        l.nebio_sc_send_float(bname, float(value))
     else:
-        l.nebio_sc_send_string(_b(name), _b(str(value)))
+        l.nebio_sc_send_string(bname, _b(str(value)))

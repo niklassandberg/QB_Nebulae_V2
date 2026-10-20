@@ -17,6 +17,7 @@ import subprocess
 
 import nebmixer
 import nebio
+import loopprofile
 from classlogger import ClassLogger
 
 cfg_path = "/home/alarm/QB_Nebulae_V2/Code/config/"
@@ -162,9 +163,11 @@ class Nebulae(object):
             request = False
             if self.first_run == False:
                 self.c_handle.restoreAltToDefault()
+            profile = loopprofile.LoopProfile(self.classlog)
             while (self.pt.status() == 0): # Run a loop to poll for messages, and handle the UI.
                 self.ui.update()
                 self.c_handle.updateAll()
+                profile.tick()
                 if debug_controls == True:
                     if time.time() - self.last_debug_print > 0.25:
                         self.last_debug_print = time.time()
@@ -374,11 +377,13 @@ class Nebulae(object):
             new_instr = None
             request = False
             self.c_handle.enterPureDataMode()
+            profile = loopprofile.LoopProfile(self.classlog)
             while(request != True):
                 self.c_handle.updateAll()
                 if debug_controls == True:
                     self.c_handle.printAllControls()
                 self.ui.update()
+                profile.tick()
                 request = self.ui.getReloadRequest()
             nebmixer.disable()
             if request == True:
@@ -412,9 +417,11 @@ class Nebulae(object):
     def run_supercollider(self):
         try:
             request = False
+            profile = loopprofile.LoopProfile(self.classlog)
             while(request != True):
                 self.c_handle.updateAll()
                 self.ui.update()
+                profile.tick()
                 request = self.ui.getReloadRequest()
             nebmixer.disable()
             if isinstance(self.c_handle, chSC.SCControlHandler):

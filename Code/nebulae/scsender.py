@@ -43,6 +43,7 @@ class ScSend(object):
     def setSynthIsDown(self):
         self.log.debug("SET SYNTH TO DOWN!!!")
         self.lib.nebio_sc_set_synth_down()
+        nebio.sc_forget_sent()
 
     def pingLoaded(self):
         if self.lib.nebio_sc_sender_open():
@@ -74,6 +75,7 @@ class ScSend(object):
 
     def clear(self):
         self.lib.nebio_sc_clear_cache()
+        nebio.sc_forget_sent()
 
     def send(self, what, value):
         # Only changed values are sent (checked in nebio).

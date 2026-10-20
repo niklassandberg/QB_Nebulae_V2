@@ -536,6 +536,14 @@ int Inputs::adcCode(int device, int channel) const {
     return snapAdc_[device][channel];
 }
 
+int Inputs::adcCodes(int *out, int n) const {
+    if (!out || n <= 0) return 0;
+    if (n > 16) n = 16;
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (int i = 0; i < n; ++i) out[i] = snapAdc_[i / 8][i % 8];
+    return n;
+}
+
 int Inputs::encoderId(int pinA, int pinB) const {
     if (pinA == 17 && pinB == 27) return 0;  // pitch, ui.py
     if (pinA == 6 && pinB == 13) return 1;   // speed, ui.py
