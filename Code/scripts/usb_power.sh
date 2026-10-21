@@ -1,5 +1,5 @@
 #!/bin/bash
-# USB on/off for quiet mode (Code/nebscripts/3_quiet.sh). Off = the USB
+# USB on/off for quiet mode (Code/scripts/quiet.sh). Off = the USB
 # controller (VL805 on PCIe) is unbound from its driver: no bus traffic, no
 # 8 kHz microframes. Everything that uses the stick calls "on" before it
 # mounts and "off" after it unmounts, so in quiet mode USB is only on while

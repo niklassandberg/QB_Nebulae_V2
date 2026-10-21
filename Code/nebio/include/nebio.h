@@ -125,10 +125,13 @@ NEBIO_API void nebio_led_animation_stop(void);
 NEBIO_API void nebio_led_clear_sc(void);
 /* Dims every LED (Python's, animations, sclang's): 0 = off .. 1 = full. */
 NEBIO_API void nebio_led_set_dim(double dim);
-/* Quiet mode: the file (next) LED only fully on or off, no PWM (its PWM is
- * heard in the audio): on from half brightness; the dim factor only counts
- * as 0 = off for it. All other LEDs keep their PWM, staggered in time. */
+/* Quiet mode: the file (next) and freeze LEDs only fully on or off, no PWM
+ * (heard in the audio): on from half brightness; the dim factor only counts
+ * as 0 = off for them. All other LEDs keep their PWM. Quiet levels 1 and 2. */
 NEBIO_API void nebio_led_set_no_pwm(int on);
+/* Quiet mode (every level): the LED channels start their PWM pulses at
+ * different points of the period, so they do not all switch at once. */
+NEBIO_API void nebio_led_set_stagger(int on);
 
 /* ---- SuperCollider (OSC) ----------------------------------------------- */
 

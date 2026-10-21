@@ -4,7 +4,7 @@ import nebio as libDriver # LedDriver/Color backed by the nebio C++ library
 import switch as libSwitch
 import filehandler
 import scripts
-import os
+import subprocess
 import threading
 import time
 import random
@@ -32,10 +32,31 @@ BANKS = ["instr", "supercollider", "puredata", "scripts"]
 # LED dim: change per encoder step (50 steps from off to full).
 LED_DIM_STEP = 0.02
 
-# Quiet mode (Code/nebscripts/3_quiet.sh) is switched by a script, so the UI
-# looks for its flag now and then: then the file LED uses no PWM.
+# Quiet mode levels 0-3 (Code/scripts/quiet.sh, chosen with 3_quiet.ui). The
+# level is in QUIET_FLAG (no file = off, empty = level 1); the UI looks at it
+# now and then: every level staggers the LED PWM channels, levels 1 and 2
+# also give the file and freeze LEDs no PWM.
 QUIET_FLAG = "/home/alarm/QB_Nebulae_V2/Code/config/quiet_mode"
+QUIET_SCRIPT = "/home/alarm/QB_Nebulae_V2/Code/scripts/quiet.sh"
 QUIET_CHECK_MS = 1000
+QUIET_STEPS = 4  # encoder steps per level in the quiet level selector
+# The levels in the order the speed encoder steps through them (user's
+# order: quieter the further it is turned).
+QUIET_ORDER = (0, 3, 2, 1)
+# Each level's colour on both speed LEDs: (r, g, b, brightness).
+QUIET_LEVEL_COLORS = {0: (4095, 0, 0, 1.0),     # off: red
+                      3: (4095, 2800, 0, 1.0),  # Quiet 3: yellow
+                      2: (0, 0, 4095, 1.0),     # Quiet 2: blue
+                      1: (0, 4095, 0, 1.0)}     # Quiet 1: green
+
+
+def quiet_level():
+    try:
+        with open(QUIET_FLAG) as f:
+            text = f.read().strip()
+    except OSError:
+        return 0
+    return int(text) if text in ("1", "2", "3") else 1
 
 sr_pin_next = 7
 sr_pin_source_gate = 6
@@ -105,8 +126,12 @@ class UserInterface(object):
         dim = self.controlhandler.settings.load("led_dim")
         self.led_dim = dim if isinstance(dim, float) else 1.0
         libDriver.led_set_dim(self.led_dim)
-        self.quiet = None
+        self.quiet = None  # level last given to nebio
         self.quiet_check_time = -QUIET_CHECK_MS
+        # Quiet level selector (scripts page, 3_quiet.ui).
+        self.quiet_select_mode = False
+        self.quiet_select = 0
+        self.quiet_select_acc = 0
 
     def update(self):
         self.now = int(round(time.time() * 1000))
@@ -123,12 +148,14 @@ class UserInterface(object):
         self.trackInputClip()
         if self.now - self.quiet_check_time >= QUIET_CHECK_MS:
             self.quiet_check_time = self.now
-            quiet = os.path.exists(QUIET_FLAG)
-            if quiet != self.quiet:
-                self.quiet = quiet
-                libDriver.led_set_no_pwm(quiet)
+            level = quiet_level()
+            if level != self.quiet:
+                self.quiet = level
+                libDriver.led_set_no_pwm(level in (1, 2))
+                libDriver.led_set_stagger(level > 0)
         # Script states (slot LEDs) are read when their page is shown.
         shown = (self.mode == "instr selector" and not self.led_dim_mode
+                 and not self.quiet_select_mode
                  and self.controlhandler.getInstrSelBank() == "scripts")
         if shown != self.scripts_shown:
             self.scripts_shown = shown
@@ -138,6 +165,9 @@ class UserInterface(object):
                 self.script_fhandle.stopPolling()
         if self.led_dim_mode:
             self.updateLedDim()
+            return
+        if self.quiet_select_mode:
+            self.updateQuietSelect()
             return
 
         if self.mode == "secondary controls":
@@ -632,6 +662,10 @@ class UserInterface(object):
                         idx = self.controlhandler.getInstrSelIdx()
                         if self.script_fhandle.uiMode(idx) == "led_dim":
                             self.led_dim_mode = True  # until a speed/pitch click
+                        elif self.script_fhandle.uiMode(idx) == "quiet":
+                            self.quiet_select_mode = True  # until a speed/pitch click
+                            self.quiet_select = QUIET_ORDER.index(quiet_level())
+                            self.quiet_select_acc = 0
                         else:
                             # Runs in the background; the instrument keeps playing.
                             self.script_fhandle.run(idx)
@@ -643,12 +677,6 @@ class UserInterface(object):
         if self.draw_leds and not (mode == "supercollider" and self.controlhandler.isRaw("speed")): # rawencoder: LEDs are sclang's
             self.set_speed_leds(mode)
 
-    # Bank change in the instr selector. The slot of the bank that is left is
-    # saved, and the new bank gets back the slot it had when it was left (e.g.
-    # supercollider 5 -> csound -> supercollider is on 5 again). A bank not
-    # visited yet keeps the current slot. If that slot is empty in the new bank
-    # (e.g. 5 in a csound bank with one instr), the first instr is selected, so
-    # a click never loads a slot that has nothing.
     # LED dim mode: every LED on (white) as a preview, the speed encoder sets
     # the dim factor live (nebio applies it to all LEDs). A speed or pitch
     # click saves it and goes back to the instrument that is playing.
@@ -670,6 +698,48 @@ class UserInterface(object):
             self.led_draw_time = -LED_DRAW_MS  # instrument colours at once
             self.controlhandler.enterNormalMode()  # writes the settings
 
+    # Quiet level selector: the speed encoder steps through QUIET_ORDER (off,
+    # Quiet 3, 2, 1), shown in the colour of both speed LEDs
+    # (QUIET_LEVEL_COLORS: off red, 3 yellow, 2 blue, 1 green). quiet_select
+    # is the position in QUIET_ORDER. A speed click switches to that level
+    # (quiet.sh in the background) and goes back to the instrument; a pitch
+    # click goes back without a change.
+    def updateQuietSelect(self):
+        self.quiet_select_acc += self.get_delta("speed")
+        if self.quiet_select_acc >= QUIET_STEPS:
+            self.quiet_select = min(len(QUIET_ORDER) - 1, self.quiet_select + 1)
+            self.quiet_select_acc = 0
+        elif self.quiet_select_acc <= -QUIET_STEPS:
+            self.quiet_select = max(0, self.quiet_select - 1)
+            self.quiet_select_acc = 0
+        level = QUIET_ORDER[self.quiet_select]
+        if self.draw_leds:
+            r, g, b, bright = QUIET_LEVEL_COLORS[level]
+            for name in ("speed_pos", "speed_neg"):
+                self.set_rgb(name, r, g, b, bright)
+            for name in ("pitch_pos", "pitch_neg"):
+                self.set_rgb(name, 4095, 4095, 4095, 0.0)
+            for name in ("record", "next", "source", "reset", "freeze"):
+                self.set_button_led(name, 0.0)
+        set_it = self.clicked_speed() == 1
+        if set_it or self.clicked_pitch() == 1:
+            self.quiet_select_mode = False
+            if set_it and level != quiet_level():
+                self.log.info("Quiet mode set to %d", level)
+                subprocess.Popen(["/bin/bash", QUIET_SCRIPT, "set", str(level)],
+                                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL, start_new_session=True)
+                self.quiet_check_time = self.now - QUIET_CHECK_MS + 500  # LEDs follow soon
+            self.clearAllLEDs()
+            self.led_draw_time = -LED_DRAW_MS  # instrument colours at once
+            self.controlhandler.enterNormalMode()
+
+    # Bank change in the instr selector. The slot of the bank that is left is
+    # saved, and the new bank gets back the slot it had when it was left (e.g.
+    # supercollider 5 -> csound -> supercollider is on 5 again). A bank not
+    # visited yet keeps the current slot. If that slot is empty in the new bank
+    # (e.g. 5 in a csound bank with one instr), the first instr is selected, so
+    # a click never loads a slot that has nothing.
     def setInstrSelBank(self, bank, f_handle):
         numfiles = f_handle.numFiles()
         idx = self.controlhandler.getInstrSelIdx()

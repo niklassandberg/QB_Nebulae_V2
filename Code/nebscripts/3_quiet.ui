@@ -1,0 +1,12 @@
+# Quiet mode, on the scripts page of the instr selector.
+# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
+# mode = the name after the number, here "quiet").
+# Speed click on it: the speed encoder picks the level, shown in the colour
+# of both speed LEDs: off = red, Quiet 1 = green, Quiet 2 = blue,
+# Quiet 3 = yellow.
+# Speed click switches to it (Code/scripts/quiet.sh set N) and goes back to
+# the instrument; pitch click goes back without a change.
+#   Quiet 1: everything not needed to play off, also LAN and the Wi-Fi chip
+#   Quiet 2: as 1, but LAN on and Wi-Fi possible
+#   Quiet 3: as 2, but the file and freeze LEDs dim (PWM) like the others
+# Slot LED bright = a level is on (nebulae-status).

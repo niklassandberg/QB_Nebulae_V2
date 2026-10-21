@@ -8,7 +8,7 @@
 
 is_on() { systemctl is-active --quiet nebwifi.service; }
 
-# Quiet mode (3_quiet.sh) removes the Wi-Fi driver; load it again and wait
+# Quiet level 1 (Code/scripts/quiet.sh) removes the Wi-Fi driver; load it again and wait
 # for wlan0. The radio stays blocked until start_wifi.sh unblocks it.
 driver() {
     [ -e /sys/class/net/wlan0 ] && return

@@ -93,6 +93,7 @@ void nebio_led_animation_stop(void) { Leds::instance().animationStop(); }
 void nebio_led_clear_sc(void) { Leds::instance().clearSc(); }
 void nebio_led_set_dim(double dim) { Leds::instance().setDim(dim); }
 void nebio_led_set_no_pwm(int on) { Leds::instance().setNoPwm(on != 0); }
+void nebio_led_set_stagger(int on) { Leds::instance().setStagger(on != 0); }
 
 // ---- SuperCollider ---------------------------------------------------------
 

@@ -87,6 +87,7 @@ def lib():
         "nebio_led_clear_sc": (None, []),
         "nebio_led_set_dim": (None, [c_double]),
         "nebio_led_set_no_pwm": (None, [c_int]),
+        "nebio_led_set_stagger": (None, [c_int]),
         "nebio_sc_open_sender": (c_int, []),
         "nebio_sc_close_sender": (None, []),
         "nebio_sc_sender_open": (c_int, []),
@@ -313,8 +314,13 @@ def led_set_dim(dim):
 
 
 def led_set_no_pwm(on):
-    """Quiet mode: file LED only fully on/off (its PWM is heard in the audio)."""
+    """Quiet mode: file and freeze LEDs only fully on/off (PWM heard in the audio)."""
     leds().nebio_led_set_no_pwm(1 if on else 0)
+
+
+def led_set_stagger(on):
+    """Quiet mode: LED channels start their PWM pulses at different times."""
+    leds().nebio_led_set_stagger(1 if on else 0)
 
 
 class Color(object):

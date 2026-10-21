@@ -37,7 +37,7 @@ NEBIO_ADC_HZ = 400
 # Code/nebio/src/gpiomem.h). For the measuring phase it is switched on only
 # when this file exists, so it can be tried without a new firmware.
 NEBIO_FAST_GPIO_FLAG = "/home/alarm/nebio_fast_gpio"
-# Quiet mode (Code/nebscripts/3_quiet.sh): the status lines are not logged.
+# Quiet mode (Code/scripts/quiet.sh, any level): the status lines are not logged.
 QUIET_FLAG = "/home/alarm/QB_Nebulae_V2/Code/config/quiet_mode"
 
 FREEZE_GATE_PIN = 4

@@ -21,6 +21,7 @@ EXTENSIONS = [".sh", ".neb"]  # .neb: any executable (compiled program)
 # .ui: handled inside Nebulae (ui.py), not run; firmware only. The mode is
 # the name after the number: 4_led_dim.ui -> "led_dim".
 UI_EXTENSION = ".ui"
+QUIET_FLAG = "/home/alarm/QB_Nebulae_V2/Code/config/quiet_mode"  # Code/scripts/quiet.sh
 STATUS_TIMEOUT_S = 2.0
 STATUS_MARKER = b"nebulae-status"
 
@@ -127,6 +128,8 @@ class ScriptHandler(object):
         self.readAll()
 
     def readStatus(self, idx):
+        if self.uiMode(idx) == "quiet":  # 3_quiet.ui: a level is saved
+            return ON if os.path.exists(QUIET_FLAG) else OFF
         try:
             r = subprocess.run(self.command(idx, "status"), stdout=subprocess.DEVNULL,
                                stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL,

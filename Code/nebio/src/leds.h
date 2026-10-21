@@ -48,11 +48,14 @@ public:
     // 0..1, applied to every LED (Python's, animations, sclang's) as the
     // last step before the hardware. The LED dim script on the scripts page.
     void setDim(double dim);
-    // Quiet mode: the file (next) LED only fully on or off: its PWM is heard
-    // in the audio (tested 2026-10-21; the other LEDs' PWM is not). On from
-    // half brightness, the dim factor only counts as 0 = off. All other LEDs
-    // keep their PWM, staggered in time (see Pca9685::writeRange).
+    // Quiet mode: the file (next) and freeze LEDs only fully on or off: the
+    // file LED's PWM is heard in the audio (tested 2026-10-21), the freeze
+    // LED was added by the user. On from half brightness, the dim factor only
+    // counts as 0 = off. All other LEDs keep their PWM.
     void setNoPwm(bool on);
+    // Quiet mode (every level): the PCA9685 channels start their pulses at
+    // different points of the period (see Pca9685::writeRange).
+    void setStagger(bool on);
 
     // sclang's colour for an RGB LED (/sc/led/<led>, 0-4095 per colour). It is
     // always remembered, and shown while sclang owns the LED; then setRgb()
@@ -99,6 +102,7 @@ private:
     std::atomic<int> animResetDuty_{100};
     std::atomic<double> dim_{1.0};
     std::atomic<bool> noPwm_{false};
+    std::atomic<bool> stagger_{false};
     bool staggered_ = false;  // LED thread only: channels written staggered
     std::mutex pwmMutex_;
     std::condition_variable pwmCv_;

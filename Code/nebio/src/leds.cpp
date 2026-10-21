@@ -42,7 +42,8 @@ constexpr int kRgbChannel[4][3] = {
     {7, 5, 6},    // speed_neg
 };
 constexpr int kButtonReset = 4;
-constexpr int kButtonNext = 1;  // the file LED (index in kButtonChannel)
+constexpr int kButtonNext = 1;    // the file LED (index in kButtonChannel)
+constexpr int kButtonFreeze = 3;  // the freeze LED
 
 void sleepMs(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
 
@@ -316,6 +317,15 @@ void Leds::setNoPwm(bool on) {
     pwmCv_.notify_all();
 }
 
+void Leds::setStagger(bool on) {
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        stagger_ = on;
+        dirty_ = true;
+    }
+    cv_.notify_all();
+}
+
 // Same math as bootleds.py.
 void Leds::renderAnimation(int out[16], int &resetDutyOut) {
     timespec ts;
@@ -374,21 +384,25 @@ void Leds::run() {
         }
 
         // Dim: the on part of each channel (LEDs are active low, 4095 = off).
-        // Quiet mode (no PWM) for the file LED: fully on from half
+        // Quiet mode (no PWM) for the file and freeze LEDs: fully on from half
         // brightness, else off; the dim factor only counts as 0 = off.
         double dim = dim_.load();
-        const int noPwmCh = kButtonChannel[kButtonNext];
-        int noPwmOut = (dim > 0 && kLedOff - out[noPwmCh] >= (kLedOff + 1) / 2) ? 0 : kLedOff;
+        const int noPwmCh[2] = {kButtonChannel[kButtonNext], kButtonChannel[kButtonFreeze]};
+        int noPwmOut[2];
+        for (int k = 0; k < 2; ++k)
+            noPwmOut[k] = (dim > 0 && kLedOff - out[noPwmCh[k]] >= (kLedOff + 1) / 2) ? 0 : kLedOff;
         if (dim < 1.0) {
             for (int ch = 0; ch < 16; ++ch)
                 out[ch] = kLedOff - static_cast<int>(std::lround((kLedOff - out[ch]) * dim));
         }
-        bool quiet = noPwm_;
-        if (quiet) out[noPwmCh] = noPwmOut;
+        if (noPwm_) {
+            for (int k = 0; k < 2; ++k) out[noPwmCh[k]] = noPwmOut[k];
+        }
         // Quiet mode staggers the channels (writeRange): a switch changes
         // every channel's start, so all are written again.
-        if (quiet != staggered_) {
-            staggered_ = quiet;
+        const bool stagger = stagger_;
+        if (stagger != staggered_) {
+            staggered_ = stagger;
             writtenValid_ = false;
         }
 
