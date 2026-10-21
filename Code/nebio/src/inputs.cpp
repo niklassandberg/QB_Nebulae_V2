@@ -544,6 +544,17 @@ int Inputs::adcCodes(int *out, int n) const {
     return n;
 }
 
+int Inputs::gpioLevels(int *out, int n) const {
+    if (!out || n <= 0) return 0;
+    if (n > 64) n = 64;
+    std::lock_guard<std::mutex> lock(mutex_);
+    for (int pin = 0; pin < n; ++pin) {
+        int s = pinSlot(pin);
+        out[pin] = s < 0 ? -1 : snapPin_[s];
+    }
+    return n;
+}
+
 int Inputs::encoderId(int pinA, int pinB) const {
     if (pinA == 17 && pinB == 27) return 0;  // pitch, ui.py
     if (pinA == 6 && pinB == 13) return 1;   // speed, ui.py

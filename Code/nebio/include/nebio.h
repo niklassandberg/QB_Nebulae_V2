@@ -46,6 +46,9 @@ NEBIO_API int nebio_adc_code(int device, int channel);
 /* All 16 codes of the last snapshot in one call: out[device * 8 + channel].
  * Copies min(n, 16) codes, returns how many. */
 NEBIO_API int nebio_adc_codes(int *out, int n);
+/* Levels of BCM pins 0..n-1 from the last snapshot in one call: out[pin] is
+ * 0/1, or -1 if the pin is not an input (as nebio_gpio_level). n <= 64. */
+NEBIO_API int nebio_gpio_levels(int *out, int n);
 /* Encoder id for a (pin_a, pin_b) pair as given to encoder.Worker, -1 if unknown. */
 NEBIO_API int nebio_encoder_id(int pin_a, int pin_b);
 /* Steps since the last call (then reset to 0). Always 0 while the encoder is raw. */

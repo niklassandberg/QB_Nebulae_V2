@@ -38,6 +38,7 @@ class DigitalData(object):
         #self.long_press_time = 63
         self.ignore_next_btrig = edge == "falling"
         self.name = name
+        self.is_alt = "_alt" in name # alt channels ignore the gate (handle_gate)
         self.longtouch_cb = longtouch_cb
         self.inc_order = inc_order
         self.ignore_button = False
@@ -149,32 +150,14 @@ class DigitalData(object):
         if src == "GPIO":
             if skip_update == False:
                 switch.update()
-            if switch.state() == True:
-                state = 1
-            else:
-                state = 0
-            if switch.prevState() == True:
-                prev = 1
-            else: 
-                prev = 0
+            state = 1 if switch.state() else 0
+            prev = 1 if switch.prevState() else 0
         elif src == "SR":
-            if switch.state(pin) == True:
-                state = 1
-            else:
-                state = 0
-            if switch.prevState(pin) == True:
-                prev = 1
-            else: 
-                prev = 0
+            state = 1 if switch.state(pin) else 0
+            prev = 1 if switch.prevState(pin) else 0
             if controltype == "gate": # Flip for Hardware
-                if state == 1:
-                    state = 0
-                else:
-                    state = 1
-                if prev == 1:
-                    prev = 0
-                else:
-                    prev = 1
+                state = 1 - state
+                prev = 1 - prev
         elif src == "NONE":
             state = 0
             prev = 0 
@@ -225,7 +208,7 @@ class DigitalData(object):
             #    self.b_state = 0
 
     def handle_gate(self):
-        if "_alt" in self.name:
+        if self.is_alt:
             self.ignore_gate = True
         if self.ignore_gate == False:
             raw_gate, raw_prev_gate = self.getRawValues("gate")

@@ -25,16 +25,19 @@ class PdSend(object):
     # Sending
     # -------------------------
 
+    # Returns True when the messages went out.
     def send(self, msgs):
         if not self.lib.nebio_pd_is_connected():
             if not self.warned: # the connect runs in the background, warn once
                 self.log.warning("PD socket not connected. Cannot send messages.")
                 self.warned = True
-            return
+            return False
         self.warned = False
         data = ''.join(str(msg) + ';' for msg in msgs).encode('utf-8')
         if self.lib.nebio_pd_send(data, len(data)) != 0:
             self.log.error("Could not send to PD: %s", nebio.last_error())
+            return False
+        return True
 
     # -------------------------
     # Utilities

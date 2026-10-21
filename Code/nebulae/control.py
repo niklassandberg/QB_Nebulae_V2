@@ -33,6 +33,12 @@ defPitchCoeff = float(config.getValue("filterCoeff","pitch",0.95))
 # reduced filtering on start, so that it can quickly and accurately be changed
 defStartCoeff = float(config.getValue("filterCoeff","start",0.95))
 
+# HybridData snaps speed to these factors and pitch to whole octaves (within
+# a tolerance). Speed as (positive, negative) pairs, checked in this order.
+SPEED_SNAP = tuple(((f + 4.0) / 8.0, ((-1.0 * f) + 4.0) / 8.0)
+                   for f in (0.0, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0))
+PITCH_SNAP = (0.0, 0.2, 0.4, 0.6, 0.8, 1.0)
+
 def addHysteresis(cur, new, distance):
     output = cur    
     if cur + distance < new:    
@@ -306,18 +312,14 @@ class HybridData(object):
             temp_rnd = round(temp, 4)
             if self.name == "speed":
                 tolerance = 0.00208 # 1/8 semi-tone = quarter tone tolerance.
-                factors = [0.0, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0]
-                for f in factors: 
-                    factor_val_pos = (f + 4.0) / 8.0 
-                    factor_val_neg = ((-1.0 * f) + 4.0) / 8.0 
+                for factor_val_pos, factor_val_neg in SPEED_SNAP:
                     if temp_rnd < factor_val_pos + tolerance and temp_rnd > factor_val_pos - tolerance:
                         temp_rnd = factor_val_pos
                     if temp_rnd < factor_val_neg + tolerance and temp_rnd > factor_val_neg - tolerance:
                         temp_rnd = factor_val_neg
             elif self.name == "pitch":
                 tolerance = 0.00208
-                octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]  
-                for octave in octaves:
+                for octave in PITCH_SNAP:
                     if temp_rnd < octave + tolerance and temp_rnd > octave - tolerance:
                         temp_rnd = octave 
             if self.stablized is True:

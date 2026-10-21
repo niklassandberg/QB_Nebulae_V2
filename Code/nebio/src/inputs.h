@@ -62,6 +62,7 @@ public:
     int gpioLevel(int pin) const;
     int adcCode(int device, int channel) const;
     int adcCodes(int *out, int n) const;
+    int gpioLevels(int *out, int n) const;
     int encoderId(int pinA, int pinB) const;
     int encoderSteps(int id);
     // Raw encoder (rawencoder in a .scd): steps and click edges go straight

@@ -22,12 +22,10 @@ class ShiftRegister(object):
         self.prevValues = [-1, -1, -1, -1, -1, -1, -1, -1]
 
     def update(self):
-        for i in range(0, 8):
-            self.prevValues[i] = self.values[i]
+        self.prevValues = self.values
         nebio.snapshot()
         bits = nebio.sr_bits()
-        for i in range(0, 8):
-            self.values[i] = (bits >> i) & 1
+        self.values = [(bits >> i) & 1 for i in range(8)]
 
     def risingEdge(self, index):
         if (self.values[index] == 1 and self.prevValues[index] == 0):

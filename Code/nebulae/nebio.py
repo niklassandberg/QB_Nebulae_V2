@@ -28,6 +28,9 @@ _last_snapshot = 0.0
 # ADC codes of the last snapshot, out[device * 8 + channel]: fetched in one
 # call per snapshot instead of one call per adc_code().
 _adc = (ctypes.c_int * 16)()
+# Same for the GPIO levels, out[bcm_pin] (-1 = not an input handled by nebio).
+_GPIO_PINS = 64
+_gpio = (ctypes.c_int * _GPIO_PINS)()
 
 # Python switch.Switch objects normally read the snapshot taken once per
 # updateAll(). Scripts without a ControlHandler (check_wifi.py,
@@ -60,6 +63,7 @@ def lib():
         "nebio_gpio_level": (c_int, [c_int]),
         "nebio_adc_code": (c_int, [c_int, c_int]),
         "nebio_adc_codes": (c_int, [ctypes.POINTER(c_int), c_int]),
+        "nebio_gpio_levels": (c_int, [ctypes.POINTER(c_int), c_int]),
         "nebio_encoder_id": (c_int, [c_int, c_int]),
         "nebio_encoder_steps": (c_int, [c_int]),
         "nebio_encoder_set_raw": (None, [c_int, c_int]),
@@ -145,6 +149,7 @@ def snapshot():
     l = _inputs_lib or inputs()
     n = l.nebio_snapshot()
     l.nebio_adc_codes(_adc, 16)
+    l.nebio_gpio_levels(_gpio, _GPIO_PINS)
     _last_snapshot = time.time()
     return n
 
@@ -156,7 +161,7 @@ def sr_bits():
 def gpio_level(pin):
     if time.time() - _last_snapshot > SNAPSHOT_MAX_AGE:
         snapshot()
-    level = (_inputs_lib or inputs()).nebio_gpio_level(pin)
+    level = _gpio[pin] if 0 <= pin < _GPIO_PINS else -1
     if level < 0:
         _log.error("nebio: GPIO %d is not an input handled by nebio", pin)
         return 1
@@ -168,6 +173,15 @@ def adc_code(device, channel):
     if not _inputs_ready:
         inputs()
     return _adc[device * 8 + channel]
+
+
+def adc_codes():
+    """The array snapshot() fills in place, out[device * 8 + channel]. A
+    reference to it always holds the codes of the last snapshot (MCP3208
+    reads it directly, one Python call less per ADC read)."""
+    if not _inputs_ready:
+        inputs()
+    return _adc
 
 
 def encoder_id(pin_a, pin_b):
