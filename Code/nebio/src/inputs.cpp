@@ -477,7 +477,25 @@ void Inputs::run() {
         int64_t took = (nowNs() - start) / 1000;
         if (took > worstScanUs_) worstScanUs_ = took;
 
-        next += periodUs * 1000LL;
+        if (externalTrigger_.load(std::memory_order_relaxed)) {
+            // One scan per trigger (e.g. from the audio clock). The timeout
+            // only lets stop_ and a switch back to the timer be seen.
+            std::unique_lock<std::mutex> lock(triggerMutex_);
+            triggerCv_.wait_for(lock, std::chrono::milliseconds(50), [&] {
+                return triggers_ > 0 || stop_ || !externalTrigger_.load(std::memory_order_relaxed);
+            });
+            if (triggers_ > 0) --triggers_;
+            next = nowNs();
+            continue;
+        }
+        int64_t step = periodUs * 1000LL;
+        const double jitter = scanJitter_.load(std::memory_order_relaxed);
+        if (jitter > 0) {
+            rng_ ^= rng_ << 13; rng_ ^= rng_ >> 7; rng_ ^= rng_ << 17;  // xorshift64
+            double u = (rng_ >> 11) * (1.0 / 9007199254740992.0);      // [0, 1)
+            step += static_cast<int64_t>(step * jitter * (2.0 * u - 1.0));
+        }
+        next += step;  // absolute deadline: the mean rate stays periodUs
         int64_t now = nowNs();
         if (next < now - 10LL * periodUs * 1000LL) next = now;  // fell behind, don't burst
         timespec ts;
@@ -485,6 +503,25 @@ void Inputs::run() {
         ts.tv_nsec = next % 1000000000LL;
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr);
     }
+}
+
+void Inputs::setScanJitter(double fraction) {
+    if (!(fraction > 0)) fraction = 0;  // also NaN
+    if (fraction > 0.9) fraction = 0.9;
+    scanJitter_ = fraction;
+}
+
+void Inputs::setScanTrigger(bool external) {
+    externalTrigger_ = external;
+    triggerCv_.notify_all();
+}
+
+void Inputs::scanTrigger() {
+    {
+        std::lock_guard<std::mutex> lock(triggerMutex_);
+        if (triggers_ < 4) ++triggers_;  // a late scan catches up, no long burst
+    }
+    triggerCv_.notify_all();
 }
 
 void Inputs::runEdges() {

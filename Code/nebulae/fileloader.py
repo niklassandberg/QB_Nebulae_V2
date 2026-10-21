@@ -1,6 +1,5 @@
 import glob
 import os
-import subprocess
 from classlogger import ClassLogger
 import neb_globals
 import shutil
@@ -8,6 +7,8 @@ import shutil
 
 import endtimer
 import nebio
+
+USB_POWER = "bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh"
 
 class FileLoader(object):
 
@@ -29,8 +30,6 @@ class FileLoader(object):
             subprocess.call(["rsync", "-a", "--delete", USB, SD])
     """ 
 
-    contentHash = "" # hash of usb content, must be global internal.
-
     def __init__(self):
         
         self.classlog = ClassLogger.loggerSetup(self)
@@ -46,14 +45,16 @@ class FileLoader(object):
         self.pdtypes = [".pd",".pd_linux"]
         self.csdtypes = [".csd"]
         self.scdtypes = [".scd",".sc"]
-        self.othertypes = [".c", ".sh", ".cpp", ".cc"]
-        self.dirs = [ "audio", "instr", "pd", "sc", "csound", "other"]
+        self.scripttypes = [".sh", ".neb"]  # scripts page (scripts.py); .neb = executable
+        self.othertypes = [".c", ".cpp", ".cc"]
+        self.dirs = [ "audio", "instr", "pd", "sc", "scripts", "csound", "other"]
         self.dirtypes = {}
         self.dirtypes["audio"] = self.audiotypes
         self.dirtypes["instr"] = self.instrtypes
         self.dirtypes["pd"] = self.pdtypes
         self.dirtypes["csd"] = self.csdtypes
         self.dirtypes["sc"] = self.scdtypes
+        self.dirtypes["scripts"] = self.scripttypes
         self.dirtypes["other"] = self.othertypes
         self.usb_mounted = self.isUSBMounted()
         self.led_process = None
@@ -65,18 +66,31 @@ class FileLoader(object):
               self.stateFunctions[self.currentState]
               self.currentState += 1
     
-    def usbHasModContent(self):
-        prevContentHash = FileLoader.contentHash
+    # A type is up to date when /home/alarm/<type> holds exactly the stick's
+    # files with the same size and mtime (copy2 keeps the mtime). Unlike the
+    # old in-memory hash of the whole stick this survives a reboot, and
+    # neb_log.txt (appended at every start) no longer counts as a change.
+    def typeIsCurrent(self, fileType):
+        fullDir = "/home/alarm/" + fileType
         try:
-            output = subprocess.check_output(
-                "find /mnt/memory -printf '%P %s %T@\\n' | sort | sha256sum",
-                shell=True
-            )
-            FileLoader.contentHash = output.strip().split()[0]
-        except Exception as e:
-            self.classlog.error("Error computing USB content hash: %s", e)
-            FileLoader.contentHash = ""
-        return prevContentHash != FileLoader.contentHash
+            local = set(f for f in os.listdir(fullDir) if not f.startswith('.'))
+            usb = self.typeFiles(fileType)
+            if local != set(os.path.basename(f) for f in usb):
+                return False
+            for f in usb:
+                s = os.stat(f)
+                d = os.stat(os.path.join(fullDir, os.path.basename(f)))
+                if s.st_size != d.st_size or int(s.st_mtime) != int(d.st_mtime):
+                    return False
+            return True
+        except OSError:
+            return False
+
+    def typeFiles(self, fileType):
+        files = []
+        for ext in self.dirtypes[fileType]:
+            files.extend(glob.glob('/mnt/memory/*' + ext))
+        return files
     
     def copyFileInternaly(self, filepath, destPath):
         if os.path.isfile(filepath) and os.path.isdir(destPath):
@@ -94,16 +108,18 @@ class FileLoader(object):
         t = endtimer.EndTimer()
         self.mount()
         if self.usb_mounted == True:
-            if self.usbHasModContent() == True:
+            changed = [ft for ft in ("audio", "instr", "pd", "sc", "scripts")
+                       if self.typeFiles(ft) and not self.typeIsCurrent(ft)]
+            if changed:
                 self.launch_bootled(1)
-                self.copyType("audio")
-                self.copyType("instr")
-                self.copyType("pd")
-                self.copyType("sc")
-                self.classlog.info("Modified content.")
+                for ft in changed:
+                    self.copyType(ft)
+                self.classlog.info("Modified content: %s", ", ".join(changed))
             else:
                 self.classlog.info("No modified content.")
-            self.umount()
+            # copyType() flushes what it copied; a global sync waited for
+            # all other boot-time writes too (5 s seen).
+            self.umount(sync=False)
             self.classlog.info("Time it took: %s", t.end())
         #why self.launch_bootled when right after kill it?
         #else: 
@@ -117,15 +133,18 @@ class FileLoader(object):
 
     def mount(self):
         self.classlog.info("Mounting USB Device")
+        os.system(USB_POWER + " on")  # quiet mode switches USB off between uses
         os.system("mount /dev/sda1 /mnt/memory")
         self.usb_mounted = self.isUSBMounted()
 
-    def umount(self):
+    def umount(self, sync=True):
         self.classlog.info("Unmounting USB Device")
         os.system("umount /dev/sda1" )
-        self.classlog.info("Sync filebuffers to disk.")
-        os.system("sync")
+        if sync:
+            self.classlog.info("Sync filebuffers to disk.")
+            os.system("sync")
         self.usb_mounted = self.isUSBMounted()
+        os.system(USB_POWER + " off")  # only does something in quiet mode
 
     def isUSBMounted(self):
         try:
@@ -152,32 +171,30 @@ class FileLoader(object):
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
 
     def copyType(self, fileType):
-        fileDir = '/mnt/memory'
-        files = []
-        for ext in self.dirtypes[fileType]:
-            files.extend(glob.glob(fileDir + '/*' + ext))
-        fileCount = len(files)
-        if fileCount > 0:
+        files = self.typeFiles(fileType)
+        if len(files) > 0:
             fullDir = "/home/alarm/" + fileType
-            cmd = "mkdir -p " + fullDir
-            os.system(cmd)
-            #fullFile = fullDir + "/*" + ext
+            os.makedirs(fullDir, exist_ok=True)
             self.classlog.info("Erasing " + fullDir)
-            cmd = "rm " + fullDir + "/*"
-            os.system(cmd)
-            self.classlog.info("Contents of " + fullDir + " after erasure:")
-            cmd = "ls " + fullDir
-            os.system(cmd)
+            for f in os.listdir(fullDir):
+                path = os.path.join(fullDir, f)
+                if not f.startswith('.') and os.path.isfile(path):
+                    os.remove(path)
             for f in files:
-                #new_f = f.replace(" ", "\ ").replace("\'", "\\\'")
-                new_f = '"{0}"'.format(f)
-                s = " ".join(["cp", new_f,fullDir])
-                os.system(s)
-                # shutil implementation
-                #fstr = "*"+ ext
-                #sstr = "/mnt/memory/"+fstr
-                #dstr = fullDir+fstr
-                #shutil.copy(sstr, dstr)
+                try:
+                    dest = shutil.copy2(f, fullDir)  # keeps the mtime for typeIsCurrent()
+                    fd = os.open(dest, os.O_RDONLY)
+                    try:
+                        os.fsync(fd)  # on the SD card even if the power is cut
+                    finally:
+                        os.close(fd)
+                except OSError as e:
+                    self.classlog.error("Could not copy %s: %s", f, e)
+            fd = os.open(fullDir, os.O_RDONLY)
+            try:
+                os.fsync(fd)  # the new directory entries
+            finally:
+                os.close(fd)
 
 
     def getState(self):

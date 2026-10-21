@@ -24,3 +24,4 @@ freeze_alt,0
 source_alt,0
 record_alt,0
 file_alt,0
+led_dim,1.0

@@ -20,6 +20,11 @@ import nebio
 import loopprofile
 from classlogger import ClassLogger
 
+# Before the first Csound(): Csound's own signal handlers caught SIGTERM
+# without exiting, so "systemctl stop nebulae" (and every reboot) waited
+# 90 s for systemd's SIGKILL. With the default action it stops at once.
+ctcsound.csoundInitialize(ctcsound.CSOUNDINIT_NO_SIGNAL_HANDLER)
+
 cfg_path = "/home/alarm/QB_Nebulae_V2/Code/config/"
 
 debug = False 
@@ -86,6 +91,11 @@ class Nebulae(object):
                 self.new_bank = 'instr'
                 self.new_instr = 'a_granularlooper'
             self.first_run = True
+            if neb_globals.wifi_always_on:
+                self.classlog.info("wifi_always_on: starting Wi-Fi")
+                subprocess.Popen(["/bin/bash", "/home/alarm/QB_Nebulae_V2/Code/nebscripts/1_wifi.sh", "on"],
+                                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
+                                 stderr=subprocess.DEVNULL, start_new_session=True)
             nebmixer.disable()
             self.last_debug_print = time.time()
         except Exception as e:

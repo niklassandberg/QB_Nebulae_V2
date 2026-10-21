@@ -2,7 +2,6 @@
 import os
 from subprocess import Popen
 import switch
-import calibration_collector
 import sys
 import neb_globals
 import time
@@ -26,14 +25,23 @@ if len(sys.argv) > 1:
     arg = sys.argv[1]
 else:
     arg = None
-collector = calibration_collector.CalibrationCollector()
 pitch_click = switch.Switch(22) # Pitch Encoder Click GPIO
-pitch_click.update() 
-if pitch_click.state() == True or arg == 'force':
+pitch_click.update()
+# 'force': calibrate + factory reset (firmware update). 'only': calibrate and
+# keep settings and instrument (scripts page, Code/nebscripts/2_calibrate.sh).
+if pitch_click.state() == True or arg == 'force' or arg == 'only':
     launch_bootled()
     #time.sleep(2)
     print('Calibration commencing')
+    # Imported and built only when calibrating: a full ControlHandler took
+    # ~1 s at every boot. nebio starts from the real pin levels, so the
+    # click above is valid without it.
+    import calibration_collector
+    collector = calibration_collector.CalibrationCollector()
     collector.collect()
+if arg == 'only':
+    print('Calibration done, settings kept')
+elif pitch_click.state() == True or arg == 'force':
     # Clear out settings and factory reset
     if neb_globals.remount_fs is True:
         os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")

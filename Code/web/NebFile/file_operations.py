@@ -80,7 +80,11 @@ def delete(src):
         shutil.rmtree(src)
     return '{"ok":"ok"}'
 
+# usb_power.sh: quiet mode keeps USB off except while the stick is in use.
+USB_POWER = "bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh"
+
 def mountUSB():
+    os.system(USB_POWER + " on")
     os.system("mount /dev/sda1 /mnt/memory")
     return '{"ok":"ok"}'
 
@@ -88,6 +92,7 @@ def mountUSB():
 def unmountUSB():
     print("unmount usb")
     os.system("umount /dev/sda1")
+    os.system(USB_POWER + " off")
     return '{"ok":"ok"}'
 
 def get_node(fpath):

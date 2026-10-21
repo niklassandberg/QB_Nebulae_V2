@@ -22,8 +22,10 @@ public:
     bool open(const char *bus, int address, double pwmFreqHz);
     void close();
     bool ok() const { return fd_ >= 0; }
-    // Writes OFF values for channels [first, last] in one transaction (ON = 0).
-    bool writeRange(const int *offValues, int first, int last);
+    // Writes OFF values for channels [first, last] in one transaction (pulses
+    // start at 0, or at channel * 256 with stagger; 4095 and 0 use the full
+    // OFF/ON bit, so those outputs are static).
+    bool writeRange(const int *offValues, int first, int last, bool stagger);
 
 private:
     bool writeReg(uint8_t reg, uint8_t value);
@@ -43,6 +45,14 @@ public:
     void commit();
     void animation(const std::string &color, const std::string &behavior);
     void animationStop();
+    // 0..1, applied to every LED (Python's, animations, sclang's) as the
+    // last step before the hardware. The LED dim script on the scripts page.
+    void setDim(double dim);
+    // Quiet mode: the file (next) LED only fully on or off: its PWM is heard
+    // in the audio (tested 2026-10-21; the other LEDs' PWM is not). On from
+    // half brightness, the dim factor only counts as 0 = off. All other LEDs
+    // keep their PWM, staggered in time (see Pca9685::writeRange).
+    void setNoPwm(bool on);
 
     // sclang's colour for an RGB LED (/sc/led/<led>, 0-4095 per colour). It is
     // always remembered, and shown while sclang owns the LED; then setRgb()
@@ -87,6 +97,9 @@ private:
     // Reset LED: duty in percent the pin is HIGH (LED is active low), as RPi.GPIO PWM.
     std::atomic<int> uiResetDuty_{100};
     std::atomic<int> animResetDuty_{100};
+    std::atomic<double> dim_{1.0};
+    std::atomic<bool> noPwm_{false};
+    bool staggered_ = false;  // LED thread only: channels written staggered
     std::mutex pwmMutex_;
     std::condition_variable pwmCv_;
 };

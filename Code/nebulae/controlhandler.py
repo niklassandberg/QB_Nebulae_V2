@@ -37,6 +37,8 @@ NEBIO_ADC_HZ = 400
 # Code/nebio/src/gpiomem.h). For the measuring phase it is switched on only
 # when this file exists, so it can be tried without a new firmware.
 NEBIO_FAST_GPIO_FLAG = "/home/alarm/nebio_fast_gpio"
+# Quiet mode (Code/nebscripts/3_quiet.sh): the status lines are not logged.
+QUIET_FLAG = "/home/alarm/QB_Nebulae_V2/Code/config/quiet_mode"
 
 FREEZE_GATE_PIN = 4
 RESET_GATE_PIN = 25
@@ -428,10 +430,11 @@ class ControlHandler(object):
         self.now = int(round(time.time() * 1000))
         self.updateAllCount += 1
         if self.now - self.updateAllLogTime >= 10000:
-            self.classlog.info("updateAll: %.1f calls/s (total %d)",
-                               (self.updateAllCount - self.updateAllLogCount) * 1000.0 / (self.now - self.updateAllLogTime),
-                               self.updateAllCount)
-            self.classlog.info("nebio: %s", nebio.stats())
+            if not os.path.exists(QUIET_FLAG):  # quiet mode: nothing extra
+                self.classlog.info("updateAll: %.1f calls/s (total %d)",
+                                   (self.updateAllCount - self.updateAllLogCount) * 1000.0 / (self.now - self.updateAllLogTime),
+                                   self.updateAllCount)
+                self.classlog.info("nebio: %s", nebio.stats())
             self.updateAllLogCount = self.updateAllCount
             self.updateAllLogTime = self.now
 

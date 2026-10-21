@@ -75,6 +75,9 @@ int nebio_input_digital_hz(void) { return Inputs::instance().digitalHz(); }
 int nebio_set_fast_gpio(int on) { return Inputs::instance().setFastGpio(on != 0); }
 int nebio_fast_gpio(void) { return Inputs::instance().fastGpio() ? 1 : 0; }
 int nebio_input_adc_hz(void) { return Inputs::instance().adcHz(); }
+void nebio_set_scan_jitter(double fraction) { Inputs::instance().setScanJitter(fraction); }
+void nebio_set_scan_trigger(int external) { Inputs::instance().setScanTrigger(external != 0); }
+void nebio_scan_trigger(void) { Inputs::instance().scanTrigger(); }
 
 // ---- LEDs ------------------------------------------------------------------
 
@@ -88,6 +91,8 @@ void nebio_led_animation(const char *color, const char *behavior) {
 }
 void nebio_led_animation_stop(void) { Leds::instance().animationStop(); }
 void nebio_led_clear_sc(void) { Leds::instance().clearSc(); }
+void nebio_led_set_dim(double dim) { Leds::instance().setDim(dim); }
+void nebio_led_set_no_pwm(int on) { Leds::instance().setNoPwm(on != 0); }
 
 // ---- SuperCollider ---------------------------------------------------------
 

@@ -80,6 +80,13 @@ NEBIO_API int nebio_set_input_rates(int scan_hz, int digital_hz, int adc_hz);
 NEBIO_API int nebio_input_scan_hz(void);
 NEBIO_API int nebio_input_digital_hz(void);
 NEBIO_API int nebio_input_adc_hz(void);
+/* Scan timing, against the tones the scans put into the audio. Jitter: each
+ * scan interval varies randomly by up to +-fraction (0 = off, max 0.9), the
+ * mean rate stays the same. Trigger: with external = 1 scans run one per
+ * nebio_scan_trigger() (e.g. from the audio clock) instead of on the timer. */
+NEBIO_API void nebio_set_scan_jitter(double fraction);
+NEBIO_API void nebio_set_scan_trigger(int external);
+NEBIO_API void nebio_scan_trigger(void);
 /* Fast GPIO: shift register and polled pins read through /dev/gpiomem (no
  * syscall per access) instead of libgpiod. Pi 1-4 only. Switching on checks
  * the board and pin functions and runs a self-check; on any problem it stays
@@ -116,6 +123,12 @@ NEBIO_API void nebio_led_animation(const char *color, const char *behavior);
 NEBIO_API void nebio_led_animation_stop(void);
 /* Forgets the colours sclang sent for the encoder LEDs (new patch). */
 NEBIO_API void nebio_led_clear_sc(void);
+/* Dims every LED (Python's, animations, sclang's): 0 = off .. 1 = full. */
+NEBIO_API void nebio_led_set_dim(double dim);
+/* Quiet mode: the file (next) LED only fully on or off, no PWM (its PWM is
+ * heard in the audio): on from half brightness; the dim factor only counts
+ * as 0 = off for it. All other LEDs keep their PWM, staggered in time. */
+NEBIO_API void nebio_led_set_no_pwm(int on);
 
 /* ---- SuperCollider (OSC) ----------------------------------------------- */
 

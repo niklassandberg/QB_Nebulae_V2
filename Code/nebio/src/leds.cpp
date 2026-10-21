@@ -26,6 +26,7 @@ constexpr uint8_t kAutoIncrement = 0x20;
 constexpr uint8_t kSleep = 0x10;
 constexpr uint8_t kAllCall = 0x01;
 constexpr uint8_t kOutDrv = 0x04;
+constexpr uint8_t kFullBit = 0x10;  // bit 4 of LEDn_ON_H / LEDn_OFF_H
 
 constexpr int kLedOff = 4095;          // LEDs are active low
 constexpr unsigned kResetLedPin = 12;  // leddriver.py RESET_LED_PIN
@@ -41,6 +42,7 @@ constexpr int kRgbChannel[4][3] = {
     {7, 5, 6},    // speed_neg
 };
 constexpr int kButtonReset = 4;
+constexpr int kButtonNext = 1;  // the file LED (index in kButtonChannel)
 
 void sleepMs(int ms) { std::this_thread::sleep_for(std::chrono::milliseconds(ms)); }
 
@@ -124,20 +126,34 @@ bool Pca9685::open(const char *bus, int address, double pwmFreqHz) {
     return ok;
 }
 
-bool Pca9685::writeRange(const int *offValues, int first, int last) {
+// A fully off (4095) or fully on (0) LED uses the full ON/OFF bit: then the
+// output is static. With ON = 0 / OFF = 4095 it still gets one tick of the
+// other level every PWM period (250 Hz edges on every "off" LED).
+// stagger (quiet mode): a dimmed LED is high for v of the 4096 ticks as
+// always, but every channel starts at its own point of the period (ON =
+// channel * 256; the chip wraps OFF past 4095), so the 16 channels do not
+// all switch at the same moment. Otherwise all start at 0.
+bool Pca9685::writeRange(const int *offValues, int first, int last, bool stagger) {
     if (fd_ < 0) return false;
     uint8_t buf[1 + 16 * 4];
     int n = 0;
     buf[n++] = static_cast<uint8_t>(kLed0OnL + 4 * first);
     for (int ch = first; ch <= last; ++ch) {
         int v = offValues[ch];
-        buf[n++] = 0;  // ON_L
-        buf[n++] = 0;  // ON_H
-        buf[n++] = static_cast<uint8_t>(v & 0xFF);
-        buf[n++] = static_cast<uint8_t>((v >> 8) & 0xFF);
+        int on = stagger ? ch * 256 : 0;
+        int off = (on + v) & 0x0FFF;
+        uint8_t onL = static_cast<uint8_t>(on & 0xFF), onH = static_cast<uint8_t>((on >> 8) & 0x0F);
+        uint8_t offL = static_cast<uint8_t>(off & 0xFF), offH = static_cast<uint8_t>((off >> 8) & 0x0F);
+        if (v >= kLedOff) { onL = 0; onH = kFullBit; offL = 0; offH = 0; }  // output always high: LED off
+        else if (v <= 0) { onL = 0; onH = 0; offL = 0; offH = kFullBit; }   // output always low: LED fully on
+        buf[n++] = onL;
+        buf[n++] = onH;
+        buf[n++] = offL;
+        buf[n++] = offH;
     }
     return ::write(fd_, buf, n) == n;
 }
+
 
 // ---- Leds ----------------------------------------------------------------
 
@@ -278,6 +294,28 @@ void Leds::animationStop() {
     pwmCv_.notify_all();
 }
 
+void Leds::setDim(double dim) {
+    if (!(dim > 0)) dim = 0;  // also NaN
+    if (dim > 1) dim = 1;
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        dim_ = dim;
+        dirty_ = true;
+    }
+    cv_.notify_all();
+    pwmCv_.notify_all();
+}
+
+void Leds::setNoPwm(bool on) {
+    {
+        std::lock_guard<std::mutex> lock(mutex_);
+        noPwm_ = on;
+        dirty_ = true;
+    }
+    cv_.notify_all();
+    pwmCv_.notify_all();
+}
+
 // Same math as bootleds.py.
 void Leds::renderAnimation(int out[16], int &resetDutyOut) {
     timespec ts;
@@ -335,6 +373,25 @@ void Leds::run() {
             pwmCv_.notify_all();
         }
 
+        // Dim: the on part of each channel (LEDs are active low, 4095 = off).
+        // Quiet mode (no PWM) for the file LED: fully on from half
+        // brightness, else off; the dim factor only counts as 0 = off.
+        double dim = dim_.load();
+        const int noPwmCh = kButtonChannel[kButtonNext];
+        int noPwmOut = (dim > 0 && kLedOff - out[noPwmCh] >= (kLedOff + 1) / 2) ? 0 : kLedOff;
+        if (dim < 1.0) {
+            for (int ch = 0; ch < 16; ++ch)
+                out[ch] = kLedOff - static_cast<int>(std::lround((kLedOff - out[ch]) * dim));
+        }
+        bool quiet = noPwm_;
+        if (quiet) out[noPwmCh] = noPwmOut;
+        // Quiet mode staggers the channels (writeRange): a switch changes
+        // every channel's start, so all are written again.
+        if (quiet != staggered_) {
+            staggered_ = quiet;
+            writtenValid_ = false;
+        }
+
         int first = -1, last = -1;
         for (int ch = 0; ch < 16; ++ch) {
             if (!writtenValid_ || out[ch] != written_[ch]) {
@@ -342,7 +399,10 @@ void Leds::run() {
                 last = ch;
             }
         }
-        if (first >= 0 && pca_.writeRange(out, first, last)) {
+        // No sleep at dim 0: in sleep the PCA9685 drives its outputs low, and
+        // the LEDs are active low, so they all lit up (tested 2026-10-21).
+        // Dim 0 = all outputs static high with the full bit (writeRange).
+        if (first >= 0 && pca_.writeRange(out, first, last, staggered_)) {
             std::memcpy(written_, out, sizeof(written_));
             writtenValid_ = true;
         }
@@ -359,6 +419,9 @@ void Leds::runResetPwm() {
             std::lock_guard<std::mutex> lock(mutex_);
             duty = animating_ ? animResetDuty_.load() : uiResetDuty_.load();
         }
+        // Dim: duty is the off (HIGH) part, so the on part is scaled.
+        double dim = dim_.load();
+        if (dim < 1.0) duty = 100 - static_cast<int>(std::lround((100 - duty) * dim));
         if (duty <= 0 || duty >= 100) {
             int level = duty >= 100 ? 1 : 0;
             if (level != lastLevel) resetLed_.set(kResetLedPin, level);

@@ -19,3 +19,6 @@ gpu_freq_min=75
 gpu_freq=75
 core_freq=400
 over_voltage=0
+# No HDMI output, even with a screen connected: one less clock and output
+# stage running next to the audio (the Nebulae has no screen).
+hdmi_ignore_hotplug=1

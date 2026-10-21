@@ -76,12 +76,17 @@ def lib():
         "nebio_set_fast_gpio": (c_int, [c_int]),
         "nebio_fast_gpio": (c_int, []),
         "nebio_input_adc_hz": (c_int, []),
+        "nebio_set_scan_jitter": (None, [c_double]),
+        "nebio_set_scan_trigger": (None, [c_int]),
+        "nebio_scan_trigger": (None, []),
         "nebio_led_set_button": (None, [c_int, c_double]),
         "nebio_led_set_rgb": (None, [c_int, c_double, c_double, c_double, c_double]),
         "nebio_led_commit": (None, []),
         "nebio_led_animation": (None, [c_char_p, c_char_p]),
         "nebio_led_animation_stop": (None, []),
         "nebio_led_clear_sc": (None, []),
+        "nebio_led_set_dim": (None, [c_double]),
+        "nebio_led_set_no_pwm": (None, [c_int]),
         "nebio_sc_open_sender": (c_int, []),
         "nebio_sc_close_sender": (None, []),
         "nebio_sc_sender_open": (c_int, []),
@@ -231,6 +236,21 @@ def set_input_rates(scan_hz, digital_hz, adc_hz):
     return input_rates()
 
 
+def set_scan_jitter(fraction):
+    """Each scan interval varies randomly by up to +-fraction (0 = off, max
+    0.9); the mean rate stays the same, so the scans' tone becomes noise."""
+    lib().nebio_set_scan_jitter(float(fraction))
+
+
+def set_scan_trigger(external):
+    """True: one scan per scan_trigger() instead of the timer (locking)."""
+    lib().nebio_set_scan_trigger(1 if external else 0)
+
+
+def scan_trigger():
+    lib().nebio_scan_trigger()
+
+
 def input_rates():
     l = lib()
     return l.nebio_input_scan_hz(), l.nebio_input_digital_hz(), l.nebio_input_adc_hz()
@@ -285,6 +305,16 @@ def led_clear_sc():
     """Forgets the encoder LED colours sclang sent (new patch). Does not
     start the LED threads (no bootleds.py kill)."""
     lib().nebio_led_clear_sc()
+
+
+def led_set_dim(dim):
+    """Dims every LED: 0 = off .. 1 = full (LED dim script, ui.py)."""
+    leds().nebio_led_set_dim(float(dim))
+
+
+def led_set_no_pwm(on):
+    """Quiet mode: file LED only fully on/off (its PWM is heard in the audio)."""
+    leds().nebio_led_set_no_pwm(1 if on else 0)
 
 
 class Color(object):

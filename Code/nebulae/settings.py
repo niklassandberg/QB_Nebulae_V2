@@ -40,6 +40,11 @@ class SettingManager(object):
                     if line.strip():
                         settingList.append(line)
             self.populateDict(settingList, self.settingDict)
+            # Settings added later (e.g. led_dim) are missing from an older
+            # file; without them they would never be saved.
+            for key in self.defaultDict:
+                if key not in self.settingDict:
+                    self.settingDict[key] = self.defaultDict[key]
             #self.mutableSettings = self.settingDict.copy()
         else:
             self.log.info("Could not locate previous settings.")

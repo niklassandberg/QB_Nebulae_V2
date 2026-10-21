@@ -93,6 +93,15 @@ public:
     int setFastGpio(bool on);
     bool fastGpio() const { return fastGpio_.load(std::memory_order_relaxed); }
 
+    // Scan timing, against the tones the scans put into the audio
+    // (noise_test.sh). Jitter: every scan interval varies randomly by up to
+    // +-fraction (0 = off, max 0.9); the mean rate stays the same, so the
+    // tone is spread out as noise. Trigger: scans no longer run on the timer
+    // but one per scanTrigger(), e.g. from the audio clock (locked to it).
+    void setScanJitter(double fraction);
+    void setScanTrigger(bool external);
+    void scanTrigger();
+
 private:
     Inputs() = default;
     void run();
@@ -126,6 +135,14 @@ private:
     std::atomic<int> scanPeriodUs_{1000};
     std::atomic<int> digitalEveryNth_{1};
     std::atomic<int> adcEveryNth_{2};
+
+    // Scan timing, see setScanJitter()/setScanTrigger().
+    std::atomic<double> scanJitter_{0.0};
+    std::atomic<bool> externalTrigger_{false};
+    std::mutex triggerMutex_;
+    std::condition_variable triggerCv_;
+    int triggers_ = 0;  // pending, guarded by triggerMutex_
+    uint64_t rng_ = 88172645463325252ULL;  // input thread only (xorshift)
 
     // Fast GPIO, see setFastGpio(). Off by default.
     std::atomic<bool> fastGpio_{false};

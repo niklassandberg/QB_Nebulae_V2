@@ -84,8 +84,14 @@ class WaveWriter(object):
                         if neb_globals.remount_fs is True:
                             os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
                         success = True
-                    except:
-                        self.log.error("Could not write file! -- Inspecific Exception")
+                    except Exception as e:
+                        self.log.error("Could not write file! -- %s", e)
+                        # A half-written file is copied in from the stick at
+                        # the next boot and Csound crashes on it.
+                        try:
+                            os.remove(filename)
+                        except OSError:
+                            pass
                 else:
                     self.log.warning("Not enough room to write file.")
             else:

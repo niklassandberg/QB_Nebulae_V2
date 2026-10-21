@@ -3,6 +3,8 @@
 #enable network so wpa_suppliant gets active (buzz sound).
 sudo rfkill unblock wifi
 
+# usb_power.sh: quiet mode keeps USB off except while the stick is in use.
+bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh on
 mount /dev/sda1 /mnt/memory
 rm /home/alarm/wifi.log
 if [ -f /mnt/memory/wlan0-wifi ]
@@ -16,4 +18,5 @@ else
 fi
 
 umount /dev/sda1
+bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh off
 ( sleep 10; systemctl start NebFile ) &
