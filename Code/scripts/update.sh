@@ -1,6 +1,25 @@
 #!/bin/bash
-sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
 sudo mount /dev/sda1 /mnt/memory
+# Bootloader (EEPROM) update, only when a file "update_bootloader" is on the
+# stick: removed first (once only), then eeprom_update.sh flashes and reboots,
+# or logs to neb_log.txt why not (already up to date, 32-bit image).
+if [ -f /mnt/memory/update_bootloader ]
+then
+    rm -f /mnt/memory/update_bootloader
+    sync
+    bash /home/alarm/QB_Nebulae_V2/Code/scripts/eeprom_update.sh flash
+fi
+# Nothing to install (no update zip, no packages on the stick or left in
+# Code/packages): done without remounting / read-write and back (~0.3 s at boot).
+if [ ! -f /mnt/memory/neb_update.zip ] && [ ! -d /home/alarm/QB_Nebulae_V2/Code/packages ] \
+    && ! ls /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst >/dev/null 2>&1
+then
+    echo "No Update Detected"
+    sudo umount /dev/sda1
+    echo "Advancing to the rest of the startup script."
+    exit 0
+fi
+sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
 if [ -f /mnt/memory/neb_update.zip ]
 then
     sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
@@ -88,13 +107,23 @@ then
 
     cd /home/alarm/QB_Nebulae_V2/Code/packages
 
-    sudo pacman --noconfirm -U *.tar.xz
-    echo "installed packages"
+    # Only packages built for this Pi's architecture: Code/packages holds old
+    # armv7h packages (and Python 2 wheels), which the aarch64 image must skip.
+    ARCH=$(pacman-conf Architecture | head -1)
+    PKGS=$(ls *-$ARCH.pkg.tar.* *-any.pkg.tar.* 2>/dev/null)
+    if [ -n "$PKGS" ]
+    then
+        sudo pacman --noconfirm -U $PKGS
+        echo "installed packages"
+    fi
 
-    echo "install pip3 packages"
-    cd python
-    echo "installed pip packages"
-    sudo pip3 install *
+    if [ "$ARCH" = "armv7h" ]
+    then
+        echo "install pip3 packages"
+        cd python
+        echo "installed pip packages"
+        sudo pip3 install *
+    fi
     cd /home/alarm
 
     rm -rf /home/alarm/QB_Nebulae_V2/Code/packages

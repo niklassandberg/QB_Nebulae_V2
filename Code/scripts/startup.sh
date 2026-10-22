@@ -10,6 +10,10 @@ sudo modprobe i2c-dev
 echo "starting bootup LEDs"
 python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py booting &
 
+# After a bootloader (EEPROM) update (update_bootloader on the stick, see
+# update.sh): remove its files from /boot again. Otherwise nothing, a few ms.
+bash /home/alarm/QB_Nebulae_V2/Code/scripts/eeprom_update.sh
+
 # nebio (C++ hardware/OSC library) must exist before any Python script that
 # reads buttons or knobs (check_wifi.py, check_calibration.py, nebulae.py).
 echo "building nebio (only if changed)"
@@ -41,16 +45,31 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh
 # Update Local Files - Config.txt (nebulae.service handled in update.)
 # Only write when changed: /boot is FAT, and a write left it marked dirty
 # ("Volume was not properly unmounted") when the power is cut.
-if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt ] && ! cmp -s /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt /boot/config.txt
-then
-    echo "updating /boot/config.txt for next boot up."
-    sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt > /boot/config.txt"
-fi
+# nebulae.service starts before /boot is mounted (an automount on the aarch64
+# image, mounted when udev has seen the partition, ~1.5 s later). config.txt
+# is for the next boot, so this runs in the background: wait for /boot, at most
+# 20 s, and never write into the empty /boot directory of the root file system.
+(
+    for i in $(seq 200); do mountpoint -q /boot && [ -f /boot/cmdline.txt ] && break; sleep 0.1; done
+    if [ -f /boot/cmdline.txt ] && [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt ] && ! cmp -s /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt /boot/config.txt
+    then
+        echo "updating /boot/config.txt for next boot up."
+        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt > /boot/config.txt"
+    fi
+) &
 #sh /home/alarm/QB_Nebulae_V2/Code/scripts/handleuserfiles.sh
 
 
 # Configure Audio Codec
-sh /home/alarm/QB_Nebulae_V2/Code/scripts/enable_inputs.sh
+# nebulae.service starts before the sound card is there (~5.5-7 s after kernel
+# start), and then alsa-restore sets the mixer state saved at shutdown. So in
+# the background: wait for the card, then for alsa-restore (at most 15 s in
+# all), so these settings come last. Audio is opened later (~8.5 s).
+(
+    for i in $(seq 100); do [ -e /proc/asound/sndrpiproto ] && break; sleep 0.1; done
+    for i in $(seq 50); do systemctl is-active --quiet alsa-restore.service && break; sleep 0.1; done
+    sh /home/alarm/QB_Nebulae_V2/Code/scripts/enable_inputs.sh
+) &
 
 if ! cmp -s /home/alarm/QB_Nebulae_V2/Code/localfiles/environment /etc/environment
 then
@@ -91,9 +110,16 @@ fi
 
 #sudo systemctl start sclang.service
 
-sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
-sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py
-sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
+# Calibration starts when the pitch encoder is held at boot. Its pin (GPIO22,
+# pull-up, 0 = held) is read here directly (a few ms) instead of starting
+# Python and nebio only to read it (~1.2 s). Anything but a clear 1 (held,
+# or no gpioget v2) runs check_calibration.py as before.
+if [ "$(sudo gpioget -c gpiochip0 --bias=pull-up --numeric 22 2>/dev/null)" != 1 ]
+then
+    sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
+    sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py
+    sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
+fi
 
 sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
 

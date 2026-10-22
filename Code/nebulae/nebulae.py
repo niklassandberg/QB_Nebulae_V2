@@ -365,14 +365,18 @@ class Nebulae(object):
             self.orc_handle.refreshFileHandler()
             fullPath = "/home/alarm/pd/" + patch + ".pd"
             cmd = "pd -jack -rt -callback -nogui -verbose".split() if debug else "pd -jack -rt -callback -nogui".split()
+            # Pd libraries (Resources/rpi4_image/build_pd_libs.sh), when installed.
+            for lib in ("else", "cyclone"):
+                libDir = "/usr/lib/pd/extra/" + lib
+                if os.path.isdir(libDir):
+                    cmd += ["-path", libDir, "-lib", lib]
             cmd.append(fullPath)
             
             self.wait_for_jack_to_start()
             
             self.pt = subprocess.Popen(cmd)
-            
-            self.classlog.info('sleeping')
-            time.sleep(2)
+
+            self.wait_for_puredata()
             self.c_handle = chPD.PDControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="puredata")
             self.c_handle.setCsoundPerformanceThread(None)
             self.c_handle.enterPureDataMode()
@@ -381,6 +385,29 @@ class Nebulae(object):
             nebmixer.enable()
         except Exception as e:
             self.classlog.error("Error in start_puredata(): %s", e)
+
+    # Waits until Pd listens on its netreceive port (3000, see pdsender.py),
+    # i.e. the patch is loaded, instead of a fixed 2 s. At most 2 s (as
+    # before, also for a patch without netreceive), or until pd exits.
+    def wait_for_puredata(self, timeout=2.0):
+        start = time.time()
+        while time.time() - start < timeout:
+            if self.pt.poll() is not None:
+                self.classlog.error("PureData exited during startup")
+                return
+            for path in ("/proc/net/tcp", "/proc/net/tcp6"):
+                try:
+                    with open(path) as f:
+                        for line in f.readlines()[1:]:
+                            fields = line.split()
+                            # local address ends in :0BB8 (port 3000), state 0A = LISTEN
+                            if fields[1].endswith(":0BB8") and fields[3] == "0A":
+                                self.classlog.info("PureData ready after %.2f s", time.time() - start)
+                                return
+                except OSError:
+                    pass
+            time.sleep(0.05)
+        self.classlog.info("PureData not listening on port 3000 after %.1f s", timeout)
 
     def run_puredata(self):
         try:

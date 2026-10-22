@@ -2,7 +2,7 @@
 #X obj 26 36 cnv 15 680 300 empty empty clockWorks 20 12 0 14 -261682
 -66577 0;
 #X obj 187 89 timer;
-#X obj 122 115 pack i f;
+#X obj 122 115 pack f f;
 #X obj 279 197 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0 10
 -261682 -1 -1 1015.87 256;
 #X obj 142 92 t b f;
@@ -30,7 +30,7 @@
 #X obj 134 243 delay;
 #X msg 122 272 0;
 #X obj 53 202 r bangCounter;
-#X obj 558 193 t i b;
+#X obj 558 193 t f b;
 #X obj 523 145 + 1;
 #X obj 27 362 cnv 15 680 400 empty empty oscillatorWorks 20 12 0 14
 -204786 -66577 0;
@@ -517,7 +517,7 @@
 #X obj 961 1211 throw~ tbus;
 #X obj 961 1182 *~;
 #X obj 975 1152 line~ 1000;
-#X obj 870 1132 pack i f;
+#X obj 870 1132 pack f f;
 #X obj 950 1127 nbx 5 14 -1e+37 1e+37 0 0 empty empty empty 0 -8 0
 10 -204800 -1 -1 1670.6 256;
 #X obj 882 1102 expr ($f1 * 2000) + 15;

@@ -307,15 +307,15 @@ class DigitalData(object):
 ####### BEGIN OG DIGITAL DATA
     def ogGetValue(self):
         if self.mode == "latching":
-            if self.gate_src is "GPIO":
+            if self.gate_src == "GPIO":
                 self.gate_switch.update()
                 g_trig = self.gate_switch.risingEdge()
-            elif self.gate_src is "SR":
+            elif self.gate_src == "SR":
                 g_trig = self.gate_switch.fallingEdge(self.gate_pin)
                 #g_trig = self.gate_switch.risingEdge(self.gate_pin)
 
             if self.ignore_button == False:
-                if self.button_src is "GPIO":
+                if self.button_src == "GPIO":
                     self.button_switch.update()
                     b_trig = self.button_switch.fallingEdge()
                 else:
@@ -366,16 +366,16 @@ class DigitalData(object):
                     self.state = 0
             
         elif self.mode == "triggered":
-            if self.gate_src is "GPIO":
+            if self.gate_src == "GPIO":
                 self.gate_switch.update()
                 g_trig = self.gate_switch.state()
-            elif self.gate_src is "SR":
+            elif self.gate_src == "SR":
                 g_trig = not self.gate_switch.state(self.gate_pin)
             else:
                 g_trig = False
 
             if self.ignore_button == False:
-                if self.button_src is "GPIO":
+                if self.button_src == "GPIO":
                     self.button_switch.update()
                     if self.edge == "rising":
                         b_trig = self.button_switch.state()
@@ -429,15 +429,15 @@ class DigitalData(object):
                 self.state = 0
 
         elif self.mode == "incremental":
-            if self.gate_src is "GPIO":
+            if self.gate_src == "GPIO":
                 self.gate_switch.update()
                 g_trig = self.gate_switch.risingEdge()
-            elif self.gate_src is "SR":
+            elif self.gate_src == "SR":
                 g_trig = self.gate_switch.risingEdge(self.gate_pin)
             else:
                 g_trig = False
 
-            if self.button_src is "GPIO":
+            if self.button_src == "GPIO":
                 self.button_switch.update()
                 if self.edge == "rising":
                     b_trig = self.button_switch.risingEdge()
@@ -490,16 +490,16 @@ class DigitalData(object):
             if self.state >= self.maximum:
                 self.state = 0
         elif self.mode == "momentary":
-            if self.gate_src is "GPIO":
+            if self.gate_src == "GPIO":
                 self.gate_switch.update()
                 g_trig = self.gate_switch.state()
-            elif self.gate_src is "SR":
+            elif self.gate_src == "SR":
                 g_trig = self.gate_switch.state(self.gate_pin)
             else:
                 g_trig = False
             if self.ignore_gate is True:
                 g_trig = False
-            if self.button_src is "GPIO":
+            if self.button_src == "GPIO":
                 self.button_switch.update()
                 if self.edge == "rising":
                     b_trig = self.button_switch.state()
@@ -512,7 +512,7 @@ class DigitalData(object):
                     b_trig = self.button_switch.state(self.button_pin)
             if self.ignore_button is True:
                 b_trig = False
-            if g_trig is True or b_trig is True or b_trig is 1:
+            if g_trig is True or b_trig is True or b_trig == 1:
                 if g_trig is True:
                     self.trig_source = "gate"
                 elif b_trig is True:

@@ -48,6 +48,9 @@ CODE=/home/alarm/QB_Nebulae_V2/Code
 STATE=/tmp/noise_test_active
 USB_DEV=0000:01:00.0
 USB_DRV=/sys/bus/pci/drivers/xhci_hcd
+# The Pi's green/red LEDs: led0/led1 on kernel 5.15, ACT/PWR on newer kernels.
+ACT_LED=/sys/class/leds/ACT; [ -e $ACT_LED ] || ACT_LED=/sys/class/leds/led0
+PWR_LED=/sys/class/leds/PWR; [ -e $PWR_LED ] || PWR_LED=/sys/class/leds/led1
 SERVICES="systemd-timesyncd.service netctl-auto@wlan0.service"
 TIMERS="archlinux-keyring-wkd-sync.timer shadow.timer systemd-tmpfiles-clean.timer"
 FMT="-D hw:0,0 -f S16_LE -r 48000 -c 2 -t raw"  # as Csound: 16-bit, 48 kHz
@@ -130,8 +133,8 @@ start() {
     if [ "$mode" != leds ] && [ "$mode" != cpu ] && command -v gpioset >/dev/null; then
         gpioset -z -c gpiochip0 12=1 2>/dev/null || echo "  reset LED pin not held (gpioset failed)"
     fi
-    for l in led0 led1; do
-        echo none > /sys/class/leds/$l/trigger; echo 0 > /sys/class/leds/$l/brightness
+    for l in $ACT_LED $PWR_LED; do
+        echo none > $l/trigger; echo 0 > $l/brightness
     done
     echo "USB off, Wi-Fi/BT off"
     [ -e $USB_DRV/$USB_DEV ] && { umount /mnt/memory 2>/dev/null; echo $USB_DEV > $USB_DRV/unbind; }
@@ -208,8 +211,8 @@ stop() {
     pkill -f noise_test_load.py; pkill -f "scripts/spin.sh .* noise_test"  # its loops go with it
     sleep 0.5  # releases nebio's GPIO lines before Nebulae starts
     echo "Pi LEDs, USB, Wi-Fi driver back"
-    echo mmc0 > /sys/class/leds/led0/trigger
-    echo default-on > /sys/class/leds/led1/trigger
+    echo mmc0 > $ACT_LED/trigger
+    echo default-on > $PWR_LED/trigger
     [ -e $USB_DRV/$USB_DEV ] || echo $USB_DEV > $USB_DRV/bind
     bash $CODE/nebscripts/1_wifi.sh driver
     journalctl --flush

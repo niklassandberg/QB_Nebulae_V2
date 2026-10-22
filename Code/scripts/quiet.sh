@@ -78,15 +78,19 @@ spin() {  # on | off
     fi
 }
 
+# The Pi's green/red LEDs: led0/led1 on kernel 5.15, ACT/PWR on newer kernels.
+ACT_LED=/sys/class/leds/ACT; [ -e $ACT_LED ] || ACT_LED=/sys/class/leds/led0
+PWR_LED=/sys/class/leds/PWR; [ -e $PWR_LED ] || PWR_LED=/sys/class/leds/led1
+
 leds() {  # off | on
     if [ "$1" = off ]; then
-        for l in led0 led1; do
-            echo none > /sys/class/leds/$l/trigger
-            echo 0 > /sys/class/leds/$l/brightness
+        for l in $ACT_LED $PWR_LED; do
+            echo none > $l/trigger
+            echo 0 > $l/brightness
         done
     else
-        echo mmc0 > /sys/class/leds/led0/trigger
-        echo default-on > /sys/class/leds/led1/trigger
+        echo mmc0 > $ACT_LED/trigger
+        echo default-on > $PWR_LED/trigger
     fi
 }
 
@@ -94,13 +98,28 @@ leds() {  # off | on
 # another nothing is restarted.
 common_on() {
     leds off
-    spin on
-    journalctl --relinquish-var
+    # At boot in the background: systemd is still busy with its own start
+    # then and took 1.4 s to answer systemd-run, and nothing waits for these.
+    if [ -n "$BOOT" ]; then
+        ( spin on; journalctl --relinquish-var ) &
+    else
+        spin on
+        journalctl --relinquish-var
+    fi
     # --runtime: blocked until the next reboot, so a late start at boot
     # cannot bring them back. In the background: mask reloads systemd
     # (1.4 s) and stopping netctl-auto takes ~1.4 s; nothing waits for them.
+    # At boot (BOOT=1) it waits until Nebulae has loaded its first instrument:
+    # the systemd reload of the mask made update.sh's USB stick mount wait for
+    # it (0.04 -> 0.74 s).
     if [ "$(systemctl is-enabled systemd-timesyncd.service 2>/dev/null)" != masked-runtime ]; then
-        ( systemctl mask --runtime $SERVICES $TIMERS; systemctl stop $SERVICES $TIMERS ) &
+        ( if [ -n "$BOOT" ]; then
+              for i in $(seq 60); do
+                  grep -qs "Killing LED program" /tmp/nebulae_logging.log && break
+                  sleep 0.5
+              done
+          fi
+          systemctl mask --runtime $SERVICES $TIMERS; systemctl stop $SERVICES $TIMERS ) &
     fi
 }
 
@@ -156,7 +175,7 @@ case "$1" in
     apply)
         l=$(level)
         [ "$l" = 0 ] && exit 0
-        common_on
+        BOOT=1 common_on
         [ "$l" = 1 ] && network 1 ;;
     *) echo "usage: $0 set 0|1|2|3 | apply | status"; exit 2 ;;
 esac

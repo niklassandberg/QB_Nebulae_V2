@@ -7,6 +7,8 @@ dtparam=i2c_baudrate=1000000
 dtparam=spi=on
 dtparam=i2s=on
 # For Non-AudioInjector Device
+# WM8731 codec. Newer kernels (6.x, aarch64 image) renamed rpi-proto to
+# proto-codec (the firmware loads that for rpi-proto) and dropped i2s-mmap.
 dtoverlay=i2s-mmap
 dtoverlay=rpi-proto
 # Audio Injector Device
@@ -22,3 +24,7 @@ over_voltage=0
 # No HDMI output, even with a screen connected: one less clock and output
 # stage running next to the audio (the Nebulae has no screen).
 hdmi_ignore_hotplug=1
+# Faster power-on: the firmware waits 1 s before the kernel by default, and
+# draws a rainbow splash.
+boot_delay=0
+disable_splash=1
