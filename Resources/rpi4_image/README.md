@@ -8,6 +8,7 @@ The 64-bit system for the Nebulae (first made 2026-10-22), replacing the old
 | `setup_system.sh` | packages + all system configuration (run as root on the Pi; safe to run again) |
 | `build_sc.sh` | builds SuperCollider 3.14.1 headless, sc3-plugins and the own UGens (hours) |
 | `checkfirmware.sh` | `/home/alarm/checkfirmware.sh`, started by nebulae.service (checks the firmware, runs startup.sh) |
+| `make_release_image.sh`, `firstboot/` | an image to hand out, from an image of a working card (see below) |
 | `mandatory_files.txt` | `/home/alarm/mandatory_files.txt`, the files checkfirmware.sh requires |
 
 ## Making a card
@@ -40,6 +41,29 @@ The 64-bit system for the Nebulae (first made 2026-10-22), replacing the old
    `systemd-run --unit=nebulae-pdbuild bash /home/alarm/rpi4_image/build_pd_libs.sh`
    (log: `/home/alarm/pd_build/build.log`). They go to `/usr/lib/pd/extra/else` and `cyclone`;
    nebulae.py loads both (`-path ... -lib ...`) when they are there.
+
+## Release image for other users
+`make_release_image.sh` makes an image to hand out from an image of a working
+card (read the card with Win32 Disk Imager, or a `.img.zst` backup); the card
+and the source image are only read. Run as root in WSL:
+```
+make_release_image.sh --firmware neb_update.zip card.img NebulaeV2_rpi4_aarch64-<date>.img.xz
+```
+- small (~7 GB written, fits an 8 GB card); at its first start it grows to
+  the whole card (`firstboot/nebulae-firstboot.service`, runs once)
+- each card gets its own machine ID and SSH host keys at the first start
+  (otherwise every card would be the same Pi: two Nebulae on one network got
+  the same IP)
+- nothing personal: no authorized_keys, histories, logs, package cache, SC
+  build sources, backups, files from the USB stick; Nebulae settings back to
+  the factory defaults (no calibration: calibrate on scripts page 2)
+- `--firmware`: the firmware from that `neb_update.zip` (`create_fw_update.sh`)
+  instead of the card's
+- every file is checked against what was meant to go in; `.img.xz` +
+  `.sha256`. Write it with Raspberry Pi Imager ("Use custom") or balenaEtcher.
+
+Login on a release card: `alarm`/`alarm`, root `root` (Arch Linux ARM
+defaults; change them with `passwd` if the Nebulae is on a shared network).
 
 ## Differences from the old 32-bit image
 - Kernel `linux-rpi` 6.18 (aarch64) instead of 5.15 (armv7h): pacman -Syu is

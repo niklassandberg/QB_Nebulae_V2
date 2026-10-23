@@ -19,9 +19,9 @@ in `template.pd`.
 
 | Nebulae control | basil parameter | Range |
 |---|---|---|
-| **start** knob + CV | VCO 1 base pitch | MIDI note 0 - 118 (about 8 Hz - 7 kHz) |
-| **overlap** knob + CV | VCO 2 base pitch | MIDI note 0 - 118 |
-| **pitch** encoder + CV | transposes **both** VCOs, 1V/oct | 0.2 per octave; 0.6 = no shift |
+| **start** knob + CV | VCO 1 pitch (VCO 2 follows it) | MIDI note 0 - 118 (about 8 Hz - 7 kHz) |
+| **pitch** encoder + CV | interval of VCO 2 above VCO 1, 1V/oct, not quantised | 0.2 per octave; 0.6 = unison, 0.8 = 1 octave up, 0.4 = 1 octave down |
+| **overlap** knob + CV | VCO 2 fine detune | -1 .. +1 semitone, middle = exact |
 | **size** knob + CV | waveshape amount | 0 - 1 |
 | **density** knob + CV | cross-modulation between the VCOs | 0 - 0.5 |
 | **window** knob + CV | mix between the oscillators | 0 - 2 |
@@ -31,12 +31,17 @@ in `template.pd`.
 speed, freeze, record, file and source are not used.
 
 ### Pitch
-- start and overlap set each oscillator's note freely (not quantised, they glide).
-- The pitch input follows 1V/oct and moves both oscillators together, so the
-  interval between them, and with it the sync and cross-mod timbre, stays the
-  same over the keyboard. Play melodies from a sequencer into the pitch CV and
-  set the timbre with start and overlap.
-- The note is clipped to MIDI 0 - 127 after the transposition.
+- start sets VCO 1's note freely (not quantised, it glides); VCO 2 always
+  follows it at the interval that pitch sets.
+- pitch is the ratio of the two oscillators as a 1V/oct interval: smooth, no
+  steps. 1 V (0.2) is an octave, so musical ratios sit at: 0.6 unison,
+  0.717 a fifth (3:2), 0.8 an octave (2:1), 0.917 an octave + fifth (3:1),
+  1.0 two octaves (4:1). With sync on (reset), sweeping pitch by hand or with
+  an LFO / envelope into the pitch CV gives the classic sync sweep; the timbre
+  stays the same when start (the note) changes.
+- overlap detunes VCO 2 a little around that interval: slow beating, or a
+  slightly sour interval on purpose. In the middle it is exact.
+- Both notes are clipped to MIDI 0 - 127.
 
 ## The sound, step by step
 1. **VCO 1 and VCO 2** (`pd saw~`): band-limited sawtooth waves. The saw is built
@@ -53,13 +58,14 @@ speed, freeze, record, file and source are not used.
    pitch stays, the timbre follows the interval between the two.
 
 ## Patch ideas
-- **Sync sweep**: press reset (sync on), start low, slowly turn overlap up, or put
-  an LFO / envelope on the overlap CV.
-- **Folded bass**: start and overlap close together (slow beating), blend up a bit,
-  envelope into blend CV for plucks.
-- **Clangs and bells**: overlap at a non-musical interval from start, density up.
-- **Melody**: sequencer into pitch CV; with sync on, the timbre stays the same on
-  every note.
+- **Sync sweep**: press reset (sync on), start low, slowly turn the pitch
+  encoder up, or put an LFO / envelope into the pitch CV.
+- **Folded bass**: pitch at unison (0.6), overlap a little off the middle (slow
+  beating), blend up a bit, envelope into blend CV for plucks.
+- **Clangs and bells**: pitch at a non-musical interval (between the ratios
+  above), density up.
+- **Melody**: sequencer into the start CV; the interval and with it the
+  timbre stay the same on every note (start is not 1V/oct tuned).
 
 ## For patch writers
 - Nebulae sends `name value;` messages over TCP port 3000 (Code/nebulae/pdsender.py):
@@ -68,5 +74,7 @@ speed, freeze, record, file and source are not used.
 - basil turns the knobs into the 0 - 4095 values of the old Terminal Tedium ADC
   (`* 4095` -> `s adc0` ... `s adc5`), so the rest of the patch works as written:
   adc0 = start, adc1 = size, adc2 = density, adc3 = overlap, adc4 = window, adc5 = blend.
+- pitch: `- 0.6` -> `* 60` = interval in semitones; VCO 2's note is
+  `expr VCO1 note + interval + detune` (overlap -> `/ 4095` -> `- 0.5` -> `* 2`).
 - reset goes through `change` and `sel 1`, so only a press toggles sync (the
   once-a-second resend doesn't).
