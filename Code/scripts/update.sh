@@ -25,6 +25,9 @@ then
     sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
     python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
     echo "neb_update.zip detected."
+    # The report of an earlier update (engines_build.sh) is stale now; this
+    # update writes a new one only when it has something to build.
+    rm -f /mnt/memory/neb_engines_report.txt
     echo "Commencing Firmware Update Procedure"
     echo "Creating Backup Directories"
     mkdir -p /home/alarm/backup/new
@@ -64,6 +67,9 @@ then
     # the knobs through nebio, so build it first (file system is still rw).
     echo "building nebio for the new firmware"
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh
+    # Audio engines: the Nebulae builds from Code/engines/ (Csound optimised
+    # and -B working, SuperCollider) when other versions are installed.
+    bash /home/alarm/QB_Nebulae_V2/Code/scripts/engines_check.sh
     sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py force
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service ]
     then

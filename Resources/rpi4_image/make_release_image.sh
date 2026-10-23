@@ -5,6 +5,11 @@
 #
 #   make_release_image.sh [--firmware neb_update.zip] [--spare MiB] [--keep-img]
 #                         SOURCE.img|SOURCE.img.zst OUT.img.xz
+#   make_release_image.sh --pi3 [--keep-img] RELEASE.img|RELEASE.img.xz OUT.img.xz
+#
+# --pi3: a copy of an existing release image (made without Pi 3 support) that
+# also starts on a Pi 3: only the Pi 3 support below is added, nothing else is
+# rebuilt. Images made without --pi3 have it already.
 #
 # The release image:
 #  - small: the root file system is made new from the files (mke2fs -d) with
@@ -16,6 +21,9 @@
 #    (Code/config back to the factory defaults, no calibration)
 #  - with --firmware: the Nebulae firmware from that neb_update.zip
 #    (create_fw_update.sh) instead of the source card's
+#  - starts on a Pi 4 and a Pi 3: /boot/nebulae-image.txt (arm_64bit=1; the Pi 3
+#    otherwise looks for a 32-bit kernel), included from config.txt, also in
+#    the firmware's Code/localfiles/config.txt (startup.sh copies that to /boot)
 #  - checked: e2fsck, and every file (content, owner, permissions, size, link
 #    targets) compared with what was meant to go in
 #  - OUT.img.xz (Raspberry Pi Imager and balenaEtcher write it as it is) and
@@ -27,18 +35,19 @@
 # a .zst one.
 set -uo pipefail
 HERE=$(cd "$(dirname "$0")" && pwd)
-FIRMWARE=""; SPARE=1536; KEEP=0; ARGS=()
+FIRMWARE=""; SPARE=1536; KEEP=0; PI3=0; ARGS=()
 while [ $# -gt 0 ]; do
     case "$1" in
         --firmware) FIRMWARE=$2; shift ;;
         --spare) SPARE=$2; shift ;;
         --keep-img) KEEP=1 ;;
-        -h|--help) sed -n '2,30p' "$0"; exit 0 ;;
+        --pi3) PI3=1 ;;
+        -h|--help) sed -n '2,38p' "$0"; exit 0 ;;
         *) ARGS+=("$1") ;;
     esac
     shift
 done
-[ ${#ARGS[@]} = 2 ] || { sed -n '2,30p' "$0"; exit 2; }
+[ ${#ARGS[@]} = 2 ] || { sed -n '2,38p' "$0"; exit 2; }
 SRC=${ARGS[0]}; OUT=${ARGS[1]}
 case "$OUT" in *.img.xz) ;; *) echo "OUT must end in .img.xz"; exit 2 ;; esac
 [ "$(id -u)" = 0 ] || { echo "run as root"; exit 2; }
@@ -56,7 +65,7 @@ T=$(mktemp -d /tmp/nebrelease.XXXXXX)
 TMPSRC=""
 mkdir -p "$T/lower" "$T/up" "$T/work" "$T/root" "$T/new"
 cleanup() {
-    umount "$T/new" "$T/root" "$T/lower" 2>/dev/null
+    umount "$T/boot" "$T/new" "$T/root" "$T/lower" 2>/dev/null
     for f in "$SRC" "$IMG"; do
         for l in $(losetup -n -O NAME -j "$f" 2>/dev/null); do losetup -d "$l"; done
     done
@@ -66,6 +75,77 @@ cleanup() {
 trap cleanup EXIT
 die() { echo "ERROR: $*"; exit 1; }
 step() { echo "==== $(date +%T) $*"; }
+
+# Pi 3 support. The image's own settings go to nebulae-image.txt in the boot
+# partition; config.txt only includes it, so the same firmware config.txt
+# still works on images without that file.
+PI3TXT=nebulae-image.txt
+pi3_root() {   # $1 = root file system; the firmware's config.txt gets the include
+    local f=$1/home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt
+    [ -f "$f" ] || die "no $f"
+    grep -q "^include $PI3TXT" "$f" && return 0
+    [ -n "$(tail -c1 "$f")" ] && echo >> "$f"
+    if grep -q $'\r$' "$f"; then
+        printf '# 64-bit image settings (Pi 3: arm_64bit=1), see /boot/%s\r\ninclude %s\r\n' $PI3TXT $PI3TXT >> "$f"
+    else
+        printf '# 64-bit image settings (Pi 3: arm_64bit=1), see /boot/%s\ninclude %s\n' $PI3TXT $PI3TXT >> "$f"
+    fi
+}
+pi3_boot() {   # $1 = image, $2 = root file system (pi3_root done)
+    local s z LB
+    read -r s z < <(sfdisk -d "$1" | grep 'start=' | head -1 |
+        sed 's/.*start= *\([0-9]*\), *size= *\([0-9]*\).*/\1 \2/')
+    LB=$(losetup -f --show -o $((s * 512)) --sizelimit $((z * 512)) "$1") || die "losetup boot"
+    mkdir -p "$T/boot"
+    mount -t vfat "$LB" "$T/boot" || die "mount boot partition"
+    [ -f "$T/boot/kernel8.img" ] || die "no kernel8.img in the boot partition"
+    [ -f "$T/boot/bootcode.bin" ] && ls "$T"/boot/bcm2710-rpi-3-b*.dtb >/dev/null 2>&1 ||
+        die "no Pi 3 boot files (bootcode.bin, bcm2710-rpi-3-b*.dtb)"
+    printf '# Settings of this 64-bit image, included from config.txt.\n# 64-bit kernel (kernel8.img) on a Pi 3 too; a Pi 4 does that by itself.\narm_64bit=1\n' > "$T/boot/$PI3TXT"
+    # As startup.sh does at every start: config.txt = the firmware's.
+    cat "$2/home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt" > "$T/boot/config.txt"
+    umount "$T/boot" || die "umount boot partition"
+    if command -v fsck.vfat >/dev/null; then
+        # A card read while /boot was mounted has the dirty bit set: cleared
+        # here; after that the check must be clean.
+        fsck.vfat -a "$LB" 2>&1 | grep -iE 'dirty|remov|fix|correct|free' | sed 's/^ */  fsck.vfat: /'
+        fsck.vfat -n "$LB" >/dev/null 2>&1 || { fsck.vfat -n "$LB" | tail -5; die "fsck.vfat"; }
+    fi
+    losetup -d "$LB"
+    echo "  boot partition: $PI3TXT (arm_64bit=1) + include in config.txt"
+}
+
+if [ $PI3 = 1 ]; then
+    IMG=${OUT%.xz}
+    [ "$(readlink -f "$SRC")" != "$(readlink -f "$IMG")" ] || die "OUT must differ from the source"
+    rm -f "$IMG"
+    case "$SRC" in
+        *.xz) step "decompressing $SRC"; xz -d -c "$SRC" > "$IMG" || die "decompress" ;;
+        *) step "copying $SRC"; cp "$SRC" "$IMG" || die "copy" ;;
+    esac
+    read -r start size < <(sfdisk -d "$IMG" | grep 'start=' | tail -1 |
+        sed 's/.*start= *\([0-9]*\), *size= *\([0-9]*\).*/\1 \2/')
+    [ -n "${start:-}" ] || die "no partition table in $SRC"
+    LN=$(losetup -f --show -o $((start * 512)) --sizelimit $((size * 512)) "$IMG") || die "losetup root"
+    e2fsck -fn "$LN" >/dev/null 2>&1 || die "e2fsck: the source root file system has errors"
+    mount "$LN" "$T/new" || die "mount root"
+    [ -f "$T/new/etc/nebulae-firstboot" ] || die "not a release image (no /etc/nebulae-firstboot)"
+    step "Pi 3 support"
+    pi3_root "$T/new"
+    pi3_boot "$IMG" "$T/new"
+    umount "$T/new" || die "umount root"
+    e2fsck -fn "$LN" >/dev/null 2>&1 || die "e2fsck after the change"
+    losetup -d "$LN"
+    echo "  e2fsck ok"
+    step "compressing"
+    xz -T0 -6 -k -f -c "$IMG" > "$OUT.part" || die "xz"
+    xz -t "$OUT.part" || die "xz test"
+    mv "$OUT.part" "$OUT"
+    echo "$(sha256sum < "$IMG" | cut -d' ' -f1)  $(basename "$IMG")" > "$OUT.sha256"
+    [ $KEEP = 1 ] || rm -f "$IMG"
+    step "done: $OUT ($(du -h "$OUT" | cut -f1)), starts on a Pi 3 and a Pi 4"
+    exit 0
+fi
 
 if [ "${SRC##*.}" = zst ]; then
     step "decompressing $SRC"
@@ -148,6 +228,9 @@ mkdir -p "$R/etc/systemd/system/sysinit.target.wants"
 ln -sf /etc/systemd/system/nebulae-firstboot.service "$R/etc/systemd/system/sysinit.target.wants/nebulae-firstboot.service"
 touch "$R/etc/nebulae-firstboot"
 
+step "Pi 3 support"
+pi3_root "$R"
+
 step "building the root file system"
 # No -x/-xdev: overlayfs reports the lower layer's files with another device.
 used=$(du -sB1 "$R" | cut -f1)
@@ -162,6 +245,7 @@ mke2fs -q -F -t ext4 -L ROOT -b 4096 -N $inodes -E offset=$off -d "$R" "$IMG" $(
 truncate -s $((off + fsbytes)) "$IMG"
 echo "$start, $((fsbytes / 512))" | sfdisk -q --no-reread -N $(sfdisk -d "$SRC" | grep -c 'start=') "$IMG" ||
     die "partition table"
+pi3_boot "$IMG" "$R"
 
 step "checking"
 LN=$(losetup -r -f --show -o $off --sizelimit $fsbytes "$IMG") || die "losetup new"

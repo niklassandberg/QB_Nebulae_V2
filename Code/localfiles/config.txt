@@ -28,3 +28,7 @@ hdmi_ignore_hotplug=1
 # draws a rainbow splash.
 boot_delay=0
 disable_splash=1
+# Settings of the 64-bit image only, in its boot partition (arm_64bit=1, so a
+# Pi 3 starts the 64-bit kernel too). Other images have no such file: the
+# firmware skips a missing include.
+include nebulae-image.txt

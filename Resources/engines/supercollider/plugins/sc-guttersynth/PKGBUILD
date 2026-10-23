@@ -1,0 +1,39 @@
+# GutterSynth UGen for the Nebulae's SuperCollider. Level 2: built after
+# SuperCollider (uses its installed plugin headers), see Resources/engines/README.md.
+
+pkgname=sc-guttersynth
+_commit=fb481d4
+pkgver=0+g$_commit
+pkgrel=1
+pkgdesc="GutterSynth UGen for SuperCollider (Nebulae build)"
+arch=(aarch64)
+url="https://github.com/madskjeldgaard/guttersynth-sc"
+license=(GPL-3.0-or-later)
+depends=(supercollider-headless)
+makedepends=(cmake git)
+source=("guttersynth-sc::git+https://github.com/madskjeldgaard/guttersynth-sc.git#commit=$_commit")
+sha256sums=('SKIP')   # git source: pinned by commit
+
+prepare() {
+  (cd guttersynth-sc && git submodule update --init --recursive)
+  # SC_PATH with an include/ like the source tree: the installed headers.
+  mkdir -p scpath && ln -sfn /usr/include/SuperCollider scpath/include
+}
+
+build() {
+  cmake -S guttersynth-sc -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DSC_PATH="$srcdir/scpath" \
+    -DSUPERNOVA=OFF \
+    -DCMAKE_INSTALL_PREFIX="$srcdir/install" \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DCMAKE_C_FLAGS="$CFLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS"
+  cmake --build build
+  cmake --install build
+}
+
+package() {
+  install -d "$pkgdir/usr/share/SuperCollider/Extensions"
+  cp -r "$srcdir/install/GutterSynth" "$pkgdir/usr/share/SuperCollider/Extensions/"
+}

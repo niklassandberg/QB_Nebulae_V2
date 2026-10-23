@@ -16,6 +16,19 @@ pacman -S --noconfirm --needed sudo alsa-utils csound dnsmasq hostapd i2c-tools 
     libgpiod liblo netctl dhcpcd pd python python-pip python-cherrypy python-numpy \
     raspberrypi-utils unzip usbutils which wireless_tools iw net-tools dialog \
     dosfstools jack2 git base-devel cmake pkgconf >/dev/null 2>&1
+# The Arch csound above pulls in the dependencies; the Nebulae builds
+# (Code/engines/: Csound optimised + -B working, SuperCollider) replace
+# them, IgnorePkg keeps them.
+bash $NEB/Code/scripts/engines_check.sh
+# The Nebulae's own SuperCollider classes (NebInterface, MultiWtOsc), as
+# update.sh installs them.
+if [ -d $NEB/SuperColliderExtensions ]; then
+    mkdir -p /usr/share/SuperCollider/Extensions
+    for item in $NEB/SuperColliderExtensions/*; do
+        rm -rf "/usr/share/SuperCollider/Extensions/$(basename "$item")"
+        cp -r "$item" /usr/share/SuperCollider/Extensions/
+    done
+fi
 
 echo "== host, keymap, time"
 echo alarmpi > /etc/hostname

@@ -29,6 +29,10 @@
 #    shell -107.2 dBFS; fewer than 4 cores was clearly worse by ear. Own unit
 #    nebulae-spin, so it survives a Nebulae restart. Costs ~1-2 W and heat
 #    (51 C tested, no throttling).
+#    Pi 3 without heatsink: 82-83 C with the loops, spin.sh pauses them
+#    above 80 C (its firmware throttles at 85 C). The glitches seen there
+#    with spin came from Csound being too slow (the unoptimised Arch
+#    package), not from the loops; see Resources/engines/csound.
 # Level 1: also Ethernet (LAN) down (the gigabit PHY stops sending, no ssh!)
 #          and the Wi-Fi/Bluetooth chip driver removed (chip without firmware)
 # Level 2: LAN on, Wi-Fi chip driver loaded (radio off until Wi-Fi is on)

@@ -6,7 +6,6 @@ The 64-bit system for the Nebulae (first made 2026-10-22), replacing the old
 | File | What |
 |---|---|
 | `setup_system.sh` | packages + all system configuration (run as root on the Pi; safe to run again) |
-| `build_sc.sh` | builds SuperCollider 3.14.1 headless, sc3-plugins and the own UGens (hours) |
 | `checkfirmware.sh` | `/home/alarm/checkfirmware.sh`, started by nebulae.service (checks the firmware, runs startup.sh) |
 | `make_release_image.sh`, `firstboot/` | an image to hand out, from an image of a working card (see below) |
 | `mandatory_files.txt` | `/home/alarm/mandatory_files.txt`, the files checkfirmware.sh requires |
@@ -34,20 +33,17 @@ The 64-bit system for the Nebulae (first made 2026-10-22), replacing the old
 3. **Firmware + system**: copy the firmware to `/home/alarm/QB_Nebulae_V2` (as
    `create_fw_update.sh` lays it out, Unix line endings, without `Code/packages`)
    and this folder to `/home/alarm/rpi4_image`, then `bash /home/alarm/rpi4_image/setup_system.sh`.
-4. **SuperCollider**: copy `Resources/sc_pkg/rpi4/PKGBUILD` next to `build_sc.sh`, then
-   `systemd-run --unit=nebulae-scbuild bash /home/alarm/rpi4_image/build_sc.sh`
-   (log: `/home/alarm/sc_build/build.log`). It enables sclang.service at the end.
-5. **Pure Data libraries** ELSE and cyclone (optional, about an hour: ELSE builds its own ffmpeg):
-   `systemd-run --unit=nebulae-pdbuild bash /home/alarm/rpi4_image/build_pd_libs.sh`
-   (log: `/home/alarm/pd_build/build.log`). They go to `/usr/lib/pd/extra/else` and `cyclone`;
-   nebulae.py loads both (`-path ... -lib ...`) when they are there.
+   It also installs the audio engines and their plugins from the firmware's
+   `Code/engines/` (Csound, SuperCollider + sc3-plugins and UGens, Pure Data +
+   cyclone and ELSE; `Code/scripts/engines_check.sh`, see
+   `Resources/engines/README.md`) and enables sclang.service. Nothing to build.
 
 ## Release image for other users
 `make_release_image.sh` makes an image to hand out from an image of a working
 card (read the card with Win32 Disk Imager, or a `.img.zst` backup); the card
 and the source image are only read. Run as root in WSL:
 ```
-make_release_image.sh --firmware neb_update.zip card.img NebulaeV2_rpi4_aarch64-<date>.img.xz
+make_release_image.sh --firmware neb_update.zip card.img NebulaeV2-RPI3-<date>.img.xz
 ```
 - small (~7 GB written, fits an 8 GB card); at its first start it grows to
   the whole card (`firstboot/nebulae-firstboot.service`, runs once)
@@ -61,6 +57,11 @@ make_release_image.sh --firmware neb_update.zip card.img NebulaeV2_rpi4_aarch64-
   instead of the card's
 - every file is checked against what was meant to go in; `.img.xz` +
   `.sha256`. Write it with Raspberry Pi Imager ("Use custom") or balenaEtcher.
+- starts on a Pi 4 and a Pi 3: `/boot/nebulae-image.txt` holds `arm_64bit=1`
+  (a Pi 3 otherwise looks for a 32-bit kernel), and `Code/localfiles/config.txt`
+  includes it. The old 32-bit image has no such file, so the same firmware
+  works there. A release image made before this gets it with
+  `make_release_image.sh --pi3 OLD.img[.xz] NEW.img.xz` (copy + this change only).
 
 Login on a release card: `alarm`/`alarm`, root `root` (Arch Linux ARM
 defaults; change them with `passwd` if the Nebulae is on a shared network).

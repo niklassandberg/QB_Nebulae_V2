@@ -1,0 +1,40 @@
+# ELSE (EL Locus Solus' Externals) for the Nebulae's Pure Data. Level 2:
+# built after Pd, see Resources/engines/README.md. nebulae.py loads it
+# ("-path ... -lib else") when /usr/lib/pd/extra/else exists.
+# ELSE builds its own ffmpeg (for play.file~ and friends): long build
+# (about an hour on a Pi 4).
+
+pkgname=pd-else
+_tag=v.1.0-rc14
+pkgver=1.0rc14
+pkgrel=1
+pkgdesc="ELSE library for Pure Data (Nebulae build)"
+arch=(aarch64)
+url="https://github.com/porres/pd-else"
+license=(WTFPL)
+depends=('pd>=0.56.1' openssl)
+makedepends=(git cmake zlib bzip2)
+source=("pd-else::git+https://github.com/porres/pd-else.git#tag=$_tag")
+sha256sums=('SKIP')   # git source: pinned by tag
+
+prepare() {
+  (cd pd-else && git submodule update --init --recursive)
+  # Upstream links OpenSSL statically (for binaries that run on any Linux);
+  # Arch has no static OpenSSL, and the system's libssl is there anyway.
+  sed -i 's/set(OPENSSL_USE_STATIC_LIBS TRUE)/set(OPENSSL_USE_STATIC_LIBS FALSE)/' pd-else/CMakeLists.txt
+  grep -q 'OPENSSL_USE_STATIC_LIBS FALSE' pd-else/CMakeLists.txt
+  # pd.cmake takes the headers from $PD_PATH/src.
+  mkdir -p pdhdr && ln -sfn /usr/include/pd pdhdr/src
+}
+
+build() {
+  cmake -S pd-else -B pd-else/Build -DPD_PATH="$srcdir/pdhdr" \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DCMAKE_C_FLAGS="$CFLAGS" -DCMAKE_CXX_FLAGS="$CXXFLAGS"
+  cmake --build pd-else/Build
+}
+
+package() {
+  install -d "$pkgdir/usr/lib/pd/extra"
+  cp -r pd-else/Build/else "$pkgdir/usr/lib/pd/extra/"
+}

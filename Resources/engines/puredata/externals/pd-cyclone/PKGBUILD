@@ -1,0 +1,31 @@
+# cyclone (Max/MSP-compatible objects) for the Nebulae's Pure Data. Level 2:
+# built after Pd, see Resources/engines/README.md. nebulae.py loads it
+# ("-path ... -lib cyclone") when /usr/lib/pd/extra/cyclone exists.
+
+pkgname=pd-cyclone
+pkgver=0.9.4
+pkgrel=1
+pkgdesc="cyclone library for Pure Data (Nebulae build)"
+arch=(aarch64)
+url="https://github.com/porres/pd-cyclone"
+license=(BSD-3-Clause)
+depends=('pd>=0.56.2')
+makedepends=(git)
+source=("pd-cyclone::git+https://github.com/porres/pd-cyclone.git#tag=cyclone_$pkgver")
+sha256sums=('SKIP')   # git source: pinned by tag
+
+prepare() {
+  cd pd-cyclone
+  git submodule update --init --recursive
+}
+
+build() {
+  cd pd-cyclone
+  # pd-lib-builder's own optimisation flags (-O3 ...), as the old build_pd_libs.sh.
+  make pdincludepath=/usr/include/pd
+}
+
+package() {
+  cd pd-cyclone
+  make install pdincludepath=/usr/include/pd objectsdir=/usr/lib/pd/extra DESTDIR="$pkgdir"
+}
