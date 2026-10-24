@@ -104,7 +104,7 @@ systemctl enable nebulae.service >/dev/null 2>&1
 # sclang is enabled once SuperCollider is installed (setup builds it later).
 if command -v sclang >/dev/null; then systemctl enable sclang.service >/dev/null 2>&1; fi
 # Never at boot: jack is started by nebulae.py for the SC/PD banks, the access
-# point by the scripts page (1_wifi.sh), NebFile by start_wifi.sh.
+# point by the scripts page (1_wifi.ui -> Code/scripts/wifi.sh), NebFile by start_wifi.sh.
 systemctl disable jack.service nebwifi.service NebFile.service >/dev/null 2>&1 || true
 
 echo "== Python packages for bootleds.py (leddriver.py)"

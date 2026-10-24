@@ -82,8 +82,16 @@ def delete(src):
 
 # usb_power.sh: quiet mode keeps USB off except while the stick is in use.
 USB_POWER = "bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh"
+# NebFile only borrows the stick: USB is put back as it was found (off in
+# quiet mode, else on), without knowing the mode.
+usb_was_off = False
 
 def mountUSB():
+    global usb_was_off
+    # Noted only when the stick is not mounted yet: a second "USB" click (or
+    # tab) before "Unmount USB" would otherwise note "on" (from the first).
+    if os.system("mountpoint -q /mnt/memory") != 0:
+        usb_was_off = os.system(USB_POWER + " status") != 0
     os.system(USB_POWER + " on")
     os.system("mount /dev/sda1 /mnt/memory")
     return '{"ok":"ok"}'
@@ -92,7 +100,8 @@ def mountUSB():
 def unmountUSB():
     print("unmount usb")
     os.system("umount /dev/sda1")
-    os.system(USB_POWER + " off")
+    if usb_was_off:
+        os.system(USB_POWER + " off")
     return '{"ok":"ok"}'
 
 def get_node(fpath):

@@ -15,23 +15,15 @@ import threading
 #
 # Each line starts with a syslog priority "<N>". The journal stores it as the
 # line's level and removes it: "journalctl -u nebulae -p err" = errors only.
-# Which levels are written at all: Code/config/log_level (one word: DEBUG,
-# INFO, WARNING, ERROR or CRITICAL; no file = INFO), or NEB_LOG_LEVEL in the
+# Which levels are written at all: log_level of configsettings.py
+# (Code/config/configsettings.txt, default INFO), or NEB_LOG_LEVEL in the
 # environment, which wins.
-
-LEVEL_FILE = "/home/alarm/QB_Nebulae_V2/Code/config/log_level"
 
 
 def _level_name():
-    name = os.environ.get("NEB_LOG_LEVEL")
-    if name:
-        return name
-    try:
-        with open(LEVEL_FILE) as f:
-            words = f.read().split()
-        return words[0] if words else "INFO"
-    except OSError:
-        return "INFO"
+    # Imported here: configsettings logs through this module.
+    from configsettings import configSettings
+    return os.environ.get("NEB_LOG_LEVEL") or configSettings.logLevel
 
 
 def _priority(levelno):

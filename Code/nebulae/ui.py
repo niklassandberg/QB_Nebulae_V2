@@ -4,10 +4,10 @@ import nebio as libDriver # LedDriver/Color backed by the nebio C++ library
 import switch as libSwitch
 import filehandler
 import scripts
-import subprocess
 import threading
 import time
 import random
+from configsettings import configSettings
 from classlogger import ClassLogger
 
 # Input clipping in secondary controls: the four encoder LEDs are red while
@@ -29,16 +29,14 @@ LED_DRAW_MS = 10
 # "scripts" runs a script instead of loading an instrument (scripts.py).
 BANKS = ["instr", "supercollider", "puredata", "scripts"]
 
+# The config settings of the scripts page (LED dim, Wi-Fi, Quiet mode) are
+# read from and saved through configSettings (configsettings.py).
+
 # LED dim: change per encoder step (50 steps from off to full).
 LED_DIM_STEP = 0.02
 
-# Quiet mode levels 0-3 (Code/scripts/quiet.sh, chosen with 3_quiet.ui). The
-# level is in QUIET_FLAG (no file = off, empty = level 1); the UI looks at it
-# now and then: every level staggers the LED PWM channels, levels 1 and 2
-# also give the file and freeze LEDs no PWM.
-QUIET_FLAG = "/home/alarm/QB_Nebulae_V2/Code/config/quiet_mode"
-QUIET_SCRIPT = "/home/alarm/QB_Nebulae_V2/Code/scripts/quiet.sh"
-QUIET_CHECK_MS = 1000
+# Quiet mode levels 0-3 (chosen with 3_quiet.ui): every level staggers the
+# LED PWM channels, levels 1 and 2 also give the file and freeze LEDs no PWM.
 QUIET_STEPS = 4  # encoder steps per level in the quiet level selector
 # The levels in the order the speed encoder steps through them (user's
 # order: quieter the further it is turned).
@@ -48,15 +46,6 @@ QUIET_LEVEL_COLORS = {0: (4095, 0, 0, 1.0),     # off: red
                       3: (4095, 2800, 0, 1.0),  # Quiet 3: yellow
                       2: (0, 0, 4095, 1.0),     # Quiet 2: blue
                       1: (0, 4095, 0, 1.0)}     # Quiet 1: green
-
-
-def quiet_level():
-    try:
-        with open(QUIET_FLAG) as f:
-            text = f.read().strip()
-    except OSError:
-        return 0
-    return int(text) if text in ("1", "2", "3") else 1
 
 sr_pin_next = 7
 sr_pin_source_gate = 6
@@ -121,13 +110,12 @@ class UserInterface(object):
         self.clip_shown = False
         self.led_draw_time = -LED_DRAW_MS
         self.draw_leds = True
-        # LED dim (scripts page, 4_led_dim.ui): saved as led_dim in the settings.
+        # LED dim (scripts page, 4_led_dim.ui).
         self.led_dim_mode = False
-        dim = self.controlhandler.settings.load("led_dim")
-        self.led_dim = dim if isinstance(dim, float) else 1.0
+        self.led_dim = configSettings.ledDim  # live while it is being turned
+        self.log.info("LED dim %.2f", self.led_dim)
         libDriver.led_set_dim(self.led_dim)
-        self.quiet = None  # level last given to nebio
-        self.quiet_check_time = -QUIET_CHECK_MS
+        self.applyQuietToLeds(configSettings.quietMode)
         # Quiet level selector (scripts page, 3_quiet.ui).
         self.quiet_select_mode = False
         self.quiet_select = 0
@@ -146,13 +134,6 @@ class UserInterface(object):
         self.delta_s = self.encoder_speed.get_steps()
         self.mode = self.controlhandler.mode()
         self.trackInputClip()
-        if self.now - self.quiet_check_time >= QUIET_CHECK_MS:
-            self.quiet_check_time = self.now
-            level = quiet_level()
-            if level != self.quiet:
-                self.quiet = level
-                libDriver.led_set_no_pwm(level in (1, 2))
-                libDriver.led_set_stagger(level > 0)
         # Script states (slot LEDs) are read when their page is shown.
         shown = (self.mode == "instr selector" and not self.led_dim_mode
                  and not self.quiet_select_mode
@@ -660,11 +641,17 @@ class UserInterface(object):
                 if self.controlhandler.getInstrSelIdx() < self.instrSelHandle().numFiles():
                     if self.controlhandler.getInstrSelBank() == "scripts":
                         idx = self.controlhandler.getInstrSelIdx()
-                        if self.script_fhandle.uiMode(idx) == "led_dim":
+                        ui_mode = self.script_fhandle.uiMode(idx)
+                        if ui_mode == "wifi":
+                            # On/off at once, back to the instrument.
+                            configSettings.setWifiOn(not configSettings.wifiOn)
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
+                        elif ui_mode == "led_dim":
                             self.led_dim_mode = True  # until a speed/pitch click
-                        elif self.script_fhandle.uiMode(idx) == "quiet":
+                        elif ui_mode == "quiet":
                             self.quiet_select_mode = True  # until a speed/pitch click
-                            self.quiet_select = QUIET_ORDER.index(quiet_level())
+                            self.quiet_select = QUIET_ORDER.index(configSettings.quietMode)
                             self.quiet_select_acc = 0
                         else:
                             # Runs in the background; the instrument keeps playing.
@@ -692,17 +679,23 @@ class UserInterface(object):
                 self.set_button_led(name, 1.0)
         if self.clicked_speed() == 1 or self.clicked_pitch() == 1:
             self.led_dim_mode = False
-            self.log.info("LED dim set to %.2f", self.led_dim)
-            self.controlhandler.settings.save("led_dim", self.led_dim)
+            configSettings.setLedDim(self.led_dim)
             self.clearAllLEDs()
             self.led_draw_time = -LED_DRAW_MS  # instrument colours at once
-            self.controlhandler.enterNormalMode()  # writes the settings
+            self.controlhandler.enterNormalMode()
+
+    # What Quiet mode changes in the LEDs themselves (nebio): every level
+    # staggers the PWM channels, levels 1 and 2 also give the file and freeze
+    # LEDs no PWM (their PWM is heard in the audio).
+    def applyQuietToLeds(self, level):
+        libDriver.led_set_no_pwm(level in (1, 2))
+        libDriver.led_set_stagger(level > 0)
 
     # Quiet level selector: the speed encoder steps through QUIET_ORDER (off,
     # Quiet 3, 2, 1), shown in the colour of both speed LEDs
     # (QUIET_LEVEL_COLORS: off red, 3 yellow, 2 blue, 1 green). quiet_select
     # is the position in QUIET_ORDER. A speed click switches to that level
-    # (quiet.sh in the background) and goes back to the instrument; a pitch
+    # (configSettings.setQuietMode) and goes back to the instrument; a pitch
     # click goes back without a change.
     def updateQuietSelect(self):
         self.quiet_select_acc += self.get_delta("speed")
@@ -724,12 +717,9 @@ class UserInterface(object):
         set_it = self.clicked_speed() == 1
         if set_it or self.clicked_pitch() == 1:
             self.quiet_select_mode = False
-            if set_it and level != quiet_level():
-                self.log.info("Quiet mode set to %d", level)
-                subprocess.Popen(["/bin/bash", QUIET_SCRIPT, "set", str(level)],
-                                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                                 stderr=subprocess.DEVNULL, start_new_session=True)
-                self.quiet_check_time = self.now - QUIET_CHECK_MS + 500  # LEDs follow soon
+            if set_it and level != configSettings.quietMode:
+                configSettings.setQuietMode(level)
+                self.applyQuietToLeds(level)
             self.clearAllLEDs()
             self.led_draw_time = -LED_DRAW_MS  # instrument colours at once
             self.controlhandler.enterNormalMode()

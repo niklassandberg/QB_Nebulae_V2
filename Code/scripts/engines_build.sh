@@ -69,7 +69,7 @@ if [ -z "$net" ] && [ -f "$CRED" ]; then
         say "wifi_credentials.txt has no SSID= line"
     else
         say "Wi-Fi: joining \"$ssid\""
-        bash /home/alarm/QB_Nebulae_V2/Code/nebscripts/1_wifi.sh driver
+        bash /home/alarm/QB_Nebulae_V2/Code/scripts/wifi.sh driver
         rfkill unblock wifi
         netctl stop-all 2>/dev/null
         pkill -f "wpa_supplicant.*wlan0"

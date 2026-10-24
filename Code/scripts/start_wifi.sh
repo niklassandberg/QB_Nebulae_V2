@@ -7,6 +7,8 @@
 rfkill unblock wifi
 
 # usb_power.sh: quiet mode keeps USB off except while the stick is in use.
+# Put back as it was: off again only if it was off.
+bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh status; USB_WAS_ON=$?
 bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh on
 mount /dev/sda1 /mnt/memory
 rm /home/alarm/wifi.log
@@ -21,5 +23,5 @@ else
 fi
 
 umount /dev/sda1
-bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh off
+[ $USB_WAS_ON = 0 ] || bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh off
 ( sleep 10; systemctl start NebFile ) &

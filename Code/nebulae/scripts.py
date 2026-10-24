@@ -3,6 +3,7 @@ import os
 import subprocess
 import threading
 from classlogger import ClassLogger
+from configsettings import configSettings
 
 # The 4th page of the instr selector: scripts and compiled executables.
 # Firmware scripts (FIRMWARE_DIR) come first, then the user's from the USB
@@ -19,9 +20,11 @@ FIRMWARE_DIR = "/home/alarm/QB_Nebulae_V2/Code/nebscripts/"
 USER_DIR = "/home/alarm/scripts/"
 EXTENSIONS = [".sh", ".neb"]  # .neb: any executable (compiled program)
 # .ui: handled inside Nebulae (ui.py), not run; firmware only. The mode is
-# the name after the number: 4_led_dim.ui -> "led_dim".
+# the name after the number: 4_led_dim.ui -> "led_dim". Their slot LED shows
+# the config setting (UI_STATES, from configsettings.py).
 UI_EXTENSION = ".ui"
-QUIET_FLAG = "/home/alarm/QB_Nebulae_V2/Code/config/quiet_mode"  # Code/scripts/quiet.sh
+UI_STATES = {"wifi": lambda: configSettings.wifiOn,
+             "quiet": lambda: configSettings.quietMode > 0}
 STATUS_TIMEOUT_S = 2.0
 STATUS_MARKER = b"nebulae-status"
 
@@ -128,8 +131,9 @@ class ScriptHandler(object):
         self.readAll()
 
     def readStatus(self, idx):
-        if self.uiMode(idx) == "quiet":  # 3_quiet.ui: a level is saved
-            return ON if os.path.exists(QUIET_FLAG) else OFF
+        mode = self.uiMode(idx)
+        if mode is not None:
+            return (ON if UI_STATES[mode]() else OFF) if mode in UI_STATES else NO_STATE
         try:
             r = subprocess.run(self.command(idx, "status"), stdout=subprocess.DEVNULL,
                                stderr=subprocess.DEVNULL, stdin=subprocess.DEVNULL,

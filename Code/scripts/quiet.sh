@@ -1,14 +1,12 @@
 #!/bin/bash
-# Quiet mode levels. Chosen on the scripts page of the instr selector
-# (Code/nebscripts/3_quiet.ui: speed encoder picks the level, ui.py runs
-# "quiet.sh set N"). For feedback patching everything that is not needed to
-# play is switched off: whatever puts noise on the power is heard by the
-# cheap ADC/DAC on i2s.
-#   quiet.sh set 0|1|2|3   0 = off
-#   quiet.sh apply         at boot (startup.sh): the saved level
-#   quiet.sh status        exit 0 = a level is on, 1 = off; prints the level
-# The level is saved in $FLAG (its content; an old empty file = level 1)
-# and survives a reboot.
+# Quiet mode levels: switches the system. For feedback patching everything
+# that is not needed to play is switched off: whatever puts noise on the
+# power is heard by the cheap ADC/DAC on i2s.
+# Only switching, no settings: Nebulae saves the level (configsettings.py)
+# and runs "quiet.sh change OLD NEW" when it is chosen on the scripts page
+# (3_quiet.ui), and "quiet.sh change 0 N" once at its start for the saved
+# level (Quiet mode is off until then). Wi-Fi off is done by Nebulae too.
+#   quiet.sh change OLD NEW   from level OLD to NEW (0-3, 0 = off)
 #
 # Every level (1-3):
 #  - USB off (usb_power.sh): only switched on while the stick is in use
@@ -18,7 +16,7 @@
 #  - scheduled jobs (systemd timers), network time sync (timesyncd, writes
 #    its clock file) and wpa_supplicant (netctl-auto) stopped
 #  - system log (journald) kept in RAM instead of the SD card
-#  - Wi-Fi off (can still be switched on after this with 1_wifi.sh, levels
+#  - Wi-Fi off (by Nebulae; can be switched on again after this, levels
 #    2 and 3 only)
 #  - Nebulae's status lines (every 10 s) not logged (controlhandler.py)
 #  - spin: the CPU never sleeps. Every scan woke it from sleep (WFI), a
@@ -41,8 +39,7 @@
 #          with PWM.
 
 CODE=/home/alarm/QB_Nebulae_V2/Code
-FLAG=$CODE/config/quiet_mode
-WIFI=$CODE/nebscripts/1_wifi.sh
+WIFI=$CODE/scripts/wifi.sh
 USB=$CODE/scripts/usb_power.sh
 SERVICES="systemd-timesyncd.service netctl-auto@wlan0.service"
 # Scheduled jobs: keyring sync goes online weekly, shadow runs at midnight,
@@ -51,26 +48,6 @@ TIMERS="archlinux-keyring-wkd-sync.timer shadow.timer systemd-tmpfiles-clean.tim
 WIFI_MODULES="brcmfmac"
 LAN=end0
 SPIN=nebulae-spin
-
-level() {  # saved level, 0 = off
-    [ -f $FLAG ] || { echo 0; return; }
-    l=$(tr -dc 0-9 < $FLAG)
-    echo "${l:-1}"  # empty file (before levels) = level 1
-}
-
-# The root file system may be read-only; only remount if it is (Nebulae
-# itself may be running with it read-write).
-save() {
-    if [ ! -w $CODE/config ]; then
-        mount -o remount,rw / && "$@"; mount -o remount,ro /
-    else
-        "$@"
-    fi
-}
-
-save_level() {
-    if [ "$1" = 0 ]; then rm -f $FLAG; else echo "$1" > $FLAG; fi
-}
 
 spin() {  # on | off
     if [ "$1" = on ]; then
@@ -102,28 +79,13 @@ leds() {  # off | on
 # another nothing is restarted.
 common_on() {
     leds off
-    # At boot in the background: systemd is still busy with its own start
-    # then and took 1.4 s to answer systemd-run, and nothing waits for these.
-    if [ -n "$BOOT" ]; then
-        ( spin on; journalctl --relinquish-var ) &
-    else
-        spin on
-        journalctl --relinquish-var
-    fi
-    # --runtime: blocked until the next reboot, so a late start at boot
-    # cannot bring them back. In the background: mask reloads systemd
-    # (1.4 s) and stopping netctl-auto takes ~1.4 s; nothing waits for them.
-    # At boot (BOOT=1) it waits until Nebulae has loaded its first instrument:
-    # the systemd reload of the mask made update.sh's USB stick mount wait for
-    # it (0.04 -> 0.74 s).
+    spin on
+    journalctl --relinquish-var
+    # --runtime: blocked until the next reboot, so a late start cannot bring
+    # them back. In the background: mask reloads systemd (1.4 s) and stopping
+    # netctl-auto takes ~1.4 s; nothing waits for them.
     if [ "$(systemctl is-enabled systemd-timesyncd.service 2>/dev/null)" != masked-runtime ]; then
-        ( if [ -n "$BOOT" ]; then
-              for i in $(seq 60); do
-                  [ -e /run/nebulae-ui-ready ] && break  # written by nebulae.py loadUI()
-                  sleep 0.5
-              done
-          fi
-          systemctl mask --runtime $SERVICES $TIMERS; systemctl stop $SERVICES $TIMERS ) &
+        ( systemctl mask --runtime $SERVICES $TIMERS; systemctl stop $SERVICES $TIMERS ) &
     fi
 }
 
@@ -154,11 +116,9 @@ network() {  # 1 | 2
     fi
 }
 
-set_level() {
-    new=$1
-    old=$(level)
+change() {  # old new
+    old=$1; new=$2
     echo "quiet $old -> $new"
-    save save_level $new
     if [ "$new" = 0 ]; then
         [ "$old" = 0 ] && return
         network 2
@@ -166,21 +126,13 @@ set_level() {
         return
     fi
     common_on
-    [ "$old" = 0 ] && { bash $USB off; bash $WIFI off; }
+    [ "$old" = 0 ] && bash $USB off  # Wi-Fi: switched off by Nebulae
     if [ "$new" = 1 ]; then network 1; else network 2; fi
 }
 
 case "$1" in
-    status) l=$(level); echo $l; if [ "$l" != 0 ]; then exit 0; else exit 1; fi ;;
-    set)
-        case "$2" in 0|1|2|3) set_level $2 ;; *) echo "level 0-3"; exit 2 ;; esac ;;
-    # Boot: Wi-Fi is off already, and USB is switched off by the file loader
-    # after Nebulae's first load from the stick.
-    apply)
-        l=$(level)
-        [ "$l" = 0 ] && exit 0
-        BOOT=1 common_on
-        [ "$l" = 1 ] && network 1 ;;
-    *) echo "usage: $0 set 0|1|2|3 | apply | status"; exit 2 ;;
+    change)
+        case "$2$3" in [0-3][0-3]) change $2 $3 ;; *) echo "levels 0-3"; exit 2 ;; esac ;;
+    *) echo "usage: $0 change OLD NEW"; exit 2 ;;
 esac
 exit 0

@@ -2,15 +2,16 @@
 # USB on/off for quiet mode (Code/scripts/quiet.sh). Off = the USB
 # controller (VL805 on PCIe) is unbound from its driver: no bus traffic, no
 # 8 kHz microframes. Everything that uses the stick calls "on" before it
-# mounts and "off" after it unmounts, so in quiet mode USB is only on while
-# the stick is in use.
+# mounts and, in quiet mode, "off" after it unmounts (the caller knows the
+# mode: configSettings.quietMode in Nebulae; NebFile and start_wifi.sh put
+# back what they found), so in quiet mode USB is only on while the stick is in
+# use.
 #   usb_power.sh on       bind the controller if needed, wait for the stick
-#   usb_power.sh off      unbind, but only in quiet mode and with nothing mounted
+#   usb_power.sh off      unbind, if nothing is mounted
 #   usb_power.sh status   exit 0 = on
 
 DEV=0000:01:00.0
 DRV=/sys/bus/pci/drivers/xhci_hcd
-FLAG=/home/alarm/QB_Nebulae_V2/Code/config/quiet_mode
 
 case "$1" in
     on)
@@ -28,7 +29,6 @@ case "$1" in
         fi
         ;;
     off)
-        [ -f $FLAG ] || exit 0
         grep -q " /mnt/memory " /proc/mounts && exit 0
         [ -e $DRV/$DEV ] && echo $DEV > $DRV/unbind
         ;;

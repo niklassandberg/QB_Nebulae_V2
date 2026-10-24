@@ -138,7 +138,7 @@ start() {
     done
     echo "USB off, Wi-Fi/BT off"
     [ -e $USB_DRV/$USB_DEV ] && { umount /mnt/memory 2>/dev/null; echo $USB_DEV > $USB_DRV/unbind; }
-    bash $CODE/nebscripts/1_wifi.sh off >/dev/null 2>&1
+    bash $CODE/scripts/wifi.sh off >/dev/null 2>&1
     echo "services, timers, journal"
     systemctl stop $SERVICES $TIMERS 2>/dev/null
     modprobe -r brcmfmac 2>/dev/null
@@ -214,22 +214,20 @@ stop() {
     echo mmc0 > $ACT_LED/trigger
     echo default-on > $PWR_LED/trigger
     [ -e $USB_DRV/$USB_DEV ] || echo $USB_DEV > $USB_DRV/bind
-    bash $CODE/nebscripts/1_wifi.sh driver
+    bash $CODE/scripts/wifi.sh driver
     journalctl --flush
-    if [ -f $CODE/config/quiet_mode ]; then
-        echo "quiet mode is saved: it is applied again (level 1: LAN goes down!)"
-    else
-        echo "services and timers back"
-        systemctl start $TIMERS
-        for s in $SERVICES; do
-            ( for i in 1 2 3 4 5; do systemctl start $s && break; sleep 2; done ) &
-        done
-    fi
+    # Started again as before the test; Nebulae then applies its saved Quiet
+    # mode itself (level 1: LAN goes down!). Units Quiet mode masked do not
+    # start (no harm).
+    echo "services and timers back"
+    systemctl start $TIMERS 2>/dev/null
+    for s in $SERVICES; do
+        ( for i in 1 2 3 4 5; do systemctl start $s 2>/dev/null && break; sleep 2; done ) &
+    done
     systemctl start sclang.service
-    echo "starting Nebulae"
+    echo "starting Nebulae (applies its config settings)"
     systemctl start nebulae.service
     rm -f $STATE
-    [ -f $CODE/config/quiet_mode ] && bash $CODE/scripts/quiet.sh apply
     echo "done"
 }
 

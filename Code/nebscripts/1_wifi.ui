@@ -1,0 +1,7 @@
+# Wi-Fi on/off, on the scripts page of the instr selector.
+# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
+# mode = the name after the number, here "wifi").
+# Speed click on it: Wi-Fi on if it is off, off if it is on, and back to the
+# instrument. Saved (configsettings.py, Code/config/configsettings.txt), so
+# after a restart it is as it was; switched by Code/scripts/wifi.sh.
+# Slot LED bright = Wi-Fi on (nebulae-status).

@@ -19,6 +19,7 @@ import nebmixer
 import nebio
 import loopprofile
 from classlogger import ClassLogger
+from configsettings import configSettings
 
 # Before the first Csound(): Csound's own signal handlers caught SIGTERM
 # without exiting, so "systemctl stop nebulae" (and every reboot) waited
@@ -527,13 +528,10 @@ class Nebulae(object):
             self.classlog.info("Killing LED program")
             cmd = "pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
             os.system(cmd)
-            # quiet.sh waits for this at boot (first instrument loaded);
-            # /run is emptied at every boot.
-            try:
-                open("/run/nebulae-ui-ready", "w").close()
-            except OSError:
-                pass
             if self.ui is None:
+                # First instrument loaded: the saved Quiet mode and Wi-Fi to
+                # the system (both off until now).
+                configSettings.applyAtStart()
                 self.ui = ui.UserInterface(self.c_handle)
             else:
                 self.ui.controlhandler = self.c_handle

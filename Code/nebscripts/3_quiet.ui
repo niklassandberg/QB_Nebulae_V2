@@ -4,7 +4,8 @@
 # Speed click on it: the speed encoder picks the level, shown in the colour
 # of both speed LEDs: off = red, Quiet 1 = green, Quiet 2 = blue,
 # Quiet 3 = yellow.
-# Speed click switches to it (Code/scripts/quiet.sh set N) and goes back to
+# Speed click switches to it (saved by configsettings.py, switched by
+# Code/scripts/quiet.sh) and goes back to
 # the instrument; pitch click goes back without a change.
 #   Quiet 1: everything not needed to play off, also LAN and the Wi-Fi chip
 #   Quiet 2: as 1, but LAN on and Wi-Fi possible

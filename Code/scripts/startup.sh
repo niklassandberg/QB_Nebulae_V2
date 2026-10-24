@@ -3,7 +3,7 @@
 # itself again with sudo (sudo as root only adds lines to the journal).
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 
-#disable network by default so wpa_suppliant does not make any sounds.
+#disable network by default.
 rfkill block wifi
 
 #sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
@@ -29,13 +29,6 @@ fi
 
 echo "optimizing system."
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/sys_opt_lite.sh
-# Wi-Fi is not started at boot any more (was check_wifi.py: hold the speed
-# click). It is switched on/off on the scripts page of the instr selector
-# (Code/nebscripts/1_wifi.sh).
-# Quiet mode (scripts page, 3_quiet.ui -> scripts/quiet.sh) is a saved setting: applied here
-# (its slow part runs in the background). USB stays on for the firmware
-# update check below; the file loader switches it off after its first load.
-bash /home/alarm/QB_Nebulae_V2/Code/scripts/quiet.sh apply
 
 echo "checking for firmware update"
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh

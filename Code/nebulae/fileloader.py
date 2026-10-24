@@ -1,6 +1,7 @@
 import glob
 import os
 from classlogger import ClassLogger
+from configsettings import configSettings
 import neb_globals
 import shutil
 #import shutil
@@ -144,7 +145,8 @@ class FileLoader(object):
             self.classlog.info("Sync filebuffers to disk.")
             os.system("sync")
         self.usb_mounted = self.isUSBMounted()
-        os.system(USB_POWER + " off")  # only does something in quiet mode
+        if configSettings.quietMode:
+            os.system(USB_POWER + " off")  # quiet mode: USB only on while in use
 
     def isUSBMounted(self):
         try:

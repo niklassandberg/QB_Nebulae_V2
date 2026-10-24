@@ -40,7 +40,7 @@ class SettingManager(object):
                     if line.strip():
                         settingList.append(line)
             self.populateDict(settingList, self.settingDict)
-            # Settings added later (e.g. led_dim) are missing from an older
+            # Settings added later are missing from an older
             # file; without them they would never be saved.
             for key in self.defaultDict:
                 if key not in self.settingDict:
