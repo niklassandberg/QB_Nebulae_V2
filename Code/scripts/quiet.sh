@@ -18,7 +18,7 @@
 #  - system log (journald) kept in RAM instead of the SD card
 #  - Wi-Fi off (by Nebulae; can be switched on again after this, levels
 #    2 and 3 only)
-#  - Nebulae's status lines (every 10 s) not logged (controlhandler.py)
+#  - (Nebulae's status lines every 10 s: only with log_level STATS, any mode)
 #  - spin: the CPU never sleeps. Every scan woke it from sleep (WFI), a
 #    current pulse heard as a tone (noise_test.sh "wake"); a do-nothing
 #    loop (Code/scripts/spin.sh yield) on all 4 cores at the lowest priority
@@ -29,7 +29,10 @@
 #    (shared cache/bus) to dropouts while recording; yield touches no
 #    memory (2026-10-24: buffer reserve ~600 instead of ~1400 of 2048
 #    used, Csound in real-time priority, nebulae.py setRealtime). Own unit
-#    nebulae-spin, so it survives a Nebulae restart. Costs ~1-2 W and heat
+#    nebulae-spin, so it survives a Nebulae restart. Or, with quiet_idle=nohlt
+#    (configsettings.py, after a restart): the kernel option "nohlt" keeps
+#    the cores awake instead, no spin (same tone; Pi 3 recording: 0
+#    dropouts, Csound +6 points). Costs ~1-2 W and heat
 #    (51 C tested, no throttling).
 #    Pi 3 without heatsink: 83 C with the loops, no slowdown, no dropouts
 #    (its firmware lowers the clock itself from 85 C; spin.sh has no heat
@@ -56,6 +59,13 @@ SPIN=nebulae-spin
 
 spin() {  # on | off
     if [ "$1" = on ]; then
+        # A switch: started with "nohlt" (quiet_idle=nohlt, configsettings.py
+        # writes it to /boot/cmdline.txt), the kernel itself keeps the cores
+        # awake and the yield spin is off (also one still running from before).
+        if grep -qw nohlt /proc/cmdline; then
+            systemctl stop $SPIN 2>/dev/null
+            echo "nohlt: the kernel keeps the cores awake, no spin"; return
+        fi
         systemctl is-active --quiet $SPIN && return
         systemd-run --unit=$SPIN --collect --quiet -p CPUSchedulingPolicy=idle \
             /bin/bash $CODE/scripts/spin.sh yield

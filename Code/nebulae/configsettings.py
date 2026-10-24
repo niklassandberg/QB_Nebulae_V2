@@ -7,6 +7,10 @@
 #
 # All settings are in one file, CONFIG_FILE, one "key=value" per line:
 #   quiet_mode=2     0 = off, 1-3 = Quiet level      (scripts/quiet.sh)
+#   quiet_idle=yield yield | nohlt: how Quiet mode keeps the cores awake. yield
+#                    = spin.sh loops (at once); nohlt = kernel option in
+#                    /boot/cmdline.txt (from the next restart; until then
+#                    yield). No UI yet, set by hand.
 #   wifi=on          on | off                        (scripts/wifi.sh)
 #   led_dim=0.50     0.00 = off .. 1.00 = full
 #   log_level=INFO   DEBUG, STATS, INFO .. CRITICAL, set by hand (classlogger.py;
@@ -35,7 +39,19 @@ SCRIPTS_DIR = "/home/alarm/QB_Nebulae_V2/Code/scripts/"
 QUIET_SCRIPT = SCRIPTS_DIR + "quiet.sh"
 WIFI_SCRIPT = SCRIPTS_DIR + "wifi.sh"
 
+CMDLINE = "/boot/cmdline.txt"   # kernel options, read at boot
+
 QUIET_LEVELS = (0, 1, 2, 3)
+QUIET_IDLE = ("yield", "nohlt")
+
+
+def _kernelHasNohlt():
+    """The running kernel was started with nohlt."""
+    try:
+        with open("/proc/cmdline") as f:
+            return "nohlt" in f.read().split()
+    except OSError:
+        return False
 LOG_LEVELS = ("DEBUG", "STATS", "INFO", "WARNING", "ERROR", "CRITICAL")
 
 
@@ -53,6 +69,7 @@ class ConfigSettings(object):
     def __init__(self):
         # Defaults: used when the file has no (valid) value.
         self._quietMode = 0
+        self._quietIdle = "yield"
         self._wifiOn = False
         self._ledDim = 1.0
         self._logLevel = "INFO"
@@ -101,6 +118,8 @@ class ConfigSettings(object):
             quiet = values.get("quiet_mode")
             if quiet in ("0", "1", "2", "3"):
                 self._quietMode = int(quiet)
+            if values.get("quiet_idle") in QUIET_IDLE:
+                self._quietIdle = values["quiet_idle"]
             wifi = values.get("wifi")
             if wifi in ("on", "off"):
                 self._wifiOn = wifi == "on"
@@ -127,6 +146,16 @@ class ConfigSettings(object):
     @property
     def quietMode(self):
         return self._quietMode
+
+    @property
+    def quietIdle(self):
+        return self._quietIdle
+
+    @property
+    def quietIdleNeedsRestart(self):
+        """True while /boot/cmdline.txt says nohlt and the running kernel
+        does not, or the other way round."""
+        return self._wantNohlt() != _kernelHasNohlt()
 
     @property
     def wifiOn(self):
@@ -172,6 +201,7 @@ class ConfigSettings(object):
         if self._quietMode:
             self._runInBackground([QUIET_SCRIPT, "change", "0", str(self._quietMode)])
         self._runInBackground([WIFI_SCRIPT, "on" if self._wifiOn else "off"])
+        self._runInBackground(self._syncCmdline)  # also after a change by hand
 
     # -------------------------
     # Saving (file + switching the system)
@@ -191,6 +221,18 @@ class ConfigSettings(object):
         if old == 0 and self._wifiOn:
             self.setWifiOn(False)
         self._runInBackground([QUIET_SCRIPT, "change", str(old), str(level)])
+        self._runInBackground(self._syncCmdline)
+
+    def setQuietIdle(self, idle):
+        if idle not in QUIET_IDLE:
+            raise ValueError("quiet_idle %s, not %r" % ("|".join(QUIET_IDLE), idle))
+        with self._lock:
+            if idle == self._quietIdle:
+                return
+            self._quietIdle = idle
+            self._save()
+        self._log().info("Quiet mode idle: %s", idle)
+        self._runInBackground(self._syncCmdline)
 
     def setWifiOn(self, on):
         on = bool(on)
@@ -223,6 +265,7 @@ class ConfigSettings(object):
         5 s (ext4 journal), and a Eurorack case switched off sooner started
         with the old values. Called with self._lock held."""
         text = ("quiet_mode=%d\n" % self._quietMode
+                + "quiet_idle=%s\n" % self._quietIdle
                 + "wifi=%s\n" % ("on" if self._wifiOn else "off")
                 + "led_dim=%.2f\n" % self._ledDim
                 + "log_level=%s\n" % self._logLevel
@@ -257,14 +300,44 @@ class ConfigSettings(object):
 
     def _worker(self):
         while True:
-            command = self._jobs.get()
+            command = self._jobs.get()   # a shell script + args, or a function
             try:
-                subprocess.run(["systemd-cat", "-t", "nebulae-config", "/bin/bash"] + command,
-                               stdin=subprocess.DEVNULL)
-            except OSError as e:
-                self._log().error("Could not run %s: %s", " ".join(command), e)
+                if callable(command):
+                    command()
+                else:
+                    subprocess.run(["systemd-cat", "-t", "nebulae-config", "/bin/bash"] + command,
+                                   stdin=subprocess.DEVNULL)
+            except Exception as e:
+                self._log().error("Could not run %s: %s", command, e)
             finally:
                 self._jobs.task_done()
+
+    def _wantNohlt(self):
+        return self._quietMode > 0 and self._quietIdle == "nohlt"
+
+    def _syncCmdline(self):
+        """nohlt in /boot/cmdline.txt exactly when Quiet mode is on with
+        quiet_idle=nohlt. The kernel reads it at boot only: quiet.sh keeps the
+        yield spin until then. Same safe write as _save (new file, rename)."""
+        want = self._wantNohlt()
+        with open(CMDLINE) as f:
+            words = f.read().split()
+        if ("nohlt" in words) == want:
+            return
+        words = [w for w in words if w != "nohlt"] + (["nohlt"] if want else [])
+        tmp = CMDLINE + ".new"
+        with open(tmp, "w") as f:
+            f.write(" ".join(words) + "\n")
+            f.flush()
+            os.fsync(f.fileno())
+        os.replace(tmp, CMDLINE)
+        folder = os.open(os.path.dirname(CMDLINE), os.O_RDONLY)
+        try:
+            os.fsync(folder)
+        finally:
+            os.close(folder)
+        self._log().info("%s nohlt in %s: active from the next restart",
+                         "Added" if want else "Removed", CMDLINE)
 
     def waitUntilApplied(self):
         """Until the shell scripts of all changes so far have run."""
