@@ -15,6 +15,10 @@
 # engines). All of them go in IgnorePkg so pacman -Syu keeps them.
 #   engines_check.sh           install what is needed
 #   engines_check.sh status    list them; exit 0 = all installed
+
+# Needs root. The services start it as root; started by hand it runs
+# itself again with sudo (sudo as root only adds lines to the journal).
+[ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 DIR=/home/alarm/QB_Nebulae_V2/Code/engines
 ARCH=$(pacman-conf Architecture | head -1)
 pkgs() {  # level: 1 = $DIR/*/, 2 = $DIR/*/*/
@@ -41,7 +45,7 @@ check() {  # level -> $need: the package files to install
 # Fallback: a recipe without its package is built on the Nebulae first (needs
 # internet: LAN, else Wi-Fi from wifi_credentials.txt on the stick; report on
 # the stick). Normally the firmware has every package and nothing happens.
-[ "$1" = status ] || sudo bash "$(dirname "$0")/engines_build.sh"
+[ "$1" = status ] || bash "$(dirname "$0")/engines_build.sh"
 if [ -z "$(pkgs 1)$(pkgs 2)" ]; then
     echo "engines: no packages for $ARCH in $DIR, keeping the installed ones"
     [ "$1" = status ] && exit 1
@@ -56,7 +60,7 @@ for level in 1 2; do
     [ -n "$need" ] || continue
     # Plugins installed by hand before they were packages (old build_sc.sh,
     # build_pd_libs.sh): their files may be replaced.
-    sudo pacman --noconfirm -U \
+    pacman --noconfirm -U \
         --overwrite '/usr/share/SuperCollider/Extensions/*' \
         --overwrite '/usr/lib/pd/extra/*' $need ||
         { echo "engines: level $level install failed"; exit 1; }
@@ -65,9 +69,9 @@ done
 for name in $names; do
     grep -qE "^IgnorePkg.*[ =]$name( |\$)" /etc/pacman.conf && continue
     if grep -q '^IgnorePkg' /etc/pacman.conf; then
-        sudo sed -i "0,/^IgnorePkg.*/s//& $name/" /etc/pacman.conf
+        sed -i "0,/^IgnorePkg.*/s//& $name/" /etc/pacman.conf
     else
-        sudo sed -i "/^\[options\]/a IgnorePkg = $name" /etc/pacman.conf
+        sed -i "/^\[options\]/a IgnorePkg = $name" /etc/pacman.conf
     fi
     echo "engines: $name added to IgnorePkg in /etc/pacman.conf"
 done

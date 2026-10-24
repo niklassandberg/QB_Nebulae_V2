@@ -8,7 +8,7 @@ import RPi.GPIO as GPIO
 import neb_globals
 
 def launch_bootled():
-    cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
+    cmd = "pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
     os.system(cmd)
     print('Launching LED program')
     fullCmd = "python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py wifi pulse"
@@ -16,7 +16,7 @@ def launch_bootled():
     print('led process created: ' + str(led_process))
  
 def kill_bootled():
-    cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
+    cmd = "pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
     os.system(cmd)
 
 

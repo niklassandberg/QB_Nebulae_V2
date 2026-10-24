@@ -1,12 +1,15 @@
 #!/bin/bash
+# Needs root. The services start it as root; started by hand it runs
+# itself again with sudo (sudo as root only adds lines to the journal).
+[ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 
 #disable network by default so wpa_suppliant does not make any sounds.
-sudo rfkill block wifi
+rfkill block wifi
 
 #sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
 
 echo "enable i2c"
-sudo modprobe i2c-dev
+modprobe i2c-dev
 echo "starting bootup LEDs"
 python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py booting &
 
@@ -54,7 +57,7 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh
     if [ -f /boot/cmdline.txt ] && [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt ] && ! cmp -s /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt /boot/config.txt
     then
         echo "updating /boot/config.txt for next boot up."
-        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt > /boot/config.txt"
+        bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt > /boot/config.txt"
     fi
 ) &
 #sh /home/alarm/QB_Nebulae_V2/Code/scripts/handleuserfiles.sh
@@ -74,9 +77,13 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh
 if ! cmp -s /home/alarm/QB_Nebulae_V2/Code/localfiles/environment /etc/environment
 then
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
-    sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/environment > /etc/environment"
+    bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/environment > /etc/environment"
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
 fi
+# What "sudo python3 nebulae.py" gave it before: HOME and /etc/environment
+# (LD_LIBRARY_PATH, SC_JACK_DEFAULT_*), now for everything started from here.
+export HOME=/root
+set -a; . /etc/environment; set +a
 
 # Hardware test firmware (create_fw_update.sh --hwtest): run the nebio
 # hardware test instead of nebulae. The log goes to the USB stick
@@ -86,7 +93,7 @@ if [ -f /home/alarm/QB_Nebulae_V2/Code/hwtest_mode ]
 then
     echo "hardware test mode"
     HWLOG=/tmp/hwtest_log.txt
-    if sudo mount /dev/sda1 /mnt/memory
+    if mount /dev/sda1 /mnt/memory
     then
         HWLOG=/mnt/memory/hwtest_log.txt
     fi
@@ -95,14 +102,14 @@ then
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh > /tmp/nebio_build.log 2>&1
     BUILD=$?
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
-    sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
+    pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
     if [ $BUILD -ne 0 ]
     then
         echo "hardware test: nebio build failed"
-        sudo bash -c "{ echo '==== nebio build FAILED' \$(date); pkg-config --modversion libgpiod liblo; cat /tmp/nebio_build.log; } >> $HWLOG 2>&1"
+        bash -c "{ echo '==== nebio build FAILED' \$(date); pkg-config --modversion libgpiod liblo; cat /tmp/nebio_build.log; } >> $HWLOG 2>&1"
         python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py error &
     else
-        sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebio/tools/hwtest.py --headless --log $HWLOG
+        python3 /home/alarm/QB_Nebulae_V2/Code/nebio/tools/hwtest.py --headless --log $HWLOG
     fi
     sync
     exit 0
@@ -114,14 +121,14 @@ fi
 # pull-up, 0 = held) is read here directly (a few ms) instead of starting
 # Python and nebio only to read it (~1.2 s). Anything but a clear 1 (held,
 # or no gpioget v2) runs check_calibration.py as before.
-if [ "$(sudo gpioget -c gpiochip0 --bias=pull-up --numeric 22 2>/dev/null)" != 1 ]
+if [ "$(gpioget -c gpiochip0 --bias=pull-up --numeric 22 2>/dev/null)" != 1 ]
 then
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
-    sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py
+    python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
 fi
 
-sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
+pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
 
 echo "Running Nebulae"
 
@@ -129,4 +136,4 @@ echo "Running Nebulae"
 #just run: journalctl -u nebulae.service -f for full history, add -n 100 for instance to see last 100 lines
 #sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py &> /tmp/nebulae_stdout.log
 
-sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py

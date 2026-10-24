@@ -1,5 +1,8 @@
 #!/bin/bash
-sudo mount /dev/sda1 /mnt/memory
+# Needs root. The services start it as root; started by hand it runs
+# itself again with sudo (sudo as root only adds lines to the journal).
+[ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
+mount /dev/sda1 /mnt/memory
 # Bootloader (EEPROM) update, only when a file "update_bootloader" is on the
 # stick: removed first (once only), then eeprom_update.sh flashes and reboots,
 # or logs to neb_log.txt why not (already up to date, 32-bit image).
@@ -15,14 +18,14 @@ if [ ! -f /mnt/memory/neb_update.zip ] && [ ! -d /home/alarm/QB_Nebulae_V2/Code/
     && ! ls /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst >/dev/null 2>&1
 then
     echo "No Update Detected"
-    sudo umount /dev/sda1
+    umount /dev/sda1
     echo "Advancing to the rest of the startup script."
     exit 0
 fi
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
 if [ -f /mnt/memory/neb_update.zip ]
 then
-    sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
+    pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
     python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
     echo "neb_update.zip detected."
     # The report of an earlier update (engines_build.sh) is stale now; this
@@ -70,46 +73,46 @@ then
     # Audio engines: the Nebulae builds from Code/engines/ (Csound optimised
     # and -B working, SuperCollider) when other versions are installed.
     bash /home/alarm/QB_Nebulae_V2/Code/scripts/engines_check.sh
-    sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py force
+    python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py force
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service ]
     then
         echo "updating /etc/systemd/system/nebulae.service for next boot up."
-        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service > /etc/systemd/system/nebulae.service"
-        sudo systemctl --system daemon-reload 
+        bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service > /etc/systemd/system/nebulae.service"
+        systemctl --system daemon-reload 
     fi
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/sclang.service ]
     then
         echo "updating /etc/systemd/system/sclang.service for next boot up."
-        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/sclang.service > /etc/systemd/system/sclang.service"
-        sudo systemctl --system daemon-reload
-        sudo systemctl enable sclang.service
+        bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/sclang.service > /etc/systemd/system/sclang.service"
+        systemctl --system daemon-reload
+        systemctl enable sclang.service
     fi
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/jack.service ]
     then
         echo "updating /etc/systemd/system/jack.service for next boot up."
-        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/jack.service > /etc/systemd/system/jack.service"
-        sudo systemctl --system daemon-reload
-        sudo systemctl disable jack.service
+        bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/jack.service > /etc/systemd/system/jack.service"
+        systemctl --system daemon-reload
+        systemctl disable jack.service
     fi
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/nebwifi.service ]
     then
         echo "updating /etc/systemd/system/nebwifi.service for next boot up."
-        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/nebwifi.service > /etc/systemd/system/nebwifi.service"
-        sudo systemctl --system daemon-reload
+        bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/nebwifi.service > /etc/systemd/system/nebwifi.service"
+        systemctl --system daemon-reload
     fi
     
-    sudo systemctl --system daemon-reload
+    systemctl --system daemon-reload
 
-    sudo reboot
+    reboot
 elif [ -d /home/alarm/QB_Nebulae_V2/Code/packages ]
 then
     echo "detected firmware pacakges to install" 
-    sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
+    pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
     python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
 
     echo "install web services"
-    sudo cp /home/alarm/QB_Nebulae_V2/Code/web/NebFile/NebFile.service /etc/systemd/system
-    sudo systemctl --system daemon-reload 
+    cp /home/alarm/QB_Nebulae_V2/Code/web/NebFile/NebFile.service /etc/systemd/system
+    systemctl --system daemon-reload 
 
     cd /home/alarm/QB_Nebulae_V2/Code/packages
 
@@ -119,7 +122,7 @@ then
     PKGS=$(ls *-$ARCH.pkg.tar.* *-any.pkg.tar.* 2>/dev/null)
     if [ -n "$PKGS" ]
     then
-        sudo pacman --noconfirm -U $PKGS
+        pacman --noconfirm -U $PKGS
         echo "installed packages"
     fi
 
@@ -128,7 +131,7 @@ then
         echo "install pip3 packages"
         cd python
         echo "installed pip packages"
-        sudo pip3 install *
+        pip3 install *
     fi
     cd /home/alarm
 
@@ -139,12 +142,12 @@ then
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/jackdrc ]
     then
         echo "updating /etc/jackdrc"
-        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/jackdrc > /etc/jackdrc"
+        bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/jackdrc > /etc/jackdrc"
     fi
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/startup.scd ]
     then
         echo "updating startup.scd"
-        sudo bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/startup.scd > /root/.config/SuperCollider/startup.scd"
+        bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/startup.scd > /root/.config/SuperCollider/startup.scd"
     fi
 
     DIR1="/home/alarm/QB_Nebulae_V2/SuperColliderExtensions"
@@ -164,7 +167,7 @@ then
     #mkdir dir if they dont exist
     mkdir -p /home/alarm/sc
 
-    sudo reboot
+    reboot
 else
     # Arch packages on the stick (.tar.xz, or .tar.zst which newer packages use),
     # e.g. libgpiod and liblo for nebio.
@@ -172,12 +175,12 @@ else
     if [ $FC -gt 0 ] 
     then 
         echo "Packages detected"
-	sudo pacman --noconfirm -U `ls /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst 2>/dev/null`
+	pacman --noconfirm -U `ls /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst 2>/dev/null`
         rm -f /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst
     else  
       echo "No Update Detected"
     fi
 fi
-sudo umount /dev/sda1
+umount /dev/sda1
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
 echo "Advancing to the rest of the startup script."

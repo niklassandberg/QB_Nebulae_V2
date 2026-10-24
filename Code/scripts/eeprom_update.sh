@@ -20,6 +20,10 @@
 # the 32-bit image on a Pi with this bootloader, first flash an older
 # bootloader (Raspberry Pi Imager: Misc utility images > Bootloader, or an
 # older release from github.com/raspberrypi/rpi-eeprom).
+
+# Needs root. The services start it as root; started by hand it runs
+# itself again with sudo (sudo as root only adds lines to the journal).
+[ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 KIT=/home/alarm/QB_Nebulae_V2/Code/localfiles/eeprom
 MARK=/home/alarm/.eeprom_update   # kit timestamp while a flash is pending
 TS=/proc/device-tree/chosen/bootloader/build-timestamp
@@ -40,7 +44,7 @@ if [ "$MODE" != flash ]; then
     [ -f $MARK ] || exit 0
     # After a flash: clean /boot and log.
     sh $MOUNTFS rw
-    sudo rm -f /boot/RECOVERY.000 /boot/recovery.bin /boot/pieeprom.upd /boot/pieeprom.sig
+    rm -f /boot/RECOVERY.000 /boot/recovery.bin /boot/pieeprom.upd /boot/pieeprom.sig
     if [ -n "$current" ] && [ "$current" -ge "$(cat $MARK)" ]; then
         echo "EEPROM bootloader updated ($(day $current))"
     else
@@ -72,12 +76,12 @@ fi
 
 say "bootloader update: $(day $current) -> $(day $kit), flashing at the next boot"
 sync
-sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
+pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
 python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
 sh $MOUNTFS rw
-sudo cp $KIT/pieeprom.upd $KIT/pieeprom.sig $KIT/recovery.bin /boot/ || { sh $MOUNTFS ro; exit 0; }
+cp $KIT/pieeprom.upd $KIT/pieeprom.sig $KIT/recovery.bin /boot/ || { sh $MOUNTFS ro; exit 0; }
 echo "$kit" > $MARK
 sync
-sudo umount /dev/sda1 2>/dev/null
-sudo reboot
+umount /dev/sda1 2>/dev/null
+reboot
 sleep 30

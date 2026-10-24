@@ -285,7 +285,7 @@ def leds():
     processes never write to the LED driver at the same time."""
     global _leds_ready
     if not _leds_ready:
-        os.system("sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py")
+        os.system("pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py")
         time.sleep(0.05)
         if lib().nebio_leds_init() != 0:
             _log.error("nebio LED init failed: %s", last_error())

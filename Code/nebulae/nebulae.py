@@ -250,7 +250,7 @@ class Nebulae(object):
         try:
             if os.system("pgrep jackd > /dev/null 2>&1") != 0:
                 self.classlog.debug("jackd is not running, starting service...")
-                os.system("sudo systemctl start jack")
+                os.system("systemctl start jack")
         except Exception as e:
             self.classlog.error("Error in start_jack(): %s", e)
 
@@ -278,7 +278,7 @@ class Nebulae(object):
             ) == 0:
                 count += 1
                 if count > 10:
-                    os.system("sudo systemctl stop jack")
+                    os.system("systemctl stop jack")
                     raise TimeoutError("jackd did not die within 1 second")
                 time.sleep(0.2)
                 self.classlog.debug("jackd has not died yet...")
@@ -517,15 +517,15 @@ class Nebulae(object):
                     time.sleep(0.1)
         except Exception as e:
             self.classlog.error("Error in cleanup_puredata(): %s", e)
-        os.system("sudo killall pt")
-        os.system("sudo systemctl stop jack")
+        os.system("killall pt")
+        os.system("systemctl stop jack")
         self.wait_for_jack_to_die()
         self.pt = None
 
     def loadUI(self):
         try:
             self.classlog.info("Killing LED program")
-            cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
+            cmd = "pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
             os.system(cmd)
             # quiet.sh waits for this at boot (first instrument loaded);
             # /run is emptied at every boot.

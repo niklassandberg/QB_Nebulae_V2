@@ -1,12 +1,15 @@
 #!/bin/bash
+# Needs root. The services start it as root; started by hand it runs
+# itself again with sudo (sudo as root only adds lines to the journal).
+[ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 
 # Exporting LIB path for nebulae
 echo export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
-# Everything that needs root in one sudo call: each sudo costs ~30 ms at boot
-# (this script took 0.74 s with one sudo per line). "service ntp stop" is gone:
+# Everything in one sh call (with one sudo per line this script took 0.74 s
+# at boot; it runs as root now, no sudo at all). "service ntp stop" is gone:
 # there is no service command (nor ntp) on the Arch images.
-sudo sh -c '
+sh -c '
 # Probing i2c dev to enable i2c
 modprobe i2c-dev
 
