@@ -196,8 +196,32 @@ class SCControlHandler(ControlHandler):
         except Exception as e:
             self.classlog.error("Error in synthIsUpStatus(): %s", e)
 
+    # sclang listens on 3010 once its class library is compiled and
+    # startup.scd has run NebInterface.init (~16 s after power on, on a Pi 3).
+    # A loadScFile sent earlier is lost, and the pings after it only ask
+    # whether a patch is loaded: the bank stayed silent. Nebulae used to start
+    # ~3 s later (a sudo per command), which hid this.
+    def waitForSclangPort(self, timeout=30.0):
+        self.classlog.info("wait until sclang lisen on port %d", scsender.ScSend.rPort)
+        port = ":%04X" % scsender.ScSend.rPort  # local address, e.g. 00000000:0BC2
+        start = time.time()
+        while time.time() - start < timeout:
+            for table in ("/proc/net/udp", "/proc/net/udp6"):
+                try:
+                    with open(table) as f:
+                        next(f)  # header
+                        if any(line.split()[1].endswith(port) for line in f):
+                            return True
+                except (OSError, IndexError, StopIteration):
+                    pass
+            time.sleep(0.1)
+        self.classlog.warning("sclang does not listen on %d after %.0f s, loading anyway",
+                              scsender.ScSend.rPort, timeout)
+        return False
+
     def loadScSynth(self, patch):
         self.scSock.setSynthIsDown()
+        self.waitForSclangPort()
         self.scSock.send('loadScFile', patch)
         self.synthIsUpStatus()
 
