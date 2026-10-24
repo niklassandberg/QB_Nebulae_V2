@@ -14,6 +14,12 @@ ExecStart=/home/alarm/checkfirmware.sh
 WorkingDirectory=/
 Restart=on-failure
 RemainAfterExit=true
+# Everything Nebulae prints and logs (classlogger.py, nebio, Csound, Pd) is in
+# the journal under this name: journalctl -u nebulae. No rate limit: with
+# log_level DEBUG it can write more than journald's 10000 lines per 30 s,
+# and the rest would be dropped.
+SyslogIdentifier=nebulae
+LogRateLimitIntervalSec=0
 
 [Install]
 WantedBy=multi-user.target

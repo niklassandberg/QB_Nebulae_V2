@@ -119,7 +119,7 @@ common_on() {
     if [ "$(systemctl is-enabled systemd-timesyncd.service 2>/dev/null)" != masked-runtime ]; then
         ( if [ -n "$BOOT" ]; then
               for i in $(seq 60); do
-                  grep -qs "Killing LED program" /tmp/nebulae_logging.log && break
+                  [ -e /run/nebulae-ui-ready ] && break  # written by nebulae.py loadUI()
                   sleep 0.5
               done
           fi

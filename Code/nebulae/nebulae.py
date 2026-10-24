@@ -91,11 +91,6 @@ class Nebulae(object):
                 self.new_bank = 'instr'
                 self.new_instr = 'a_granularlooper'
             self.first_run = True
-            if neb_globals.wifi_always_on:
-                self.classlog.info("wifi_always_on: starting Wi-Fi")
-                subprocess.Popen(["/bin/bash", "/home/alarm/QB_Nebulae_V2/Code/nebscripts/1_wifi.sh", "on"],
-                                 stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL,
-                                 stderr=subprocess.DEVNULL, start_new_session=True)
             nebmixer.disable()
             self.last_debug_print = time.time()
         except Exception as e:
@@ -532,6 +527,12 @@ class Nebulae(object):
             self.classlog.info("Killing LED program")
             cmd = "sudo pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
             os.system(cmd)
+            # quiet.sh waits for this at boot (first instrument loaded);
+            # /run is emptied at every boot.
+            try:
+                open("/run/nebulae-ui-ready", "w").close()
+            except OSError:
+                pass
             if self.ui is None:
                 self.ui = ui.UserInterface(self.c_handle)
             else:
@@ -570,5 +571,6 @@ try:
     else:
         app.start(app.new_instr, app.new_bank)
         app.run()
-except Exception as e:
-    app.classlog.error("Unhandled error in main execution: %s", e)
+except Exception:
+    # With the traceback, also when Nebulae() itself failed (no app yet).
+    ClassLogger.logCrash("Unhandled error in main execution")

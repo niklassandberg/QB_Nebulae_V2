@@ -6,10 +6,13 @@ After=network.target sound.target
 Type=simple
 User=root
 WorkingDirectory=/root/
-ExecStart=/bin/bash -c 'exec tail -f /dev/null | /usr/bin/sclang &> /tmp/sclang.log'
+# tail keeps sclang's stdin open (it quits at end of input). Its output (and
+# scsynth's) goes to the journal: journalctl -u sclang (was /tmp/sclang.log).
+ExecStart=/bin/bash -c 'exec tail -f /dev/null | /usr/bin/sclang'
 Restart=always
 StandardOutput=journal
 StandardError=journal
+SyslogIdentifier=sclang
 
 [Install]
 WantedBy=multi-user.target

@@ -1,5 +1,4 @@
 remount_fs = False
-wifi_always_on = False
 
 #To not write to known logs so we get even more noice
 #sudo systemctl stop systemd-journald.socket systemd-journald-dev-log.socket systemd-journald

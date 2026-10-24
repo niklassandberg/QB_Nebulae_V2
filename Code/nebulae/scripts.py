@@ -9,8 +9,8 @@ from classlogger import ClassLogger
 # stick (USER_DIR, copied by fileloader like instruments).
 #
 # A script is run with no arguments when it is selected (speed click), in
-# the background as root; the instrument keeps playing. Output goes to
-# /tmp/nebulae_script_<name>.log.
+# the background as root; the instrument keeps playing. Output goes to the
+# journal: journalctl -t nebscript-<name>.
 # "<script> status" tells its state for the slot LED: exit 0 = on (bright),
 # exit 1 = off (dim), anything else = no state (dim, like an instr slot).
 # Only scripts that contain STATUS_MARKER (e.g. in a comment) are asked:
@@ -86,12 +86,12 @@ class ScriptHandler(object):
             return
         self.log.info("Running script %s", self.files[idx])
         try:
-            out = open("/tmp/nebulae_script_" + name + ".log", "w")
-            proc = subprocess.Popen(self.command(idx), stdout=out,
-                                    stderr=subprocess.STDOUT,
+            # Output to the journal: journalctl -t nebscript-<name>.
+            # systemd-cat execs the script, so proc is the script itself.
+            proc = subprocess.Popen(["systemd-cat", "-t", "nebscript-" + name]
+                                    + self.command(idx),
                                     stdin=subprocess.DEVNULL,
                                     start_new_session=True)
-            out.close()
             self.running[idx] = proc
             threading.Thread(target=self.refreshWhenDone, args=(proc,), daemon=True).start()
         except OSError as e:
