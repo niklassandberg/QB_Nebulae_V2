@@ -18,6 +18,12 @@ import threading
 # Which levels are written at all: log_level of configsettings.py
 # (Code/config/configsettings.txt, default INFO), or NEB_LOG_LEVEL in the
 # environment, which wins.
+#
+# STATS, between DEBUG and INFO: measuring/status lines (e.g. every 10 s the
+# main loop rate and nebio's counters, controlhandler.py), only written with
+# log_level STATS or DEBUG. In the journal they are debug priority.
+STATS = 15
+logging.addLevelName(STATS, "STATS")
 
 
 def _level_name():

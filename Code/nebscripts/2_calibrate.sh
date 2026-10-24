@@ -1,5 +1,5 @@
 #!/bin/bash
-# Calibrate the CV inputs, from the scripts page of the instr selector.
+# Calibrate the CV inputs, from the configsettings page of the instr selector.
 # Unplug all CV cables first: the 8 CV inputs are measured as their zero.
 # Settings and the current instrument are kept (check_calibration.py only).
 #

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Switches Wi-Fi on or off; only switching, no settings. Nebulae saves the
 # setting (configsettings.py) and runs "wifi.sh on|off" when it is changed on
-# the scripts page (1_wifi.ui), and once at its start for the saved setting
+# the configsettings page (1_wifi.ui), and once at its start for the saved setting
 # (Wi-Fi is off until then: startup.sh blocks the radio).
 #   wifi.sh on|off
 #   wifi.sh driver   load the Wi-Fi driver (after Quiet level 1 removed it)

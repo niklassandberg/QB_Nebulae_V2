@@ -58,7 +58,8 @@ import nebio
 LOCK_FRAMES = 64     # smallest period of the audio chip: 48000 / 64 = 750 Hz
 LOCK_BUFFER = 1024   # frames; a 192-frame buffer ran dry (281 scans/s, tested)
 
-# controlhandler.py NEBIO_SCAN_HZ, NEBIO_DIGITAL_HZ, NEBIO_ADC_HZ. Locked:
+# Rates as Nebulae: nebio_scan_hz, nebio_digital_hz, nebio_adc_hz in
+# configsettings.py (defaults 1200, 400, 400). Locked:
 # 750 scans/s (one per block), digital and ADC every 2nd scan (375/s).
 nebio.inputs()
 if "--rates" in sys.argv:

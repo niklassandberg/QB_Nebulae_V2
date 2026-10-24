@@ -105,7 +105,7 @@ class ScriptHandler(object):
         with self.lock:
             return self.states[idx] if idx < self.fileCount else NO_STATE
 
-    # "status" is read once when the scripts page is shown and once after a
+    # "status" is read once when the configsettings page is shown and once after a
     # script has ended (the states only change by running one), in a thread
     # so a slow script never holds up the UI loop. It was polled every
     # second: each poll started bash + systemctl, a burst of activity heard

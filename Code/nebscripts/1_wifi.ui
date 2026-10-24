@@ -1,4 +1,4 @@
-# Wi-Fi on/off, on the scripts page of the instr selector.
+# Wi-Fi on/off, on the configsettings page of the instr selector.
 # A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
 # mode = the name after the number, here "wifi").
 # Speed click on it: Wi-Fi on if it is off, off if it is on, and back to the

@@ -8,14 +8,13 @@
 # yield/work: spin.c (see there), built into /tmp (RAM, so the root file
 # system stays read-only) when missing or older than spin.c; shell: a shell
 # loop (also the fallback if gcc fails).
-# Heat guard: the loops pause (SIGSTOP) at SPIN_HOT and go on at SPIN_COOL
-# (millidegrees). A Pi 3 without heatsink reached 83 C with them on all cores;
-# at 85 C its firmware lowers the clock and the audio breaks up. A Pi 4 stays
-# around 51 C, there the guard never acts.
+# No heat guard: pausing loops when hot (tried at 80 C, all of them or one at
+# a time) only brought the tone back, heard as a beat. Measured on a Pi 3
+# without heatsink (2026-10-24, 10 min, all cores, Nebulae playing): settles
+# at 83 C, ARM clock stayed 1200 MHz, 0 dropouts. Hotter (case, room), the
+# Pi's firmware lowers the clock itself from 85 C; Csound has room for that
+# (2.8x real time). A Pi 4 stays around 51 C.
 KIND=${1:-yield}
-HOT=${SPIN_HOT:-80000}
-COOL=${SPIN_COOL:-75000}
-TEMP=/sys/class/thermal/thermal_zone0/temp
 CORES=${2:-$(nproc)}
 [ "$CORES" -gt "$(nproc)" ] && CORES=$(nproc)
 SRC=$(dirname "$0")/spin.c
@@ -23,27 +22,13 @@ BIN=/tmp/nebulae_spin
 if [ "$KIND" != shell ] && ! { [ -x $BIN ] && [ $BIN -nt "$SRC" ]; }; then
     gcc -O2 -o $BIN "$SRC" || KIND=shell
 fi
-PIDS=""
-# Stopped (systemctl stop, noise_test.sh stop): the loops go too (a paused
-# loop only sees the TERM once it is continued).
-trap 'kill -CONT $PIDS 2>/dev/null; kill $(jobs -p) 2>/dev/null; exit 0' TERM INT
+# Stopped (systemctl stop, noise_test.sh stop): the loops go too.
+trap 'kill $(jobs -p) 2>/dev/null; exit 0' TERM INT
 for c in $(seq 0 $(( CORES - 1 ))); do
     if [ "$KIND" = shell ]; then
         taskset -c "$c" sh -c 'while :; do :; done' &
     else
         taskset -c "$c" $BIN "$KIND" &
     fi
-    PIDS="$PIDS $!"
 done
-paused=0
-while :; do
-    t=$(cat $TEMP 2>/dev/null || echo 0)
-    if [ $paused = 0 ] && [ "$t" -ge $HOT ]; then
-        kill -STOP $PIDS 2>/dev/null; paused=1
-        logger -t nebulae-spin "paused at $((t / 1000)) C"
-    elif [ $paused = 1 ] && [ "$t" -le $COOL ]; then
-        kill -CONT $PIDS 2>/dev/null; paused=0
-        logger -t nebulae-spin "running again at $((t / 1000)) C"
-    fi
-    sleep 1 & wait $!  # the trap runs at once, not after the sleep
-done
+wait

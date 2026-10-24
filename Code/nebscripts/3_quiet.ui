@@ -1,4 +1,4 @@
-# Quiet mode, on the scripts page of the instr selector.
+# Quiet mode, on the configsettings page of the instr selector.
 # A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
 # mode = the name after the number, here "quiet").
 # Speed click on it: the speed encoder picks the level, shown in the colour

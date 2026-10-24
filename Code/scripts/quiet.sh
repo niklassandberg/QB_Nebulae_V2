@@ -3,7 +3,7 @@
 # that is not needed to play is switched off: whatever puts noise on the
 # power is heard by the cheap ADC/DAC on i2s.
 # Only switching, no settings: Nebulae saves the level (configsettings.py)
-# and runs "quiet.sh change OLD NEW" when it is chosen on the scripts page
+# and runs "quiet.sh change OLD NEW" when it is chosen on the configsettings page
 # (3_quiet.ui), and "quiet.sh change 0 N" once at its start for the saved
 # level (Quiet mode is off until then). Wi-Fi off is done by Nebulae too.
 #   quiet.sh change OLD NEW   from level OLD to NEW (0-3, 0 = off)
@@ -20,15 +20,20 @@
 #    2 and 3 only)
 #  - Nebulae's status lines (every 10 s) not logged (controlhandler.py)
 #  - spin: the CPU never sleeps. Every scan woke it from sleep (WFI), a
-#    current pulse heard as a tone (noise_test.sh "wake"); a do-nothing shell
-#    loop (Code/scripts/spin.sh shell) on all 4 cores at the lowest priority
+#    current pulse heard as a tone (noise_test.sh "wake"); a do-nothing
+#    loop (Code/scripts/spin.sh yield) on all 4 cores at the lowest priority
 #    (SCHED_IDLE, all real work goes first) keeps the current even. Measured
 #    (noise_measure.py, 400 Hz scan tone): none -98.5, yield or nohlt -103.5,
-#    shell -107.2 dBFS; fewer than 4 cores was clearly worse by ear. Own unit
+#    shell -107.2 dBFS; fewer than 4 cores was clearly worse by ear. yield,
+#    not the quieter shell loop: on a Pi 3 the shell loop slowed Csound
+#    (shared cache/bus) to dropouts while recording; yield touches no
+#    memory (2026-10-24: buffer reserve ~600 instead of ~1400 of 2048
+#    used, Csound in real-time priority, nebulae.py setRealtime). Own unit
 #    nebulae-spin, so it survives a Nebulae restart. Costs ~1-2 W and heat
 #    (51 C tested, no throttling).
-#    Pi 3 without heatsink: 82-83 C with the loops, spin.sh pauses them
-#    above 80 C (its firmware throttles at 85 C). The glitches seen there
+#    Pi 3 without heatsink: 83 C with the loops, no slowdown, no dropouts
+#    (its firmware lowers the clock itself from 85 C; spin.sh has no heat
+#    guard, pausing loops only brought the tone back). The glitches seen there
 #    with spin came from Csound being too slow (the unoptimised Arch
 #    package), not from the loops; see Resources/engines/csound.
 # Level 1: also Ethernet (LAN) down (the gigabit PHY stops sending, no ssh!)
@@ -53,7 +58,7 @@ spin() {  # on | off
     if [ "$1" = on ]; then
         systemctl is-active --quiet $SPIN && return
         systemd-run --unit=$SPIN --collect --quiet -p CPUSchedulingPolicy=idle \
-            /bin/bash $CODE/scripts/spin.sh shell
+            /bin/bash $CODE/scripts/spin.sh yield
     else
         systemctl stop $SPIN 2>/dev/null
     fi

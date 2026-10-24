@@ -46,7 +46,7 @@ class FileLoader(object):
         self.pdtypes = [".pd",".pd_linux"]
         self.csdtypes = [".csd"]
         self.scdtypes = [".scd",".sc"]
-        self.scripttypes = [".sh", ".neb"]  # scripts page (scripts.py); .neb = executable
+        self.scripttypes = [".sh", ".neb"]  # configsettings page (scripts.py); .neb = executable
         self.othertypes = [".c", ".cpp", ".cc"]
         self.dirs = [ "audio", "instr", "pd", "sc", "scripts", "csound", "other"]
         self.dirtypes = {}

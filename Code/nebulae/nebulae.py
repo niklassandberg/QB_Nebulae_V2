@@ -97,6 +97,29 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in __init__: %s", e)
 
+    # Csound's performance thread (it computes and plays every audio block)
+    # in real-time priority (SCHED_FIFO, csound_rt_priority in
+    # configsettings.py, below jackd's 75): nothing else may interrupt it.
+    # At normal priority even the Quiet mode spin loops (SCHED_IDLE) got
+    # ~2 ms turns on its core; on a Pi 3 while recording that was constant
+    # dropouts (measured 2026-10-24: ~1400 interruptions per 20 s, 1800 to
+    # 2000 dropouts per 160 s; with FIFO 0 and 0).
+    # new_threads: the thread ids CsoundPerformanceThread() created.
+    def setRealtime(self, new_threads):
+        prio = configSettings.csoundRtPriority
+        if prio == 0:
+            return
+        if len(new_threads) != 1:
+            self.classlog.warning("Csound thread not found (new threads: %s): normal priority",
+                                  sorted(new_threads))
+            return
+        tid = int(new_threads.pop())
+        try:
+            os.sched_setscheduler(tid, os.SCHED_FIFO, os.sched_param(prio))
+            self.classlog.info("Csound thread %d: real-time priority %d (SCHED_FIFO)", tid, prio)
+        except OSError as e:
+            self.classlog.error("Csound thread %d: no real-time priority: %s", tid, e)
+
     def getSysCores(self):
         try:
             return multiprocessing.cpu_count()
@@ -151,7 +174,9 @@ class Nebulae(object):
             self.c.start() # Start Csound
             self.c_handle = ch.ControlHandler(self.c, self.orc_handle.numFiles(), configData, self.new_instr, bank=self.new_bank) # Create handler for all csound comm.
             self.loadUI()
-            self.pt = ctcsound.CsoundPerformanceThread(self.c.csound()) # Create CsoundPerformanceThread 
+            threads = set(os.listdir("/proc/self/task"))
+            self.pt = ctcsound.CsoundPerformanceThread(self.c.csound()) # Create CsoundPerformanceThread
+            self.setRealtime(set(os.listdir("/proc/self/task")) - threads)
             self.c_handle.setCsoundPerformanceThread(self.pt)
             self.pt.play() # Begin Performing the Score in the perforamnce thread
             nebmixer.init()

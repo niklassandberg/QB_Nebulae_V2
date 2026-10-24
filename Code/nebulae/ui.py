@@ -26,10 +26,10 @@ CLIP_HOLD_MS = 8
 LED_DRAW_MS = 10
 
 # Instr selector pages, in the order the speed encoder steps through them.
-# "scripts" runs a script instead of loading an instrument (scripts.py).
-BANKS = ["instr", "supercollider", "puredata", "scripts"]
+# "configsettings": the config settings and scripts instead of instruments (scripts.py).
+BANKS = ["instr", "supercollider", "puredata", "configsettings"]
 
-# The config settings of the scripts page (LED dim, Wi-Fi, Quiet mode) are
+# The config settings of the configsettings page (LED dim, Wi-Fi, Quiet mode) are
 # read from and saved through configSettings (configsettings.py).
 
 # LED dim: change per encoder step (50 steps from off to full).
@@ -110,13 +110,13 @@ class UserInterface(object):
         self.clip_shown = False
         self.led_draw_time = -LED_DRAW_MS
         self.draw_leds = True
-        # LED dim (scripts page, 4_led_dim.ui).
+        # LED dim (configsettings page, 4_led_dim.ui).
         self.led_dim_mode = False
         self.led_dim = configSettings.ledDim  # live while it is being turned
         self.log.info("LED dim %.2f", self.led_dim)
         libDriver.led_set_dim(self.led_dim)
         self.applyQuietToLeds(configSettings.quietMode)
-        # Quiet level selector (scripts page, 3_quiet.ui).
+        # Quiet level selector (configsettings page, 3_quiet.ui).
         self.quiet_select_mode = False
         self.quiet_select = 0
         self.quiet_select_acc = 0
@@ -137,7 +137,7 @@ class UserInterface(object):
         # Script states (slot LEDs) are read when their page is shown.
         shown = (self.mode == "instr selector" and not self.led_dim_mode
                  and not self.quiet_select_mode
-                 and self.controlhandler.getInstrSelBank() == "scripts")
+                 and self.controlhandler.getInstrSelBank() == "configsettings")
         if shown != self.scripts_shown:
             self.scripts_shown = shown
             if shown:
@@ -592,7 +592,7 @@ class UserInterface(object):
             elif self.controlhandler.getInstrSelBank() == "puredata":
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 0.0)
                 self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
-            elif self.controlhandler.getInstrSelBank() == "scripts":
+            elif self.controlhandler.getInstrSelBank() == "configsettings":
                 tempc = libDriver.Color(4095, 1200, 0) # orange: not an instrument page
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 1.0)
                 self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
@@ -639,7 +639,7 @@ class UserInterface(object):
                 self.log.debug("Clicked Speed from Instr Sel")
                 # Never load a slot that has nothing (e.g. a bank emptied by a USB load).
                 if self.controlhandler.getInstrSelIdx() < self.instrSelHandle().numFiles():
-                    if self.controlhandler.getInstrSelBank() == "scripts":
+                    if self.controlhandler.getInstrSelBank() == "configsettings":
                         idx = self.controlhandler.getInstrSelIdx()
                         ui_mode = self.script_fhandle.uiMode(idx)
                         if ui_mode == "wifi":
@@ -689,6 +689,10 @@ class UserInterface(object):
     # LEDs no PWM (their PWM is heard in the audio).
     def applyQuietToLeds(self, level):
         libDriver.led_set_no_pwm(level in (1, 2))
+        # NOTE (idea, 2026-10-24): stagger could always be on, also without
+        # Quiet mode. It only spreads the LED channels' switch-on moments
+        # over the PWM cycle (no big current step, heard as a tone); the
+        # brightness looks the same. Then it needs no Quiet mode switch.
         libDriver.led_set_stagger(level > 0)
 
     # Quiet level selector: the speed encoder steps through QUIET_ORDER (off,
@@ -1002,7 +1006,7 @@ class UserInterface(object):
             return self.sc_fhandle
         elif bank == "puredata":
             return self.puredata_fhandle
-        elif bank == "scripts":
+        elif bank == "configsettings":
             return self.script_fhandle
         return self.instr_fhandle
 
