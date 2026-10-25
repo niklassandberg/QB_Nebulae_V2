@@ -1,5 +1,5 @@
 # GutterSynth UGen for the Nebulae's SuperCollider. Level 2: built after
-# SuperCollider (uses its installed plugin headers), see Resources/engines/README.md.
+# SuperCollider (uses its installed plugin headers), see Resources/engine_build/README.md.
 
 pkgname=sc-guttersynth
 _commit=fb481d4

@@ -29,10 +29,10 @@ cp -R ../Code QB_Nebulae_V2/
 # machine and its CMake cache for the wrong path.
 rm -rf QB_Nebulae_V2/Code/nebio/build
 cp -R ../Resources/SuperCollider/Extensions QB_Nebulae_V2/SuperColliderExtensions
-# The engine recipes next to their packages (Code/engines/): a Nebulae builds
+# The engine recipes next to their packages (Code/engine_packages/): a Nebulae builds
 # a package itself when the firmware has a recipe but no package for it
 # (Code/scripts/engines_build.sh).
-cp -R ../Resources/engines/. QB_Nebulae_V2/Code/engines/
+cp -R ../Resources/engine_build/. QB_Nebulae_V2/Code/engine_packages/
 if [ "$1" = "--hwtest" ]
 then
     echo "Hardware test firmware: startup.sh will run hwtest.py instead of nebulae"

@@ -1,13 +1,13 @@
 #!/bin/bash
 # The Nebulae's audio engines and their plugins, as packages in
-# /home/alarm/engines/ (recipes in Resources/engines/, same layout):
+# /home/alarm/engine_packages/ (recipes in Resources/engine_build/, same layout):
 #   <engine>/*.pkg.tar.*            level 1: the engines
 #   <engine>/<plugins>/*.pkg.tar.*  level 2: plugins, externals
-# /home/alarm/engines/ is outside the firmware folder, so a firmware update
+# /home/alarm/engine_packages/ is outside the firmware folder, so a firmware update
 # keeps what was built on this Nebulae. At each run (firmware update) first:
-#  - the firmware's Code/engines/ is merged in: its recipes and scripts
+#  - the firmware's Code/engine_packages/ is merged in: its recipes and scripts
 #    replace the old ones, its packages are added, nothing is deleted
-#  - the USB stick's engines/ folder too (same layout: your own recipes, or
+#  - the USB stick's engine_build/ folder too (same layout: your own recipes, or
 #    ready packages), only its engine folders (not the scripts)
 #  - the first time: the packages of the previous firmware (the update's
 #    backup in /home/alarm/backup/old) are taken over
@@ -32,22 +32,31 @@
 # Needs root. The services start it as root; started by hand it runs
 # itself again with sudo (sudo as root only adds lines to the journal).
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
-DIR=/home/alarm/engines
-FIRMWARE=/home/alarm/QB_Nebulae_V2/Code/engines
-STICK=/mnt/memory/engines
-OLD=/home/alarm/backup/old/QB_Nebulae_V2/Code/engines   # update.sh's backup
+DIR=/home/alarm/engine_packages
+FIRMWARE=/home/alarm/QB_Nebulae_V2/Code/engine_packages
+STICK=/mnt/memory/engine_build
+# update.sh's backup of the previous firmware; up to 2026-10-25 the folder
+# was called Code/engines.
+OLD=/home/alarm/backup/old/QB_Nebulae_V2/Code
 ARCH=$(pacman-conf Architecture | head -1)
 
 merge() {
-    local first=""
+    local first="" old
+    # Up to 2026-10-25 the folder was called /home/alarm/engines: moved, so
+    # what was built on this Nebulae stays.
+    if [ ! -d $DIR ] && [ -d /home/alarm/engines ]; then
+        mv /home/alarm/engines $DIR && echo "engines: /home/alarm/engines renamed to $DIR"
+    fi
     [ -d $DIR ] || first=1
     mkdir -p $DIR
-    # The first time: what the previous firmware had built (Code/engines/ in
-    # it), so it is not built again.
-    if [ -n "$first" ] && [ -d $OLD ]; then
-        (cd $OLD && find . -name "*.pkg.tar.*" -exec cp --parents -n {} $DIR/ \;)
-        echo "engines: packages of the previous firmware taken over"
-    fi
+    # The first time: what the previous firmware had built, so it is not
+    # built again.
+    for old in $OLD/engine_packages $OLD/engines; do
+        if [ -n "$first" ] && [ -d $old ]; then
+            (cd $old && find . -name "*.pkg.tar.*" -exec cp --parents -n {} $DIR/ \;)
+            echo "engines: packages of the previous firmware taken over ($old)"
+        fi
+    done
     [ -d $FIRMWARE ] && cp -r $FIRMWARE/. $DIR/
     if grep -qs " /mnt/memory " /proc/mounts && [ -d $STICK ]; then
         for d in $STICK/*/; do

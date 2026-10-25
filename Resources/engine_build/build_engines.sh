@@ -5,8 +5,8 @@
 #      (the Arch package, no recipe); each is installed when built
 #   2. their plugins and externals: <engine>/<dir>/<name>/PKGBUILD, built
 #      against the installed engines
-# Output: OUT in the layout of Code/engines/ (copy it there).
-#   build_engines.sh [OUT]        default OUT=/home/alarm/engines_out
+# Output: OUT in the layout of Code/engine_packages/ (copy it there).
+#   build_engines.sh [OUT]        default OUT=/home/alarm/engine_packages
 # Run as root (it installs the build dependencies); makepkg runs as alarm.
 # Takes hours on a Pi 3 (Csound ~30 min, sc3-plugins and ELSE longer), so
 # start it detached:
@@ -15,8 +15,8 @@
 # again after a failure to go on.
 set -uo pipefail
 SRC=$(cd "$(dirname "$0")" && pwd)
-OUT=${1:-/home/alarm/engines_out}
-WORK=/home/alarm/engines_build
+OUT=${1:-/home/alarm/engine_packages}
+WORK=/home/alarm/engine_build_work
 mkdir -p "$OUT" "$WORK/sources"
 chown alarm:alarm "$OUT" "$WORK" "$WORK/sources"
 exec >> "$OUT/build.log" 2>&1

@@ -1,6 +1,6 @@
 # sc3-plugins for the Nebulae's SuperCollider (supercollider-headless,
-# Resources/engines/supercollider). Level 2: built after SuperCollider, see
-# Resources/engines/README.md.
+# Resources/engine_build/supercollider). Level 2: built after SuperCollider, see
+# Resources/engine_build/README.md.
 # Release build with makepkg's CFLAGS (-march=armv8-a: runs on Pi 3 and Pi 4;
 # the old build_sc.sh used -DNATIVE=ON, tuned to the Pi 4 it was built on).
 

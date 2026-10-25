@@ -1,5 +1,5 @@
 # ELSE (EL Locus Solus' Externals) for the Nebulae's Pure Data. Level 2:
-# built after Pd, see Resources/engines/README.md. nebulae.py loads it
+# built after Pd, see Resources/engine_build/README.md. nebulae.py loads it
 # ("-path ... -lib else") when /usr/lib/pd/extra/else exists.
 # ELSE builds its own ffmpeg (for play.file~ and friends): long build
 # (about an hour on a Pi 4).

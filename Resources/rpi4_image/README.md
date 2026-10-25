@@ -34,9 +34,9 @@ The 64-bit system for the Nebulae (first made 2026-10-22), replacing the old
    `create_fw_update.sh` lays it out, Unix line endings, without `Code/packages`)
    and this folder to `/home/alarm/rpi4_image`, then `bash /home/alarm/rpi4_image/setup_system.sh`.
    It also installs the audio engines and their plugins from the firmware's
-   `Code/engines/` (Csound, SuperCollider + sc3-plugins and UGens, Pure Data +
+   `Code/engine_packages/` (Csound, SuperCollider + sc3-plugins and UGens, Pure Data +
    cyclone and ELSE; `Code/scripts/engines_check.sh`, see
-   `Resources/engines/README.md`) and enables sclang.service. Nothing to build.
+   `Resources/engine_build/README.md`) and enables sclang.service. Nothing to build.
 
 ## Release image for other users
 `make_release_image.sh` makes an image to hand out from an image of a working

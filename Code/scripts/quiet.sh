@@ -38,7 +38,7 @@
 #    (its firmware lowers the clock itself from 85 C; spin.sh has no heat
 #    guard, pausing loops only brought the tone back). The glitches seen there
 #    with spin came from Csound being too slow (the unoptimised Arch
-#    package), not from the loops; see Resources/engines/csound.
+#    package), not from the loops; see Resources/engine_build/csound.
 # Level 1: also Ethernet (LAN) down (the gigabit PHY stops sending, no ssh!)
 #          and the Wi-Fi/Bluetooth chip driver removed (chip without firmware)
 # Level 2: LAN on, Wi-Fi chip driver loaded (radio off until Wi-Fi is on)

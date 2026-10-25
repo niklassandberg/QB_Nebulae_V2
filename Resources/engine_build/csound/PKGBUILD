@@ -13,7 +13,7 @@
 # Build on the Pi (aarch64, about 30 min on a Pi 3, needs the makedepends):
 #   makepkg -s
 # Install: Code/scripts/engines_check.sh (firmware update) installs the
-# package from Code/engines/ when the installed Csound is not this build.
+# package from Code/engine_packages/ when the installed Csound is not this build.
 #
 # Maintainer (ALARM): Kevin Mihelich <kevin@archlinuxarm.org>
 # Maintainer (Arch): David Runge <dvzrv@archlinux.org>

@@ -1,11 +1,11 @@
 # Audio engines and their plugins
 
 The Nebulae's audio engines and everything built for them are packages in the
-firmware (`Code/engines/`), built from the recipes here. Both have the same
+firmware (`Code/engine_packages/`), built from the recipes here. Both have the same
 layout, in two levels:
 
 ```
-Code/engines/                       Resources/engines/
+Code/engine_packages/                       Resources/engine_build/
   csound/                             csound/PKGBUILD
   supercollider/                      supercollider/PKGBUILD
     plugins/                            plugins/sc3-plugins/ sc-guttersynth/
@@ -30,16 +30,16 @@ All of them are optimised builds (`-O2`/`-O3`, CMake `Release`) for
 `-march=armv8-a`, so the same packages run on a Pi 3 and a Pi 4.
 
 ## On the Nebulae
-The engines live in **`/home/alarm/engines/`** (same layout), outside the
+The engines live in **`/home/alarm/engine_packages/`** (same layout), outside the
 firmware folder: a firmware update replaces `QB_Nebulae_V2/`, but keeps what
 was built on the Nebulae. `Code/scripts/engines_check.sh` (run by `update.sh`
 during a firmware update, and by `setup_system.sh`):
-1. merges the firmware's `Code/engines/` into `/home/alarm/engines/`: its
+1. merges the firmware's `Code/engine_packages/` into `/home/alarm/engine_packages/`: its
    recipes and scripts replace the old ones, its packages are added, nothing
    is deleted (the first time also the packages of the previous firmware)
-2. merges the USB stick's **`engines/`** folder the same way (only the engine
+2. merges the USB stick's **`engine_build/`** folder the same way (only the engine
    folders): **your own recipes or ready packages**, e.g.
-   `engines/supercollider/plugins/sc-myugen/PKGBUILD` on the stick. Only
+   `engine_build/supercollider/plugins/sc-myugen/PKGBUILD` on the stick. Only
    during a firmware update (`neb_update.zip` on the stick too).
 3. builds nothing: a recipe without a package of its version is only
    reported, on the stick in `neb_engines_report.txt` (build it by hand, below)
@@ -60,8 +60,8 @@ filesystem"). The folders the packages may overwrite for that are in
 
 ### Building a missing package on the Nebulae (by hand)
 The firmware also carries the recipes (`create_fw_update.sh` copies this
-folder into `Code/engines/`). When a recipe has no package of its version in
-`/home/alarm/engines/` (for example a new UGen added to the repository
+folder into `Code/engine_packages/`). When a recipe has no package of its version in
+`/home/alarm/engine_packages/` (for example a new UGen added to the repository
 without building it, or a recipe from the stick), build it on the Nebulae:
 ```
 sudo bash /home/alarm/QB_Nebulae_V2/Code/scripts/engines_build.sh
@@ -71,7 +71,7 @@ It builds every recipe without its package, **natively** for that Pi's CPU
 every recipe that uses makepkg's `$CFLAGS`; both models have the same
 instructions, so a package also runs on the other one, only less finely
 tuned), installs the result and deletes the old package files. Log:
-`/home/alarm/engines/build.log`. It needs internet:
+`/home/alarm/engine_packages/build.log`. It needs internet:
 
 1. internet through the **LAN** cable, if it has internet
 2. else **Wi-Fi** as a normal client, with a file called `wlan0-wifi` (no
@@ -106,12 +106,12 @@ removed again afterwards.
 On a Pi with the 64-bit image, as root (hours on a Pi 3, mostly sc3-plugins
 and ELSE, which builds its own ffmpeg):
 ```
-systemd-run --unit=nebulae-engines bash Resources/engines/build_engines.sh /home/alarm/engines_out
+systemd-run --unit=nebulae-engines bash Resources/engine_build/build_engines.sh /home/alarm/engine_packages
 ```
 It builds and installs level 1, then level 2, and writes the packages to
-`/home/alarm/engines_out` in the `Code/engines/` layout; copy that into the
+`/home/alarm/engine_packages` in the `Code/engine_packages/` layout; copy that into the
 repository. Packages already in the output folder are not built again (put the
-current `Code/engines/` there first to only build what is new).
+current `Code/engine_packages/` there first to only build what is new).
 
 A new version: change `pkgver`/tag/commit (and the checksums) in the recipe,
 raise `pkgrel` for a rebuild of the same version.

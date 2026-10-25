@@ -1,8 +1,8 @@
 #!/bin/bash
 # Builds, on the Nebulae itself, the engine packages that have a recipe but
-# no package of its version in /home/alarm/engines/ (the firmware's
-# Code/engines/ and the stick's engines/, merged in by a firmware update;
-# see Resources/engines/README.md), natively for this Pi's CPU
+# no package of its version in /home/alarm/engine_packages/ (the firmware's
+# Code/engine_packages/ and the stick's engine_build/, merged in by a firmware update;
+# see Resources/engine_build/README.md), natively for this Pi's CPU
 # (build_engines.sh), then installs them (engines_check.sh install).
 # A firmware update builds nothing; it reports what has no package. Run by
 # hand, it takes long:
@@ -31,7 +31,7 @@
 
 # Needs root. Started by hand it runs itself again with sudo.
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
-E=/home/alarm/engines
+E=/home/alarm/engine_packages
 STICK=/mnt/memory
 # The USB stick (report, wlan0-wifi): mounted for the build if it is in and
 # not mounted yet, and unmounted again at the end.
@@ -69,7 +69,7 @@ release_stick() {  # as it was before: unmounted, USB off (Quiet mode)
     stick_mounted=""; usb_was_off=""
 }
 # The new packages installed, the older files deleted (no merge: the
-# stick's engines/ is only taken in by a firmware update).
+# stick's engine_build/ is only taken in by a firmware update).
 install_built() { bash "$(dirname "$0")/engines_check.sh" install; }
 
 # What is missing: a recipe without its package (level 1: <engine>/PKGBUILD,
@@ -165,7 +165,7 @@ if [ -n "$new" ]; then
     orphans=$(comm -12 <(echo "$new" | sort) <(pacman -Qdtq 2>/dev/null | sort))
     [ -n "$orphans" ] && pacman -Rns --noconfirm $orphans >/dev/null 2>&1
 fi
-rm -rf /home/alarm/engines_build
+rm -rf /home/alarm/engine_build_work
 # This run only: build.log is appended to, from its last start line on.
 first=$(grep -n '^==== .*build_engines.sh$' $E/build.log | tail -1 | cut -d: -f1)
 this_run() { tail -n +"${first:-1}" $E/build.log; }
@@ -188,13 +188,13 @@ failed_log() {
     fi
 }
 if [ -z "$result" ] || [ "$rc" != 0 ]; then
-    summary="BUILD STOPPED after $(( ($(date +%s) - start) / 60 )) min (exit $rc; log: /home/alarm/engines/build.log)"
+    summary="BUILD STOPPED after $(( ($(date +%s) - start) / 60 )) min (exit $rc; log: /home/alarm/engine_packages/build.log)"
     say "$summary"
     failed_log
     install_built   # what did build: installed, old files deleted
     finish 1
 elif [[ $result == *FAILED* ]]; then
-    summary="BUILT WITH ERRORS after $(( ($(date +%s) - start) / 60 )) min:${result#*FAILED:} (log: /home/alarm/engines/build.log)"
+    summary="BUILT WITH ERRORS after $(( ($(date +%s) - start) / 60 )) min:${result#*FAILED:} (log: /home/alarm/engine_packages/build.log)"
     say "$summary"
     failed_log
     install_built   # what did build: installed, old files deleted

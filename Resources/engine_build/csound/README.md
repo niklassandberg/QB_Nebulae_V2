@@ -1,7 +1,7 @@
 # Csound package for the Nebulae (aarch64)
 
 Nebulae uses its own build of Csound 6.18.1 instead of the Arch Linux ARM
-package. The package is in `Code/engines/`; a firmware update installs it
+package. The package is in `Code/engine_packages/`; a firmware update installs it
 (`Code/scripts/engines_check.sh`, run by `update.sh`) when another Csound is
 installed, and adds `csound` to `IgnorePkg` so `pacman -Syu` keeps it.
 
@@ -46,7 +46,7 @@ buffer alone.
 On a Pi with the 64-bit image (about 30 min on a Pi 3):
 ```
 makepkg -s          # in a copy of this folder, as alarm
-cp csound-6.18.1-10.1-aarch64.pkg.tar.zst <repo>/Code/engines/
+cp csound-6.18.1-10.1-aarch64.pkg.tar.zst <repo>/Code/engine_packages/
 ```
 For a new Csound version: start from the current ALARM PKGBUILD again and
 check both fixes are still needed (look at its CMAKE_C_FLAGS line and at

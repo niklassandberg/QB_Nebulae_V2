@@ -1,5 +1,5 @@
 # SuperBufRd UGens for the Nebulae's SuperCollider. Level 2: built after
-# SuperCollider (uses its installed plugin headers), see Resources/engines/README.md.
+# SuperCollider (uses its installed plugin headers), see Resources/engine_build/README.md.
 # No install target upstream: the .so files and classes are copied, as the old
 # build_sc.sh did.
 

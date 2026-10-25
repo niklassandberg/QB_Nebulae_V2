@@ -386,7 +386,7 @@ class Nebulae(object):
             self.orc_handle.refreshFileHandler()
             fullPath = "/home/alarm/pd/" + patch + ".pd"
             cmd = "pd -jack -rt -callback -nogui -verbose".split() if debug else "pd -jack -rt -callback -nogui".split()
-            # Pd libraries (Code/engines/puredata/externals), when installed.
+            # Pd libraries (Code/engine_packages/puredata/externals), when installed.
             for lib in ("else", "cyclone"):
                 libDir = "/usr/lib/pd/extra/" + lib
                 if os.path.isdir(libDir):

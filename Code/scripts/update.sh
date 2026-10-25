@@ -70,8 +70,8 @@ then
     # the knobs through nebio, so build it first (file system is still rw).
     echo "building nebio for the new firmware"
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh
-    # Audio engines: the firmware's Code/engines/ and the stick's engines/
-    # are merged into /home/alarm/engines/ (kept across updates, so what was
+    # Audio engines: the firmware's Code/engine_packages/ and the stick's engine_build/
+    # are merged into /home/alarm/engine_packages/ (kept across updates, so what was
     # built here stays), other versions installed. Nothing is built: what has
     # no package is reported on the stick (build it: engines_build.sh).
     bash /home/alarm/QB_Nebulae_V2/Code/scripts/engines_check.sh

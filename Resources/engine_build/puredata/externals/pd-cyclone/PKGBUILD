@@ -1,5 +1,5 @@
 # cyclone (Max/MSP-compatible objects) for the Nebulae's Pure Data. Level 2:
-# built after Pd, see Resources/engines/README.md. nebulae.py loads it
+# built after Pd, see Resources/engine_build/README.md. nebulae.py loads it
 # ("-path ... -lib cyclone") when /usr/lib/pd/extra/cyclone exists.
 
 pkgname=pd-cyclone
