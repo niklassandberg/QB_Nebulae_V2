@@ -43,7 +43,7 @@ check() {  # level -> $need: the package files to install
     done
 }
 # Fallback: a recipe without its package is built on the Nebulae first (needs
-# internet: LAN, else Wi-Fi from wifi_credentials.txt on the stick; report on
+# internet: LAN, else Wi-Fi from the wlan0-wifi profile on the stick; report on
 # the stick). Normally the firmware has every package and nothing happens.
 [ "$1" = status ] || bash "$(dirname "$0")/engines_build.sh"
 if [ -z "$(pkgs 1)$(pkgs 2)" ]; then

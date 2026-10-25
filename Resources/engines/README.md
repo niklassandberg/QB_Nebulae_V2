@@ -42,14 +42,26 @@ example a new UGen added to the repository without building it), the firmware
 update builds it on the Nebulae (`Code/scripts/engines_build.sh`):
 
 1. internet through the **LAN** cable, if it has internet
-2. else **Wi-Fi** as a normal client, with `wifi_credentials.txt` on the USB
-   stick next to `neb_update.zip`:
+2. else **Wi-Fi** as a normal client, with a file called `wlan0-wifi` (no
+   filename extension!) on the USB stick next to `neb_update.zip`, with your
+   Wi-Fi name and password:
    ```
-   SSID=My home network
-   PASSWORD=my wifi password
+   Description='wifi for netctl'
+   Interface=wlan0
+   Connection=wireless
+   Security=wpa
+   ESSID=YourWifiNetworkName
+   IP=dhcp
+   Key=YourWifiPassword
    ```
-   (no `PASSWORD=` line for an open network). The file is only read into RAM,
-   the Wi-Fi setting is gone after the reboot that ends the update.
+   It is the same file the Nebulae uses for the home network when Wi-Fi is
+   switched on (`start_wifi.sh`). Quotes around a value do not matter (`"…"`,
+   `'…'`, `’…’` from old instructions, or none): the Nebulae takes every value
+   as written, also a `$` in the password (`Code/scripts/wifi_profile.sh`).
+   A WPA password has 8-63 characters. `Security=none` (and no `Key`) for an
+   open network, `Hidden=yes` for a network that does not show its name. Here it is
+   only read into RAM, the Wi-Fi setting is gone after the reboot that ends the
+   update.
 3. else nothing is built: the installed engines stay.
 
 Either way `neb_engines_report.txt` on the stick says what was missing, which

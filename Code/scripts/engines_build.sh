@@ -6,10 +6,19 @@
 # and the USB stick mounted (update.sh).
 # Internet for the sources and build tools:
 #  1. the LAN (Ethernet), when it has internet
-#  2. else Wi-Fi as a client, when wifi_credentials.txt is on the USB stick:
-#       SSID=My network
-#       PASSWORD=my password        (no PASSWORD line: an open network)
-#     It is only read into RAM (/tmp), never written to the SD card.
+#  2. else Wi-Fi as a client, when the file wlan0-wifi (no extension) is on
+#     the USB stick: the netctl profile start_wifi.sh uses for the home
+#     network too, e.g.
+#       Description='wifi for netctl'
+#       Interface=wlan0
+#       Connection=wireless
+#       Security=wpa                (or none: an open network, no Key)
+#       ESSID=YourWifiNetworkName
+#       IP=dhcp
+#       Key=YourWifiPassword
+#     Only ESSID, Key, Security and Hidden are used here, with any quotes
+#     (wifi_profile.sh); the file is read as text (not run) and only into
+#     RAM (/tmp), never written to the SD card.
 #  3. else nothing is built and the installed engines stay.
 # Report: neb_engines_report.txt on the stick (what was missing, the
 # network, what was built or why not); one line in neb_log.txt.
@@ -53,7 +62,7 @@ say "$(date) - $(tr -d '\0' < /proc/device-tree/model 2>/dev/null)"
 say "no package in the firmware for:$missing"
 
 # Network: the LAN first (faster, nothing to set up), else Wi-Fi with the
-# credentials from the stick.
+# wlan0-wifi profile from the stick.
 have_internet() { curl -sfI --max-time 10 https://github.com >/dev/null 2>&1; }
 net=""
 say "LAN: trying"
@@ -61,12 +70,19 @@ for i in /sys/class/net/e*; do ip link set "$(basename $i)" up 2>/dev/null; done
 systemctl start systemd-networkd systemd-resolved
 /usr/lib/systemd/systemd-networkd-wait-online --any --timeout=20 >/dev/null 2>&1
 if have_internet; then net="LAN"; else say "LAN: no internet"; fi
-CRED=$STICK/wifi_credentials.txt
-if [ -z "$net" ] && [ -f "$CRED" ]; then
-    ssid=$(tr -d '\r' < "$CRED" | sed -n 's/^SSID=//p' | head -1)
-    pass=$(tr -d '\r' < "$CRED" | sed -n 's/^PASSWORD=//p' | head -1)
+PROFILE=$STICK/wlan0-wifi
+# A value of the netctl profile, without whatever quotes it was written with.
+profile() { bash /home/alarm/QB_Nebulae_V2/Code/scripts/wifi_profile.sh get "$PROFILE" "$1"; }
+if [ -z "$net" ] && [ -f "$PROFILE" ]; then
+    ssid=$(profile ESSID)
+    pass=$(profile Key)
+    security=$(profile Security | tr A-Z a-z)
+    hidden=$(profile Hidden | tr A-Z a-z)
+    [ "$security" = none ] && pass=""
     if [ -z "$ssid" ]; then
-        say "wifi_credentials.txt has no SSID= line"
+        say "wlan0-wifi has no ESSID= line"
+    elif [ -n "$security" ] && [ "$security" != wpa ] && [ "$security" != none ]; then
+        say "wlan0-wifi: Security=$security is not supported here (wpa or none)"
     else
         say "Wi-Fi: joining \"$ssid\""
         bash /home/alarm/QB_Nebulae_V2/Code/scripts/wifi.sh driver
@@ -79,6 +95,8 @@ if [ -z "$net" ] && [ -f "$CRED" ]; then
         else
             printf 'network={\n\tssid="%s"\n\tkey_mgmt=NONE\n}\n' "$ssid" > $WPA
         fi
+        # Hidden=yes: the network does not announce itself, ask for it by name.
+        [ "$hidden" = yes ] && sed -i 's/^}$/\tscan_ssid=1\n}/' $WPA
         umask 022
         wpa_supplicant -B -i wlan0 -c $WPA -P /tmp/neb_build_wpa.pid >/dev/null 2>&1
         wpa_pid=$(cat /tmp/neb_build_wpa.pid 2>/dev/null)
@@ -89,10 +107,10 @@ if [ -z "$net" ] && [ -f "$CRED" ]; then
         if have_internet; then net="Wi-Fi \"$ssid\""; else say "Wi-Fi: no internet through \"$ssid\""; fi
     fi
 elif [ -z "$net" ]; then
-    say "Wi-Fi: no wifi_credentials.txt on the stick"
+    say "Wi-Fi: no wlan0-wifi on the stick"
 fi
 if [ -z "$net" ]; then
-    say "NOT BUILT: no internet (connect a LAN cable or put wifi_credentials.txt on the stick, then update again)"
+    say "NOT BUILT: no internet (connect a LAN cable or put wlan0-wifi on the stick, then update again)"
     finish 1
 fi
 say "internet through $net"
