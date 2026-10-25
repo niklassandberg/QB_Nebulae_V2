@@ -35,6 +35,22 @@ BANKS = ["instr", "supercollider", "puredata", "configsettings"]
 # LED dim: change per encoder step (50 steps from off to full).
 LED_DIM_STEP = 0.02
 
+# The configsettings page goes in pages of 5 (the 5 buttons select an item
+# of the page), not in the sliding window of the instrument banks (1-5,
+# 2-6, ...). The pitch encoder turns the page, CONFIG_PAGE_STEPS steps per
+# page. The pitch LEDs show it: the colour is the pair of pages
+# (CONFIG_PAGE_COLORS, r, g, b), within the pair the right LED (pitch_pos)
+# is the 1st page, the left (pitch_neg) the 2nd:
+#   items 1-5 white right, 6-10 white left, 11-15 yellow right, ...
+CONFIG_PAGE_SIZE = 5
+CONFIG_PAGE_STEPS = 4
+CONFIG_PAGE_COLORS = [(4095, 4095, 4095),  # white:  items 1-10
+                      (4095, 2800, 0),     # yellow: 11-20
+                      (4095, 0, 0),        # red:    21-30
+                      (0, 4095, 0),        # green:  31-40
+                      (0, 0, 4095),        # blue:   41-50
+                      (3037, 200, 3825)]   # purple: 51-60
+
 # Quiet mode levels 0-3 (chosen with 3_quiet.ui): every level staggers the
 # LED PWM channels, levels 1 and 2 also give the file and freeze LEDs no PWM.
 QUIET_STEPS = 4  # encoder steps per level in the quiet level selector
@@ -120,6 +136,7 @@ class UserInterface(object):
         self.quiet_select_mode = False
         self.quiet_select = 0
         self.quiet_select_acc = 0
+        self.config_page_acc = 0  # pitch steps toward the next configsettings page
 
     def update(self):
         self.now = int(round(time.time() * 1000))
@@ -293,7 +310,11 @@ class UserInterface(object):
             #    values[led] = 1
             if led >= 0 and led <= 4:
                 values[led] = 1
-        if offset > 0:
+        # Sliding window (instrument banks): the 1st and 5th button show that
+        # there is more to the left or right. The configsettings page shows
+        # its page on the pitch LEDs instead.
+        paged = f_handle is self.script_fhandle
+        if offset > 0 and not paged:
             if blink == True:
                 if idx == offset: #bright blink
                     val = 1.0
@@ -305,7 +326,7 @@ class UserInterface(object):
                 else:
                     val = low_bright
             values[0] = val
-        if offset + 5 < f_handle.numFiles():
+        if offset + 5 < f_handle.numFiles() and not paged:
             if blink == True:
                 if idx == offset + 4: #bright blink
                     val = 1.0
@@ -742,7 +763,13 @@ class UserInterface(object):
         idx, offset = self.instr_sel_saved.get(bank, (idx, offset))
         if idx >= numfiles:
             idx, offset = 0, 0
-        offset = min(offset, max(0, numfiles - 5))
+        if f_handle is self.script_fhandle:
+            # Pages: the offset is always the start of a page.
+            last_page = max(0, (numfiles - 1) // CONFIG_PAGE_SIZE)
+            offset = min(offset // CONFIG_PAGE_SIZE, last_page) * CONFIG_PAGE_SIZE
+            self.config_page_acc = 0
+        else:
+            offset = min(offset, max(0, numfiles - 5))
         self.controlhandler.setInstrSelBank(bank)
         self.controlhandler.setInstrSelNumFiles(numfiles)
         self.controlhandler.setInstrSelIdx(idx)
@@ -917,11 +944,32 @@ class UserInterface(object):
             self.set_rgb("pitch_neg", tempc.red(), tempc.green(), tempc.blue(), neg_bright)
             self.set_rgb("pitch_pos", tempc.red(), tempc.green(), tempc.blue(), pos_bright)
         elif mode == "instr selector":
+            if self.instrSelHandle() is self.script_fhandle:
+                page = self.controlhandler.getInstrSelOffset() // CONFIG_PAGE_SIZE
+                r, g, b = CONFIG_PAGE_COLORS[(page // 2) % len(CONFIG_PAGE_COLORS)]
+                first = page % 2 == 0
+                self.set_rgb("pitch_pos", r, g, b, 1.0 if first else 0.0)
+                self.set_rgb("pitch_neg", r, g, b, 0.0 if first else 1.0)
+                return
             tempc = libDriver.Color(0, 4095, 0)
             self.set_rgb("pitch_neg", tempc.red(), tempc.green(), tempc.blue(), 1.0)
             self.set_rgb("pitch_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
         else:
             pass
+
+    # Configsettings page: the pitch encoder turns whole pages (offset 0, 5,
+    # 10, ...); it stops at the first and the last page.
+    def turnConfigPage(self):
+        pages = max(1, -(-self.script_fhandle.numFiles() // CONFIG_PAGE_SIZE))
+        self.config_page_acc += self.get_delta("pitch")
+        page = self.controlhandler.getInstrSelOffset() // CONFIG_PAGE_SIZE
+        turned = int(self.config_page_acc / CONFIG_PAGE_STEPS)  # whole pages, either way
+        self.config_page_acc -= turned * CONFIG_PAGE_STEPS
+        page = min(max(page + turned, 0), pages - 1)
+        # At the first/last page: steps further out are not saved up.
+        if (page == 0 and self.config_page_acc < 0) or (page == pages - 1 and self.config_page_acc > 0):
+            self.config_page_acc = 0
+        self.controlhandler.setInstrSelOffset(page * CONFIG_PAGE_SIZE)
             
 
     def update_pitch(self, mode):
@@ -939,7 +987,9 @@ class UserInterface(object):
                 self.controlhandler.restoreAltToDefault()
         elif mode == "instr selector":
             f_handle = self.instrSelHandle()
-            if f_handle.numFiles() <= 5:
+            if f_handle is self.script_fhandle:
+                self.turnConfigPage()
+            elif f_handle.numFiles() <= 5:
                 offset = 0
             else:
                 offset = self.controlhandler.getInstrSelOffset()
