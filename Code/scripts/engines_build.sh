@@ -1,9 +1,13 @@
 #!/bin/bash
-# Fallback after a firmware update: builds, on the Nebulae itself, the engine
-# packages the firmware has a recipe for but no package (Code/engines/, see
-# Resources/engines/README.md). Normally the firmware has them all and this
-# does nothing. Run by engines_check.sh, with the root file system read-write
-# and the USB stick mounted (update.sh).
+# Builds, on the Nebulae itself, the engine packages that have a recipe but
+# no package of its version in /home/alarm/engines/ (the firmware's
+# Code/engines/ and the stick's engines/, merged in by a firmware update;
+# see Resources/engines/README.md), natively for this Pi's CPU
+# (build_engines.sh), then installs them (engines_check.sh install).
+# A firmware update builds nothing; it reports what has no package. Run by
+# hand, it takes long:
+#   sudo bash /home/alarm/QB_Nebulae_V2/Code/scripts/engines_build.sh
+# Nothing missing: it does nothing.
 # Internet for the sources and build tools:
 #  1. the LAN (Ethernet), when it has internet
 #  2. else Wi-Fi as a client, when the file wlan0-wifi (no extension) is on
@@ -23,15 +27,27 @@
 # Report: neb_engines_report.txt on the stick (what was missing, the
 # network, what was built or why not); one line in neb_log.txt.
 # A build takes minutes (a UGen) to hours (Csound, sc3-plugins, ELSE) on a
-# Pi 3; the update LEDs stay on meanwhile. A reboot follows the update, so
-# the Wi-Fi and time settings made here are temporary.
-E=/home/alarm/QB_Nebulae_V2/Code/engines
+# Pi 3. The Wi-Fi it set up is taken down again at the end.
+
+# Needs root. Started by hand it runs itself again with sudo.
+[ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
+E=/home/alarm/engines
 STICK=/mnt/memory
+# The USB stick (report, wlan0-wifi): mounted for the build if it is in and
+# not mounted yet, and unmounted again at the end.
+USB=/home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh
+stick_mounted=""; usb_was_off=""
+if ! grep -qs " $STICK " /proc/mounts; then
+    bash $USB status || { usb_was_off=1; bash $USB on; }  # Quiet mode: USB may be off
+    if [ -b /dev/sda1 ]; then
+        mkdir -p $STICK && mount /dev/sda1 $STICK && stick_mounted=1
+    fi
+fi
 REPORT=/tmp/neb_engines_report.txt
 WPA=/tmp/neb_build_wifi.conf
 NETF=/run/systemd/network/40-neb-build-wifi.network
 : > $REPORT
-say() { echo "engines build: $*"; echo "$*" >> $REPORT; }
+say() { echo "engines build: $*"; echo "$*" >> $REPORT; last_say="$*"; }
 finish() {  # exit code
     if [ -n "${wpa_pid:-}" ]; then
         kill "$wpa_pid" 2>/dev/null
@@ -41,11 +57,20 @@ finish() {  # exit code
     rm -f "$WPA"
     if grep -qs " $STICK " /proc/mounts; then
         cp $REPORT $STICK/neb_engines_report.txt
-        echo "$(date +"%a %D - %T") - engines: $(tail -1 $REPORT)" >> $STICK/neb_log.txt
+        echo "$(date +"%a %D - %T") - engines: ${summary:-$last_say}" >> $STICK/neb_log.txt
         sync
     fi
+    release_stick
     exit "$1"
 }
+release_stick() {  # as it was before: unmounted, USB off (Quiet mode)
+    [ -n "$stick_mounted" ] && umount $STICK
+    [ -n "$usb_was_off" ] && bash $USB off
+    stick_mounted=""; usb_was_off=""
+}
+# The new packages installed, the older files deleted (no merge: the
+# stick's engines/ is only taken in by a firmware update).
+install_built() { bash "$(dirname "$0")/engines_check.sh" install; }
 
 # What is missing: a recipe without its package (level 1: <engine>/PKGBUILD,
 # package next to it; level 2: <engine>/<dir>/<name>/PKGBUILD, package in <dir>).
@@ -57,9 +82,12 @@ for f in $E/*/PKGBUILD $E/*/*/*/PKGBUILD; do
     case "$rel" in */*/*) dst=$(dirname "$d") ;; *) dst=$d ;; esac
     ls "$dst/${nv% *}-${nv#* }"-*.pkg.tar.* >/dev/null 2>&1 || missing="$missing $rel(${nv/ / })"
 done
-[ -n "$missing" ] || exit 0    # every recipe has its package: nothing to build
+if [ -z "$missing" ]; then
+    echo "engines build: every recipe has its package, nothing to build"
+    release_stick; exit 0
+fi
 say "$(date) - $(tr -d '\0' < /proc/device-tree/model 2>/dev/null)"
-say "no package in the firmware for:$missing"
+say "no package for:$missing"
 
 # Network: the LAN first (faster, nothing to set up), else Wi-Fi with the
 # wlan0-wifi profile from the stick.
@@ -138,10 +166,41 @@ if [ -n "$new" ]; then
     [ -n "$orphans" ] && pacman -Rns --noconfirm $orphans >/dev/null 2>&1
 fi
 rm -rf /home/alarm/engines_build
-sed -n '/^==== .*build_engines.sh$/,$p' $E/build.log | grep -E '^==' >> $REPORT
-if grep -q 'FAILED' <(tail -1 $E/build.log); then
-    say "BUILT WITH ERRORS after $(( ($(date +%s) - start) / 60 )) min: $(tail -1 $E/build.log | sed 's/.*FAILED://') (log: Code/engines/build.log)"
+# This run only: build.log is appended to, from its last start line on.
+first=$(grep -n '^==== .*build_engines.sh$' $E/build.log | tail -1 | cut -d: -f1)
+this_run() { tail -n +"${first:-1}" $E/build.log; }
+this_run | grep -E '^(==|====) ' >> $REPORT   # its own step lines, not makepkg's "==>"
+# The result is this run's "==== <date> done[, FAILED: ...]" line (the log
+# goes on after it with the list of package files). No such line: the build
+# stopped before the end.
+result=$(this_run | grep '^==== .* done' | tail -1)
+# Not everything built: why, on the stick. In the report the last lines
+# before each FAILED (usually the compiler's error), and this run's whole log
+# as neb_engines_build.log.gz (a few hundred KB; the log itself is MBs).
+failed_log() {
+    this_run | grep -n 'FAILED$' | cut -d: -f1 | while read -r n; do
+        echo; echo "---- $(this_run | sed -n "${n}p")"
+        this_run | sed -n "$(( n > 30 ? n - 30 : 1 )),$(( n - 1 ))p"
+    done >> $REPORT
+    if grep -qs " $STICK " /proc/mounts; then
+        this_run | gzip > $STICK/neb_engines_build.log.gz
+        say "log: neb_engines_build.log.gz on the stick"
+    fi
+}
+if [ -z "$result" ] || [ "$rc" != 0 ]; then
+    summary="BUILD STOPPED after $(( ($(date +%s) - start) / 60 )) min (exit $rc; log: /home/alarm/engines/build.log)"
+    say "$summary"
+    failed_log
+    install_built   # what did build: installed, old files deleted
+    finish 1
+elif [[ $result == *FAILED* ]]; then
+    summary="BUILT WITH ERRORS after $(( ($(date +%s) - start) / 60 )) min:${result#*FAILED:} (log: /home/alarm/engines/build.log)"
+    say "$summary"
+    failed_log
+    install_built   # what did build: installed, old files deleted
     finish 1
 fi
+rm -f $STICK/neb_engines_build.log.gz  # an old one from a failed build before
 say "built after $(( ($(date +%s) - start) / 60 )) min"
+install_built
 finish 0

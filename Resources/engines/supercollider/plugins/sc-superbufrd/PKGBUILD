@@ -6,7 +6,7 @@
 pkgname=sc-superbufrd
 _commit=e1e19f9
 pkgver=0+g$_commit
-pkgrel=1
+pkgrel=2
 pkgdesc="SuperBufRd UGens (64-bit buffer positions) for SuperCollider (Nebulae build)"
 arch=(aarch64)
 url="https://github.com/esluyter/super-bufrd"
@@ -38,6 +38,10 @@ package() {
   local d="$pkgdir/usr/share/SuperCollider/Extensions/SuperBufRd"
   install -d "$d"
   cp build/*.so "$d/"
+  # The classes (SuperBufRd.sc, SuperPair.sc) are in the project's root, not
+  # in a Classes folder: without them SuperCollider does not know the UGens
+  # (pkgrel 1 had only the .so files).
+  cp super-bufrd/*.sc "$d/"
   for x in Classes SystemOverwrites HelpSource; do
     [ -d super-bufrd/$x ] && cp -r super-bufrd/$x "$d/"
   done

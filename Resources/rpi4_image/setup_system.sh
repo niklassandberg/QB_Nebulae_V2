@@ -17,8 +17,8 @@ pacman -S --noconfirm --needed sudo alsa-utils csound dnsmasq hostapd i2c-tools 
     raspberrypi-utils unzip usbutils which wireless_tools iw net-tools dialog \
     dosfstools jack2 git base-devel cmake pkgconf >/dev/null 2>&1
 # The Arch csound above pulls in the dependencies; the Nebulae builds
-# (Code/engines/: Csound optimised + -B working, SuperCollider) replace
-# them, IgnorePkg keeps them.
+# (Code/engines/ -> /home/alarm/engines/: Csound optimised + -B working,
+# SuperCollider) replace them, IgnorePkg keeps them.
 bash $NEB/Code/scripts/engines_check.sh
 # The Nebulae's own SuperCollider classes (NebInterface, MultiWtOsc), as
 # update.sh installs them.

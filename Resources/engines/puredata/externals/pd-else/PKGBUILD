@@ -23,6 +23,12 @@ prepare() {
   # Arch has no static OpenSSL, and the system's libssl is there anyway.
   sed -i 's/set(OPENSSL_USE_STATIC_LIBS TRUE)/set(OPENSSL_USE_STATIC_LIBS FALSE)/' pd-else/CMakeLists.txt
   grep -q 'OPENSSL_USE_STATIC_LIBS FALSE' pd-else/CMakeLists.txt
+  # ELSE's own ffmpeg without its documentation: ffmpeg 7.0.1's doc/t2h.pm is
+  # too old for Arch's Texinfo ('Can't locate object method "gdt" via package
+  # "Texinfo::Convert::HTML"', the build stopped after an hour on a Pi 3), and
+  # the Nebulae needs no ffmpeg docs.
+  sed -i 's|^\./configure --disable-asm|./configure --disable-doc --disable-asm|' pd-else/Source/Shared/ffmpeg/build_ffmpeg.sh
+  grep -q -- '--disable-doc' pd-else/Source/Shared/ffmpeg/build_ffmpeg.sh
   # pd.cmake takes the headers from $PD_PATH/src.
   mkdir -p pdhdr && ln -sfn /usr/include/pd pdhdr/src
 }

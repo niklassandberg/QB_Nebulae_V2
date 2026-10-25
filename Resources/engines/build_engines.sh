@@ -43,8 +43,22 @@ trap cleanup EXIT
 HERE=$WORK/recipes
 rm -rf "$HERE"; cp -r "$SRC" "$HERE"
 find "$HERE" -type f \( -name PKGBUILD -o -name "*.sh" -o -name "*.install" \) -exec sed -i 's/\r$//' {} +
-# Plugins installed by hand before they were packages: their files may be replaced.
-OVERWRITE=(--overwrite '/usr/share/SuperCollider/Extensions/*' --overwrite '/usr/lib/pd/extra/*')
+# Native: every package is built for this Pi's CPU, for every recipe that
+# uses makepkg's $CFLAGS / $CXXFLAGS (all here do, as a new one normally
+# does): -mcpu=native instead of -march=armv8-a, i.e. cortex-a53+crc on a
+# Pi 3, cortex-a72+crc on a Pi 4. Both have the same instructions (ARMv8.0 +
+# CRC, no crypto), so a package also runs on the other model, only tuned for
+# the one it was built on.
+CONF=$WORK/makepkg.conf
+sed 's/-march=armv8-a/-mcpu=native/' /etc/makepkg.conf > "$CONF"
+grep -q -- '-mcpu=native' "$CONF" ||
+    printf '%s\n' 'CFLAGS="$CFLAGS -mcpu=native"' 'CXXFLAGS="$CXXFLAGS -mcpu=native"' >> "$CONF"
+echo "== compiler: -mcpu=native = $(gcc -mcpu=native -Q --help=target 2>/dev/null | awk '$1 == "-mcpu=" {print $2}')"
+# Plugins installed by hand before they were packages: their files may be
+# replaced. The rules are in legacy_overwrite.sh (one place, to comment out).
+LEGACY_OVERWRITE=()
+. "$SRC/legacy_overwrite.sh" 2>/dev/null
+OVERWRITE=("${LEGACY_OVERWRITE[@]}")
 
 # The Nebulae's own packages: not in the repositories, built here.
 OWN=$(for f in "$HERE"/*/PKGBUILD "$HERE"/*/*/*/PKGBUILD; do ( . "$f"; echo "$pkgname" ); done)
@@ -74,7 +88,7 @@ build() {  # recipe dir relative to HERE, destination dir relative to OUT
     rm -rf "$WORK/$rel"; mkdir -p "$WORK/$rel"; cp -r "$HERE/$rel/." "$WORK/$rel/"
     chown -R alarm:alarm "$WORK"
     if ! ( cd "$WORK/$rel" && runuser -u alarm -- env MAKEFLAGS=-j$JOBS CMAKE_BUILD_PARALLEL_LEVEL=$JOBS SRCDEST="$WORK/sources" \
-            makepkg -f --nodeps --noconfirm ); then
+            makepkg --config "$CONF" -f --nodeps --noconfirm ); then
         echo "== $rel: makepkg FAILED"; failed="$failed $rel"; return 1
     fi
     mkdir -p "$dst"

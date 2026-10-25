@@ -30,16 +30,48 @@ All of them are optimised builds (`-O2`/`-O3`, CMake `Release`) for
 `-march=armv8-a`, so the same packages run on a Pi 3 and a Pi 4.
 
 ## On the Nebulae
-`Code/scripts/engines_check.sh` (run by `update.sh` after a firmware update,
-and by `setup_system.sh`) installs level 1 and then level 2, each package only
-when the installed version differs, and puts them all in `IgnorePkg` so
-`pacman -Syu` cannot replace them. `engines_check.sh status` lists them.
+The engines live in **`/home/alarm/engines/`** (same layout), outside the
+firmware folder: a firmware update replaces `QB_Nebulae_V2/`, but keeps what
+was built on the Nebulae. `Code/scripts/engines_check.sh` (run by `update.sh`
+during a firmware update, and by `setup_system.sh`):
+1. merges the firmware's `Code/engines/` into `/home/alarm/engines/`: its
+   recipes and scripts replace the old ones, its packages are added, nothing
+   is deleted (the first time also the packages of the previous firmware)
+2. merges the USB stick's **`engines/`** folder the same way (only the engine
+   folders): **your own recipes or ready packages**, e.g.
+   `engines/supercollider/plugins/sc-myugen/PKGBUILD` on the stick. Only
+   during a firmware update (`neb_update.zip` on the stick too).
+3. builds nothing: a recipe without a package of its version is only
+   reported, on the stick in `neb_engines_report.txt` (build it by hand, below)
+4. installs level 1 and then level 2, each package only when the installed
+   version differs, and puts them in `IgnorePkg` so `pacman -Syu` cannot
+   replace them
+5. deletes the other package files of each package: the one with its
+   recipe's version is kept (a version like `0+gfb481d4`, a commit, cannot be
+   compared as newer), without a recipe the highest version
 
-### Fallback: the Nebulae builds a missing package itself
+`engines_check.sh status` lists them.
+
+Plugins that were copied in by hand before they were packages (the old
+`build_sc.sh`, `build_pd_libs.sh`) block a package install ("exists in
+filesystem"). The folders the packages may overwrite for that are in
+**`legacy_overwrite.sh`**, the only place (read by `build_engines.sh` and
+`engines_check.sh`): once no Nebulae has such leftovers, comment its lines out.
+
+### Building a missing package on the Nebulae (by hand)
 The firmware also carries the recipes (`create_fw_update.sh` copies this
-folder into `Code/engines/`). When a recipe has no package next to it (for
-example a new UGen added to the repository without building it), the firmware
-update builds it on the Nebulae (`Code/scripts/engines_build.sh`):
+folder into `Code/engines/`). When a recipe has no package of its version in
+`/home/alarm/engines/` (for example a new UGen added to the repository
+without building it, or a recipe from the stick), build it on the Nebulae:
+```
+sudo bash /home/alarm/QB_Nebulae_V2/Code/scripts/engines_build.sh
+```
+It builds every recipe without its package, **natively** for that Pi's CPU
+(`-mcpu=native`: `cortex-a53+crc` on a Pi 3, `cortex-a72+crc` on a Pi 4, for
+every recipe that uses makepkg's `$CFLAGS`; both models have the same
+instructions, so a package also runs on the other one, only less finely
+tuned), installs the result and deletes the old package files. Log:
+`/home/alarm/engines/build.log`. It needs internet:
 
 1. internet through the **LAN** cable, if it has internet
 2. else **Wi-Fi** as a normal client, with a file called `wlan0-wifi` (no
@@ -60,14 +92,15 @@ update builds it on the Nebulae (`Code/scripts/engines_build.sh`):
    as written, also a `$` in the password (`Code/scripts/wifi_profile.sh`).
    A WPA password has 8-63 characters. `Security=none` (and no `Key`) for an
    open network, `Hidden=yes` for a network that does not show its name. Here it is
-   only read into RAM, the Wi-Fi setting is gone after the reboot that ends the
-   update.
+   only read into RAM, and the Wi-Fi connection is taken down at the end.
 3. else nothing is built: the installed engines stay.
 
-Either way `neb_engines_report.txt` on the stick says what was missing, which
-network was used, and what was built or why not. A build takes minutes for a
-UGen and hours for Csound, sc3-plugins or ELSE on a Pi 3 (the update LEDs stay
-on meanwhile); the build tools it installs are removed again afterwards.
+Either way `neb_engines_report.txt` on the stick (mounted for the build if it
+is in) says what was missing, which network was used, and what was built or
+why not; when something failed also its last lines and the whole log
+(`neb_engines_build.log.gz`). A build takes minutes for a UGen and hours for
+Csound, sc3-plugins or ELSE on a Pi 3; the build tools it installs are
+removed again afterwards.
 
 ## Building the packages
 On a Pi with the 64-bit image, as root (hours on a Pi 3, mostly sc3-plugins
