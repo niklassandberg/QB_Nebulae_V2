@@ -20,11 +20,14 @@ FIRMWARE_DIR = "/home/alarm/QB_Nebulae_V2/Code/nebscripts/"
 USER_DIR = "/home/alarm/scripts/"
 EXTENSIONS = [".sh", ".neb"]  # .neb: any executable (compiled program)
 # .ui: handled inside Nebulae (ui.py), not run; firmware only. The mode is
-# the name after the number: 4_led_dim.ui -> "led_dim". Their slot LED shows
+# the name after the number: 6_led_dim.ui -> "led_dim". Their slot LED shows
 # the config setting (UI_STATES, from configsettings.py).
 UI_EXTENSION = ".ui"
 UI_STATES = {"wifi": lambda: configSettings.wifiOn,
-             "quiet": lambda: configSettings.quietMode > 0}
+             "power_regulator": lambda: configSettings.powerRegulator != "off",
+             "no_pwm": lambda: configSettings.noPwm,
+             "led_stagger": lambda: configSettings.ledStagger,
+             "services_quiet": lambda: configSettings.servicesQuiet}
 STATUS_TIMEOUT_S = 2.0
 STATUS_MARKER = b"nebulae-status"
 

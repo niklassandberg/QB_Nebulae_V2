@@ -25,6 +25,23 @@ removed, 37 changed, none added):
 `report.txt` (next to the build) lists every option that changed against the
 stock kernel, and any line of `nebulae.config` that did not take effect.
 
+## Real-time variant (`nebulae-rt`)
+`build_kernel.sh OUTDIR rt` builds the same kernel with `nebulae-rt.config`
+on top: `CONFIG_PREEMPT_RT=y` (on top of `CONFIG_PREEMPT`, which stays; RT
+brings `RCU_BOOST`), nothing else changed (same source, same options, 250 Hz). It is named `-nebulae-rt`
+(`kernel8-nebulae-rt.img`, `linux-nebulae-rt-<version>.tar.xz`,
+`report-rt.txt`) and installs next to the stock and the normal Nebulae
+kernel; switch with `kernel=kernel8-nebulae-rt.img`.
+
+What RT changes: kernel locks can be preempted and every interrupt handler
+runs as a kernel thread (`irq/NN-...`, SCHED_FIFO 50 by default), so a
+higher-priority audio thread is not held up by other kernel work. The
+priorities come from user space: jackd runs `-R -P75` (SC and Pd banks),
+the Csound thread SCHED_FIFO 70 (`csound_rt_priority`). Cost: some
+throughput. Gain: steadier, lower latency, i.e. smaller audio buffers and
+tighter CV/gate timing. Check it with `uname -v` (shows `PREEMPT_RT`) and
+`ps -eLo rtprio,comm | grep irq/`.
+
 ## Building (WSL or any x86 Arch Linux)
 ```
 systemd-run --unit=nebkernel bash Resources/kernel/build_kernel.sh /root/kernel/out

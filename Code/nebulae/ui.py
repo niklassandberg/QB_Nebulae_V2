@@ -4,6 +4,7 @@ import nebio as libDriver # LedDriver/Color backed by the nebio C++ library
 import switch as libSwitch
 import filehandler
 import scripts
+import subprocess
 import threading
 import time
 import random
@@ -51,17 +52,15 @@ CONFIG_PAGE_COLORS = [(4095, 4095, 4095),  # white:  items 1-10
                       (0, 0, 4095),        # blue:   41-50
                       (3037, 200, 3825)]   # purple: 51-60
 
-# Quiet mode levels 0-3 (chosen with 3_quiet.ui): every level staggers the
-# LED PWM channels, levels 1 and 2 also give the file and freeze LEDs no PWM.
-QUIET_STEPS = 4  # encoder steps per level in the quiet level selector
-# The levels in the order the speed encoder steps through them (user's
-# order: quieter the further it is turned).
-QUIET_ORDER = (0, 3, 2, 1)
-# Each level's colour on both speed LEDs: (r, g, b, brightness).
-QUIET_LEVEL_COLORS = {0: (4095, 0, 0, 1.0),     # off: red
-                      3: (4095, 2800, 0, 1.0),  # Quiet 3: yellow
-                      2: (0, 0, 4095, 1.0),     # Quiet 2: blue
-                      1: (0, 4095, 0, 1.0)}     # Quiet 1: green
+# Power regulator (chosen with 2_power_regulator.ui, configsettings.py): the
+# values in the order the speed encoder steps through them, and each one's
+# colour on both speed LEDs: (r, g, b, brightness).
+POWER_STEPS = 4  # encoder steps per value in the selector
+POWER_ORDER = ("off", "yield", "shell", "nohlt")
+POWER_COLORS = {"off": (4095, 0, 0, 1.0),       # red
+                "yield": (0, 4095, 0, 1.0),     # green: yield spin
+                "shell": (0, 0, 4095, 1.0),     # blue: shell spin
+                "nohlt": (4095, 2800, 0, 1.0)}  # yellow: kernel nohlt (restart)
 
 sr_pin_next = 7
 sr_pin_source_gate = 6
@@ -126,16 +125,16 @@ class UserInterface(object):
         self.clip_shown = False
         self.led_draw_time = -LED_DRAW_MS
         self.draw_leds = True
-        # LED dim (configsettings page, 4_led_dim.ui).
+        # LED dim (configsettings page, 6_led_dim.ui).
         self.led_dim_mode = False
         self.led_dim = configSettings.ledDim  # live while it is being turned
         self.log.info("LED dim %.2f", self.led_dim)
         libDriver.led_set_dim(self.led_dim)
-        self.applyQuietToLeds(configSettings.quietMode)
-        # Quiet level selector (configsettings page, 3_quiet.ui).
-        self.quiet_select_mode = False
-        self.quiet_select = 0
-        self.quiet_select_acc = 0
+        self.applyLeds()
+        # Power regulator selector (configsettings page, 2_power_regulator.ui).
+        self.power_select_mode = False
+        self.power_select = 0
+        self.power_select_acc = 0
         self.config_page_acc = 0  # pitch steps toward the next configsettings page
 
     def update(self):
@@ -153,7 +152,7 @@ class UserInterface(object):
         self.trackInputClip()
         # Script states (slot LEDs) are read when their page is shown.
         shown = (self.mode == "instr selector" and not self.led_dim_mode
-                 and not self.quiet_select_mode
+                 and not self.power_select_mode
                  and self.controlhandler.getInstrSelBank() == "configsettings")
         if shown != self.scripts_shown:
             self.scripts_shown = shown
@@ -164,8 +163,8 @@ class UserInterface(object):
         if self.led_dim_mode:
             self.updateLedDim()
             return
-        if self.quiet_select_mode:
-            self.updateQuietSelect()
+        if self.power_select_mode:
+            self.updatePowerSelect()
             return
 
         if self.mode == "secondary controls":
@@ -668,12 +667,26 @@ class UserInterface(object):
                             configSettings.setWifiOn(not configSettings.wifiOn)
                             self.script_fhandle.refresh()
                             self.controlhandler.enterNormalMode()
+                        elif ui_mode == "no_pwm":
+                            configSettings.setNoPwm(not configSettings.noPwm)
+                            self.applyLeds()
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
+                        elif ui_mode == "led_stagger":
+                            configSettings.setLedStagger(not configSettings.ledStagger)
+                            self.applyLeds()
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
+                        elif ui_mode == "services_quiet":
+                            configSettings.setServicesQuiet(not configSettings.servicesQuiet)
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
                         elif ui_mode == "led_dim":
                             self.led_dim_mode = True  # until a speed/pitch click
-                        elif ui_mode == "quiet":
-                            self.quiet_select_mode = True  # until a speed/pitch click
-                            self.quiet_select = QUIET_ORDER.index(configSettings.quietMode)
-                            self.quiet_select_acc = 0
+                        elif ui_mode == "power_regulator":
+                            self.power_select_mode = True  # until a speed/pitch click
+                            self.power_select = POWER_ORDER.index(configSettings.powerRegulator)
+                            self.power_select_acc = 0
                         else:
                             # Runs in the background; the instrument keeps playing.
                             self.script_fhandle.run(idx)
@@ -705,34 +718,30 @@ class UserInterface(object):
             self.led_draw_time = -LED_DRAW_MS  # instrument colours at once
             self.controlhandler.enterNormalMode()
 
-    # What Quiet mode changes in the LEDs themselves (nebio): every level
-    # staggers the PWM channels, levels 1 and 2 also give the file and freeze
-    # LEDs no PWM (their PWM is heard in the audio).
-    def applyQuietToLeds(self, level):
-        libDriver.led_set_no_pwm(level in (1, 2))
-        # NOTE (idea, 2026-10-24): stagger could always be on, also without
-        # Quiet mode. It only spreads the LED channels' switch-on moments
-        # over the PWM cycle (no big current step, heard as a tone); the
-        # brightness looks the same. Then it needs no Quiet mode switch.
-        libDriver.led_set_stagger(level > 0)
+    # The LEDs themselves (nebio), from configSettings. No PWM: the file and
+    # freeze LEDs only fully on or off (their PWM is heard in the audio).
+    # Stagger: the PWM channels' switch-on moments spread over the cycle (no
+    # big current step, heard as a tone; the brightness looks the same).
+    def applyLeds(self):
+        libDriver.led_set_no_pwm(configSettings.noPwm)
+        libDriver.led_set_stagger(configSettings.ledStagger)
 
-    # Quiet level selector: the speed encoder steps through QUIET_ORDER (off,
-    # Quiet 3, 2, 1), shown in the colour of both speed LEDs
-    # (QUIET_LEVEL_COLORS: off red, 3 yellow, 2 blue, 1 green). quiet_select
-    # is the position in QUIET_ORDER. A speed click switches to that level
-    # (configSettings.setQuietMode) and goes back to the instrument; a pitch
-    # click goes back without a change.
-    def updateQuietSelect(self):
-        self.quiet_select_acc += self.get_delta("speed")
-        if self.quiet_select_acc >= QUIET_STEPS:
-            self.quiet_select = min(len(QUIET_ORDER) - 1, self.quiet_select + 1)
-            self.quiet_select_acc = 0
-        elif self.quiet_select_acc <= -QUIET_STEPS:
-            self.quiet_select = max(0, self.quiet_select - 1)
-            self.quiet_select_acc = 0
-        level = QUIET_ORDER[self.quiet_select]
+    # Power regulator selector: the speed encoder steps through POWER_ORDER,
+    # shown in the colour of both speed LEDs (POWER_COLORS). A speed click
+    # sets it (configSettings.setPowerRegulator) and goes back to the
+    # instrument; nohlt switched on or off restarts the Pi (the instrument
+    # settings saved first). A pitch click goes back without a change.
+    def updatePowerSelect(self):
+        self.power_select_acc += self.get_delta("speed")
+        if self.power_select_acc >= POWER_STEPS:
+            self.power_select = min(len(POWER_ORDER) - 1, self.power_select + 1)
+            self.power_select_acc = 0
+        elif self.power_select_acc <= -POWER_STEPS:
+            self.power_select = max(0, self.power_select - 1)
+            self.power_select_acc = 0
+        level = POWER_ORDER[self.power_select]
         if self.draw_leds:
-            r, g, b, bright = QUIET_LEVEL_COLORS[level]
+            r, g, b, bright = POWER_COLORS[level]
             for name in ("speed_pos", "speed_neg"):
                 self.set_rgb(name, r, g, b, bright)
             for name in ("pitch_pos", "pitch_neg"):
@@ -741,13 +750,14 @@ class UserInterface(object):
                 self.set_button_led(name, 0.0)
         set_it = self.clicked_speed() == 1
         if set_it or self.clicked_pitch() == 1:
-            self.quiet_select_mode = False
-            if set_it and level != configSettings.quietMode:
-                configSettings.setQuietMode(level)
-                self.applyQuietToLeds(level)
+            self.power_select_mode = False
+            restart = set_it and configSettings.setPowerRegulator(level)
             self.clearAllLEDs()
             self.led_draw_time = -LED_DRAW_MS  # instrument colours at once
-            self.controlhandler.enterNormalMode()
+            self.controlhandler.enterNormalMode()  # writes the instrument settings
+            if restart:
+                self.log.info("Power regulator %s: restarting the Pi (nohlt)", level)
+                subprocess.Popen(["systemctl", "reboot"])
 
     # Bank change in the instr selector. The slot of the bank that is left is
     # saved, and the new bank gets back the slot it had when it was left (e.g.

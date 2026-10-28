@@ -28,7 +28,7 @@ else:
 pitch_click = switch.Switch(22) # Pitch Encoder Click GPIO
 pitch_click.update()
 # 'force': calibrate + factory reset (firmware update). 'only': calibrate and
-# keep settings and instrument (configsettings page, Code/nebscripts/2_calibrate.sh).
+# keep settings and instrument (configsettings page, Code/nebscripts/7_calibrate.sh).
 if pitch_click.state() == True or arg == 'force' or arg == 'only':
     launch_bootled()
     #time.sleep(2)

@@ -1,16 +1,19 @@
 # Nebulae's config settings (the configsettings page): read and saved here only.
 #
 # Nebulae code never opens the file itself: it reads the values from the
-# singleton configSettings (configSettings.ledDim, .wifiOn, .quietMode) and
+# singleton configSettings (configSettings.ledDim, .wifiOn, .powerRegulator) and
 # saves a change through it (configSettings.setLedDim(0.4), ...), which also
 # starts the part that switches the system (the shell scripts below).
 #
 # All settings are in one file, CONFIG_FILE, one "key=value" per line:
-#   quiet_mode=2     0 = off, 1-3 = Quiet level      (scripts/quiet.sh)
-#   quiet_idle=yield yield | nohlt: how Quiet mode keeps the cores awake. yield
-#                    = spin.sh loops (at once); nohlt = kernel option in
-#                    /boot/cmdline.txt (from the next restart; until then
-#                    yield). No UI yet, set by hand.
+#   power_regulator=off  off | yield | shell | nohlt: keeps the CPU from
+#                    sleeping (its wake-ups are heard as a tone). yield/shell
+#                    = spin.sh loops (scripts/quiet.sh spin, at once); nohlt =
+#                    kernel option in /boot/cmdline.txt (the Pi restarts).
+#   no_pwm=off       on: the file and freeze LEDs without PWM (ui.py)
+#   led_stagger=on   on: the LED PWM channels switch on spread over the cycle
+#   services_quiet=off  on: Pi LEDs, USB, log, time sync, scheduled jobs quiet
+#                    (scripts/quiet.sh services)
 #   wifi=on          on | off                        (scripts/wifi.sh)
 #   led_dim=0.50     0.00 = off .. 1.00 = full
 #   log_level=INFO   DEBUG, STATS, INFO .. CRITICAL, set by hand (classlogger.py;
@@ -22,8 +25,8 @@
 #                    (nebulae.py setRealtime); no UI, set by hand
 # The defaults are in the constructor. A missing file is created empty; a
 # missing or invalid value keeps its default. Every save writes all values.
-# Nothing else reads the file: the system starts with Quiet mode and Wi-Fi
-# off, and Nebulae applies the saved settings once it has loaded its first
+# Nothing else reads the file: the system starts with the quiet settings and
+# Wi-Fi off, and Nebulae applies the saved settings once it has loaded its first
 # instrument (applyAtStart). The shell scripts only switch (quiet.sh, wifi.sh).
 #
 # A firmware update replaces Code/config: every setting back to its default.
@@ -41,8 +44,7 @@ WIFI_SCRIPT = SCRIPTS_DIR + "wifi.sh"
 
 CMDLINE = "/boot/cmdline.txt"   # kernel options, read at boot
 
-QUIET_LEVELS = (0, 1, 2, 3)
-QUIET_IDLE = ("yield", "nohlt")
+POWER_REGULATOR = ("off", "yield", "shell", "nohlt")
 
 
 def _kernelHasNohlt():
@@ -68,8 +70,10 @@ class ConfigSettings(object):
 
     def __init__(self):
         # Defaults: used when the file has no (valid) value.
-        self._quietMode = 0
-        self._quietIdle = "yield"
+        self._powerRegulator = "off"
+        self._noPwm = False
+        self._ledStagger = True
+        self._servicesQuiet = False
         self._wifiOn = False
         self._ledDim = 1.0
         self._logLevel = "INFO"
@@ -115,11 +119,14 @@ class ConfigSettings(object):
         except OSError:
             pass
         with self._lock:
-            quiet = values.get("quiet_mode")
-            if quiet in ("0", "1", "2", "3"):
-                self._quietMode = int(quiet)
-            if values.get("quiet_idle") in QUIET_IDLE:
-                self._quietIdle = values["quiet_idle"]
+            if values.get("power_regulator") in POWER_REGULATOR:
+                self._powerRegulator = values["power_regulator"]
+            if values.get("no_pwm") in ("on", "off"):
+                self._noPwm = values["no_pwm"] == "on"
+            if values.get("led_stagger") in ("on", "off"):
+                self._ledStagger = values["led_stagger"] == "on"
+            if values.get("services_quiet") in ("on", "off"):
+                self._servicesQuiet = values["services_quiet"] == "on"
             wifi = values.get("wifi")
             if wifi in ("on", "off"):
                 self._wifiOn = wifi == "on"
@@ -144,18 +151,26 @@ class ConfigSettings(object):
                 pass
 
     @property
-    def quietMode(self):
-        return self._quietMode
+    def powerRegulator(self):
+        return self._powerRegulator
 
     @property
-    def quietIdle(self):
-        return self._quietIdle
-
-    @property
-    def quietIdleNeedsRestart(self):
-        """True while /boot/cmdline.txt says nohlt and the running kernel
-        does not, or the other way round."""
+    def powerNeedsRestart(self):
+        """True while the setting wants nohlt and the running kernel does
+        not have it, or the other way round."""
         return self._wantNohlt() != _kernelHasNohlt()
+
+    @property
+    def noPwm(self):
+        return self._noPwm
+
+    @property
+    def ledStagger(self):
+        return self._ledStagger
+
+    @property
+    def servicesQuiet(self):
+        return self._servicesQuiet
 
     @property
     def wifiOn(self):
@@ -198,8 +213,10 @@ class ConfigSettings(object):
         Wi-Fi off. Called by Nebulae after its first instrument load: the
         stick is free then (start_wifi.sh mounts it). Again after a restart
         of Nebulae does no harm (nothing is switched twice)."""
-        if self._quietMode:
-            self._runInBackground([QUIET_SCRIPT, "change", "0", str(self._quietMode)])
+        if self._servicesQuiet:
+            self._runInBackground([QUIET_SCRIPT, "services", "on"])
+        if self._powerRegulator in ("yield", "shell"):
+            self._runInBackground([QUIET_SCRIPT, "spin", self._powerRegulator])
         self._runInBackground([WIFI_SCRIPT, "on" if self._wifiOn else "off"])
         self._runInBackground(self._syncCmdline)  # also after a change by hand
 
@@ -207,32 +224,54 @@ class ConfigSettings(object):
     # Saving (file + switching the system)
     # -------------------------
 
-    def setQuietMode(self, level):
-        if level not in QUIET_LEVELS:
-            raise ValueError("quiet mode level 0-3, not %r" % (level,))
+    def setPowerRegulator(self, value):
+        """off | yield | shell | nohlt. Returns True when the Pi must restart
+        for it (nohlt switched on or off: a kernel option, read at boot; the
+        caller saves the instrument settings and reboots). Until then the
+        running kernel keeps what it has."""
+        if value not in POWER_REGULATOR:
+            raise ValueError("power_regulator %s, not %r" % ("|".join(POWER_REGULATOR), value))
         with self._lock:
-            old = self._quietMode
-            if level == old:
-                return
-            self._quietMode = level
+            if value == self._powerRegulator:
+                return False
+            self._powerRegulator = value
             self._save()
-        self._log().info("Quiet mode %d -> %d", old, level)
-        # Quiet mode switches Wi-Fi off when it is turned on; it is saved as off.
-        if old == 0 and self._wifiOn:
-            self.setWifiOn(False)
-        self._runInBackground([QUIET_SCRIPT, "change", str(old), str(level)])
-        self._runInBackground(self._syncCmdline)
+        self._log().info("Power regulator: %s", value)
+        self._syncCmdline()   # now, not in the background: a reboot may follow
+        if self.powerNeedsRestart:
+            return True
+        self._runInBackground([QUIET_SCRIPT, "spin", value if value != "nohlt" else "off"])
+        return False
 
-    def setQuietIdle(self, idle):
-        if idle not in QUIET_IDLE:
-            raise ValueError("quiet_idle %s, not %r" % ("|".join(QUIET_IDLE), idle))
+    def setNoPwm(self, on):
+        # Only saved: the UI gives it to nebio (ui.py applyNoPwm).
+        on = bool(on)
         with self._lock:
-            if idle == self._quietIdle:
+            if on == self._noPwm:
                 return
-            self._quietIdle = idle
+            self._noPwm = on
             self._save()
-        self._log().info("Quiet mode idle: %s", idle)
-        self._runInBackground(self._syncCmdline)
+        self._log().info("No PWM: %s", "on" if on else "off")
+
+    def setLedStagger(self, on):
+        # Only saved: the UI gives it to nebio (ui.py applyLeds).
+        on = bool(on)
+        with self._lock:
+            if on == self._ledStagger:
+                return
+            self._ledStagger = on
+            self._save()
+        self._log().info("LED stagger: %s", "on" if on else "off")
+
+    def setServicesQuiet(self, on):
+        on = bool(on)
+        with self._lock:
+            if on == self._servicesQuiet:
+                return
+            self._servicesQuiet = on
+            self._save()
+        self._log().info("Services no sounds: %s", "on" if on else "off")
+        self._runInBackground([QUIET_SCRIPT, "services", "on" if on else "off"])
 
     def setWifiOn(self, on):
         on = bool(on)
@@ -264,8 +303,10 @@ class ConfigSettings(object):
         synced too: the rename is otherwise only on the SD card after up to
         5 s (ext4 journal), and a Eurorack case switched off sooner started
         with the old values. Called with self._lock held."""
-        text = ("quiet_mode=%d\n" % self._quietMode
-                + "quiet_idle=%s\n" % self._quietIdle
+        text = ("power_regulator=%s\n" % self._powerRegulator
+                + "no_pwm=%s\n" % ("on" if self._noPwm else "off")
+                + "led_stagger=%s\n" % ("on" if self._ledStagger else "off")
+                + "services_quiet=%s\n" % ("on" if self._servicesQuiet else "off")
                 + "wifi=%s\n" % ("on" if self._wifiOn else "off")
                 + "led_dim=%.2f\n" % self._ledDim
                 + "log_level=%s\n" % self._logLevel
@@ -313,12 +354,12 @@ class ConfigSettings(object):
                 self._jobs.task_done()
 
     def _wantNohlt(self):
-        return self._quietMode > 0 and self._quietIdle == "nohlt"
+        return self._powerRegulator == "nohlt"
 
     def _syncCmdline(self):
-        """nohlt in /boot/cmdline.txt exactly when Quiet mode is on with
-        quiet_idle=nohlt. The kernel reads it at boot only: quiet.sh keeps the
-        yield spin until then. Same safe write as _save (new file, rename)."""
+        """nohlt in /boot/cmdline.txt exactly when the power regulator is
+        nohlt. The kernel reads it at boot only (setPowerRegulator asks for
+        the restart). Same safe write as _save (new file, rename)."""
         want = self._wantNohlt()
         with open(CMDLINE) as f:
             words = f.read().split()

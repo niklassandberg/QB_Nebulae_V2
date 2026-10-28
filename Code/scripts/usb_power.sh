@@ -3,7 +3,7 @@
 # controller (VL805 on PCIe) is unbound from its driver: no bus traffic, no
 # 8 kHz microframes. Everything that uses the stick calls "on" before it
 # mounts and, in quiet mode, "off" after it unmounts (the caller knows the
-# mode: configSettings.quietMode in Nebulae; NebFile and start_wifi.sh put
+# mode: configSettings.servicesQuiet in Nebulae; NebFile and start_wifi.sh put
 # back what they found), so in quiet mode USB is only on while the stick is in
 # use.
 #   usb_power.sh on       bind the controller if needed, wait for the stick

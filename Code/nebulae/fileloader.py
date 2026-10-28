@@ -145,7 +145,7 @@ class FileLoader(object):
             self.classlog.info("Sync filebuffers to disk.")
             os.system("sync")
         self.usb_mounted = self.isUSBMounted()
-        if configSettings.quietMode:
+        if configSettings.servicesQuiet:
             os.system(USB_POWER + " off")  # quiet mode: USB only on while in use
 
     def isUSBMounted(self):

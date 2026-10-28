@@ -1,0 +1,8 @@
+# Services no sounds, on the configsettings page of the instr selector.
+# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
+# mode = the name after the number, here "services_quiet").
+# Speed click on it: on/off, and back to the instrument. On: the Pi's own
+# LEDs off, USB off while the stick is not in use, the system log in RAM,
+# network time sync, netctl-auto and the scheduled jobs stopped
+# (Code/scripts/quiet.sh services). Saved (configsettings.py).
+# Slot LED bright = on (nebulae-status).
