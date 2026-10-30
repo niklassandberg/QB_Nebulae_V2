@@ -6,7 +6,7 @@ import controlhandler as ch
 import controlhandlerSC as chSC
 import controlhandlerPD as chPD
 import conductor
-import scparser
+import nebconfig
 import ui
 import fileloader
 import time
@@ -18,6 +18,7 @@ import subprocess
 import nebmixer
 import nebio
 import loopprofile
+import kernelswitch
 from classlogger import ClassLogger
 from configsettings import configSettings
 
@@ -44,7 +45,7 @@ class Nebulae(object):
             self.classlog.info("Nebulae Initializing")
             self.instr_cfg = cfg_path + "bootinstr.txt"
             self.orc_handle = conductor.Conductor() # Initialize Audio File Tables and Csound Score/Orchestra
-            self.sc_parser = scparser.ScParser() # nebconfig block of the .scd
+            self.kernel_switch = kernelswitch.KernelSwitch() # RT or normal kernel, as the instrument asks
             #self.currentInstr = "a_granularlooper"
             self.c = None
             self.pt = None 
@@ -65,7 +66,7 @@ class Nebulae(object):
                             self.new_instr = templist[1] 
             else:
                 self.new_bank = 'instr'
-                instr_path = "/home/alarm/instr/"
+                instr_path = nebconfig.instrumentDir("instr")
                 factory_path = "/home/alarm/QB_Nebulae_V2/Code/instr/"
                 if not os.path.isdir(instr_path) or not os.listdir(instr_path):
                     os.makedirs(instr_path, exist_ok=True)
@@ -74,19 +75,12 @@ class Nebulae(object):
                 self.new_instr = instr_files[0] if instr_files else 'a_granularlooper'
             self.currentInstr = self.new_instr
             # Check if file exists, else reset to default instr
-            instr_path = "/home/alarm/instr/"
-            pd_path = "/home/alarm/pd/"
-            sc_path = "/home/alarm/sc/"
-            if self.new_bank == 'instr':
-                path = instr_path + self.new_instr + '.instr'
-            elif self.new_bank == 'supercollider':
-                path = sc_path + self.new_instr + '.scd'
-            elif self.new_bank == 'puredata':
-                path = pd_path + self.new_instr + '.pd'
+            if self.new_bank in nebconfig.INSTR_DIRS:
+                path = nebconfig.instrumentPath(self.new_bank, self.new_instr)
             else:
                 self.classlog.info("bank not recocgnized.")
                 self.classlog.info(self.new_bank)
-                path = instr_path + 'a_granularlooper.instr'
+                path = nebconfig.instrumentPath('instr', 'a_granularlooper')
             if os.path.isfile(path) == False:
                 # set to default instr
                 self.new_bank = 'instr'
@@ -127,6 +121,21 @@ class Nebulae(object):
             self.classlog.error("Error in getSysCores(): %s", e)
             return 1
 
+    # Kernel per instrument (kernelswitch.py, "kernel,rt" in the instrument's
+    # nebconfig): when the running kernel is the wrong one, the Pi restarts
+    # into the one this instrument wants. Called after floader.reload(), with
+    # the NebConfig the engine then uses (the file is read once). The
+    # instrument is not started meanwhile: the loading animation runs until
+    # systemd stops Nebulae. If the restart does not come, the instrument
+    # starts on this kernel after all.
+    def kernelSwitch(self, instr, config):
+        if not self.kernel_switch.switchFor(instr, config):
+            return
+        self.launch_bootled()
+        time.sleep(60)
+        self.classlog.error("No restart after 60 s: starting %s on this kernel", instr)
+        self.kill_bootled()
+
     def start(self, instr, instr_bank):
         try:
             #somehow jack starts at startup sometimes, just to be sure...
@@ -142,7 +151,9 @@ class Nebulae(object):
             self.log.spill_basic_info()
             floader = fileloader.FileLoader()
             floader.reload()
-            self.orc_handle.generate_orc(instr, instr_bank)
+            config = nebconfig.NebConfig.read("instr", instr)
+            self.kernelSwitch(instr, config)
+            self.orc_handle.generate_orc(instr, instr_bank, config)
             configData = self.orc_handle.getConfigDict()
             
             self.c.setOption("-iadc:hw:0,0")
@@ -326,14 +337,14 @@ class Nebulae(object):
             self.currentInstr = patch
             self.newInstr = patch
 
-            fullPathTmp = "/home/alarm/sc/" + patch +  ".scd"
+            fullPathTmp = nebconfig.instrumentPath("supercollider", patch)
             floader = fileloader.FileLoader()
             fullPath = floader.copyFileInternaly(fullPathTmp,"/tmp/") #this remove bug if patch will be removed with floader.reload()
             self.kill_bootled()
             floader.reload()
             self.launch_bootled()
             if not os.path.exists(fullPathTmp):
-                fullPath = floader.copyFileInternaly(fullPath,"/home/alarm/sc/") #if no new file, copy it back
+                fullPath = floader.copyFileInternaly(fullPath, nebconfig.instrumentDir("supercollider")) #if no new file, copy it back
             else:
                 fullPath = fullPathTmp
                 
@@ -344,17 +355,18 @@ class Nebulae(object):
             # Only an SCControlHandler can be reused (a Csound/PD handler has no
             # SC updateAll() and no OSC listener).
             reuseResources = fromSC and isinstance(self.c_handle, chSC.SCControlHandler)
-            self.sc_parser.parse(patch, "/home/alarm/sc/")
-            scConfigData = self.sc_parser.getConfigDict()
-            scConfigData['output_period'] = [self.sc_parser.getOutputPeriod()]
-            scConfigData['holdwithtrigg_combos'] = self.sc_parser.getHoldWithTriggCombos()
+            scConfig = nebconfig.NebConfig.read("supercollider", patch)
+            self.kernelSwitch(patch, scConfig)
+            scConfigData = scConfig.asDict()
+            scConfigData['output_period'] = [scConfig.outputPeriod()]
+            scConfigData['holdwithtrigg_combos'] = scConfig.holdWithTriggCombos()
             if not reuseResources:
                 self.classlog.info("init SuperCollider handle")
                 self.c_handle = chSC.SCControlHandler(None, self.orc_handle.numFiles(), scConfigData, self.new_instr, bank="supercollider")
                 self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
                 self.st = None #just to be sertain.
-            self.c_handle.setConfig(self.sc_parser) # rawencoder or hybrid speed/pitch, as the .scd declares
+            self.c_handle.setConfig(scConfig) # rawencoder or hybrid speed/pitch, as the .scd declares
 
             self.c_handle.enterSuperColliderMode()
             self.classlog.info("Load patch!")
@@ -383,8 +395,16 @@ class Nebulae(object):
             self.newInstr = patch
             floader = fileloader.FileLoader()
             floader.reload()
+            # Pd itself reads the patch; here only its nebconfig (kernel). A
+            # patch that is not readable as text still starts (Pd may know).
+            try:
+                config = nebconfig.NebConfig.read("puredata", patch)
+            except (OSError, ValueError) as e:
+                self.classlog.warning("No nebconfig from %s: %s", patch, e)
+                config = nebconfig.NebConfig([])
+            self.kernelSwitch(patch, config)
             self.orc_handle.refreshFileHandler()
-            fullPath = "/home/alarm/pd/" + patch + ".pd"
+            fullPath = nebconfig.instrumentPath("puredata", patch)
             cmd = "pd -jack -rt -callback -nogui -verbose".split() if debug else "pd -jack -rt -callback -nogui".split()
             # Pd libraries (Code/engine_packages/puredata/externals), when installed.
             for lib in ("else", "cyclone"):

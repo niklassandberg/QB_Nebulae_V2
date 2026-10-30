@@ -42,6 +42,20 @@ throughput. Gain: steadier, lower latency, i.e. smaller audio buffers and
 tighter CV/gate timing. Check it with `uname -v` (shows `PREEMPT_RT`) and
 `ps -eLo rtprio,comm | grep irq/`.
 
+### Per instrument (`Code/nebulae/kernelswitch.py`)
+An instrument can ask for the RT kernel; Nebulae restarts the Pi into it
+when it loads that instrument, and back when an instrument asks for the
+normal one:
+- `.instr`, `.scd`: `kernel,rt` in the nebconfig block
+- `.pd`: a comment box with the text `nebconfig kernel,rt`
+  (all instrument settings are read by `Code/nebulae/nebconfig.py`)
+- values `rt`, `normal`, `any`; no line = `any` (never a restart)
+
+The switch writes and removes only its own `kernel=kernel8-nebulae-rt.img`
+line (under `[all]`, at the end of `/boot/nebulae-image.txt`). Without the RT
+kernel on the card it does not restart; a restart that did not switch is not
+tried again (`Code/config/kernel_switch.txt`).
+
 ## Building (WSL or any x86 Arch Linux)
 ```
 systemd-run --unit=nebkernel bash Resources/kernel/build_kernel.sh /root/kernel/out

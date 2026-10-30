@@ -3,6 +3,7 @@ import shiftregister as libSR
 import nebio as libDriver # LedDriver/Color backed by the nebio C++ library
 import switch as libSwitch
 import filehandler
+import nebconfig
 import scripts
 import subprocess
 import threading
@@ -1087,9 +1088,9 @@ class UserInterface(object):
     # (setCurrentInstr): the load copies new files from the USB stick first,
     # and the UI object lives as long as Nebulae runs.
     def refreshFileHandlers(self):
-        self.instr_fhandle = filehandler.FileHandler("/home/alarm/instr/", ".instr")
-        self.sc_fhandle = filehandler.FileHandler("/home/alarm/sc/", ".scd")
-        self.puredata_fhandle = filehandler.FileHandler("/home/alarm/pd/", ".pd")
+        self.instr_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("instr"), ".instr")
+        self.sc_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("supercollider"), ".scd")
+        self.puredata_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("puredata"), ".pd")
         if self.script_fhandle is not None:
             self.script_fhandle.stopPolling()
             self.scripts_shown = False

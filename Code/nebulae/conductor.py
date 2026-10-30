@@ -1,5 +1,4 @@
 import filehandler as fh
-import instrparser
 import neb_globals
 import os
 
@@ -20,12 +19,13 @@ endin
 
 class Conductor(object):
     def __init__(self):
-        self.instrparser = instrparser.InstrParser()
+        self.config = None  # nebconfig.NebConfig of the instrument
         self.source = "instr"
         self.instr = "granular_test"
         self.dir = "/home/alarm/audio/"
 
-    def generate_orc(self, instr, instr_bank):
+    # config: the instrument's nebconfig.NebConfig (read once by nebulae.py)
+    def generate_orc(self, instr, instr_bank, config):
         self.refreshFileHandler()
         self.instr = instr
         self.orcheader = """
@@ -76,16 +76,9 @@ gipeak[] init 100
             """
 
         self.source = instr_bank
-        self.instr_dir = "/home/alarm/instr/"
-        self.instrparser.parse(self.instr, self.instr_dir)
-        if self.instrparser.configEntry("ksmps") is not None:
-            self.preamble = "ksmps = " + str(self.instrparser.configEntry("ksmps")[0]) + "\n"
-        else:
-            self.preamble = "ksmps = 128\n"
-        if self.instrparser.configEntry("sr") is not None:
-            self.preamble += "sr = " + str(self.instrparser.configEntry("sr")[0]) + "\n"
-        else:
-            self.preamble += "sr = 48000\n"
+        self.config = config
+        self.preamble = "ksmps = " + self.config.value("ksmps", "128") + "\n"
+        self.preamble += "sr = " + self.config.value("sr", "48000") + "\n"
         isco = "f 0 2147483641\n" + "i1 1 -10\n" #Start the longest possible score, and force i1 to run for length of score
         isco += "i \"NebInputClip\" 0 -1\n" # input clip detector, always on (see INPUT_CLIP_INSTR)
         fsco_lines = []
@@ -104,7 +97,7 @@ gipeak[] init 100
         fsco = ''.join(fsco_lines)
         self.arrayinitlines = ''.join(glen_arrayinit)
         sco = isco + fsco
-        self.curOrc = self.preamble + self.orcheader + self.arrayinitlines + self.instrparser.getInstrString() + INPUT_CLIP_INSTR
+        self.curOrc = self.preamble + self.orcheader + self.arrayinitlines + self.config.body + INPUT_CLIP_INSTR
         self.curSco = sco
         try:
             if neb_globals.remount_fs is True:
@@ -124,7 +117,7 @@ gipeak[] init 100
         return self.filehandler.numFiles();
 
     def getConfigDict(self):
-        return self.instrparser.getConfigDict()
+        return self.config.asDict()
 
     def refreshFileHandler(self):
         self.filehandler = fh.FileHandler(self.dir,[".wav",".aif", ".aiff", ".flac"])

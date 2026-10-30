@@ -38,12 +38,12 @@ class SCControlHandler(ControlHandler):
     # .scd: speed/pitch become rawencoder or hybrid as the patch declares them.
     # The channel keeps its place in self.channels, resistNormalSettings()
     # pairs channels[i] with altchannels[i].
-    def setConfig(self, scParser):
+    def setConfig(self, config):  # nebconfig.NebConfig of the .scd
         self.setRawActive(False)
         self.rawReady = False
         nebio.led_clear_sc()  # the old patch's LED colours
         for name in RAW_ENCODERS:
-            source = scParser.getType(name)
+            source = config.encoderType(name)
             old = self.channeldict[name]
             new = self.encoders[name][source]
             if new is old:
@@ -51,15 +51,15 @@ class SCControlHandler(ControlHandler):
             self.channels[self.channels.index(old)] = new
             self.channeldict[name] = new
             self.classlog.info("%s: %s", name, source)
-        self.setButtonConfig(scParser)
+        self.setButtonConfig(config)
 
     # Button mode and edge as the .scd declares them (e.g. freeze,latching,rising),
     # else the default, the same as ControlHandler.__init__ does for a new handler.
-    def setButtonConfig(self, scParser):
-        output_period = scParser.getOutputPeriod()
+    def setButtonConfig(self, nebConfig):
+        output_period = nebConfig.outputPeriod()
         for ctrl in DIGITAL_CONTROLS:
             chn = self.channeldict.get(ctrl) or self.altchanneldict.get(ctrl)
-            config = scParser.configEntry(ctrl) or self.defaultConfig.get(ctrl)
+            config = nebConfig.entry(ctrl) or self.defaultConfig.get(ctrl)
             if chn is None or config is None or len(config) < 2:
                 continue
             chn.setMode(config[0], config[1])
