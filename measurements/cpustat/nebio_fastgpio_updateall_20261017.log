@@ -1,0 +1,298 @@
+2026-10-17 00:26:04,402 INFO [controlhandler.py:75]: nebio input rates (scan, digital, adc): (1200, 400, 400)
+2026-10-17 00:26:04,403 INFO [controlhandler.py:81]: nebio fast GPIO: off (libgpiod)
+2026-10-17 00:26:07,232 INFO [controlhandler.py:75]: nebio input rates (scan, digital, adc): (1200, 400, 400)
+2026-10-17 00:26:07,233 INFO [controlhandler.py:81]: nebio fast GPIO: off (libgpiod)
+2026-10-17 00:26:17,234 INFO [controlhandler.py:531]: updateAll: 389.7 calls/s (total 3897)
+2026-10-17 00:26:17,234 INFO [controlhandler.py:534]: nebio: scan 1199 Hz, snapshot 389 Hz, worst scan 14873 us, gpio libgpiod
+2026-10-17 00:26:27,233 INFO [controlhandler.py:531]: updateAll: 398.0 calls/s (total 7877)
+2026-10-17 00:26:27,234 INFO [controlhandler.py:534]: nebio: scan 1198 Hz, snapshot 398 Hz, worst scan 3977 us, gpio libgpiod
+2026-10-17 00:26:37,234 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 11876)
+2026-10-17 00:26:37,234 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 2693 us, gpio libgpiod
+2026-10-17 00:26:47,235 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 15878)
+2026-10-17 00:26:47,236 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3544 us, gpio libgpiod
+2026-10-17 00:27:11,923 INFO [controlhandler.py:531]: updateAll: 6.4 calls/s (total 16035)
+2026-10-17 00:27:11,923 INFO [controlhandler.py:534]: nebio: scan 1202 Hz, snapshot 396 Hz, worst scan 5625 us, gpio libgpiod
+2026-10-17 00:27:21,924 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 20036)
+2026-10-17 00:27:21,924 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5443 us, gpio libgpiod
+2026-10-17 00:27:31,925 INFO [controlhandler.py:531]: updateAll: 399.5 calls/s (total 24032)
+2026-10-17 00:27:31,926 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4924 us, gpio libgpiod
+2026-10-17 00:27:41,926 INFO [controlhandler.py:531]: updateAll: 399.2 calls/s (total 28024)
+2026-10-17 00:27:41,926 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 2754 us, gpio libgpiod
+2026-10-17 00:27:51,927 INFO [controlhandler.py:531]: updateAll: 399.1 calls/s (total 32016)
+2026-10-17 00:27:51,928 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 4448 us, gpio libgpiod
+2026-10-17 00:28:01,928 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 36015)
+2026-10-17 00:28:01,929 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 3768 us, gpio libgpiod
+2026-10-17 00:28:11,929 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 40015)
+2026-10-17 00:28:11,929 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4860 us, gpio libgpiod
+2026-10-17 00:28:21,930 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 44015)
+2026-10-17 00:28:21,930 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5131 us, gpio libgpiod
+2026-10-17 00:28:31,931 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 48014)
+2026-10-17 00:28:31,931 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4935 us, gpio libgpiod
+2026-10-17 00:28:41,932 INFO [controlhandler.py:531]: updateAll: 399.5 calls/s (total 52009)
+2026-10-17 00:28:41,932 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 5218 us, gpio libgpiod
+2026-10-17 00:28:51,933 INFO [controlhandler.py:531]: updateAll: 399.4 calls/s (total 56003)
+2026-10-17 00:28:51,933 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 4986 us, gpio libgpiod
+2026-10-17 00:29:01,934 INFO [controlhandler.py:531]: updateAll: 399.6 calls/s (total 60000)
+2026-10-17 00:29:01,935 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5088 us, gpio libgpiod
+2026-10-17 00:29:11,935 INFO [controlhandler.py:531]: updateAll: 399.4 calls/s (total 63994)
+2026-10-17 00:29:11,936 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 5737 us, gpio libgpiod
+2026-10-17 00:29:21,936 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 67992)
+2026-10-17 00:29:21,937 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 6548 us, gpio libgpiod
+2026-10-17 00:29:31,937 INFO [controlhandler.py:531]: updateAll: 399.5 calls/s (total 71987)
+2026-10-17 00:29:31,937 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 399 Hz, worst scan 3732 us, gpio libgpiod
+2026-10-17 00:29:41,938 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 75986)
+2026-10-17 00:29:41,938 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5112 us, gpio libgpiod
+2026-10-17 00:29:51,939 INFO [controlhandler.py:531]: updateAll: 399.5 calls/s (total 79982)
+2026-10-17 00:29:51,940 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5626 us, gpio libgpiod
+2026-10-17 00:30:01,940 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 83984)
+2026-10-17 00:30:01,940 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 2638 us, gpio libgpiod
+2026-10-17 00:30:11,941 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 87983)
+2026-10-17 00:30:11,941 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4935 us, gpio libgpiod
+2026-10-17 00:30:21,942 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 91985)
+2026-10-17 00:30:21,942 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2208 us, gpio libgpiod
+2026-10-17 00:30:31,943 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 95987)
+2026-10-17 00:30:31,943 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3055 us, gpio libgpiod
+2026-10-17 00:30:41,944 INFO [controlhandler.py:531]: updateAll: 399.7 calls/s (total 99985)
+2026-10-17 00:30:41,945 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4871 us, gpio libgpiod
+2026-10-17 00:30:51,945 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 103983)
+2026-10-17 00:30:51,946 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 4241 us, gpio libgpiod
+2026-10-17 00:31:01,946 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 107983)
+2026-10-17 00:31:01,947 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4549 us, gpio libgpiod
+2026-10-17 00:31:11,947 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 111981)
+2026-10-17 00:31:11,948 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3100 us, gpio libgpiod
+2026-10-17 00:31:21,948 INFO [controlhandler.py:531]: updateAll: 399.6 calls/s (total 115977)
+2026-10-17 00:31:21,948 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 4323 us, gpio libgpiod
+2026-10-17 00:31:31,949 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 119977)
+2026-10-17 00:31:31,949 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4996 us, gpio libgpiod
+2026-10-17 00:31:41,950 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 123978)
+2026-10-17 00:31:41,950 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4515 us, gpio libgpiod
+2026-10-17 00:31:51,951 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 127979)
+2026-10-17 00:31:51,951 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2341 us, gpio libgpiod
+2026-10-17 00:32:01,952 INFO [controlhandler.py:531]: updateAll: 399.2 calls/s (total 131971)
+2026-10-17 00:32:01,952 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 5183 us, gpio libgpiod
+2026-10-17 00:32:11,953 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 135970)
+2026-10-17 00:32:11,954 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2628 us, gpio libgpiod
+2026-10-17 00:32:21,954 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 139971)
+2026-10-17 00:32:21,954 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 3504 us, gpio libgpiod
+2026-10-17 00:32:31,955 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 143973)
+2026-10-17 00:32:31,955 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2567 us, gpio libgpiod
+2026-10-17 00:32:41,956 INFO [controlhandler.py:531]: updateAll: 399.7 calls/s (total 147970)
+2026-10-17 00:32:41,957 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5093 us, gpio libgpiod
+2026-10-17 00:32:51,957 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 151971)
+2026-10-17 00:32:51,957 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 1034 us, gpio libgpiod
+2026-10-17 00:33:01,958 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 155973)
+2026-10-17 00:33:01,959 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2495 us, gpio libgpiod
+2026-10-17 00:33:11,959 INFO [controlhandler.py:531]: updateAll: 399.4 calls/s (total 159967)
+2026-10-17 00:33:11,959 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 399 Hz, worst scan 6502 us, gpio libgpiod
+2026-10-17 00:33:21,960 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 163969)
+2026-10-17 00:33:21,960 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3181 us, gpio libgpiod
+2026-10-17 00:33:31,961 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 167970)
+2026-10-17 00:33:31,962 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2585 us, gpio libgpiod
+2026-10-17 00:33:41,962 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 171972)
+2026-10-17 00:33:41,962 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 756 us, gpio libgpiod
+2026-10-17 00:33:51,963 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 175974)
+2026-10-17 00:33:51,963 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 741 us, gpio libgpiod
+2026-10-17 00:34:01,964 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 179976)
+2026-10-17 00:34:01,964 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 754 us, gpio libgpiod
+2026-10-17 00:34:11,965 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 183978)
+2026-10-17 00:34:11,965 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 759 us, gpio libgpiod
+2026-10-17 00:34:21,966 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 187980)
+2026-10-17 00:34:21,966 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 935 us, gpio libgpiod
+2026-10-17 00:34:31,967 INFO [controlhandler.py:531]: updateAll: 399.4 calls/s (total 191974)
+2026-10-17 00:34:31,967 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 3105 us, gpio libgpiod
+2026-10-17 00:34:41,968 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 195974)
+2026-10-17 00:34:41,968 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5929 us, gpio libgpiod
+2026-10-17 00:34:51,969 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 199976)
+2026-10-17 00:34:51,969 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 782 us, gpio libgpiod
+2026-10-17 00:35:01,970 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 203978)
+2026-10-17 00:35:01,970 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 761 us, gpio libgpiod
+2026-10-17 00:35:10,876 INFO [controlhandler.py:75]: nebio input rates (scan, digital, adc): (1200, 400, 400)
+2026-10-17 00:35:10,887 INFO [controlhandler.py:78]: nebio fast GPIO requested (/home/alarm/nebio_fast_gpio): on
+2026-10-17 00:35:13,149 INFO [controlhandler.py:75]: nebio input rates (scan, digital, adc): (1200, 400, 400)
+2026-10-17 00:35:13,160 INFO [controlhandler.py:78]: nebio fast GPIO requested (/home/alarm/nebio_fast_gpio): on
+2026-10-17 00:35:23,163 INFO [controlhandler.py:531]: updateAll: 389.4 calls/s (total 3895)
+2026-10-17 00:35:23,164 INFO [controlhandler.py:534]: nebio: scan 1199 Hz, snapshot 389 Hz, worst scan 9714 us, gpio fast
+2026-10-17 00:35:33,164 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 7897)
+2026-10-17 00:35:33,165 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 1583 us, gpio fast
+2026-10-17 00:35:43,165 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 11897)
+2026-10-17 00:35:43,166 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2535 us, gpio fast
+2026-10-17 00:35:53,166 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 15899)
+2026-10-17 00:35:53,167 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 773 us, gpio fast
+2026-10-17 00:36:03,167 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 19901)
+2026-10-17 00:36:03,168 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 753 us, gpio fast
+2026-10-17 00:36:13,168 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 23903)
+2026-10-17 00:36:13,169 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 759 us, gpio fast
+2026-10-17 00:36:23,169 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 27905)
+2026-10-17 00:36:23,170 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 768 us, gpio fast
+2026-10-17 00:36:33,170 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 31907)
+2026-10-17 00:36:33,171 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 1692 us, gpio fast
+2026-10-17 00:36:43,171 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 35909)
+2026-10-17 00:36:43,172 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 1576 us, gpio fast
+2026-10-17 00:36:53,172 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 39911)
+2026-10-17 00:36:53,173 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 807 us, gpio fast
+2026-10-17 00:37:03,173 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 43913)
+2026-10-17 00:37:03,174 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 756 us, gpio fast
+2026-10-17 00:37:13,174 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 47915)
+2026-10-17 00:37:13,175 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 952 us, gpio fast
+2026-10-17 00:37:23,175 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 51917)
+2026-10-17 00:37:23,176 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 778 us, gpio fast
+2026-10-17 00:37:33,176 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 55919)
+2026-10-17 00:37:33,177 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3134 us, gpio fast
+2026-10-17 00:37:43,177 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 59921)
+2026-10-17 00:37:43,178 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 1576 us, gpio fast
+2026-10-17 00:37:53,178 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 63923)
+2026-10-17 00:37:53,179 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 874 us, gpio fast
+2026-10-17 00:38:03,179 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 67925)
+2026-10-17 00:38:03,180 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 747 us, gpio fast
+2026-10-17 00:38:13,180 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 71927)
+2026-10-17 00:38:13,181 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4250 us, gpio fast
+2026-10-17 00:38:23,181 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 75929)
+2026-10-17 00:38:23,182 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 746 us, gpio fast
+2026-10-17 00:38:33,182 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 79931)
+2026-10-17 00:38:33,183 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 782 us, gpio fast
+2026-10-17 00:38:43,183 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 83933)
+2026-10-17 00:38:43,184 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 771 us, gpio fast
+2026-10-17 00:38:53,184 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 87933)
+2026-10-17 00:38:53,185 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2879 us, gpio fast
+2026-10-17 00:39:03,185 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 91934)
+2026-10-17 00:39:03,186 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3290 us, gpio fast
+2026-10-17 00:39:13,186 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 95934)
+2026-10-17 00:39:13,187 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4962 us, gpio fast
+2026-10-17 00:39:23,187 INFO [controlhandler.py:531]: updateAll: 399.7 calls/s (total 99931)
+2026-10-17 00:39:23,188 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4549 us, gpio fast
+2026-10-17 00:39:33,188 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 103931)
+2026-10-17 00:39:33,189 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4924 us, gpio fast
+2026-10-17 00:39:43,189 INFO [controlhandler.py:531]: updateAll: 399.6 calls/s (total 107927)
+2026-10-17 00:39:43,190 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3380 us, gpio fast
+2026-10-17 00:39:53,190 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 111925)
+2026-10-17 00:39:53,191 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4978 us, gpio fast
+2026-10-17 00:40:03,191 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 115923)
+2026-10-17 00:40:03,192 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3819 us, gpio fast
+2026-10-17 00:40:13,192 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 119924)
+2026-10-17 00:40:13,193 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3379 us, gpio fast
+2026-10-17 00:40:23,193 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 123923)
+2026-10-17 00:40:23,194 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 2561 us, gpio fast
+2026-10-17 00:40:33,194 INFO [controlhandler.py:531]: updateAll: 399.6 calls/s (total 127919)
+2026-10-17 00:40:33,195 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5412 us, gpio fast
+2026-10-17 00:40:43,195 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 131918)
+2026-10-17 00:40:43,196 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2466 us, gpio fast
+2026-10-17 00:40:53,196 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 135917)
+2026-10-17 00:40:53,197 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4517 us, gpio fast
+2026-10-17 00:41:03,197 INFO [controlhandler.py:531]: updateAll: 399.6 calls/s (total 139913)
+2026-10-17 00:41:03,198 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5856 us, gpio fast
+2026-10-17 00:41:13,198 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 143913)
+2026-10-17 00:41:13,199 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2999 us, gpio fast
+2026-10-17 00:41:23,199 INFO [controlhandler.py:531]: updateAll: 398.3 calls/s (total 147896)
+2026-10-17 00:41:23,200 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 398 Hz, worst scan 3143 us, gpio fast
+2026-10-17 00:41:33,200 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 151897)
+2026-10-17 00:41:33,201 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3849 us, gpio fast
+2026-10-17 00:41:43,201 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 155898)
+2026-10-17 00:41:43,202 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 4653 us, gpio fast
+2026-10-17 00:41:53,202 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 159896)
+2026-10-17 00:41:53,203 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5811 us, gpio fast
+2026-10-17 00:42:03,203 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 163896)
+2026-10-17 00:42:03,204 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3134 us, gpio fast
+2026-10-17 00:42:13,204 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 167895)
+2026-10-17 00:42:13,205 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5499 us, gpio fast
+2026-10-17 00:42:23,205 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 171895)
+2026-10-17 00:42:23,205 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 3830 us, gpio fast
+2026-10-17 00:42:33,206 INFO [controlhandler.py:531]: updateAll: 399.6 calls/s (total 175892)
+2026-10-17 00:42:33,207 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4610 us, gpio fast
+2026-10-17 00:42:43,207 INFO [controlhandler.py:531]: updateAll: 399.7 calls/s (total 179889)
+2026-10-17 00:42:43,208 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4997 us, gpio fast
+2026-10-17 00:42:53,208 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 183888)
+2026-10-17 00:42:53,209 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4555 us, gpio fast
+2026-10-17 00:43:03,209 INFO [controlhandler.py:531]: updateAll: 399.7 calls/s (total 187885)
+2026-10-17 00:43:03,210 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4292 us, gpio fast
+2026-10-17 00:43:13,210 INFO [controlhandler.py:531]: updateAll: 399.3 calls/s (total 191878)
+2026-10-17 00:43:13,211 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 3891 us, gpio fast
+2026-10-17 00:43:23,211 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 195878)
+2026-10-17 00:43:23,212 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 7470 us, gpio fast
+2026-10-17 00:43:33,212 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 199877)
+2026-10-17 00:43:33,213 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4733 us, gpio fast
+2026-10-17 00:43:43,214 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 203876)
+2026-10-17 00:43:43,214 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 7746 us, gpio fast
+2026-10-17 00:43:53,214 INFO [controlhandler.py:531]: updateAll: 399.5 calls/s (total 207871)
+2026-10-17 00:43:53,215 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 2769 us, gpio fast
+2026-10-17 00:44:03,215 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 211872)
+2026-10-17 00:44:03,216 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 1686 us, gpio fast
+2026-10-17 00:44:09,955 INFO [controlhandler.py:75]: nebio input rates (scan, digital, adc): (1200, 400, 400)
+2026-10-17 00:44:09,956 INFO [controlhandler.py:81]: nebio fast GPIO: off (libgpiod)
+2026-10-17 00:44:12,229 INFO [controlhandler.py:75]: nebio input rates (scan, digital, adc): (1200, 400, 400)
+2026-10-17 00:44:12,230 INFO [controlhandler.py:81]: nebio fast GPIO: off (libgpiod)
+2026-10-17 00:44:22,232 INFO [controlhandler.py:531]: updateAll: 390.0 calls/s (total 3900)
+2026-10-17 00:44:22,233 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 390 Hz, worst scan 4937 us, gpio libgpiod
+2026-10-17 00:44:32,233 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 7901)
+2026-10-17 00:44:32,234 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2580 us, gpio libgpiod
+2026-10-17 00:44:42,234 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 11903)
+2026-10-17 00:44:42,235 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 848 us, gpio libgpiod
+2026-10-17 00:44:52,235 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 15905)
+2026-10-17 00:44:52,236 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 758 us, gpio libgpiod
+2026-10-17 00:45:02,236 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 19907)
+2026-10-17 00:45:02,237 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 763 us, gpio libgpiod
+2026-10-17 00:45:12,237 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 23909)
+2026-10-17 00:45:12,238 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 787 us, gpio libgpiod
+2026-10-17 00:45:22,238 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 27911)
+2026-10-17 00:45:22,239 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 895 us, gpio libgpiod
+2026-10-17 00:45:32,239 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 31909)
+2026-10-17 00:45:32,240 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4210 us, gpio libgpiod
+2026-10-17 00:45:42,240 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 35910)
+2026-10-17 00:45:42,240 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 3189 us, gpio libgpiod
+2026-10-17 00:45:52,242 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 39912)
+2026-10-17 00:45:52,243 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3543 us, gpio libgpiod
+2026-10-17 00:46:02,242 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 43913)
+2026-10-17 00:46:02,243 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 7142 us, gpio libgpiod
+2026-10-17 00:46:12,243 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 47914)
+2026-10-17 00:46:12,244 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2423 us, gpio libgpiod
+2026-10-17 00:46:22,244 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 51915)
+2026-10-17 00:46:22,245 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2804 us, gpio libgpiod
+2026-10-17 00:46:32,245 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 55915)
+2026-10-17 00:46:32,246 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4650 us, gpio libgpiod
+2026-10-17 00:46:42,246 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 59913)
+2026-10-17 00:46:42,247 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 7082 us, gpio libgpiod
+2026-10-17 00:46:52,247 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 63913)
+2026-10-17 00:46:52,248 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3859 us, gpio libgpiod
+2026-10-17 00:47:02,248 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 67911)
+2026-10-17 00:47:02,249 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5041 us, gpio libgpiod
+2026-10-17 00:47:12,249 INFO [controlhandler.py:531]: updateAll: 399.8 calls/s (total 71909)
+2026-10-17 00:47:12,250 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5127 us, gpio libgpiod
+2026-10-17 00:47:22,250 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 75908)
+2026-10-17 00:47:22,251 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 2660 us, gpio libgpiod
+2026-10-17 00:47:32,251 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 79907)
+2026-10-17 00:47:32,252 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4642 us, gpio libgpiod
+2026-10-17 00:47:42,252 INFO [controlhandler.py:531]: updateAll: 399.7 calls/s (total 83904)
+2026-10-17 00:47:42,253 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 5035 us, gpio libgpiod
+2026-10-17 00:47:52,253 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 87906)
+2026-10-17 00:47:52,254 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2669 us, gpio libgpiod
+2026-10-17 00:48:02,254 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 91907)
+2026-10-17 00:48:02,255 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3767 us, gpio libgpiod
+2026-10-17 00:48:12,255 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 95906)
+2026-10-17 00:48:12,256 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3780 us, gpio libgpiod
+2026-10-17 00:48:22,256 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 99905)
+2026-10-17 00:48:22,256 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3917 us, gpio libgpiod
+2026-10-17 00:48:32,257 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 103905)
+2026-10-17 00:48:32,258 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4963 us, gpio libgpiod
+2026-10-17 00:48:42,258 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 107904)
+2026-10-17 00:48:42,259 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3769 us, gpio libgpiod
+2026-10-17 00:48:52,259 INFO [controlhandler.py:531]: updateAll: 399.7 calls/s (total 111901)
+2026-10-17 00:48:52,260 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 6311 us, gpio libgpiod
+2026-10-17 00:49:02,260 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 115901)
+2026-10-17 00:49:02,261 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2803 us, gpio libgpiod
+2026-10-17 00:49:12,261 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 119900)
+2026-10-17 00:49:12,262 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4726 us, gpio libgpiod
+2026-10-17 00:49:22,262 INFO [controlhandler.py:531]: updateAll: 399.5 calls/s (total 123895)
+2026-10-17 00:49:22,263 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 5105 us, gpio libgpiod
+2026-10-17 00:49:32,263 INFO [controlhandler.py:531]: updateAll: 399.9 calls/s (total 127894)
+2026-10-17 00:49:32,264 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5037 us, gpio libgpiod
+2026-10-17 00:49:42,264 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 131895)
+2026-10-17 00:49:42,264 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 2061 us, gpio libgpiod
+2026-10-17 00:49:52,265 INFO [controlhandler.py:531]: updateAll: 399.3 calls/s (total 135888)
+2026-10-17 00:49:52,266 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 4039 us, gpio libgpiod
+2026-10-17 00:50:02,266 INFO [controlhandler.py:531]: updateAll: 399.5 calls/s (total 139883)
+2026-10-17 00:50:02,266 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 399 Hz, worst scan 3759 us, gpio libgpiod
+2026-10-17 00:50:12,267 INFO [controlhandler.py:531]: updateAll: 400.0 calls/s (total 143884)
+2026-10-17 00:50:12,267 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3870 us, gpio libgpiod
+2026-10-17 00:50:22,268 INFO [controlhandler.py:531]: updateAll: 400.2 calls/s (total 147886)
+2026-10-17 00:50:22,269 INFO [controlhandler.py:534]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3719 us, gpio libgpiod
+2026-10-17 00:50:32,269 INFO [controlhandler.py:531]: updateAll: 400.1 calls/s (total 151887)
+2026-10-17 00:50:32,269 INFO [controlhandler.py:534]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 6250 us, gpio libgpiod

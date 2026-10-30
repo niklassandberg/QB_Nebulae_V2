@@ -1,15 +1,31 @@
 import filehandler as fh
-import instrparser
+import neb_globals
 import os
+
+# Added to every orchestra: counts the k-cycles in which the audio input
+# reached full scale (the codec's ADC clipped, e.g. too much input gain).
+# ControlHandler reads "inclip"; ui.py makes the four encoder LEDs flicker red
+# in secondary controls while it changes.
+INPUT_CLIP_INSTR = """
+instr NebInputClip
+ain1, ain2 ins
+kpeak1 max_k ain1, 1, 1
+kpeak2 max_k ain2, 1, 1
+if kpeak1 >= 0.999 || kpeak2 >= 0.999 then
+  gkinclip = gkinclip + 1
+endif
+endin
+"""
 
 class Conductor(object):
     def __init__(self):
-        self.instrparser = instrparser.InstrParser()
-        self.source = "factory"
+        self.config = None  # nebconfig.NebConfig of the instrument
+        self.source = "instr"
         self.instr = "granular_test"
         self.dir = "/home/alarm/audio/"
 
-    def generate_orc(self, instr, instr_bank):
+    # config: the instrument's nebconfig.NebConfig (read once by nebulae.py)
+    def generate_orc(self, instr, instr_bank, config):
         self.refreshFileHandler()
         self.instr = instr
         self.orcheader = """
@@ -37,6 +53,7 @@ gkeol chnexport "eol", 2
 gksizestatus chnexport "sizestatus", 2
 gkrecordstatus chnexport "recordstatus", 2
 gkbufferlength chnexport "bufferlength", 2
+gkinclip chnexport "inclip", 2
 ; secondary controls
 gkloopstart_alt chnexport "start_alt", 1
 gkloopsize_alt chnexport "size_alt", 1
@@ -59,20 +76,11 @@ gipeak[] init 100
             """
 
         self.source = instr_bank
-        if self.source == "user": # Changed "is" to "==" (danishfurniture)
-            self.instr_dir = "/home/alarm/instr/"
-        else: #if self.source is "factory":
-            self.instr_dir = "/home/alarm/QB_Nebulae_V2/Code/instr/"
-        self.instrparser.parse(self.instr, self.instr_dir)
-        if self.instrparser.configEntry("ksmps") is not None:
-            self.preamble = "ksmps = " + str(self.instrparser.configEntry("ksmps")[0]) + "\n"
-        else:
-            self.preamble = "ksmps = 128\n"
-        if self.instrparser.configEntry("sr") is not None:
-            self.preamble += "sr = " + str(self.instrparser.configEntry("sr")[0]) + "\n"
-        else:
-            self.preamble += "sr = 48000\n"
+        self.config = config
+        self.preamble = "ksmps = " + self.config.value("ksmps", "128") + "\n"
+        self.preamble += "sr = " + self.config.value("sr", "48000") + "\n"
         isco = "f 0 2147483641\n" + "i1 1 -10\n" #Start the longest possible score, and force i1 to run for length of score
+        isco += "i \"NebInputClip\" 0 -1\n" # input clip detector, always on (see INPUT_CLIP_INSTR)
         fsco_lines = []
         glen_arrayinit = []
         stereo_ftgen = []
@@ -89,7 +97,7 @@ gipeak[] init 100
         fsco = ''.join(fsco_lines)
         self.arrayinitlines = ''.join(glen_arrayinit)
         sco = isco + fsco
-        self.curOrc = self.preamble + self.orcheader + self.arrayinitlines + self.instrparser.getInstrString()
+        self.curOrc = self.preamble + self.orcheader + self.arrayinitlines + self.config.body + INPUT_CLIP_INSTR
         self.curSco = sco
         try:
             if neb_globals.remount_fs is True:
@@ -103,13 +111,13 @@ gipeak[] init 100
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
         except:
-            print "Could not write log of current csd"
+            print("Could not write log of current csd")
 
     def numFiles(self):
         return self.filehandler.numFiles();
 
     def getConfigDict(self):
-        return self.instrparser.getConfigDict()
+        return self.config.asDict()
 
     def refreshFileHandler(self):
         self.filehandler = fh.FileHandler(self.dir,[".wav",".aif", ".aiff", ".flac"])

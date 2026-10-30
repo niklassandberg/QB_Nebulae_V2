@@ -29,8 +29,10 @@ sudo killall polkitd
 ## This may cause hardfaults if more memory than is available is actually committed.
 echo 1 | sudo tee /proc/sys/vm/overcommit_memory
 
-## Remount /dev/shm to prevent memory allocation errors
-sudo mount -o remount,size=128M /dev/shm
+## Remount /dev/shm to prevent memory allocation errors. 512M: on the 64-bit
+## image JACK alone takes 107 MB there, and a crashed jackd leaves its copy
+## behind (128M then made the next jackd die with SIGBUS).
+sudo mount -o remount,size=512M /dev/shm
 
 ## Kill the usespace gnome virtual filesystem daemon. Warning: this can cause unpredictable behaviour when running a desktop environment on the RPi
 killall gvfsd

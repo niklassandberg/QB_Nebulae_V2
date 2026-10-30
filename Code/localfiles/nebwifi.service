@@ -1,0 +1,12 @@
+[Unit]
+Description=Nebulae WiFi Access Point
+DefaultDependencies=false
+After=local-fs.target
+
+[Service]
+Type=oneshot
+ExecStart=/bin/bash /home/alarm/QB_Nebulae_V2/Code/scripts/start_wifi.sh
+RemainAfterExit=true
+
+[Install]
+WantedBy=multi-user.target

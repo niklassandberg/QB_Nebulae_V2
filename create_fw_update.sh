@@ -1,6 +1,12 @@
 ################################################
 # Create Firmware Update File for the Nebulae
 #
+# sh create_fw_update.sh            normal firmware
+# sh create_fw_update.sh --hwtest   firmware that runs the nebio hardware
+#                                   test (Code/nebio/tools/hwtest.py) at boot
+#                                   instead of nebulae. Install a normal
+#                                   firmware afterwards to go back.
+#
 # Nebulae expects a file called "neb_update.zip"
 #
 # Using the .zip extension was an oversight,
@@ -11,13 +17,28 @@
 echo "Creating Nebulae Firmware Update"
 # Get Current Location
 dir="$(pwd)"
-# Create Temp Locations
+
+rm -rf temp/
 mkdir -p temp/
 # Move to Temp Location
 cd temp/
 # Copy Code/ contents to new directory structure
 mkdir -p QB_Nebulae_V2/
-cp -R ../Code/ QB_Nebulae_V2/
+cp -R ../Code QB_Nebulae_V2/
+# nebio is built on the Nebulae itself; a local build dir would be for the wrong
+# machine and its CMake cache for the wrong path.
+rm -rf QB_Nebulae_V2/Code/nebio/build
+cp -R ../Resources/SuperCollider/Extensions QB_Nebulae_V2/SuperColliderExtensions
+# The engine recipes next to their packages (Code/engine_packages/): a Nebulae builds
+# a package itself when the firmware has a recipe but no package for it
+# (Code/scripts/engines_build.sh).
+cp -R ../Resources/engine_build/. QB_Nebulae_V2/Code/engine_packages/
+if [ "$1" = "--hwtest" ]
+then
+    echo "Hardware test firmware: startup.sh will run hwtest.py instead of nebulae"
+    touch QB_Nebulae_V2/Code/hwtest_mode
+fi
+
 # Go through, and strip any unwanted line endings.
 SEARCHDIR=./QB_Nebulae_V2/Code
 for f in $SEARCHDIR/* $SEARCHDIR/**/*

@@ -1,0 +1,112 @@
+# Maintainer: Your Name <your@email.com>
+#
+# SuperCollider 3.14.1 — headless build for Arch Linux ARM on Raspberry Pi 4 (aarch64)
+#
+# Headless means: no IDE (scide), no Qt, scsynth + sclang only.
+#
+# Designed to keep all headers and CMake config files so that external
+# UGens (sc3-plugins, FluCoMa, etc.) can be compiled against this install.
+# The `options=(!strip)` line is intentional — stripping removes debug
+# symbols that can help diagnose plugin ABI issues. Remove it if you want
+# a smaller install.
+#
+# To compile an external UGen later, point CMake at the installed headers:
+#   cmake -DSC_PATH=/usr/share/supercollider ...
+# or use the installed CMake config:
+#   cmake -DSuperCollider_DIR=/usr/lib/cmake/SuperCollider ...
+
+pkgname=supercollider-headless
+pkgver=3.14.1
+pkgrel=1
+pkgdesc="SuperCollider audio synthesis server and language (headless, no IDE, RPi4)"
+arch=('aarch64' 'armv7h')
+url="https://supercollider.github.io"
+license=('GPL3')
+depends=(
+    'jack'           # JACK audio — required by scsynth
+    'libsndfile'     # soundfile I/O
+    'fftw'           # FFT used by several built-in UGens
+    'boost-libs'     # Boost runtime libs (regex, filesystem, etc.)
+    'yaml-cpp'       # YAML parsing
+    'udev'           # HID / udev support in sclang
+    'libxt'          # X toolkit stubs (needed even headless for sclang)
+    'alsa-lib'       # ALSA backend (fallback when JACK not running)
+)
+makedepends=(
+    'cmake'
+    'git'
+    'boost'          # Boost headers for compilation
+    #'python'         # build scripts
+    'pkgconf'
+)
+provides=('supercollider')
+conflicts=('supercollider')
+
+# Using the official release tarball with submodules baked in.
+# GitHub auto-generated tarballs do NOT include submodules, so we use git.
+source=(
+    "git+https://github.com/supercollider/supercollider.git#tag=Version-${pkgver}"
+)
+sha256sums=('SKIP')   # git source — integrity guaranteed by tag
+
+# ── Build options ─────────────────────────────────────────────────────────────
+# !strip  → keep debug symbols (helpful when building/debugging UGens)
+# !docs   → skip building HTML docs (speeds up build on RPi)
+options=(!strip !docs)
+
+prepare() {
+    cd "${srcdir}/supercollider"
+
+    # Initialise all submodules (nova-tt, hidapi, boost if vendored, etc.)
+    git submodule update --init --recursive
+
+    # Fix ARM NEON: get() missing return after assert(false) in vec_neon.hpp.
+    # The sed is too broad and also hits set() (void), so use Python to match
+    # the unique context of get() via the /* @} */ comment that follows it.
+    python -c "
+fn = 'external_libraries/nova-simd/vec/vec_neon.hpp'
+content = open(fn).read()
+old = '        assert(false);\n    }\n    /* @} */'
+new = '        assert(false);\n        return 0.f;\n    }\n    /* @} */'
+open(fn, 'w').write(content.replace(old, new, 1))
+"
+}
+
+build() {
+    cd "${srcdir}/supercollider"
+
+    # Out-of-tree build directory
+    mkdir -p build
+    cd build
+
+    cmake .. \
+        -DCMAKE_INSTALL_PREFIX=/usr \
+        -DCMAKE_BUILD_TYPE=Release \
+        -DAUDIOAPI=jack \
+        -DLIBSCSYNTH=ON \
+        -DSUPERNOVA=OFF \
+        -DSC_IDE=OFF \
+        -DSC_ED=OFF \
+        -DSC_EL=OFF \
+        -DSC_VIM=OFF \
+        -DSC_QT=OFF \
+        -DNO_X11=ON \
+        -DNATIVE=ON \
+        -DCMAKE_C_FLAGS="${CFLAGS}" \
+        -DCMAKE_CXX_FLAGS="${CXXFLAGS}"
+    cmake --build . --config Release -- -j3
+}
+
+package() {
+    cd "${srcdir}/supercollider/build"
+    make DESTDIR="${pkgdir}" install
+}
+
+# run: nohup makepkg -s --skipchecksums > build.log 2>&1 &
+# sudo pacman -U --disable-sandbox supercollider-headless-3.14.1-1-armv7h.pkg.tar.xz
+#
+# makepkg
+# nohup - "no hang up". It detaches the process from your terminal session so it keeps running even if SSH disconnects.
+# -s - installs missing dependencies automatically
+# -i - installs the package after building
+# --skipchecksums - checksum is not set in the build file abo

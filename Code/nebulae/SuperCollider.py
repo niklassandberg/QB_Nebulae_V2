@@ -23,7 +23,7 @@ class SuperCollider():
             try:
                 self.buffersID.append(sc.loadSndAbs(self.path + "audio/" + i, True))
             except:
-                print "something went wrong with " + i
+                print("something went wrong with " + i)
 
     def boot(self):
         sc.start(self.exedir, 57110, 2, 2, 48000, 0, 0, 1) #remove verbosity and spew of scsynth
@@ -32,10 +32,10 @@ class SuperCollider():
         sc.sc.sndpat = self.path + "audio"
         self.started = True #it's alive!
         self.loadBuffers()
-        print "server has started"
+        print("server has started")
 
     def instantiate_synth(self, which): #creates an instance of the chosen synth
-        print which
+        print(which)
         self.s = sc.sc.server
         time.sleep(0.1)
         self.s.sendMsg('/d_load', self.path + 'scsyndef/' + which + '.scsyndef')

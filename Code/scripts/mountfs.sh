@@ -1,12 +1,15 @@
 #!/bin/bash
+# Needs root. The services start it as root; started by hand it runs
+# itself again with sudo (sudo as root only adds lines to the journal).
+[ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 
 case "${1}" in
     rw)
-        sudo mount -o remount,rw /
+        mount -o remount,rw /
         echo "Filesystem mounted in READ-WRITE mode"
         ;;
     ro)
-        sudo mount -o remount,ro /
+        mount -o remount,ro /
         echo "Filesystem mounted in READ-ONLY mode"
         ;;
     *)

@@ -1,6 +1,5 @@
-import Adafruit_GPIO.SPI as SPI
-import RPi.GPIO as GPIO
 import MCP3208
+import nebio
 import ctcsound
 import switch as libSwitch
 import shiftregister as libSR
@@ -8,14 +7,13 @@ import random
 import os
 import digitaldata
 import time
-# Hardware SPI configuration:
-SPI_PORT   = 0
-SPI_DEVICE_CV = 0
-SPI_DEVICE_POT = 1
+import nconfig
+from classlogger import ClassLogger
 
-POT_Sel_Pin = 7
-CV_Sel_Pin = 8
-EOL_OUT_PIN = 16
+
+# Hardware SPI configuration (read by nebio):
+SPI_DEVICE_CV = nebio.ADC_CV
+SPI_DEVICE_POT = nebio.ADC_POT
 
 # Defines for Button/Gate Types
 BUTTON_GATE_GPIO = 0
@@ -24,6 +22,22 @@ BUTTON_GATE_SR = 2
 BUTTON_GPIO_GATE_SR = 3
 BUTTON_GPIO_GATE_NONE = 4
 BUTTON_SR_GATE_NONE = 5
+
+
+config = nconfig.NConfig()
+defSmoothCoeff = float(config.getValue("filterCoeff","analog",0.33))
+defHybridCoeff = float(config.getValue("filterCoeff","hybrid",0.43))
+
+# litte filtering on v/oct we dont want it gliding
+defPitchCoeff = float(config.getValue("filterCoeff","pitch",0.95))
+# reduced filtering on start, so that it can quickly and accurately be changed
+defStartCoeff = float(config.getValue("filterCoeff","start",0.95))
+
+# HybridData snaps speed to these factors and pitch to whole octaves (within
+# a tolerance). Speed as (positive, negative) pairs, checked in this order.
+SPEED_SNAP = tuple(((f + 4.0) / 8.0, ((-1.0 * f) + 4.0) / 8.0)
+                   for f in (0.0, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0))
+PITCH_SNAP = (0.0, 0.2, 0.4, 0.6, 0.8, 1.0)
 
 def addHysteresis(cur, new, distance):
     output = cur    
@@ -45,7 +59,8 @@ def averageInput(new_val, hist, hist_size, hist_idx):
 
 # Class for handling ADC Input Data
 class AdcData(object):
-    def __init__(self, pot_channel, cv_channel, minimum, maximum, init_val=0.0):
+    def __init__(self, pot_channel, cv_channel, name,minimum, maximum, init_val=0.0):
+        self.name = name
         self.minimum = minimum
         self.maximum = maximum
         self.range = maximum - minimum
@@ -70,16 +85,20 @@ class AdcData(object):
         self.count = 0
         self.filtPotVal = 0
         self.filtCVVal = 0
+        self.log = ClassLogger.loggerSetup(self)
         #self.smoothCoeff = 0.125
-        self.smoothCoeff = 0.33
+        ##self.smoothCoeff = 0.33
+        self.smoothCoeff = defSmoothCoeff
         self.hyst_amt = 0.002
         self.stablized = True
         self.stable_delta = 0.0
         self.last_in = 0.0
         if (pot_channel >= 0):
-            self.mcp_pot = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_POT))
+            self.mcp_pot = MCP3208.MCP3208(SPI_DEVICE_POT)
         if (cv_channel >= 0):
-            self.mcp_cv = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_CV))
+            self.mcp_cv = MCP3208.MCP3208(SPI_DEVICE_CV)
+        if self.name == "start":
+            self.smoothCoeff = defStartCoeff
 
     def setIgnoreHID(self, state):
         self.ignoring_pot = state
@@ -206,9 +225,9 @@ class AdcData(object):
             self.curmaxcv = temp_cv_code
         if temp_cv_code < self.curmincv:
             self.curmincv = temp_cv_code
-        print "########### SIGS ########"
-        print "POT: Current Code: " + str(temp_pot_code) + " Translated Value: " + str(self.raw_pot) + " min: " + str(self.curminpot) + " max: " + str(self.curmaxpot) + " range: " + str(self.curmaxpot - self.curminpot) + " channel " + str(self.pot_channel)
-        print "CV:  Current Code: " + str(temp_cv_code) + " Translated Value: " + str(temp_cv) + " min: " + str(self.curmincv) + " max: " + str(self.curmaxcv) + " range: " + str(self.curmaxcv - self.curmincv) + " channel " + str(self.cv_channel)
+        self.log.debug("########### SIGS ########")
+        self.log.debug("POT: Current Code: " + str(temp_pot_code) + " Translated Value: " + str(self.raw_pot) + " min: " + str(self.curminpot) + " max: " + str(self.curmaxpot) + " range: " + str(self.curmaxpot - self.curminpot) + " channel " + str(self.pot_channel))
+        self.log.debug("CV:  Current Code: " + str(temp_cv_code) + " Translated Value: " + str(temp_cv) + " min: " + str(self.curmincv) + " max: " + str(self.curmaxcv) + " range: " + str(self.curmaxcv - self.curmincv) + " channel " + str(self.cv_channel))
 
 
 class StaticData(object):
@@ -220,6 +239,9 @@ class StaticData(object):
 
     def setValue(self, value):
         self.curVal = value
+
+
+
 
 class HybridData(object):
     def __init__(self, channel, name, minimum, maximum, init_val):
@@ -241,18 +263,19 @@ class HybridData(object):
             self.scaling = 0.8685 # Rev13
             ## TODO recalibrate for rev10
             #self.filtCoeff = 0.20
-            self.filtCoeff = 0.33
+            ##self.filtCoeff = 0.33
+            self.filtCoeff = defPitchCoeff
         else:
             self.minimum = minimum
             self.maximum = maximum
             self.scaling = 1.0
             self.offset = -0.0049
-            self.filtCoeff = 0.43
+            self.filtCoeff = defHybridCoeff
         self.range = self.maximum - self.minimum
         self.channel = channel
         if (channel >= 0):
-            self.mcp_cv = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_CV))
-            self.mcp_pot = MCP3208.MCP3208(spi=SPI.SpiDev(SPI_PORT, SPI_DEVICE_POT))
+            self.mcp_cv = MCP3208.MCP3208(SPI_DEVICE_CV)
+            self.mcp_pot = MCP3208.MCP3208(SPI_DEVICE_POT)
         self.average = 0.0
         self.analogVal = 0.0
         self.filtVal = 0.0
@@ -289,18 +312,14 @@ class HybridData(object):
             temp_rnd = round(temp, 4)
             if self.name == "speed":
                 tolerance = 0.00208 # 1/8 semi-tone = quarter tone tolerance.
-                factors = [0.0, 0.125, 0.25, 0.5, 1.0, 2.0, 4.0]
-                for f in factors: 
-                    factor_val_pos = (f + 4.0) / 8.0 
-                    factor_val_neg = ((-1.0 * f) + 4.0) / 8.0 
+                for factor_val_pos, factor_val_neg in SPEED_SNAP:
                     if temp_rnd < factor_val_pos + tolerance and temp_rnd > factor_val_pos - tolerance:
                         temp_rnd = factor_val_pos
                     if temp_rnd < factor_val_neg + tolerance and temp_rnd > factor_val_neg - tolerance:
                         temp_rnd = factor_val_neg
             elif self.name == "pitch":
                 tolerance = 0.00208
-                octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]  
-                for octave in octaves:
+                for octave in PITCH_SNAP:
                     if temp_rnd < octave + tolerance and temp_rnd > octave - tolerance:
                         temp_rnd = octave 
             if self.stablized is True:
@@ -358,6 +377,28 @@ class HybridData(object):
 
                 
 
+# Encoder whose value is owned by sclang (rawencoder in a .scd). While active,
+# nebio sends the steps and the click straight to sclang and sclang drives the
+# encoder's LEDs. sclang also saves the value. This class keeps no value: it
+# only switches that routing.
+class RawEncoderData(object):
+    def __init__(self, name):
+        self.name = name
+
+    # nebio ignores a call that doesn't change the state.
+    def setActive(self, state):
+        nebio.encoder_set_raw(self.name, state)
+
+    def getValue(self):
+        return 0.0
+
+    def setValue(self, value):
+        pass
+
+    def setIgnoreHID(self, state):
+        pass
+
+
 # Single Channel of Return Communication from CSound
 class CommChannel(object):
     def __init__(self, csound, name):
@@ -373,11 +414,14 @@ class CommChannel(object):
         else:
             self.channel = None
 
+    # Read straight from the channel memory (the pointer from channelPtr),
+    # not with controlChannel(name): same value, without the name lookup and
+    # ctypes call every update. The .orc chnexports these, so Csound writes
+    # that memory with plain stores either way.
     def update(self):
         if self.channel is not None:
-            temp = self.csound.controlChannel(self.name)
             self.prev_state = self.state
-            self.state = temp[0]
+            self.state = float(self.channel[0])
             if self.state > 0.0 and self.prev_state < 1.0:
                 self.rising_edge_flag = True
             else:
@@ -408,14 +452,9 @@ class CommChannel(object):
 # Single Channel of Control Information
 class ControlChannel(object):
     def __init__(self, csound, name, init = 0, source="static", data_channel=-1, sr=None, gate_pin=-1, button_pin=-1, config=None, minimum=0, maximum=1, cvchn=-2, longtouch_cb=None):
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
-        GPIO.setup(CV_Sel_Pin, GPIO.OUT)
-        GPIO.setup(POT_Sel_Pin, GPIO.OUT)
-        GPIO.setup(EOL_OUT_PIN, GPIO.OUT)
-        GPIO.output(CV_Sel_Pin, True)
-        GPIO.output(POT_Sel_Pin, True)
+        nebio.inputs() # GPIO, SPI and the end-of-loop output are owned by nebio
         self.csound = csound
+        self.log = ClassLogger.loggerSetup(self)
         self.name = name
         if self.csound is not None:
             chn, _ = self.csound.channelPtr(self.name, 
@@ -440,7 +479,7 @@ class ControlChannel(object):
         if (cvchn is -2):
             cvchn = data_channel
         if (self.source is "analog"):
-            self.input = AdcData(data_channel, cvchn, minimum, maximum, init_val=init)
+            self.input = AdcData(data_channel,cvchn, self.name, minimum, maximum, init_val=init)
         elif (source is "static"):
             self.input = StaticData(self.curVal)
         elif (source is "digital"):
@@ -448,6 +487,8 @@ class ControlChannel(object):
                 self.input = digitaldata.DigitalData(self.name, data_channel, gate_pin, button_pin, self.sr, mode, edge, maximum, longtouch_cb, init_val=init)
         elif (source is "hybrid"):
             self.input = HybridData(data_channel, self.name, minimum, maximum, init_val=self.curVal)
+        elif (source == "rawencoder"):
+            self.input = RawEncoderData(self.name)
 
         if self.source == "analog" or self.source == "hybrid": 
             new_offset = self.gatherOffset(self.name)
@@ -493,6 +534,14 @@ class ControlChannel(object):
     def setIgnoreNextButton(self):
         if self.source == "digital":
             self.input.setIgnoreNextButton()
+
+    def setOutputPeriod(self, ms):
+        if self.source == "digital":
+            self.input.setOutputPeriod(ms)
+
+    def setMode(self, mode, edge):
+        if self.source == "digital":
+            self.input.setMode(mode, edge)
 
     def setModeChangeValue(self, value_to_resist):
         if self.source == "analog":
@@ -551,9 +600,9 @@ class ControlChannel(object):
                         try:
                             val = float(datalist[1])
                         except:
-                            print 'list value is not a floating point number:' + datalist[1]
+                            self.log.error('list value is not a floating point number:' + datalist[1])
         except:
-            print 'No file: ' + filepath + filename
+            self.log.error('No file: ' + filepath + filename)
         return val 
 
     def update(self):

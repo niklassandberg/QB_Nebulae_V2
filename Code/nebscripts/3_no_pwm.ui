@@ -1,0 +1,7 @@
+# No PWM, on the configsettings page of the instr selector.
+# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
+# mode = the name after the number, here "no_pwm").
+# Speed click on it: on/off, and back to the instrument. On: the file (next)
+# and freeze LEDs are only fully on or off, without PWM (their PWM is heard
+# in the audio). Saved (configsettings.py).
+# Slot LED bright = on (nebulae-status).

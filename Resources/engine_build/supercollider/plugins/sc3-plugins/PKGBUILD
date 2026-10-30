@@ -1,0 +1,42 @@
+# sc3-plugins for the Nebulae's SuperCollider (supercollider-headless,
+# Resources/engine_build/supercollider). Level 2: built after SuperCollider, see
+# Resources/engine_build/README.md.
+# Release build with makepkg's CFLAGS (-march=armv8-a: runs on Pi 3 and Pi 4;
+# the old build_sc.sh used -DNATIVE=ON, tuned to the Pi 4 it was built on).
+
+pkgname=sc3-plugins
+pkgver=3.14.1
+pkgrel=1
+pkgdesc="Extension UGens for SuperCollider (Nebulae build, scsynth only)"
+arch=(aarch64)
+url="https://github.com/supercollider/sc3-plugins"
+license=(GPL-2.0-or-later)
+depends=(supercollider-headless fftw)
+makedepends=(cmake git)
+# The full SuperCollider source (with submodules) of the same version: the
+# plugins build against it (SC_PATH), as in the old build_sc.sh.
+source=("sc3-plugins::git+https://github.com/supercollider/sc3-plugins.git#tag=Version-$pkgver"
+        "supercollider::git+https://github.com/supercollider/supercollider.git#tag=Version-$pkgver")
+sha256sums=('SKIP' 'SKIP')   # git sources: pinned by tag
+
+prepare() {
+  (cd sc3-plugins && git submodule update --init --recursive)
+  (cd supercollider && git submodule update --init --recursive)
+}
+
+build() {
+  cmake -S sc3-plugins -B build \
+    -DCMAKE_INSTALL_PREFIX=/usr \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DSC_PATH="$srcdir/supercollider" \
+    -DSUPERNOVA=OFF \
+    -DNATIVE=OFF \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DCMAKE_C_FLAGS="$CFLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS"
+  cmake --build build
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+}

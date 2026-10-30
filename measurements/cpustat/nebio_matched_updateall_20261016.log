@@ -1,0 +1,96 @@
+2026-10-16 22:38:09,535 INFO [controlhandler.py:71]: nebio input rates (scan, digital, adc): (1200, 400, 400)
+2026-10-16 22:38:15,508 INFO [controlhandler.py:71]: nebio input rates (scan, digital, adc): (1200, 400, 400)
+2026-10-16 22:38:25,512 INFO [controlhandler.py:522]: updateAll: 395.0 calls/s (total 3951)
+2026-10-16 22:38:25,513 INFO [controlhandler.py:525]: nebio: scan 1198 Hz, snapshot 395 Hz, worst scan 18934 us
+2026-10-16 23:00:54,559 INFO [controlhandler.py:522]: updateAll: 2.8 calls/s (total 7753)
+2026-10-16 23:00:54,559 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 1121 us
+2026-10-16 23:01:04,559 INFO [controlhandler.py:522]: updateAll: 398.8 calls/s (total 11741)
+2026-10-16 23:01:04,559 INFO [controlhandler.py:525]: nebio: scan 1201 Hz, snapshot 399 Hz, worst scan 4457 us
+2026-10-16 23:01:14,560 INFO [controlhandler.py:522]: updateAll: 399.1 calls/s (total 15732)
+2026-10-16 23:01:14,560 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 6104 us
+2026-10-16 23:01:24,560 INFO [controlhandler.py:522]: updateAll: 399.9 calls/s (total 19731)
+2026-10-16 23:01:24,561 INFO [controlhandler.py:525]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 5238 us
+2026-10-16 23:01:34,561 INFO [controlhandler.py:522]: updateAll: 399.3 calls/s (total 23724)
+2026-10-16 23:01:34,561 INFO [controlhandler.py:525]: nebio: scan 1199 Hz, snapshot 399 Hz, worst scan 6577 us
+2026-10-16 23:01:44,561 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 27726)
+2026-10-16 23:01:44,562 INFO [controlhandler.py:525]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 1014 us
+2026-10-16 23:01:54,563 INFO [controlhandler.py:522]: updateAll: 399.1 calls/s (total 31717)
+2026-10-16 23:01:54,563 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 4976 us
+2026-10-16 23:02:04,563 INFO [controlhandler.py:522]: updateAll: 399.8 calls/s (total 35715)
+2026-10-16 23:02:04,564 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5860 us
+2026-10-16 23:02:14,564 INFO [controlhandler.py:522]: updateAll: 399.4 calls/s (total 39709)
+2026-10-16 23:02:14,565 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 3515 us
+2026-10-16 23:02:24,565 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 43711)
+2026-10-16 23:02:24,566 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 845 us
+2026-10-16 23:02:34,566 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 47713)
+2026-10-16 23:02:34,567 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 853 us
+2026-10-16 23:02:44,567 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 51715)
+2026-10-16 23:02:44,568 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 1835 us
+2026-10-16 23:02:54,568 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 55717)
+2026-10-16 23:02:54,569 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 937 us
+2026-10-16 23:03:04,569 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 59719)
+2026-10-16 23:03:04,570 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 864 us
+2026-10-16 23:03:14,571 INFO [controlhandler.py:522]: updateAll: 399.8 calls/s (total 63717)
+2026-10-16 23:03:14,571 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3472 us
+2026-10-16 23:03:24,571 INFO [controlhandler.py:522]: updateAll: 400.0 calls/s (total 67717)
+2026-10-16 23:03:24,572 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4364 us
+2026-10-16 23:03:34,572 INFO [controlhandler.py:522]: updateAll: 399.7 calls/s (total 71714)
+2026-10-16 23:03:34,573 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5172 us
+2026-10-16 23:03:44,573 INFO [controlhandler.py:522]: updateAll: 400.1 calls/s (total 75715)
+2026-10-16 23:03:44,574 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4366 us
+2026-10-16 23:03:54,574 INFO [controlhandler.py:522]: updateAll: 399.6 calls/s (total 79711)
+2026-10-16 23:03:54,575 INFO [controlhandler.py:525]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 2914 us
+2026-10-16 23:04:04,575 INFO [controlhandler.py:522]: updateAll: 400.0 calls/s (total 83711)
+2026-10-16 23:04:04,576 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5139 us
+2026-10-16 23:04:14,576 INFO [controlhandler.py:522]: updateAll: 400.1 calls/s (total 87712)
+2026-10-16 23:04:14,577 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3787 us
+2026-10-16 23:04:24,577 INFO [controlhandler.py:522]: updateAll: 399.2 calls/s (total 91704)
+2026-10-16 23:04:24,578 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 3882 us
+2026-10-16 23:04:34,578 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 95706)
+2026-10-16 23:04:34,579 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 2471 us
+2026-10-16 23:04:44,581 INFO [controlhandler.py:522]: updateAll: 399.6 calls/s (total 99703)
+2026-10-16 23:04:44,581 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5875 us
+2026-10-16 23:04:54,580 INFO [controlhandler.py:522]: updateAll: 399.8 calls/s (total 103701)
+2026-10-16 23:04:54,581 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3211 us
+2026-10-16 23:05:04,582 INFO [controlhandler.py:522]: updateAll: 399.9 calls/s (total 107700)
+2026-10-16 23:05:04,582 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4579 us
+2026-10-16 23:05:14,582 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 111702)
+2026-10-16 23:05:14,583 INFO [controlhandler.py:525]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 2786 us
+2026-10-16 23:05:24,583 INFO [controlhandler.py:522]: updateAll: 399.8 calls/s (total 115700)
+2026-10-16 23:05:24,584 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4939 us
+2026-10-16 23:05:34,585 INFO [controlhandler.py:522]: updateAll: 399.8 calls/s (total 119698)
+2026-10-16 23:05:34,586 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5941 us
+2026-10-16 23:05:44,585 INFO [controlhandler.py:522]: updateAll: 399.9 calls/s (total 123697)
+2026-10-16 23:05:44,586 INFO [controlhandler.py:525]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 3870 us
+2026-10-16 23:05:54,586 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 127699)
+2026-10-16 23:05:54,587 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3811 us
+2026-10-16 23:06:04,586 INFO [controlhandler.py:522]: updateAll: 399.9 calls/s (total 131698)
+2026-10-16 23:06:04,587 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 6171 us
+2026-10-16 23:06:14,588 INFO [controlhandler.py:522]: updateAll: 400.2 calls/s (total 135701)
+2026-10-16 23:06:14,589 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3441 us
+2026-10-16 23:06:24,589 INFO [controlhandler.py:522]: updateAll: 399.8 calls/s (total 139699)
+2026-10-16 23:06:24,590 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4197 us
+2026-10-16 23:06:34,590 INFO [controlhandler.py:522]: updateAll: 400.1 calls/s (total 143700)
+2026-10-16 23:06:34,591 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3349 us
+2026-10-16 23:06:44,591 INFO [controlhandler.py:522]: updateAll: 400.1 calls/s (total 147701)
+2026-10-16 23:06:44,592 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3037 us
+2026-10-16 23:06:54,592 INFO [controlhandler.py:522]: updateAll: 400.1 calls/s (total 151702)
+2026-10-16 23:06:54,593 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3035 us
+2026-10-16 23:07:04,593 INFO [controlhandler.py:522]: updateAll: 399.6 calls/s (total 155698)
+2026-10-16 23:07:04,594 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4579 us
+2026-10-16 23:07:14,594 INFO [controlhandler.py:522]: updateAll: 399.9 calls/s (total 159697)
+2026-10-16 23:07:14,595 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 5437 us
+2026-10-16 23:07:24,595 INFO [controlhandler.py:522]: updateAll: 399.8 calls/s (total 163695)
+2026-10-16 23:07:24,596 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4893 us
+2026-10-16 23:07:34,596 INFO [controlhandler.py:522]: updateAll: 400.0 calls/s (total 167695)
+2026-10-16 23:07:34,597 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4890 us
+2026-10-16 23:07:44,597 INFO [controlhandler.py:522]: updateAll: 399.8 calls/s (total 171693)
+2026-10-16 23:07:44,598 INFO [controlhandler.py:525]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 5288 us
+2026-10-16 23:07:54,598 INFO [controlhandler.py:522]: updateAll: 399.2 calls/s (total 175685)
+2026-10-16 23:07:54,599 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 399 Hz, worst scan 5279 us
+2026-10-16 23:08:04,599 INFO [controlhandler.py:522]: updateAll: 400.1 calls/s (total 179686)
+2026-10-16 23:08:04,600 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 3229 us
+2026-10-16 23:08:14,600 INFO [controlhandler.py:522]: updateAll: 399.9 calls/s (total 183685)
+2026-10-16 23:08:14,601 INFO [controlhandler.py:525]: nebio: scan 1200 Hz, snapshot 400 Hz, worst scan 4511 us
+2026-10-16 23:08:24,601 INFO [controlhandler.py:522]: updateAll: 399.9 calls/s (total 187684)
+2026-10-16 23:08:24,602 INFO [controlhandler.py:525]: nebio: scan 1201 Hz, snapshot 400 Hz, worst scan 3844 us

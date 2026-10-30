@@ -1,0 +1,48 @@
+# SuperBufRd UGens for the Nebulae's SuperCollider. Level 2: built after
+# SuperCollider (uses its installed plugin headers), see Resources/engine_build/README.md.
+# No install target upstream: the .so files and classes are copied, as the old
+# build_sc.sh did.
+
+pkgname=sc-superbufrd
+_commit=e1e19f9
+pkgver=0+g$_commit
+pkgrel=2
+pkgdesc="SuperBufRd UGens (64-bit buffer positions) for SuperCollider (Nebulae build)"
+arch=(aarch64)
+url="https://github.com/esluyter/super-bufrd"
+license=(GPL-3.0-or-later)
+depends=(supercollider-headless)
+makedepends=(cmake git)
+source=("super-bufrd::git+https://github.com/esluyter/super-bufrd.git#commit=$_commit")
+sha256sums=('SKIP')   # git source: pinned by commit
+
+prepare() {
+  (cd super-bufrd && git submodule update --init --recursive)
+  # SC_PATH with an include/ like the source tree: the installed headers.
+  mkdir -p scpath && ln -sfn /usr/include/SuperCollider scpath/include
+}
+
+build() {
+  cmake -S super-bufrd -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DSC_PATH="$srcdir/scpath" \
+    -DSUPERNOVA=OFF \
+    -DCPP11=OFF -DCMAKE_CXX_STANDARD=17 \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DCMAKE_C_FLAGS="$CFLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS"
+  cmake --build build
+}
+
+package() {
+  local d="$pkgdir/usr/share/SuperCollider/Extensions/SuperBufRd"
+  install -d "$d"
+  cp build/*.so "$d/"
+  # The classes (SuperBufRd.sc, SuperPair.sc) are in the project's root, not
+  # in a Classes folder: without them SuperCollider does not know the UGens
+  # (pkgrel 1 had only the .so files).
+  cp super-bufrd/*.sc "$d/"
+  for x in Classes SystemOverwrites HelpSource; do
+    [ -d super-bufrd/$x ] && cp -r super-bufrd/$x "$d/"
+  done
+}

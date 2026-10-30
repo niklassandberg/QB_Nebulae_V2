@@ -1,0 +1,52 @@
+==== cpustat 2026-10-16 08:41:40
+label:      SC bank (instrument loaded at boot), nebio firmware, no user input
+host:       alarmpi 5.15.43-2-rpi-ARCH armv7l, 4 cores
+cpu freq:   performance 1200 MHz
+window:     300 s, sample every 1 s
+nebio:      yes (2026-10-16_07:32)
+nebulae.py: md5 e67c4c6f8289
+running:
+    364 /bin/bash -c exec tail -f /dev/null | /usr/bin/sclang &> /tmp/sclang.log
+    371 /usr/bin/sclang
+    526 sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+    528 python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+    691 dbus-run-session /usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p128 -n3 -s -r48000
+    694 /usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p128 -n3 -s -r48000
+    738 scsynth -u 57110 -a 1024 -i 2 -o 2 -B 0.0.0.0 -m 524288 -R 0 -C 1 -l 4
+
+measured:   273 intervals, 301 s
+
+program       min %   mean %    p95 %    max %   mean Pi%   max RSS
+           (of one core, like top)                                                
+python         96.7    101.7    106.0    106.9       25.4    80.4 MB
+sclang          5.4      6.9      7.3      8.9        1.7    28.6 MB
+scsynth         1.8      3.5      4.5      4.6        0.9   117.5 MB
+pd         not running
+csound     not running
+jackd           2.7      4.5      5.5      5.5        1.1   127.4 MB
+total Pi       43.3     46.0     48.4     50.9   (whole Pi, all 4 cores = 100 %)
+temp           43.8     45.3     46.3     46.7   (deg C)
+
+whole Pi split (% of all 4 cores): user 26.5, system 19.3, irq 0.2, idle 54.0
+The programs above use 29.2 % of the Pi. The rest is other processes and kernel/interrupt
+work; this kernel counts interrupts during idle as system time without any process.
+
+python processes (mean % of one core):
+     528  101.7 %  python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py 
+
+python threads, busiest first (mean / max % of one core).
+nebio and Csound threads run inside nebulae.py; the first thread is the python main loop.
+  pid    528 tid    528 python3            79.0 % /   84.2 %   (main thread)
+  pid    528 tid    577 python3            20.2 % /   21.9 %
+  pid    528 tid    559 python3             1.6 % /    2.7 %
+  pid    528 tid    560 python3             0.8 % /    1.8 %
+  pid    528 tid    578 python3             0.0 % /    0.9 %
+
+interrupts per second (all cores), busiest first:
+      9582 /s  IPI3:  Function call interrupts
+      7996 /s  33:    GICv2 150 Level fe204000.spi
+      1289 /s  26:    GICv2 30 Level arch_timer
+       986 /s  34:    GICv2 149 Level fe804000.i2c
+       375 /s  42:    GICv2 119 Level DMA IRQ
+       375 /s  41:    GICv2 118 Level DMA IRQ
+        29 /s  IPI2:  Rescheduling interrupts

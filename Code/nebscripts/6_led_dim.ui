@@ -1,0 +1,7 @@
+# LED dim, on the configsettings page of the instr selector.
+# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
+# mode = the name after the number, here "led_dim").
+# Speed click on it: all LEDs light up and the speed encoder sets how bright
+# every LED is (0 = off .. 1 = full). Speed (or pitch) click goes back to the
+# instrument that is playing; the value is saved by configsettings.py
+# (Code/config/configsettings.txt).

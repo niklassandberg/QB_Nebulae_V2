@@ -1,0 +1,11 @@
+[Unit]
+Description=JACK Audio Connection Kit
+After=sound.target
+
+[Service]
+Type=simple
+ExecStart=dbus-run-session /usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p128 -n3 -s -r48000
+Restart=no
+
+[Install]
+WantedBy=multi-user.target

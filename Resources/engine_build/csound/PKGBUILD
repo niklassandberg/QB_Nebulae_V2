@@ -1,0 +1,144 @@
+# Csound for the Nebulae (aarch64): the Arch Linux ARM package (extra/csound
+# 6.18.1-10, https://github.com/archlinuxarm/PKGBUILDs) with two fixes.
+#
+# 1. Optimised. ALARM's PKGBUILD sets CMAKE_C_FLAGS/CMAKE_CXX_FLAGS to its own
+#    flags only, which replaces makepkg's CFLAGS (-O2 -march=...); with
+#    CMAKE_BUILD_TYPE=None the whole of Csound is built WITHOUT optimisation.
+#    On a Pi 3 granular_looper then needs 110 % of real time (constant
+#    dropouts); built with the CFLAGS it needs 36 % (3x faster).
+# 2. -B works again (rtalsa-buffer-size.patch): Csound 6.18 no longer passes
+#    -B to the ALSA module, the buffer is always 1024 frames; 6.11 (the
+#    original Qu-Bit system) used -B (instruments ask for -B 2048).
+#
+# Build on the Pi (aarch64, about 30 min on a Pi 3, needs the makedepends):
+#   makepkg -s
+# Install: Code/scripts/engines_check.sh (firmware update) installs the
+# package from Code/engine_packages/ when the installed Csound is not this build.
+#
+# Maintainer (ALARM): Kevin Mihelich <kevin@archlinuxarm.org>
+# Maintainer (Arch): David Runge <dvzrv@archlinux.org>
+# Maintainer (Arch): Brett Cornwall <ainola@archlinux.org>
+# Contributor: speps
+# Contributor: Bernardo Barros
+
+pkgname=csound
+pkgver=6.18.1
+# 10 = the Arch package this is based on, .1 = Nebulae build
+pkgrel=10.1
+pkgdesc="Programming language for sound rendering and signal processing (Nebulae build: optimised, -B fixed)"
+arch=(aarch64)
+url="https://csound.com"
+license=(LGPL-2.1-or-later)
+# As Arch, without java-environment (ALARM: no Java interface) and without
+# what only the documentation and the jar need (doxygen, strip-nondeterminism).
+makedepends=(
+  alsa-lib
+  cmake
+  dssi
+  fluidsynth
+  hdf5
+  jack
+  ladspa
+  libmusicxml
+  libsamplerate
+  libsndfile
+  libwebsockets
+  llvm
+  lua
+  openssl
+  portaudio
+  portmidi
+  portsmf
+  python
+  stk
+  swig
+  wiiuse
+)
+depends=(
+  curl libcurl.so
+  glibc
+  libgcc
+  libstdc++
+  libsamplerate libsamplerate.so
+  libsndfile libsndfile.so
+)
+optdepends=(
+  'alsa-lib: for librtalsa plugin'
+  'csound-plugins: for additional opcodes'
+  'hdf5: for hdf5ops plugin'
+  'fluidsynth: for libfluidOpcodes plugin'
+  'jack: for libjacko, librtjack and libjackTransport plugins'
+  'liblo: for libosc plugin'
+  'ncurses: for libfaustcsound plugin'
+  'portmidi: for libpmidi plugin'
+  'portaudio: for librtpa plugin'
+  'libpulse: for librtpulse plugin'
+  'stk: for libstkops plugin'
+  'libwebsockets: for libwebsocketIO plugin'
+  'wiiuse: for libwiimote plugin'
+  'libx11: for libwidgets plugin'
+  'lua: for LUA integration'
+  'openssl: for libfaustcsound plugin'
+  'python-numpy: For Csound Python bindings'
+  'zlib: for libfaustcsound plugin'
+)
+provides=(
+  libcsound64.so
+  libcsnd6.so
+)
+source=(
+  https://github.com/$pkgname/$pkgname/archive/$pkgver/$pkgname-$pkgver.tar.gz
+  $pkgname.sh
+  fixing-liblo-calls.patch::https://github.com/$pkgname/$pkgname/commit/596667daba1ed99eda048e491ff8f36200f09429.patch
+  type-mismatch-in-OSC.patch::https://github.com/$pkgname/$pkgname/commit/2a071ae8ca89bc21b5c80037f8c95a01bb670ac9.patch
+  rtalsa-buffer-size.patch
+)
+sha512sums=('4ea4dccb36017c96482389a8d139f6f55c79c5ceb9cc34e6d2bfabcb930b4833d0301be4a4b21929db27b2d8ce30754b5c5867acd2ea5a849135e1b8d1506acf'
+            '53a8ae1e61db2a3a492930ef0f0881b613ae47108c5e8de0a6e2aa28bcf7a5c93c7fea8b7fc2bbae29ab92e1e68bf94ba406be1255ad8ab5725ea9078c1fd6dc'
+            '0c944100310e7027b237e089d68b63bcc836a8f00d73d88fa18b92be9fb8a17c6d99796ef8f68c63c44a543da98d6f2ccb0720d5abdaf421c570d0089b4ea776'
+            '7a90fc4b313d033cffe8afc663f27fc3f863491ba4377028c200fae04e7371a494a7601385e10f0a6ad7a42248071cac3c9770c2472b7201a95ac0ad0714c636'
+            '87171b05fad663ea15084a813cdeb7bb01b839ea375cdd8b859bbb00d051693fddd2b9632cf48c5c4d267a8ccc5c75e9ecec41596a0a017d45d6087cda411e83')
+b2sums=('1b258724dd986eea63921e36b43235eb05702729ee31e40ef724f7e7644755adeb5a3abdca9188d65296882d5f532693c0f9fc742ee5d39ccc7fbed860ec0bf4'
+        '8a556685d0f9ee55c4de521b3d76fc729936e98e991e8ea860d64b29a1b09d142ab0a51548b2dddadb41ecb796e84ba1f8ed114494b4c67d7d6d8ab3475b2ede'
+        'df183e29b315e790fb32038db0085b062599b5400097f51a97cf96b8fc5e0554e619692be3ad7527aca848268e5cee0b61329da43942afa7425f73b3b482548a'
+        '39ef09880a2250fccc955556a40a23f59e698834ea32e1951821a7dc5a23a1fa25127fb7adf90b79c729c1859e4ea526af64d40d757b81aec007f59230bf4bf7'
+        '829a690f14799650d9e072ea6a05a7b2eb0e4d7496e888477fad3ae186d0db540bbb9201b9db27f4ec920a4db94c858634716b8fe44fd8e82fa0ea1dd4d60822')
+
+prepare() {
+  cd $pkgname-$pkgver
+  patch -Np1 -i ../fixing-liblo-calls.patch
+  patch -Np1 -i ../type-mismatch-in-OSC.patch
+  patch -Np1 -i ../rtalsa-buffer-size.patch
+}
+
+build() {
+  local cmake_options=(
+    -B build
+    -D CMAKE_INSTALL_PREFIX=/usr
+    -D CMAKE_BUILD_TYPE=None
+    # it's not allowed to redistribute the scansyn opcodes: https://github.com/csound/csound/issues/1148
+    -D BUILD_SCANSYN_OPCODES=OFF
+    -D LUA_LIBRARY=/usr/lib/liblua.so
+    -D BUILD_STATIC_LIBRARY=ON
+    # ALARM's flags, but added to makepkg's instead of replacing them (fix 1).
+    # template-body: as Arch, for GCC 15+ (a typo in include/plugin.h).
+    -D CMAKE_C_FLAGS="$CFLAGS -Wno-error -Wno-missing-field-initializers -DPFFFT_SIMD_DISABLE"
+    -D CMAKE_CXX_FLAGS="$CXXFLAGS -Wno-error -Wno-error=template-body -Wno-missing-field-initializers -DPFFFT_SIMD_DISABLE"
+    -D BUILD_JAVA_INTERFACE=0
+    -S $pkgname-$pkgver
+    -W no-dev
+  )
+
+  cmake "${cmake_options[@]}"
+  cmake --build build --verbose
+}
+
+package() {
+  DESTDIR="$pkgdir" cmake --install build
+
+  # export vars in profile.d
+  install -vDm 755 "$srcdir/$pkgname.sh" -t "$pkgdir/etc/profile.d/"
+  # rename extract executable due to name conflict with libextractor
+  # https://github.com/csound/csound/issues/985
+  mv -v "$pkgdir/usr/bin/extract" "$pkgdir/usr/bin/$pkgname-extract"
+}

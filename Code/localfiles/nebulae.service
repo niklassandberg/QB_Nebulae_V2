@@ -1,14 +1,25 @@
 [Unit]
 Description=Starts Nebulae
-DefaultDependencies=false 
-After=local-fs.target
+DefaultDependencies=false
+# Only what Nebulae needs: / read-write and /tmp. Not local-fs.target: that
+# waits for "Create Static Device Nodes in /dev", which sometimes hangs on the
+# SD card (done at ~3.6 s, sometimes 4.5-6 s). /boot is read later; startup.sh
+# waits for its mount.
+After=systemd-remount-fs.service tmp.mount
+Wants=tmp.mount
 
 [Service]
 #ExecStart=/home/alarm/QB_Nebulae_V2/Code/scripts/startup.sh
 ExecStart=/home/alarm/checkfirmware.sh
 WorkingDirectory=/
 Restart=on-failure
-#RemainAfterExit=true
+RemainAfterExit=true
+# Everything Nebulae prints and logs (classlogger.py, nebio, Csound, Pd) is in
+# the journal under this name: journalctl -u nebulae. No rate limit: with
+# log_level DEBUG it can write more than journald's 10000 lines per 30 s,
+# and the rest would be dropped.
+SyslogIdentifier=nebulae
+LogRateLimitIntervalSec=0
 
 [Install]
 WantedBy=multi-user.target

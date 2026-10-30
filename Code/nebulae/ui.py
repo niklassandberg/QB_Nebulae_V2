@@ -1,12 +1,67 @@
-import RPi.GPIO as GPIO
 import encoder as libEnc
 import shiftregister as libSR
-import leddriver as libDriver
+import nebio as libDriver # LedDriver/Color backed by the nebio C++ library
 import switch as libSwitch
 import filehandler
+import nebconfig
+import scripts
+import subprocess
 import threading
 import time
 import random
+from configsettings import configSettings
+from classlogger import ClassLogger
+
+# Input clipping in secondary controls: the four encoder LEDs are red while
+# the engine reports digital clipping, so they flicker with the signal (and
+# are not taken for record, steady red). SuperCollider and Csound both check
+# every 128 samples (2.7 ms at 48 kHz); red lasts CLIP_HOLD_MS after a report,
+# three of those windows, so a clip that goes on stays red between reports
+# (this loop runs about every 2.5 ms).
+CLIP_HOLD_MS = 8
+
+# The encoder LED colours (set_speed_leds/set_pitch_leds) are worked out at
+# most every LED_DRAW_MS (100 Hz), not every update (~400 Hz): no one sees
+# the difference and it was about a fifth of the main loop's CPU. Encoders,
+# clicks and buttons are still read every update (the encoder step size is
+# cubed per reading, so reading less often would change how it feels).
+LED_DRAW_MS = 10
+
+# Instr selector pages, in the order the speed encoder steps through them.
+# "configsettings": the config settings and scripts instead of instruments (scripts.py).
+BANKS = ["instr", "supercollider", "puredata", "configsettings"]
+
+# The config settings of the configsettings page (LED dim, Wi-Fi, Quiet mode) are
+# read from and saved through configSettings (configsettings.py).
+
+# LED dim: change per encoder step (50 steps from off to full).
+LED_DIM_STEP = 0.02
+
+# The configsettings page goes in pages of 5 (the 5 buttons select an item
+# of the page), not in the sliding window of the instrument banks (1-5,
+# 2-6, ...). The pitch encoder turns the page, CONFIG_PAGE_STEPS steps per
+# page. The pitch LEDs show it: the colour is the pair of pages
+# (CONFIG_PAGE_COLORS, r, g, b), within the pair the right LED (pitch_pos)
+# is the 1st page, the left (pitch_neg) the 2nd:
+#   items 1-5 white right, 6-10 white left, 11-15 yellow right, ...
+CONFIG_PAGE_SIZE = 5
+CONFIG_PAGE_STEPS = 4
+CONFIG_PAGE_COLORS = [(4095, 4095, 4095),  # white:  items 1-10
+                      (4095, 2800, 0),     # yellow: 11-20
+                      (4095, 0, 0),        # red:    21-30
+                      (0, 4095, 0),        # green:  31-40
+                      (0, 0, 4095),        # blue:   41-50
+                      (3037, 200, 3825)]   # purple: 51-60
+
+# Power regulator (chosen with 2_power_regulator.ui, configsettings.py): the
+# values in the order the speed encoder steps through them, and each one's
+# colour on both speed LEDs: (r, g, b, brightness).
+POWER_STEPS = 4  # encoder steps per value in the selector
+POWER_ORDER = ("off", "yield", "shell", "nohlt")
+POWER_COLORS = {"off": (4095, 0, 0, 1.0),       # red
+                "yield": (0, 4095, 0, 1.0),     # green: yield spin
+                "shell": (0, 0, 4095, 1.0),     # blue: shell spin
+                "nohlt": (4095, 2800, 0, 1.0)}  # yellow: kernel nohlt (restart)
 
 sr_pin_next = 7
 sr_pin_source_gate = 6
@@ -19,8 +74,7 @@ sr_pin_reset = 0
 class UserInterface(object):
     def __init__(self, controlhandler):
         self.controlhandler = controlhandler
-        GPIO.setmode(GPIO.BCM)
-        GPIO.setwarnings(False)
+        self.log = ClassLogger.loggerSetup(self)
         self.currentInstr = None
         self.ledState = 1
         self.ledDriver = libDriver.LedDriver()
@@ -49,26 +103,12 @@ class UserInterface(object):
         self.pitch_amount = self.controlhandler.getStaticVal("pitch")
         self.mode = "normal"
 
-        user_dir = "/home/alarm/instr/"
-        factory_dir = "/home/alarm/QB_Nebulae_V2/Code/instr/"
-        pd_dir = "/home/alarm/pd/"
-        sc_dir = "/home/alarm/scsyndef/"
-        self.factoryinstr_fhandle = filehandler.FileHandler(factory_dir, ".instr")
-        self.userinstr_fhandle = filehandler.FileHandler(user_dir, ".instr")
-        self.puredata_fhandle = filehandler.FileHandler(pd_dir, ".pd")
-        self.sc_fhandle = filehandler.FileHandler(sc_dir, ".scsyndef")
-        cur_bank = self.controlhandler.getInstrSelBank()
+        self.script_fhandle = None
+        self.scripts_shown = False
+        self.refreshFileHandlers()
         self.bank_shift_counter = 0
-        if cur_bank == "factory":
-            cnt = self.factoryinstr_fhandle.numFiles()
-        elif cur_bank == "user":
-            cnt = self.userinstr_fhandle.numFiles()
-        elif cur_bank == "puredata":
-            cnt = self.puredata_fhandle.numFiles()
-        elif cur_bank == "supercollider":
-            cnt = self.sc_fhandle.numFiles()
-        self.bank_counter = 0
-        self.controlhandler.setInstrSelNumFiles(cnt)
+        self.instr_sel_saved = {} # bank -> (idx, offset) selected when that bank was left
+        self.controlhandler.setInstrSelNumFiles(self.instrSelHandle().numFiles())
         self.reload_flag = False # Flag to reload the whole program. 
         self.alt_file_bright = 0.0
         self.alt_file_cnt = 0.0
@@ -80,9 +120,29 @@ class UserInterface(object):
         self.ignore_next_speed_click = False
         self.clearAllLEDs()
         self.restoreDefaultsFlag = False
+        self.clip_handler = None   # controlhandler whose inputClipCount() is followed
+        self.clip_count = 0
+        self.clip_time = -CLIP_HOLD_MS
+        self.clip_shown = False
+        self.led_draw_time = -LED_DRAW_MS
+        self.draw_leds = True
+        # LED dim (configsettings page, 6_led_dim.ui).
+        self.led_dim_mode = False
+        self.led_dim = configSettings.ledDim  # live while it is being turned
+        self.log.info("LED dim %.2f", self.led_dim)
+        libDriver.led_set_dim(self.led_dim)
+        self.applyLeds()
+        # Power regulator selector (configsettings page, 2_power_regulator.ui).
+        self.power_select_mode = False
+        self.power_select = 0
+        self.power_select_acc = 0
+        self.config_page_acc = 0  # pitch steps toward the next configsettings page
 
     def update(self):
         self.now = int(round(time.time() * 1000))
+        self.draw_leds = self.now - self.led_draw_time >= LED_DRAW_MS
+        if self.draw_leds:
+            self.led_draw_time = self.now
         if self.reload_flag == False:
             self.ledDriver.update()
         self.pitch_click.update() 
@@ -90,6 +150,23 @@ class UserInterface(object):
         self.delta_p = self.encoder_pitch.get_steps()
         self.delta_s = self.encoder_speed.get_steps()
         self.mode = self.controlhandler.mode()
+        self.trackInputClip()
+        # Script states (slot LEDs) are read when their page is shown.
+        shown = (self.mode == "instr selector" and not self.led_dim_mode
+                 and not self.power_select_mode
+                 and self.controlhandler.getInstrSelBank() == "configsettings")
+        if shown != self.scripts_shown:
+            self.scripts_shown = shown
+            if shown:
+                self.script_fhandle.startPolling()
+            else:
+                self.script_fhandle.stopPolling()
+        if self.led_dim_mode:
+            self.updateLedDim()
+            return
+        if self.power_select_mode:
+            self.updatePowerSelect()
+            return
 
         if self.mode == "secondary controls":
             if self.restoreDefaultsFlag == True:
@@ -132,14 +209,12 @@ class UserInterface(object):
                 self.animateEditFunction("record")
             elif self.controlhandler.getEditFunctionFlag("source") == True:
                 self.animateEditFunction("source")
-                if self.controlhandler.currentBank == 'factory':
-                    tempidx = self.factoryinstr_fhandle.getIndex(self.controlhandler.currentInstr) 
-                elif self.controlhandler.currentBank == 'user':
-                    tempidx = self.userinstr_fhandle.getIndex(self.controlhandler.currentInstr) 
-                elif self.controlhandler.currentBank == 'puredata':
-                    tempidx = self.puredatainstr_fhandle.getIndex(self.controlhandler.currentInstr) 
+                if self.controlhandler.currentBank == 'instr':
+                    tempidx = self.instr_fhandle.getIndex(self.controlhandler.currentInstr)
                 elif self.controlhandler.currentBank == 'supercollider':
                     tempidx = self.sc_fhandle.getIndex(self.controlhandler.currentInstr)
+                elif self.controlhandler.currentBank == 'puredata':
+                    tempidx = self.puredata_fhandle.getIndex(self.controlhandler.currentInstr)
                 self.controlhandler.setInstrSelIdx(tempidx)
                 self.controlhandler.setInstrSelBank(self.controlhandler.currentBank)
                 self.reload_flag = True
@@ -167,7 +242,37 @@ class UserInterface(object):
 
         self.update_speed(self.mode)
         self.update_pitch(self.mode)
+        if self.mode == "secondary controls":
+            self.showInputClip()
     
+    # Follows the input clip count of the engine (every update, so a clip from
+    # long ago never shows when secondary controls is entered). A new
+    # controlhandler (instr load) starts its own count: that is no clip.
+    def trackInputClip(self):
+        count = self.controlhandler.inputClipCount()
+        if self.clip_handler is not self.controlhandler:
+            self.clip_handler = self.controlhandler
+        elif count != self.clip_count:
+            self.clip_time = self.now
+        self.clip_count = count
+
+    def inputClipped(self):
+        return self.now - self.clip_time < CLIP_HOLD_MS
+
+    # Drawn over what update_speed()/update_pitch() set in this update.
+    def showInputClip(self):
+        if self.inputClipped():
+            for name in ("speed_pos", "speed_neg", "pitch_pos", "pitch_neg"):
+                self.set_rgb(name, 4095, 0, 0, 1.0)
+            self.clip_shown = True
+        elif self.clip_shown:
+            self.clip_shown = False
+            self.led_draw_time = -LED_DRAW_MS   # normal colours back next update, not up to LED_DRAW_MS later
+            # A rawencoder pitch is not redrawn in secondary controls: clear it.
+            if self.controlhandler.isRaw("pitch"):
+                self.set_rgb("pitch_pos", 4095, 4095, 4095, 0.0)
+                self.set_rgb("pitch_neg", 4095, 4095, 4095, 0.0)
+
     def clearAllLEDs(self):
         self.set_rgb("pitch_pos", 4095, 4095, 4095, 0.0)
         self.set_rgb("pitch_neg", 4095, 4095, 4095, 0.0)
@@ -183,26 +288,33 @@ class UserInterface(object):
         values = [0, 0, 0, 0, 0]
         blink = (self.now & 500) > 250
         low_bright = 0.3
-        if self.controlhandler.getInstrSelBank() == "factory":
-            f_handle = self.factoryinstr_fhandle 
-        elif self.controlhandler.getInstrSelBank() == "user":
-            f_handle = self.userinstr_fhandle
-        elif self.controlhandler.getInstrSelBank() == "puredata":
-            f_handle = self.puredata_fhandle
-        elif self.controlhandler.getInstrSelBank() == "supercollider":
-            f_handle = self.sc_fhandle
+        f_handle = self.instrSelHandle()
         idx = self.controlhandler.getInstrSelIdx()
         offset = self.controlhandler.getInstrSelOffset()
-        for i in range(0, 5):
-            if i < f_handle.numFiles():
-                values[i] = low_bright
-        #if idx >= offset and idx < offset + 4:
-        #    led = idx - offset
-        #    values[led] = 1
         led = idx - offset
-        if led >= 0 and led <= 4:
-            values[led] = 1
-        if offset > 0:
+        if f_handle is self.script_fhandle:
+            # Scripts: bright = on, dim = off or no state; the selected
+            # one blinks (its level / dark).
+            for i in range(0, 5):
+                if offset + i < f_handle.numFiles():
+                    on = f_handle.state(offset + i) == scripts.ON
+                    values[i] = 1.0 if on else low_bright
+            if led >= 0 and led <= 4 and not blink:
+                values[led] = 0.0
+        else:
+            for i in range(0, 5):
+                if i < f_handle.numFiles():
+                    values[i] = low_bright
+            #if idx >= offset and idx < offset + 4:
+            #    led = idx - offset
+            #    values[led] = 1
+            if led >= 0 and led <= 4:
+                values[led] = 1
+        # Sliding window (instrument banks): the 1st and 5th button show that
+        # there is more to the left or right. The configsettings page shows
+        # its page on the pitch LEDs instead.
+        paged = f_handle is self.script_fhandle
+        if offset > 0 and not paged:
             if blink == True:
                 if idx == offset: #bright blink
                     val = 1.0
@@ -214,7 +326,7 @@ class UserInterface(object):
                 else:
                     val = low_bright
             values[0] = val
-        if offset + 5 < f_handle.numFiles():
+        if offset + 5 < f_handle.numFiles() and not paged:
             if blink == True:
                 if idx == offset + 4: #bright blink
                     val = 1.0
@@ -360,18 +472,11 @@ class UserInterface(object):
         if self.speed_click.state() == True:
             inc = 0
         if self.speed_delay == -1:
-            if inc > 0:
-                if self.speed_inc_dir == 1:
-                    self.speed_amount += 0.001 * inc * inc * inc
-                    self.speed_inc_dir = 1
-                else:
-                    self.speed_inc_dir = 1
-            elif inc < 0:
-                if self.speed_inc_dir == -1:
-                    self.speed_amount -= 0.001 * (-1 * inc) * (-1 * inc) * (-1 * inc)
-                    self.speed_inc_dir = -1
-                else:
-                    self.speed_inc_dir = -1
+            if inc != 0:
+                direction = 1 if inc > 0 else -1
+                if self.speed_inc_dir == direction: # first step after a direction change is ignored
+                    self.speed_amount += 0.001 * inc ** 3
+                self.speed_inc_dir = direction
         else:
             if self.now > self.speed_delay:
                 self.speed_delay = -1
@@ -390,14 +495,11 @@ class UserInterface(object):
     def set_alt_speed_amount(self):
         self.alt_speed_amount = self.controlhandler.getAltValue("speed_alt")
         inc = self.get_delta("speed")
-        if inc > 0:
-            self.alt_speed_amount += 1
-        elif inc < 0:
-            self.alt_speed_amount -= 1
+        if inc != 0:
+            self.alt_speed_amount += 1 if inc > 0 else -1 # one step per reading, however fast it is turned
         if self.alt_speed_amount > 32:
             self.alt_speed_amount = 32
         elif self.alt_speed_amount < 0:
-            #self.alt_speed_amount = 0.0
             self.alt_speed_amount = 0
         if self.clicked_speed() == 1:
             #self.alt_speed_amount = 0.710 # 23/32 = 0dB input gain
@@ -478,7 +580,7 @@ class UserInterface(object):
             if speed_neg_bright < 0:
                 speed_neg_bright = 0
             if self.currentInstr == "a_granularlooper":
-                if self.controlhandler.channeldict["record"].curVal == 1:
+                if self.controlhandler.channeldict["record"].curVal == 1 and self.controlhandler.altchanneldict["record_alt"].curVal == 0:
                     color_neg = red
                     color_pos = red
                     speed_neg_bright = 1.0
@@ -502,21 +604,22 @@ class UserInterface(object):
             self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), speed_pos_bright)
         elif mode == "instr selector":
             tempc = libDriver.Color(0, 4095, 0)
-            if self.controlhandler.getInstrSelBank() == "factory":
+            if self.controlhandler.getInstrSelBank() == "instr":
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 1.0)
                 self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
-            elif self.controlhandler.getInstrSelBank() == "user":
+            elif self.controlhandler.getInstrSelBank() == "supercollider":
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 1.0)
                 self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 0.0)
             elif self.controlhandler.getInstrSelBank() == "puredata":
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 0.0)
                 self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
-            elif self.controlhandler.getInstrSelBank() == "supercollider":
-                self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 0.0)
-                self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 0.0)
+            elif self.controlhandler.getInstrSelBank() == "configsettings":
+                tempc = libDriver.Color(4095, 1200, 0) # orange: not an instrument page
+                self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 1.0)
+                self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
         else:
             pass
-    
+
     def update_speed(self, mode):
         if mode == "normal" or mode == "puredata" or mode == "supercollider":
             if self.speed_click.risingEdge() == True:
@@ -524,14 +627,8 @@ class UserInterface(object):
             if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500:
                 self.ignore_next_speed_click = True
                 self.controlhandler.enterInstrSelMode()
-            self.set_speed_amount()
-        elif mode == "puredata":
-            if self.speed_click.risingEdge() == True:
-                self.time_pressed_speed = self.now
-            if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500:
-                self.ignore_next_speed_click = True
-                self.controlhandler.enterInstrSelMode()
-            self.set_speed_amount()
+            if not self.controlhandler.isRaw("speed"): # rawencoder: value is sclang's
+                self.set_speed_amount()
         elif mode == "secondary controls":
             self.set_alt_speed_amount()
         elif mode == "instr selector":
@@ -549,26 +646,145 @@ class UserInterface(object):
 
             if self.bank_shift_counter >= thresh or self.bank_shift_counter <= -1 * thresh:
                 self.bank_shift_counter = 0
-                self.bank_counter = self.bank_counter+1
-                if self.bank_counter%4 == 0:
-                    self.controlhandler.setInstrSelBank("factory")
-                    self.controlhandler.setInstrSelNumFiles(self.factoryinstr_fhandle.numFiles())
-                if self.bank_counter%4 == 1:
-                    self.controlhandler.setInstrSelBank("user")
-                    self.controlhandler.setInstrSelNumFiles(self.userinstr_fhandle.numFiles())
-                if self.bank_counter%4 == 2:
-                    self.controlhandler.setInstrSelBank("puredata")
-                    self.controlhandler.setInstrSelNumFiles(self.puredata_fhandle.numFiles())
-                if self.bank_counter%4 == 3: 
-                    self.controlhandler.setInstrSelBank("supercollider")
-                    self.controlhandler.setInstrSelNumFiles(self.sc_fhandle.numFiles())
+                # Next bank (from the one shown) that has files; empty banks
+                # are skipped. If no other bank has any, it stays where it is.
+                start = BANKS.index(cur_bank) if cur_bank in BANKS else 0
+                for step in range(1, len(BANKS)):
+                    bank = BANKS[(start + step) % len(BANKS)]
+                    f_handle = self.bankHandle(bank)
+                    if f_handle.numFiles() > 0:
+                        self.setInstrSelBank(bank, f_handle)
+                        break
 
             if self.clicked_speed() == 1:
-                print "Clicked Speed from Instr Sel"
-                self.reload_flag = True 
+                self.log.debug("Clicked Speed from Instr Sel")
+                # Never load a slot that has nothing (e.g. a bank emptied by a USB load).
+                if self.controlhandler.getInstrSelIdx() < self.instrSelHandle().numFiles():
+                    if self.controlhandler.getInstrSelBank() == "configsettings":
+                        idx = self.controlhandler.getInstrSelIdx()
+                        ui_mode = self.script_fhandle.uiMode(idx)
+                        if ui_mode == "wifi":
+                            # On/off at once, back to the instrument.
+                            configSettings.setWifiOn(not configSettings.wifiOn)
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
+                        elif ui_mode == "no_pwm":
+                            configSettings.setNoPwm(not configSettings.noPwm)
+                            self.applyLeds()
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
+                        elif ui_mode == "led_stagger":
+                            configSettings.setLedStagger(not configSettings.ledStagger)
+                            self.applyLeds()
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
+                        elif ui_mode == "services_quiet":
+                            configSettings.setServicesQuiet(not configSettings.servicesQuiet)
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
+                        elif ui_mode == "led_dim":
+                            self.led_dim_mode = True  # until a speed/pitch click
+                        elif ui_mode == "power_regulator":
+                            self.power_select_mode = True  # until a speed/pitch click
+                            self.power_select = POWER_ORDER.index(configSettings.powerRegulator)
+                            self.power_select_acc = 0
+                        else:
+                            # Runs in the background; the instrument keeps playing.
+                            self.script_fhandle.run(idx)
+                            self.controlhandler.enterNormalMode()
+                    else:
+                        self.reload_flag = True
         else:
             pass
-        self.set_speed_leds(mode)
+        if self.draw_leds and not (mode == "supercollider" and self.controlhandler.isRaw("speed")): # rawencoder: LEDs are sclang's
+            self.set_speed_leds(mode)
+
+    # LED dim mode: every LED on (white) as a preview, the speed encoder sets
+    # the dim factor live (nebio applies it to all LEDs). A speed or pitch
+    # click saves it and goes back to the instrument that is playing.
+    def updateLedDim(self):
+        inc = self.get_delta("speed")
+        if inc != 0:
+            self.led_dim = min(1.0, max(0.0, round(self.led_dim + LED_DIM_STEP * inc, 2)))
+            libDriver.led_set_dim(self.led_dim)
+        if self.draw_leds:
+            for name in ("speed_pos", "speed_neg", "pitch_pos", "pitch_neg"):
+                self.set_rgb(name, 4095, 4095, 4095, 1.0)
+            for name in ("record", "next", "source", "reset", "freeze"):
+                self.set_button_led(name, 1.0)
+        if self.clicked_speed() == 1 or self.clicked_pitch() == 1:
+            self.led_dim_mode = False
+            configSettings.setLedDim(self.led_dim)
+            self.clearAllLEDs()
+            self.led_draw_time = -LED_DRAW_MS  # instrument colours at once
+            self.controlhandler.enterNormalMode()
+
+    # The LEDs themselves (nebio), from configSettings. No PWM: the file and
+    # freeze LEDs only fully on or off (their PWM is heard in the audio).
+    # Stagger: the PWM channels' switch-on moments spread over the cycle (no
+    # big current step, heard as a tone; the brightness looks the same).
+    def applyLeds(self):
+        libDriver.led_set_no_pwm(configSettings.noPwm)
+        libDriver.led_set_stagger(configSettings.ledStagger)
+
+    # Power regulator selector: the speed encoder steps through POWER_ORDER,
+    # shown in the colour of both speed LEDs (POWER_COLORS). A speed click
+    # sets it (configSettings.setPowerRegulator) and goes back to the
+    # instrument; nohlt switched on or off restarts the Pi (the instrument
+    # settings saved first). A pitch click goes back without a change.
+    def updatePowerSelect(self):
+        self.power_select_acc += self.get_delta("speed")
+        if self.power_select_acc >= POWER_STEPS:
+            self.power_select = min(len(POWER_ORDER) - 1, self.power_select + 1)
+            self.power_select_acc = 0
+        elif self.power_select_acc <= -POWER_STEPS:
+            self.power_select = max(0, self.power_select - 1)
+            self.power_select_acc = 0
+        level = POWER_ORDER[self.power_select]
+        if self.draw_leds:
+            r, g, b, bright = POWER_COLORS[level]
+            for name in ("speed_pos", "speed_neg"):
+                self.set_rgb(name, r, g, b, bright)
+            for name in ("pitch_pos", "pitch_neg"):
+                self.set_rgb(name, 4095, 4095, 4095, 0.0)
+            for name in ("record", "next", "source", "reset", "freeze"):
+                self.set_button_led(name, 0.0)
+        set_it = self.clicked_speed() == 1
+        if set_it or self.clicked_pitch() == 1:
+            self.power_select_mode = False
+            restart = set_it and configSettings.setPowerRegulator(level)
+            self.clearAllLEDs()
+            self.led_draw_time = -LED_DRAW_MS  # instrument colours at once
+            self.controlhandler.enterNormalMode()  # writes the instrument settings
+            if restart:
+                self.log.info("Power regulator %s: restarting the Pi (nohlt)", level)
+                subprocess.Popen(["systemctl", "reboot"])
+
+    # Bank change in the instr selector. The slot of the bank that is left is
+    # saved, and the new bank gets back the slot it had when it was left (e.g.
+    # supercollider 5 -> csound -> supercollider is on 5 again). A bank not
+    # visited yet keeps the current slot. If that slot is empty in the new bank
+    # (e.g. 5 in a csound bank with one instr), the first instr is selected, so
+    # a click never loads a slot that has nothing.
+    def setInstrSelBank(self, bank, f_handle):
+        numfiles = f_handle.numFiles()
+        idx = self.controlhandler.getInstrSelIdx()
+        offset = self.controlhandler.getInstrSelOffset()
+        self.instr_sel_saved[self.controlhandler.getInstrSelBank()] = (idx, offset)
+        idx, offset = self.instr_sel_saved.get(bank, (idx, offset))
+        if idx >= numfiles:
+            idx, offset = 0, 0
+        if f_handle is self.script_fhandle:
+            # Pages: the offset is always the start of a page.
+            last_page = max(0, (numfiles - 1) // CONFIG_PAGE_SIZE)
+            offset = min(offset // CONFIG_PAGE_SIZE, last_page) * CONFIG_PAGE_SIZE
+            self.config_page_acc = 0
+        else:
+            offset = min(offset, max(0, numfiles - 5))
+        self.controlhandler.setInstrSelBank(bank)
+        self.controlhandler.setInstrSelNumFiles(numfiles)
+        self.controlhandler.setInstrSelIdx(idx)
+        self.controlhandler.setInstrSelOffset(offset)
 
     def set_pitch_amount(self):
         self.pitch_amount = self.controlhandler.getStaticVal("pitch")
@@ -739,33 +955,52 @@ class UserInterface(object):
             self.set_rgb("pitch_neg", tempc.red(), tempc.green(), tempc.blue(), neg_bright)
             self.set_rgb("pitch_pos", tempc.red(), tempc.green(), tempc.blue(), pos_bright)
         elif mode == "instr selector":
+            if self.instrSelHandle() is self.script_fhandle:
+                page = self.controlhandler.getInstrSelOffset() // CONFIG_PAGE_SIZE
+                r, g, b = CONFIG_PAGE_COLORS[(page // 2) % len(CONFIG_PAGE_COLORS)]
+                first = page % 2 == 0
+                self.set_rgb("pitch_pos", r, g, b, 1.0 if first else 0.0)
+                self.set_rgb("pitch_neg", r, g, b, 0.0 if first else 1.0)
+                return
             tempc = libDriver.Color(0, 4095, 0)
             self.set_rgb("pitch_neg", tempc.red(), tempc.green(), tempc.blue(), 1.0)
             self.set_rgb("pitch_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
         else:
             pass
+
+    # Configsettings page: the pitch encoder turns whole pages (offset 0, 5,
+    # 10, ...); it stops at the first and the last page.
+    def turnConfigPage(self):
+        pages = max(1, -(-self.script_fhandle.numFiles() // CONFIG_PAGE_SIZE))
+        self.config_page_acc += self.get_delta("pitch")
+        page = self.controlhandler.getInstrSelOffset() // CONFIG_PAGE_SIZE
+        turned = int(self.config_page_acc / CONFIG_PAGE_STEPS)  # whole pages, either way
+        self.config_page_acc -= turned * CONFIG_PAGE_STEPS
+        page = min(max(page + turned, 0), pages - 1)
+        # At the first/last page: steps further out are not saved up.
+        if (page == 0 and self.config_page_acc < 0) or (page == pages - 1 and self.config_page_acc > 0):
+            self.config_page_acc = 0
+        self.controlhandler.setInstrSelOffset(page * CONFIG_PAGE_SIZE)
             
 
     def update_pitch(self, mode):
         if mode == "normal" or mode == "puredata" or mode == "supercollider":
             if self.pitch_click.risingEdge() == True:
                 self.time_pressed_pitch = self.now
-            self.set_pitch_amount()
+            if not self.controlhandler.isRaw("pitch"): # rawencoder: value is sclang's
+                self.set_pitch_amount()
         elif mode == "secondary controls":
-            self.set_alt_pitch_amount()
+            # TODO: next version: pitch_alt can be declared raw too (sclang sets it).
+            if not self.controlhandler.isRaw("pitch"): # rawencoder: pitch_alt is not set either
+                self.set_alt_pitch_amount()
             if self.pitch_click.risingEdge() == True:
                 self.restoreDefaultsFlag = True
                 self.controlhandler.restoreAltToDefault()
         elif mode == "instr selector":
-            if self.controlhandler.getInstrSelBank() == "factory":
-                f_handle = self.factoryinstr_fhandle 
-            elif self.controlhandler.getInstrSelBank() == "user":
-                f_handle = self.userinstr_fhandle
-            elif self.controlhandler.getInstrSelBank() == "puredata":
-                f_handle = self.puredata_fhandle
-            elif self.controlhandler.getInstrSelBank() == "supercollider":
-                f_handle = self.sc_fhandle
-            if f_handle.numFiles() <= 5:
+            f_handle = self.instrSelHandle()
+            if f_handle is self.script_fhandle:
+                self.turnConfigPage()
+            elif f_handle.numFiles() <= 5:
                 offset = 0
             else:
                 offset = self.controlhandler.getInstrSelOffset()
@@ -786,11 +1021,11 @@ class UserInterface(object):
                 #l = self.puredata_fhandle.getFileNames()
                 #for name in l:
                 #    print name
-                if self.currentInstr in self.puredata_fhandle.getFileNames():
-                    self.controlhandler.enterPureDataMode()
-                else:
-                    self.controlhandler.enterNormalMode()
-        self.set_pitch_leds(mode)
+                # SC and PD control handlers override enterNormalMode()
+                # to go back to supercollider/puredata mode.
+                self.controlhandler.enterNormalMode()
+        if self.draw_leds and not (mode in ("supercollider", "secondary controls") and self.controlhandler.isRaw("pitch")): # rawencoder: LEDs are not set by ui
+            self.set_pitch_leds(mode)
 
     def set_rgb(self, name, r, g, b, bright=1.0):
         self.ledDriver.set_rgb(name, r, g, b, bright)       
@@ -802,7 +1037,6 @@ class UserInterface(object):
         self.encoder_pitch.stop()
         self.encoder_speed.stop()
         self.ledDriver.cleanup()
-        GPIO.cleanup()
 
     def getReloadRequest(self):
         return self.reload_flag
@@ -824,49 +1058,71 @@ class UserInterface(object):
                 self.alt_file_bright = random.random()
         self.set_button_led("next", self.alt_file_bright)
 
+    # File handler of the bank shown in the instr selector.
+    def instrSelHandle(self):
+        return self.bankHandle(self.controlhandler.getInstrSelBank())
+
+    def bankHandle(self, bank):
+        if bank == "supercollider":
+            return self.sc_fhandle
+        elif bank == "puredata":
+            return self.puredata_fhandle
+        elif bank == "configsettings":
+            return self.script_fhandle
+        return self.instr_fhandle
+
     def getNewInstr(self):
         idx = self.controlhandler.getInstrSelIdx()
-        if self.controlhandler.getInstrSelBank() == "factory":
-            if idx < self.factoryinstr_fhandle.numFiles():
-                instr = self.factoryinstr_fhandle.getFilename(idx)
-        elif self.controlhandler.getInstrSelBank() == "user":
-            if idx < self.userinstr_fhandle.numFiles():
-                instr = self.userinstr_fhandle.getFilename(idx)
-        elif self.controlhandler.getInstrSelBank() == "puredata":
-            if idx < self.puredata_fhandle.numFiles():
-                instr = self.puredata_fhandle.getFilename(idx)
+        if self.controlhandler.getInstrSelBank() == "instr":
+            if idx < self.instr_fhandle.numFiles():
+                instr = self.instr_fhandle.getFilename(idx)
         elif self.controlhandler.getInstrSelBank() == "supercollider":
             if idx < self.sc_fhandle.numFiles():
                 instr = self.sc_fhandle.getFilename(idx)
+        elif self.controlhandler.getInstrSelBank() == "puredata":
+            if idx < self.puredata_fhandle.numFiles():
+                instr = self.puredata_fhandle.getFilename(idx)
         return instr
 
+    # The instr selector's file lists. Read again on every instr load
+    # (setCurrentInstr): the load copies new files from the USB stick first,
+    # and the UI object lives as long as Nebulae runs.
+    def refreshFileHandlers(self):
+        self.instr_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("instr"), ".instr")
+        self.sc_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("supercollider"), ".scd")
+        self.puredata_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("puredata"), ".pd")
+        if self.script_fhandle is not None:
+            self.script_fhandle.stopPolling()
+            self.scripts_shown = False
+        self.script_fhandle = scripts.ScriptHandler()
+
     def setCurrentInstr(self, instr):
+        self.refreshFileHandlers()
         self.currentInstr = instr
         self.controlhandler.setCurrentInstr(instr)
-        handlers = [self.factoryinstr_fhandle, self.userinstr_fhandle, self.puredata_fhandle]
+        handlers = [self.instr_fhandle, self.sc_fhandle, self.puredata_fhandle]
         tempbank = None
         for handle in handlers:
             tempidx = handle.getIndex(instr)
             if tempidx is not None:
                 tempbank = handle
-                if tempbank == self.factoryinstr_fhandle:
-                    tempbankname = "factory"
-                elif tempbank == self.userinstr_fhandle:
-                    tempbankname = "user"
-                elif tempbank == self.puredata_fhandle:
-                    tempbankname = "puredata"
+                if tempbank == self.instr_fhandle:
+                    tempbankname = "instr"
                 elif tempbank == self.sc_fhandle:
                     tempbankname = "supercollider"
+                elif tempbank == self.puredata_fhandle:
+                    tempbankname = "puredata"
                 break
         # Only udpate if the instr is found
         if tempidx is not None and tempbank is not None:
-            if tempidx < 5:
-                self.controlhandler.setInstrSelIdx(tempidx)
-                self.controlhandler.setInstrSelOffset(0)
-            else:
-                self.controlhandler.setInstrSelIdx(tempidx % 5)
-                self.controlhandler.setInstrSelOffset(tempidx / 5)
+            # The index is the position in the whole bank (as everywhere in the
+            # instr selector); the offset scrolls the 5 buttons so that it is
+            # shown, on the last button if it is the 6th or later.
+            self.controlhandler.setInstrSelIdx(tempidx)
+            self.controlhandler.setInstrSelOffset(0 if tempidx < 5 else tempidx - 4)
             self.controlhandler.setInstrSelBank(tempbankname)
+            # A new controlhandler (bank change) starts with 5 files.
+            self.controlhandler.setInstrSelNumFiles(tempbank.numFiles())
 
     def blendColor(self, color_a, color_b, amount):
         newred = (color_a.red() * (1.0 - amount)) + (color_b.red() * amount)

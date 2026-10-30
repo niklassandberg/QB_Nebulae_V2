@@ -133,7 +133,9 @@ class GPIOLed(object):
        
 class LedDriver(object):
     def __init__(self):
-        self.device = Adafruit_PCA9685.PCA9685()
+        # Bus 1 given explicitly: Adafruit_GPIO cannot guess it on the aarch64
+        # image ("Could not determine default I2C bus for platform").
+        self.device = Adafruit_PCA9685.PCA9685(busnum=1)
         self.device.set_pwm_freq(250)
         self.ledRecord = ButtonLed(self.device, ADDR_RECORD)
         self.ledNext = ButtonLed(self.device, ADDR_NEXT)

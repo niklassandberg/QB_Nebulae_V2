@@ -1,0 +1,42 @@
+# GutterSynth UGen for the Nebulae's SuperCollider. Level 2: built after
+# SuperCollider (uses its installed plugin headers), see Resources/engine_build/README.md.
+
+pkgname=sc-guttersynth
+_commit=fb481d4
+pkgver=0+g$_commit
+pkgrel=1
+pkgdesc="GutterSynth UGen for SuperCollider (Nebulae build)"
+arch=(aarch64)
+url="https://github.com/madskjeldgaard/guttersynth-sc"
+license=(GPL-3.0-or-later)
+depends=(supercollider-headless)
+makedepends=(cmake git)
+source=("guttersynth-sc::git+https://github.com/madskjeldgaard/guttersynth-sc.git#commit=$_commit"
+        "supercollider::git+https://github.com/supercollider/supercollider.git#tag=Version-3.14.1")
+sha256sums=('SKIP' 'SKIP')   # git sources: pinned by commit / tag
+
+prepare() {
+  (cd guttersynth-sc && git submodule update --init --recursive)
+  # SC_PATH: the SuperCollider source tree of the installed version (its
+  # SCVersion.txt, headers and the nova-simd submodule; the installed headers
+  # alone are not enough, CMake includes SC_PATH/SCVersion.txt).
+  (cd supercollider && git submodule update --init external_libraries/nova-simd)
+}
+
+build() {
+  cmake -S guttersynth-sc -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DSC_PATH="$srcdir/supercollider" \
+    -DSUPERNOVA=OFF \
+    -DCMAKE_INSTALL_PREFIX="$srcdir/install" \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DCMAKE_C_FLAGS="$CFLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS"
+  cmake --build build
+  cmake --install build
+}
+
+package() {
+  install -d "$pkgdir/usr/share/SuperCollider/Extensions"
+  cp -r "$srcdir/install/GutterSynth" "$pkgdir/usr/share/SuperCollider/Extensions/"
+}

@@ -1,0 +1,54 @@
+==== cpustat 2026-10-16 10:20:31
+label:      SC bank (instrument loaded at boot), original firmware 0419df1 (no nebio), no user input
+host:       alarmpi 5.15.43-2-rpi-ARCH armv7l, 4 cores
+cpu freq:   performance 1200 MHz
+window:     300 s, sample every 1 s
+nebio:      no (original hardware handling)
+nebulae.py: md5 64995ce48aba
+running:
+    368 /bin/bash -c exec tail -f /dev/null | /usr/bin/sclang &> /tmp/sclang.log
+    377 /usr/bin/sclang
+    488 sudo python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+    490 python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py
+    569 dbus-run-session /usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p128 -n3 -s -r48000
+    572 /usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p128 -n3 -s -r48000
+    678 [python3] <defunct>
+    681 scsynth -u 57110 -a 1024 -i 2 -o 2 -B 0.0.0.0 -m 524288 -R 0 -C 1 -l 4
+
+measured:   268 intervals, 299 s
+
+program       min %   mean %    p95 %    max %   mean Pi%   max RSS
+           (of one core, like top)                                                
+python         77.1     81.6     84.0     85.0       20.4   307.4 MB
+sclang          4.5      5.7      6.3      7.2        1.4    28.7 MB
+scsynth         2.7      3.6      4.5      4.5        0.9   120.3 MB
+pd         not running
+csound     not running
+jackd           3.6      4.2      5.4      5.4        1.1   127.4 MB
+total Pi       23.2     26.5     30.1     31.3   (whole Pi, all 4 cores = 100 %)
+temp           43.8     45.2     46.3     46.7   (deg C)
+
+whole Pi split (% of all 4 cores): user 18.8, system 7.5, irq 0.3, idle 73.4
+The programs above use 23.8 % of the Pi. The rest is other processes and kernel/interrupt
+work; this kernel counts interrupts during idle as system time without any process.
+
+python processes (mean % of one core):
+     490   81.6 %  python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/nebulae.py 
+     678    0.0 %  
+
+python threads, busiest first (mean / max % of one core).
+nebio and Csound threads run inside nebulae.py; the first thread is the python main loop.
+  pid    490 tid    490 python3            74.2 % /   78.0 %   (main thread)
+  pid    490 tid    543 Thread-2            3.2 % /    4.5 %
+  pid    490 tid    544 Thread-3            3.1 % /    4.5 %
+  pid    490 tid    542 python3             1.1 % /    2.7 %
+  pid    678 tid    678 python3             0.0 % /    0.0 %   (main thread)
+
+interrupts per second (all cores), busiest first:
+     14973 /s  IPI3:  Function call interrupts
+      5266 /s  33:    GICv2 150 Level fe204000.spi
+      4680 /s  34:    GICv2 149 Level fe804000.i2c
+      2718 /s  26:    GICv2 30 Level arch_timer
+       374 /s  42:    GICv2 119 Level DMA IRQ
+       374 /s  41:    GICv2 118 Level DMA IRQ
+        22 /s  IPI2:  Rescheduling interrupts

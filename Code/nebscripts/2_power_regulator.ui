@@ -1,0 +1,11 @@
+# Power regulator, on the configsettings page of the instr selector.
+# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
+# mode = the name after the number, here "power_regulator").
+# Speed click on it: the speed encoder picks the value, shown in the colour of
+# both speed LEDs: off = red, yield spin = green, shell spin = blue,
+# nohlt = yellow. Speed click sets it and goes back to the instrument; pitch
+# click goes back without a change. Keeps the CPU from sleeping (its
+# wake-ups are heard as a tone): Code/scripts/quiet.sh spin. nohlt is a
+# kernel option: choosing it (or leaving it) saves the settings and restarts
+# the Pi.
+# Slot LED bright = not off (nebulae-status).

@@ -1,0 +1,11 @@
+--- a/InOut/rtalsa.c
++++ b/InOut/rtalsa.c
+@@ -712,7 +712,7 @@
+     dev->sampleSize = 1;
+     dev->srate = (int) (parm->sampleRate > 0 ? parm->sampleRate  + 0.5f : 0);
+     dev->nchns = parm->nChannels;
+-
++    dev->buffer_smps = parm->bufSamp_HW;  /* -B, as in Csound 6.11 (lost in 6.18) */
+     dev->period_smps = parm->bufSamp_SW;
+     dev->playconv = (void (*)(int, MYFLT*, void*, int*)) NULL;
+     dev->rec_conv = (void (*)(int, void*, MYFLT*)) NULL;

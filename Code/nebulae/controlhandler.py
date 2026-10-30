@@ -1,19 +1,19 @@
-# Import SPI library (for hardware SPI) and MCP3008 library.
-import Adafruit_GPIO.SPI as SPI
-import RPi.GPIO as GPIO
 import ctcsound
 import switch as libSwitch
 import shiftregister as libSR
 import control
-import pdsender
 import os
 import settings
 import time
 import threading
 import wavewriter
 import numpy as np
-from SuperCollider import SuperCollider
+import nebio
 
+import nebmixer
+
+from classlogger import ClassLogger, STATS
+from configsettings import configSettings
 
 # Defines for Button/Gate Types
 BUTTON_GATE_GPIO = 0
@@ -23,55 +23,78 @@ BUTTON_GPIO_GATE_SR = 3
 BUTTON_GPIO_GATE_NONE = 4
 BUTTON_SR_GATE_NONE = 5
 
+
 FREEZE_GATE_PIN = 4
 RESET_GATE_PIN = 25
 NEXT_GATE_PIN = 23
 RECORD_GATE_PIN = 24
 
+# Buttons whose mode and edge a patch can set in its nebconfig block (e.g. freeze,latching,rising).
+DIGITAL_CONTROLS = [
+    "reset", "freeze", "source", "record", "file", "filestate", "sourcegate",
+    "reset_alt", "freeze_alt", "source_alt", "record_alt", "file_alt"
+]
 
 # Main Class. Holds all ControlChannels
 class ControlHandler(object):
-    def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='factory'):
+
+    def __init__(self, csound, numberFiles, configData, instr='a_granularlooper', bank='instr'):
+        
+        self.classlog = ClassLogger.loggerSetup(self)
+
         self.csound = csound # Share csound instance with object
-        GPIO.setmode(GPIO.BCM) # init GPIO
-        GPIO.setwarnings(False) # silence GPIO warnings (this is probably not the best.)
-        self.eol_pin = 16
-        self.sc = SuperCollider() #added supercollider
+        nebio.inputs() # all hardware is owned by nebio
         self.eol_state = False
-        GPIO.setup(self.eol_pin, GPIO.OUT)
         self.shiftReg = libSR.ShiftRegister()
+        # nebio settings: configsettings.py (no UI for them yet).
+        self.classlog.info("nebio input rates (scan, digital, adc): %s",
+                           nebio.set_input_rates(configSettings.nebioScanHz,
+                                                 configSettings.nebioDigitalHz,
+                                                 configSettings.nebioAdcHz))
+        if configSettings.nebioFastGpio:
+            self.classlog.info("nebio fast GPIO requested: %s",
+                               "on" if nebio.set_fast_gpio(True) else "refused, using libgpiod")
+        else:
+            self.classlog.info("nebio fast GPIO: off (libgpiod)")
         self.numFiles = numberFiles
         self.control_mode = "normal"
         self.prev_control_mode = "normal"
         self.configData = configData
         self.in_ticks = 23
+        self.in_ticks_calls = 0
         self.modeChangeControl = None
         self.settings = settings.SettingManager(configData)
         self.settings.read()
         self.saveFlag = 0
         self.now = int(round(time.time() * 1000))
-        self.pdSock = pdsender.PdSend()
+        # updateAll() call counter, logged every 10 s (for CPU measurements)
+        self.updateAllCount = 0
+        self.updateAllLogCount = 0
+        self.updateAllLogTime = self.now
+
         self.currentInstr = instr
         self.currentBank = bank
         self.static_file_idx = 0
         self.prep_mode_change = False
         self.prep_mode_change_time = self.now
-        self.modeChangeValues = {}
         self.writer = wavewriter.WaveWriter() 
         self.writing_buffer = False
         self.buffer_failure = False
         self.performance_thread = None
 
         # Set Defaults/Read Config
-        digitalControlList = [
-            "reset", "freeze", "source", "record", "file", "filestate", "sourcegate",
-            "reset_alt", "freeze_alt", "source_alt", "record_alt", "file_alt"
-        ]
         self.defaultConfig = dict()
         self.populateDefaultConfig()
         digitalConfig = dict()
-        for ctrl in digitalControlList:
-            if self.configData is not None and self.configData.has_key(ctrl):
+
+            
+
+        output_period = None
+        if self.configData is not None and 'output_period' in self.configData:
+            output_period = float(self.configData['output_period'][0])
+
+        for ctrl in DIGITAL_CONTROLS:
+            if self.configData is not None and ctrl in self.configData:
                 digitalConfig[ctrl] = self.configData.get(ctrl)
             else:
                 digitalConfig[ctrl] = self.defaultConfig.get(ctrl)
@@ -116,6 +139,11 @@ class ControlHandler(object):
             control.ControlChannel(self.csound, "reset_instr", 0, "digital",data_channel=BUTTON_SR_GATE_NONE, sr=self.shiftReg, button_pin=libSR.PIN_RESET, config=["triggered", "falling"]),
             control.ControlChannel(self.csound, "freeze_instr", 0, "digital",data_channel=BUTTON_SR_GATE_NONE, sr=self.shiftReg, button_pin=libSR.PIN_FREEZE, config=["triggered","falling"])
             ]
+        if output_period is not None:
+            for chn in self.channels + self.altchannels:
+                if digitalConfig.get(chn.name, [None])[0] == "triggered":
+                    chn.setOutputPeriod(output_period)
+
         self.channeldict = {}
         for chn in self.channels:
             self.channeldict[chn.name] = chn
@@ -136,13 +164,14 @@ class ControlHandler(object):
         self.sourceStateCtrl = control.ControlChannel(self.csound, "source_state", 0, "digital",data_channel=BUTTON_SR_GATE_NONE, sr=self.shiftReg, button_pin=libSR.PIN_SOURCE, config=["momentary","rising"], longtouch_cb=None)
         ## Clean this stuff up.
         self.instr_sel_idx = 0
-        self.instr_sel_bank = "factory"
+        self.instr_sel_bank = "instr"
         self.instr_sel_offset = 0
         self.instr_sel_numfiles = 5
         self.eol_comm = control.CommChannel(self.csound, "eol")
         self.size_status_comm = control.CommChannel(self.csound, "sizestatus")
         self.record_status_comm = control.CommChannel(self.csound, "recordstatus")
         self.buffer_size_comm = control.CommChannel(self.csound, "bufferlength")
+        self.inclip_comm = control.CommChannel(self.csound, "inclip") # conductor.py INPUT_CLIP_INSTR
         self.eol_gate_timer = 0
         self.reset_led_pin = 12
         #GPIO.setup(self.reset_led_pin, GPIO.OUT)
@@ -152,8 +181,16 @@ class ControlHandler(object):
         #self.writeThread = threading.Thread(target=self.writeBufferToAudioFile())
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
-    
+        
+    # rawencoder only exists in the SuperCollider bank (SCControlHandler).
+    def isRaw(self, name):
+        return False
 
+    # Grows while the audio input clips (ui.py: encoder LEDs flicker red in
+    # secondary controls). Csound counts it in "inclip"; without Csound (PD) it stays 0.
+    def inputClipCount(self):
+        self.inclip_comm.update()
+        return self.inclip_comm.getState()
 
     # Pass Csound Performance Thread Pointer
     def setCsoundPerformanceThread(self, ptr):
@@ -220,20 +257,12 @@ class ControlHandler(object):
     def mode(self):
         return self.control_mode
     
-    def enterSuperColliderMode(self): ##added supercollider mode, very similar to the PD mode
-        self.prev_control_mode = self.control_mode
-        self.control_mode = "supercollider"
-        for chn in self.channels: #mutes csound
-            chn.muteCSound(True)
-        if self.control_mode == "secondary controls":
-            self.resistSecondarySettings()
-        self.altchanneldict["source_alt"].setValue(0)
-        if self.pdSock.is_connected(): #kills pure data
-            self.pdSock.close()
-        self.sc.boot()
-    
+    # Csound has no sockets; SCControlHandler and PDControlHandler close theirs.
+    def closeSockets(self):
+        pass
+
     def enterNormalMode(self):
-        print "entering normal"
+        self.classlog.info("entering normal")
         for chn in self.channels:
             chn.muteCSound(False)
         if self.modeChangeControl is not None:
@@ -245,33 +274,14 @@ class ControlHandler(object):
         self.altchanneldict["source_alt"].setValue(0)
         self.prev_control_mode = self.control_mode
         self.control_mode = "normal"
-        if self.pdSock.is_connected():
-            self.pdSock.close()
-        self.sc.exit()
 
-    def enterPureDataMode(self):
-        self.prev_control_mode = self.control_mode
-        if self.modeChangeControl is not None:
-            self.channeldict[self.modeChangeControl].setIgnoreNextButton()
-        if self.control_mode == "secondary controls":
-            self.resistSecondarySettings()
-        for chn in self.channels:
-            chn.muteCSound(True)
-        if not self.pdSock.is_connected():
-            print "Connecting to PD Socket"
-            self.pdSock.connect()
-        self.sc.exit()
-        self.control_mode = "puredata"
-    
     def enterSecondaryMode(self):
         #self.modeChangeControl = "pitch"
         #self.altchanneldict[self.modeChangeControl + "_alt"].setIgnoreNextButton()
         if self.control_mode == "normal" or self.control_mode == "puredata" or self.control_mode == "supercollider":
-            print "entering secondary"
-            self.resistNormalSettings() 
-            if not self.pdSock.is_connected() and self.control_mode == "puredata" or self.control_mode == "supercollider":
-                print "Connecting to PD Socket"
-                self.pdSock.connect()
+            self.classlog.info("entering secondary")
+            self.resistNormalSettings()
+
             self.prev_control_mode = self.control_mode
             self.control_mode = "secondary controls"
         for chn in self.channels:
@@ -283,7 +293,7 @@ class ControlHandler(object):
         #self.modeChangeControl = "speed"
         #self.instrchanneldict[self.modeChangeControl + "_instr"].setIgnoreNextButton()
         if self.control_mode == "normal" or self.control_mode == "puredata" or self.control_mode == "supercollider":
-            print "entering instr selector"
+            self.classlog.info("entering instr selector")
             self.control_mode = "instr selector"
         self.settings.update(self.now)
         self.settings.write()
@@ -344,11 +354,12 @@ class ControlHandler(object):
 
     def setInputLevel(self, scalar):
         tick = scalar
-        prev_ticks = self.in_ticks
-        self.in_ticks = tick
-        if prev_ticks != self.in_ticks:
-            cmd = 'amixer set \'Capture\' ' + str(tick)
-            os.system(cmd)
+        if tick != self.in_ticks:
+            self.in_ticks = tick
+            nebmixer.inputLevel(tick)
+            #cmd = 'amixer set \'Capture\' ' + str(self.in_ticks)
+            #cmd = 'amixer sset Capture,0 ' + str(self.in_ticks) + ' rear'
+            #os.system(cmd)
 
     def getEndOfLoopState(self):
         return self.eol_state
@@ -358,9 +369,9 @@ class ControlHandler(object):
         self.size_status_comm.update()
         if self.size_status_comm.getState() == 0:
             if self.eol_comm.getState() > 0:
-                GPIO.output(self.eol_pin, False)
+                nebio.set_eol(False)
             else:
-                GPIO.output(self.eol_pin, True)
+                nebio.set_eol(True)
         #    if self.eol_comm.getState() == 1:
         #        self.eol_comm.clearState()
         #        GPIO.output(self.eol_pin, False)
@@ -372,13 +383,13 @@ class ControlHandler(object):
         #           GPIO.output(self.eol_pin, True) 
         #           self.eol_state = False
         else:
-            GPIO.output(self.eol_pin, True)
+            nebio.set_eol(True)
 
     # Listens for changes in the actual recording state of CSound
     def handleRecordStatus(self):
         self.record_status_comm.update()
         if self.record_status_comm.fallingEdge() == True:
-            print "Ending recording."
+            self.classlog.info("Ending recording.")
             if self.getAltValue("record_alt") == 0:
                 self.setValue("record", 0)
                 if self.getValue("source") == 1:
@@ -387,83 +398,86 @@ class ControlHandler(object):
         
 
     def getEditFunctionFlag(self, name):
-        if self.editFunctionFlag.has_key(name):
+        if name in self.editFunctionFlag:
             return self.editFunctionFlag[name]
         else:
             return False
 
     def clearEditFunctionFlag(self,name):
-        if self.editFunctionFlag.has_key(name):
+        if name in self.editFunctionFlag:
             self.editFunctionFlag[name] = False
 
     def setEditFunctionFlag(self,name):
-        if self.editFunctionFlag.has_key(name):
+        if name in self.editFunctionFlag:
             self.editFunctionFlag[name] = True
 
-    def updateAll(self): 
-        #GPIO.output(self.eol_pin, False) # For debugging
-        numChanged = 0
+    # Start of every updateAll(): time stamp and the call counter, logged
+    # every 10 s at log level STATS (for CPU measurements; log_level STATS or
+    # DEBUG in configsettings.py). Otherwise not even nebio's counters are read.
+    def countUpdateAll(self):
         self.now = int(round(time.time() * 1000))
-        self.shiftReg.update()
+        self.updateAllCount += 1
+        if self.now - self.updateAllLogTime >= 10000:
+            if self.classlog.isEnabledFor(STATS):
+                self.classlog.log(STATS, "updateAll: %.1f calls/s (total %d)",
+                                  (self.updateAllCount - self.updateAllLogCount) * 1000.0 / (self.now - self.updateAllLogTime),
+                                  self.updateAllCount)
+                self.classlog.log(STATS, "nebio: %s", nebio.stats())
+            self.updateAllLogCount = self.updateAllCount
+            self.updateAllLogTime = self.now
+
+    # Holding the source button enters secondary controls, releasing it goes
+    # back to the previous mode.
+    def handleSourceHold(self):
         self.sourceStateCtrl.update()
         #print "source state: " + str(self.sourceStateCtrl.getValue())
-        if self.sourceStateCtrl.getValue() == 1 and self.sourceStateCtrl.getPrevValue() == 0: 
+        if self.sourceStateCtrl.getValue() == 1 and self.sourceStateCtrl.getPrevValue() == 0:
             self.prep_mode_change = True
             self.prep_mode_change_time = self.now
             #for chn in self.channeldict:
-        elif self.sourceStateCtrl.getValue() == 0: 
-            for chn in self.channels:
-                self.modeChangeValues[chn.name] = chn.getValue()
+        elif self.sourceStateCtrl.getValue() == 0:
             if self.sourceStateCtrl.getPrevValue() == 1:
                 self.prep_mode_change = False
                 if self.control_mode == "secondary controls":
-                    if self.prev_control_mode == "puredata":
-                        self.enterPureDataMode()
-                    elif self.prev_control_mode == "supercollider": 
-                        self.enterSuperColliderMode() ##added
-                    else:
-                        self.enterNormalMode()
+                    # SCControlHandler/PDControlHandler override enterNormalMode()
+                    # to go back to supercollider/puredata mode
+                    self.enterNormalMode()
+
         if self.prep_mode_change == True and self.now - self.prep_mode_change_time > 175:# and numChanged > 0:
             self.enterSecondaryMode()
             self.prep_mode_change = False
             self.channeldict["source"].setIgnoreNextButton()
             #self.altchanneldict["source_alt"].setIgnoreNextButton()
-        if self.control_mode != "puredata":
-            self.handleEndOfLoop()
-            self.handleRecordStatus()
+
+    def updateInstrSelector(self):
+        #self.exit_instrmode_chn.update()
+        for idx, chn in enumerate(self.instr_sel_controls):
+            chn.update()
+            if chn.getValue() == 1:
+                sel_idx = idx + self.instr_sel_offset
+                if sel_idx < self.instr_sel_numfiles:
+                    self.instr_sel_idx = sel_idx
+
+    # Csound. SCControlHandler and PDControlHandler have their own updateAll().
+    def updateAll(self):
+        #GPIO.output(self.eol_pin, False) # For debugging
+        self.countUpdateAll()
+        self.shiftReg.update()
+        self.handleSourceHold()
+
+        self.handleEndOfLoop()
+        self.handleRecordStatus()
         #self.printAllControls()
+
         if self.control_mode == "secondary controls":
-            if self.prev_control_mode == "puredata":          
-                time.sleep(0.001)
-                msgs = []
-                for chn in self.channels:
-                    #chn.setIgnoreHID(False)
-                    chn.update()
-                    temp_str = chn.name + ' ' + str(chn.getValue())
-                    msgs.append(temp_str)
-                for chn in self.altchannels:
-                    chn.update()
-                    temp_str = chn.name + ' ' + str(chn.getValue())
-                    msgs.append(temp_str)
-                try:
-                    self.pdSock.send(msgs)
-                except:
-                    if self.pdSock.is_connected():
-                        print 'Could not send messages to PD. Connected, but error?'
-                    else:
-                        print 'Could not send messgaes to PD. No connection?'
-            elif self.prev_control_mode =="supercollider": #if we are in sc mode
-                for chn in self.channels: #for each of the adc channels
-                    self.sc.setSynth(chn.name, chn.getValue()) ##for each channel I send a OSC message
-                    chn.update() #update all control values
-            else:
-                for chn in self.channels:
-                    chn.update()
-                for chn in self.altchannels:
-                    chn.update()
-                    self.settings.save(chn.name, chn.getValue())
-                if self.currentInstr == "a_granularlooper":
-                    self.channeldict["file"].input.setIncOrder(self.altchanneldict["file_alt"].getValue()) 
+            for chn in self.channels:
+                chn.update()
+            for chn in self.altchannels:
+                chn.update()
+                self.settings.save(chn.name, chn.getValue())
+            if self.currentInstr == "a_granularlooper":
+                self.channeldict["file"].input.setIncOrder(self.altchanneldict["file_alt"].getValue())
+
             in_scalar = self.altchanneldict["speed_alt"].getValue()
             self.setInputLevel(in_scalar)
             #if self.altchanneldict["reset_alt"].curVal == True and self.altchanneldict["reset_alt"].prevVal == False:
@@ -474,88 +488,59 @@ class ControlHandler(object):
             #    print "Restoring Defaults!"
             #    if self.control_mode == "secondary controls":
             #        self.restoreAltToDefault()
+            
         elif self.control_mode == "instr selector":
-            #self.exit_instrmode_chn.update()
-            for idx, chn in enumerate(self.instr_sel_controls):
-                chn.update()
-                if chn.getValue() == 1:
-                    sel_idx = idx + self.instr_sel_offset
-                    if sel_idx < self.instr_sel_numfiles:
-                        self.instr_sel_idx = sel_idx
-                
-        elif self.control_mode == "puredata":
-            time.sleep(0.001)
-            msgs = []
-            for chn in self.channels:
-                if chn.name != "sourcegate":
-                    chn.setIgnoreHID(False)
-                chn.update()
-                temp_str = chn.name + ' ' + str(chn.getValue())
-                msgs.append(temp_str)
-            try:
-                self.pdSock.send(msgs)
-            except:
-                if self.pdSock.is_connected():
-                    print 'Could not send messages to PD. Connected, but error?'
-                else:
-                    print 'Could not send messgaes to PD. No connection?'
-        elif self.control_mode =="supercollider": #if we are in sc mode 
-            for chn in self.channels: #for each of the adc channels
-                if chn.name != "sourcegate":
-                    chn.setIgnoreHID(False)
-                self.sc.setSynth(chn.name, chn.getValue()) ##for each channel I send a OSC message
-                chn.update() #update all control values
+            self.updateInstrSelector()
+
         else: #includes "normal":4
             filestate = self.channeldict["filestate"].getValue()
+            file_edit = filestate == 1 or filestate == True
             source_state = self.getValue("source")
-            if self.getAltValue("freeze_alt") == 1 and self.currentInstr == "a_granularlooper":
+            granular = self.currentInstr == "a_granularlooper"
+            if self.getAltValue("freeze_alt") == 1 and granular:
                 self.channeldict["source"].setIgnoreGate(True)
             else:
                 self.channeldict["source"].setIgnoreGate(False)
-                        
+            save = self.settings.save
+
             for chn in self.channels:
-                if chn.name != "sourcegate":
+                name = chn.name
+                if name != "sourcegate":
                     chn.setIgnoreHID(False)
                 chn.update()
-                #if abs(chn.getValue() - chn.getPrevValue()) > 0.005 and chn.name != "source":
-                if self.modeChangeValues.has_key(chn.name):
-                    if abs(chn.getValue() - self.modeChangeValues[chn.name]) > 0.005:
-                        numChanged += 1
                 ## UNIQUE INSTR HANDLING
-                if self.currentInstr == "a_granularlooper":
-                    if chn.name == "file":
-                        if source_state == 1:
-                            chn.setValue(self.static_file_idx)
-                        else:
-                            self.static_file_idx = self.getValue("file")
-                if chn.name != "filestate":
-                    if chn.source == "hybrid":
-                        self.settings.save(chn.name, chn.getStaticVal())
+                if granular and name == "file":
+                    if source_state == 1:
+                        chn.setValue(self.static_file_idx)
                     else:
-                        self.settings.save(chn.name, chn.getValue())
-                    if chn.source == "digital" and chn.name != "file": 
-                        if filestate == 1 or filestate == True:
-                            if chn.hasChanged() == True and chn.getTrigSource() == "button":
-                                if chn.name == "reset":
-                                    self.setEditFunctionFlag(chn.name)
-                                elif chn.name == "source":
-                                    self.setEditFunctionFlag(chn.name) 
-                                    self.channeldict[chn.name].setIgnoreNextButton()
-                                elif chn.name == "freeze":
-                                    self.setEditFunctionFlag(chn.name) 
-                                    self.channeldict[chn.name].setIgnoreNextButton()
-                                    self.channeldict[chn.name].setValue(1 - self.channeldict[chn.name].getValue())
-                                    #self.writeBufferToAudioFile()
-                                    if self.writeThread.isAlive() == False:
-                                        print("Write Thread Starting!")
-                                        self.writeThread.join()
-                                        self.writeThread = threading.Thread(target=self.writeBufferToAudioFile)
-                                        self.writeThread.start()
-                                        #self.writeThread.start()
-                                    else:
-                                        print("Write thread still running.")
-                                print "channel: " + chn.name + " has changed."
-                                self.channeldict["file"].setIgnoreNextButton()
+                        self.static_file_idx = chn.getValue()
+                if name != "filestate":
+                    if chn.source == "hybrid":
+                        save(name, chn.getStaticVal())
+                    else:
+                        save(name, chn.getValue())
+                    if file_edit and chn.source == "digital" and name != "file":
+                        if chn.hasChanged() == True and chn.getTrigSource() == "button":
+                            if chn.name == "reset":
+                                self.setEditFunctionFlag(chn.name)
+                            elif chn.name == "source":
+                                self.setEditFunctionFlag(chn.name) 
+                                self.channeldict[chn.name].setIgnoreNextButton()
+                            elif chn.name == "freeze":
+                                self.setEditFunctionFlag(chn.name) 
+                                self.channeldict[chn.name].setIgnoreNextButton()
+                                self.channeldict[chn.name].setValue(1 - self.channeldict[chn.name].getValue())
+                                #self.writeBufferToAudioFile()
+                                if self.writeThread.is_alive() == False:
+                                    self.classlog.info("Write Thread Starting!")
+                                    self.writeThread.join()
+                                    self.writeThread = threading.Thread(target=self.writeBufferToAudioFile)
+                                    self.writeThread.start()
+                                    #self.writeThread.start()
+                                else:
+                                    self.classlog.info("Write thread still running.")
+                            self.classlog.info("channel: %s has changed.", chn.name)
+                            self.channeldict["file"].setIgnoreNextButton()
         #GPIO.output(self.eol_pin, True) # for debugging
 
     def printAllControls(self):
@@ -574,7 +559,7 @@ class ControlHandler(object):
         line += "\nComm Channels:"
         line += "krecordstatus: " + str(self.record_status_comm.getState()) + '\n'
         line += "\n############################\n"
-        print line
+        self.classlog.info(line)
 
     def printAllControlsVerbose(self):
         line = "############################\n"
@@ -594,35 +579,35 @@ class ControlHandler(object):
                 line += "\n"
             line += chn.name + ": " + str(chn.getValue()) + "\t"
         line += "\n############################\n"
-        print line
+        self.classlog.info(line)
 
     def writeBufferToAudioFile(self):
         # Get Tables from csound
         success = False
         silence_audio = False
         if self.csound is not None:
-            print("Started Writing Buffer")
+            self.classlog.info("Started Writing Buffer")
             self.writing_buffer = True
             self.buffer_size_comm.update()
             length = self.buffer_size_comm.getState()
             if (length > 0):
-                print length
+                self.classlog.info(length)
                 if self.performance_thread is not None and silence_audio is True:
                     self.performance_thread.pause()
-                print("Getting tables from Csound")
+                self.classlog.info("Getting tables from Csound")
                 dataLeft = self.csound.table(200)
                 dataRight = self.csound.table(201)
-                print("Jumping to WaveWriter")
+                self.classlog.info("Jumping to WaveWriter")
                 # Format down to 16-bit signed
                 success = self.writer.WriteStereoWaveFile(dataLeft, dataRight, length)
                 if self.performance_thread is not None and silence_audio is True:
                     self.performance_thread.play()
-                print("Finished Writing Buffer")
+                self.classlog.info("Finished Writing Buffer")
             else:
-                print("Buffer is currently empty")
+                self.classlog.info("Buffer is currently empty")
             self.writing_buffer = False
         if success == False:
             self.buffer_failure = True
 
     def dummyThread(self):
-        print "This is a dummy function for initializing a worker thread."
+        self.classlog.info("This is a dummy function for initializing a worker thread.")

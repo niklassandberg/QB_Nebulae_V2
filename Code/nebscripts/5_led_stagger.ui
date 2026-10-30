@@ -1,0 +1,8 @@
+# LED stagger, on the configsettings page of the instr selector.
+# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
+# mode = the name after the number, here "led_stagger").
+# Speed click on it: on/off, and back to the instrument. On (default): the
+# LED PWM channels switch on at different moments of the PWM cycle, so there
+# is no big current step all at once (heard as a tone); the brightness looks
+# the same. Saved (configsettings.py).
+# Slot LED bright = on (nebulae-status).

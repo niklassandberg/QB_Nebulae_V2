@@ -1,0 +1,42 @@
+# XPlayBuf UGen for the Nebulae's SuperCollider. Level 2: built after
+# SuperCollider (uses its installed plugin headers), see Resources/engine_build/README.md.
+
+pkgname=sc-xplaybuf
+_commit=44b9077
+pkgver=0+g$_commit
+pkgrel=1
+pkgdesc="XPlayBuf UGen for SuperCollider (Nebulae build)"
+arch=(aarch64)
+url="https://github.com/elgiano/XPlayBuf"
+license=(GPL-3.0-or-later)
+depends=(supercollider-headless)
+makedepends=(cmake git)
+source=("XPlayBuf::git+https://github.com/elgiano/XPlayBuf.git#commit=$_commit"
+        "supercollider::git+https://github.com/supercollider/supercollider.git#tag=Version-3.14.1")
+sha256sums=('SKIP' 'SKIP')   # git sources: pinned by commit / tag
+
+prepare() {
+  (cd XPlayBuf && git submodule update --init --recursive)
+  # SC_PATH: the SuperCollider source tree of the installed version (its
+  # SCVersion.txt, headers and the nova-simd submodule; the installed headers
+  # alone are not enough, CMake includes SC_PATH/SCVersion.txt).
+  (cd supercollider && git submodule update --init external_libraries/nova-simd)
+}
+
+build() {
+  cmake -S XPlayBuf -B build \
+    -DCMAKE_BUILD_TYPE=Release \
+    -DSC_PATH="$srcdir/supercollider" \
+    -DSUPERNOVA=OFF \
+    -DCMAKE_INSTALL_PREFIX="$srcdir/install" \
+    -DCMAKE_POLICY_VERSION_MINIMUM=3.5 \
+    -DCMAKE_C_FLAGS="$CFLAGS" \
+    -DCMAKE_CXX_FLAGS="$CXXFLAGS"
+  cmake --build build
+  cmake --install build
+}
+
+package() {
+  install -d "$pkgdir/usr/share/SuperCollider/Extensions"
+  cp -r "$srcdir/install/XPlayBuf" "$pkgdir/usr/share/SuperCollider/Extensions/"
+}

@@ -1,0 +1,13 @@
+[Unit]
+Description=Nebulae first start: new machine ID and SSH keys, root grown to the SD card
+DefaultDependencies=no
+ConditionPathExists=/etc/nebulae-firstboot
+After=systemd-remount-fs.service
+Before=sysinit.target systemd-networkd.service sshd.service nebulae.service
+
+[Service]
+Type=oneshot
+ExecStart=/usr/local/sbin/nebulae-firstboot
+
+[Install]
+WantedBy=sysinit.target

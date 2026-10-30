@@ -2,6 +2,7 @@ import switch as libSwitch
 import shiftregister as libSR
 import time
 import random
+from classlogger import ClassLogger
 # Defines for Button/Gate Types
 BUTTON_GATE_GPIO = 0
 BUTTON_SR_GATE_GPIO = 1
@@ -9,6 +10,7 @@ BUTTON_GATE_SR = 2
 BUTTON_GPIO_GATE_SR = 3
 BUTTON_GPIO_GATE_NONE = 4
 BUTTON_SR_GATE_NONE = 5
+DEFAULT_OUTPUT_PERIOD = 10 # output to csound pulse in ms
 class DigitalData(object):
     def __init__(self, name, button_gate_mode, gate_pin, button_pin, sr, mode="latching", edge="falling", maximum=1, longtouch_cb=None, inc_order=0, init_val=0):
         self.b_state = 0
@@ -31,16 +33,18 @@ class DigitalData(object):
         self.time_held = 0
         self.button_pressed = False
         self.long_press_time = 300
-        self.output_period = 10 # output to csound pulse in ms
+        self.output_period = DEFAULT_OUTPUT_PERIOD
         self.led_period = 40 # output to csound pulse in ms
         #self.long_press_time = 63
-        self.ignore_next_btrig = False
+        self.ignore_next_btrig = edge == "falling"
         self.name = name
+        self.is_alt = "_alt" in name # alt channels ignore the gate (handle_gate)
         self.longtouch_cb = longtouch_cb
         self.inc_order = inc_order
         self.ignore_button = False
         self.ignore_gate = False
         self.trig_source = "button"
+        self.log = ClassLogger.loggerSetup(self)
         ## hacky way for making sure LED stays low
         ## when file is >0 at bootup
         if name == "file":
@@ -95,6 +99,19 @@ class DigitalData(object):
     def setIgnoreNextButton(self):
         self.ignore_next_btrig = True
 
+    def setOutputPeriod(self, ms):
+        self.output_period = ms
+
+    # New mode/edge from the next patch (reused SCControlHandler). A new mode
+    # starts from 0, as the old state means something else in it.
+    def setMode(self, mode, edge):
+        if mode != self.mode:
+            self.mode = mode
+            self.state = self.prev_state = self.led_state = 0
+            self.b_state = self.g_state = 0
+        self.edge = edge
+        self.ignore_next_btrig = edge == "falling"
+
     def getTrigSource(self):
         return self.trig_source
 
@@ -117,7 +134,7 @@ class DigitalData(object):
                 self.time_held += 1
             if self.time_held > self.long_press_time:
                 if self.longtouch_cb != None:
-                    print "You long pressed a button"
+                    self.log.debug("You long pressed a button")
                     self.longtouch_cb()
                 self.time_held = 0
         
@@ -133,32 +150,14 @@ class DigitalData(object):
         if src == "GPIO":
             if skip_update == False:
                 switch.update()
-            if switch.state() == True:
-                state = 1
-            else:
-                state = 0
-            if switch.prevState() == True:
-                prev = 1
-            else: 
-                prev = 0
+            state = 1 if switch.state() else 0
+            prev = 1 if switch.prevState() else 0
         elif src == "SR":
-            if switch.state(pin) == True:
-                state = 1
-            else:
-                state = 0
-            if switch.prevState(pin) == True:
-                prev = 1
-            else: 
-                prev = 0
+            state = 1 if switch.state(pin) else 0
+            prev = 1 if switch.prevState(pin) else 0
             if controltype == "gate": # Flip for Hardware
-                if state == 1:
-                    state = 0
-                else:
-                    state = 1
-                if prev == 1:
-                    prev = 0
-                else:
-                    prev = 1
+                state = 1 - state
+                prev = 1 - prev
         elif src == "NONE":
             state = 0
             prev = 0 
@@ -179,6 +178,12 @@ class DigitalData(object):
                     self.ignore_next_btrig = False
                     self.time_held = 0
                     self.button_pressed = 0
+                elif raw_button == 0:
+                    # Only the press going on right now is ignored. Up and
+                    # nothing ignored (not held when the flag was set, e.g. at
+                    # an instr load, or a rising edge button released after a
+                    # source hold): drop it, or it eats the next real press.
+                    self.ignore_next_btrig = False
             if self.mode == "triggered":
                 if action == 1:
                     self.button_pulse_time = time.time() * 1000.0
@@ -203,7 +208,7 @@ class DigitalData(object):
             #    self.b_state = 0
 
     def handle_gate(self):
-        if "_alt" in self.name:
+        if self.is_alt:
             self.ignore_gate = True
         if self.ignore_gate == False:
             raw_gate, raw_prev_gate = self.getRawValues("gate")
@@ -302,15 +307,15 @@ class DigitalData(object):
 ####### BEGIN OG DIGITAL DATA
     def ogGetValue(self):
         if self.mode == "latching":
-            if self.gate_src is "GPIO":
+            if self.gate_src == "GPIO":
                 self.gate_switch.update()
                 g_trig = self.gate_switch.risingEdge()
-            elif self.gate_src is "SR":
+            elif self.gate_src == "SR":
                 g_trig = self.gate_switch.fallingEdge(self.gate_pin)
                 #g_trig = self.gate_switch.risingEdge(self.gate_pin)
 
             if self.ignore_button == False:
-                if self.button_src is "GPIO":
+                if self.button_src == "GPIO":
                     self.button_switch.update()
                     b_trig = self.button_switch.fallingEdge()
                 else:
@@ -333,7 +338,7 @@ class DigitalData(object):
                         self.ignore_next_btrig = True
                         self.button_pressed = False
                         self.time_held = 0
-                        print "You long pressed a button!"
+                        self.log.debug("You long pressed a button!")
                         self.longtouch_cb()
 
                 if self.ignore_next_btrig is True:
@@ -361,16 +366,16 @@ class DigitalData(object):
                     self.state = 0
             
         elif self.mode == "triggered":
-            if self.gate_src is "GPIO":
+            if self.gate_src == "GPIO":
                 self.gate_switch.update()
                 g_trig = self.gate_switch.state()
-            elif self.gate_src is "SR":
+            elif self.gate_src == "SR":
                 g_trig = not self.gate_switch.state(self.gate_pin)
             else:
                 g_trig = False
 
             if self.ignore_button == False:
-                if self.button_src is "GPIO":
+                if self.button_src == "GPIO":
                     self.button_switch.update()
                     if self.edge == "rising":
                         b_trig = self.button_switch.state()
@@ -387,7 +392,7 @@ class DigitalData(object):
                                 b_trig = False
                             self.button_pressed = False
                             self.time_held = 0
-                            print "You long pressed a button!"
+                            self.log.debug("You long pressed a button!")
                             self.longtouch_cb()
                 else:
                     if self.edge == "rising":
@@ -406,7 +411,7 @@ class DigitalData(object):
                         b_trig = False
                         self.button_pressed = False
                         self.time_held = 0
-                        print "You long pressed a button!"
+                        self.log.debug("You long pressed a button!")
                         if self.longtouch_cb is not None:
                             self.longtouch_cb()
                     
@@ -424,15 +429,15 @@ class DigitalData(object):
                 self.state = 0
 
         elif self.mode == "incremental":
-            if self.gate_src is "GPIO":
+            if self.gate_src == "GPIO":
                 self.gate_switch.update()
                 g_trig = self.gate_switch.risingEdge()
-            elif self.gate_src is "SR":
+            elif self.gate_src == "SR":
                 g_trig = self.gate_switch.risingEdge(self.gate_pin)
             else:
                 g_trig = False
 
-            if self.button_src is "GPIO":
+            if self.button_src == "GPIO":
                 self.button_switch.update()
                 if self.edge == "rising":
                     b_trig = self.button_switch.risingEdge()
@@ -453,7 +458,7 @@ class DigitalData(object):
                     b_trig = False
                     self.button_pressed = False
                     self.time_held = 0
-                    print "You long pressed a button!"
+                    print("You long pressed a button!")
                     if self.longtouch_cb is not None:
                         self.longtouch_cb()
             if self.ignore_next_btrig is True:
@@ -485,16 +490,16 @@ class DigitalData(object):
             if self.state >= self.maximum:
                 self.state = 0
         elif self.mode == "momentary":
-            if self.gate_src is "GPIO":
+            if self.gate_src == "GPIO":
                 self.gate_switch.update()
                 g_trig = self.gate_switch.state()
-            elif self.gate_src is "SR":
+            elif self.gate_src == "SR":
                 g_trig = self.gate_switch.state(self.gate_pin)
             else:
                 g_trig = False
             if self.ignore_gate is True:
                 g_trig = False
-            if self.button_src is "GPIO":
+            if self.button_src == "GPIO":
                 self.button_switch.update()
                 if self.edge == "rising":
                     b_trig = self.button_switch.state()
@@ -507,7 +512,7 @@ class DigitalData(object):
                     b_trig = self.button_switch.state(self.button_pin)
             if self.ignore_button is True:
                 b_trig = False
-            if g_trig is True or b_trig is True or b_trig is 1:
+            if g_trig is True or b_trig is True or b_trig == 1:
                 if g_trig is True:
                     self.trig_source = "gate"
                 elif b_trig is True:
