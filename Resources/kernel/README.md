@@ -51,8 +51,12 @@ normal one:
   (all instrument settings are read by `Code/nebulae/nebconfig.py`)
 - values `rt`, `normal`, `any`; no line = `any` (never a restart)
 
-The switch writes and removes only its own `kernel=kernel8-nebulae-rt.img`
-line (under `[all]`, at the end of `/boot/nebulae-image.txt`). Without the RT
+The switch writes and removes only its own block at the end of
+`/boot/nebulae-image.txt`: `[all]`, a comment, `arm_64bit=1` and
+`kernel=kernel8-nebulae-rt.img`. `arm_64bit=1` is needed: the firmware starts
+a kernel with its own name (not `kernel8.img`) in 32-bit mode without it,
+also on a Pi 4, and the kernel hangs at once (cards older than the release
+image have no `arm_64bit=1`). Without the RT
 kernel on the card it does not restart; a restart that did not switch is not
 tried again (`Code/config/kernel_switch.txt`).
 
@@ -76,8 +80,11 @@ The kernel has its own name, so it does not replace anything:
 2. in `/boot/nebulae-image.txt` (the image's own boot settings, startup.sh
    does not overwrite it) add:
    ```
+   arm_64bit=1
    kernel=kernel8-nebulae.img
    ```
+   (`arm_64bit=1` is already there on the release image; without it a kernel
+   with its own name hangs at once.)
 3. reboot; `uname -r` shows `...-nebulae`.
 
 Back to the stock kernel: remove that line. If the Pi does not start with

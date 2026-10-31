@@ -17,8 +17,12 @@
 #
 # The normal kernel is whatever the card boots without the switch's line
 # (stock kernel8.img, or a kernel= line set by hand). The switch owns one
-# line only, RT_LINE, at the end of BOOT_FILE under [all] (the last kernel=
-# line wins), and removes exactly that line again.
+# block only, at the end of BOOT_FILE (the last kernel= line wins):
+#   [all] / RT_COMMENT / RT_ARM64 / RT_LINE
+# and removes exactly that block again. RT_ARM64 is in it because the
+# firmware starts a kernel with its own name (not kernel8.img) in 32-bit mode
+# without arm_64bit=1, also on a Pi 4: the 64-bit kernel then hangs at once
+# (2026-10-31, an image older than the release image had no arm_64bit=1).
 #
 # Safety:
 # - RT kernel not on the card (image or modules missing): no restart, the
@@ -41,6 +45,7 @@ BOOT_FILE = "/boot/nebulae-image.txt"  # included from config.txt (the image's o
 RT_IMAGE = "kernel8-nebulae-rt.img"
 RT_LINE = "kernel=" + RT_IMAGE
 RT_COMMENT = "# real-time kernel, set and removed by Nebulae (kernelswitch.py)"
+RT_ARM64 = "arm_64bit=1"  # a kernel= name the firmware does not know starts 32-bit without it
 MARKER = "/home/alarm/QB_Nebulae_V2/Code/config/kernel_switch.txt"
 MOUNTFS = "/home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh"
 
@@ -108,20 +113,30 @@ def _writeMarker(target):
 
 
 def _setBootLine(rt):
-    """RT_LINE (with its comment and [all]) at the end of BOOT_FILE, or
-    removed. Other lines stay as they are."""
+    """Our block ([all], RT_COMMENT, RT_ARM64, RT_LINE) at the end of
+    BOOT_FILE, or removed. Other lines stay as they are, also an arm_64bit=1
+    of the image itself (only the one right after RT_COMMENT is ours)."""
     try:
         with open(BOOT_FILE) as f:
             lines = f.read().splitlines()
     except FileNotFoundError:
         lines = []
-    ours = (RT_COMMENT, RT_LINE)
-    kept = [l for l in lines if l.strip() not in ours]
-    # our [all] goes with our line: drop it when it is the last line left
-    if kept and kept[-1].strip() == "[all]" and len(kept) < len(lines):
-        kept.pop()
+    kept = []
+    i = 0
+    while i < len(lines):
+        line = lines[i].strip()
+        i += 1
+        if line == RT_COMMENT:
+            # our [all] before it, our arm_64bit=1 after it (older switches
+            # wrote the block without it)
+            if kept and kept[-1].strip() == "[all]":
+                kept.pop()
+            if i < len(lines) and lines[i].strip() == RT_ARM64:
+                i += 1
+        elif line != RT_LINE:
+            kept.append(lines[i - 1])
     if rt:
-        kept += ["[all]", RT_COMMENT, RT_LINE]
+        kept += ["[all]", RT_COMMENT, RT_ARM64, RT_LINE]
     _safeWrite(BOOT_FILE, "\n".join(kept) + "\n")
 
 

@@ -1,7 +1,11 @@
 #!/bin/bash
 # The Nebulae kernel: Arch Linux ARM's linux-rpi (Raspberry Pi kernel fork,
 # same commit and config, files in alarm/) with nebulae.config on top,
-# cross-compiled for aarch64 (Pi 3 and Pi 4) in WSL or on any x86 Linux.
+# cross-compiled for aarch64 (Pi 3 and Pi 4) in WSL or on any x86 Linux, or
+# built natively on an aarch64 Arch Linux ARM (e.g. the Pi 4 itself, ~2 h):
+# then with the same compiler as Arch Linux ARM's own linux-rpi. (The Pi 4
+# hang at boot of 2026-10-30 was not the compiler: native builds hung the
+# same; the card had no arm_64bit=1, see README.md.)
 #   build_kernel.sh [OUTDIR] [rt]  default OUTDIR=/root/kernel/out
 #   rt: the real-time variant, nebulae-rt.config on top (PREEMPT_RT)
 # Run as root (installs the cross compiler with pacman on Arch). Result:
@@ -27,11 +31,17 @@ KVER=6.18.57
 KREL=1
 COMMIT=234188315037848e5b07d65b85d38edc64095caa
 JOBS=${JOBS:-$(( $(nproc) > 2 ? $(nproc) - 1 : 1 ))}
-MAKE=(make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j"$JOBS")
+if [ "$(uname -m)" = aarch64 ]; then
+    MAKE=(make -j"$JOBS")
+    DEPS=(gcc bc flex bison openssl libelf cpio kmod xz)
+else
+    MAKE=(make ARCH=arm64 CROSS_COMPILE=aarch64-linux-gnu- -j"$JOBS")
+    DEPS=(aarch64-linux-gnu-gcc bc flex bison openssl libelf pahole cpio kmod xz)
+fi
 
-echo "==== $(date) Nebulae kernel $KVER-$KREL$SUF (raspberrypi/linux ${COMMIT:0:10})"
-pacman -S --noconfirm --needed aarch64-linux-gnu-gcc bc flex bison openssl \
-    libelf pahole cpio kmod xz >/dev/null
+echo "==== $(date) Nebulae kernel $KVER-$KREL$SUF (raspberrypi/linux ${COMMIT:0:10}), $(uname -m)"
+pacman -S --noconfirm --needed "${DEPS[@]}" >/dev/null
+echo "compiler: $(${DEPS[0]} --version | head -1)"
 mkdir -p "$W" "$OUT"
 cd "$W"
 T=linux-$KVER-${COMMIT:0:10}.tar.gz
@@ -60,7 +70,7 @@ VER=$("${MAKE[@]}" -s kernelrelease)
 # What changed, and whether every line of the config files took effect. An
 # option set in more than one file is checked only as the last file sets it.
 {
-    echo "Nebulae kernel $VER, $(date)"
+    echo "Nebulae kernel $VER, $(date), $(uname -m), $(${DEPS[0]} --version | head -1)"
     echo "changed against the stock linux-rpi config:"
     scripts/diffconfig "$W/config.stock" .config | sed 's/^/  /'
     echo "${CONFIGS[*]##*/} lines that did not take effect (dependencies):"
