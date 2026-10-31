@@ -7,6 +7,11 @@ DefaultDependencies=false
 # waits for its mount.
 After=systemd-remount-fs.service tmp.mount
 Wants=tmp.mount
+# DefaultDependencies=false drops these two: without them a reboot does not
+# stop this unit (systemd-shutdown just kills what is left), and the
+# ExecStopPost below (LEDs dark) never runs.
+Conflicts=shutdown.target
+Before=shutdown.target
 
 [Service]
 #ExecStart=/home/alarm/QB_Nebulae_V2/Code/scripts/startup.sh
@@ -14,6 +19,18 @@ ExecStart=/home/alarm/checkfirmware.sh
 WorkingDirectory=/
 Restart=on-failure
 RemainAfterExit=true
+# LEDs dark once Nebulae is stopped (every reboot: kernel switch, update),
+# until nebio lights them in the next boot: dark = restarting. The PCA9685
+# (I2C bus 1, 0x40) keeps its registers while the Pi has power. The LEDs are
+# active low (nebio kLedOff = 4095): dark = output always high = the full-ON
+# bit in 0xFB ALL_LED_ON_H for all 16 channels, and the full-OFF bit in 0xFD
+# ALL_LED_OFF_H cleared (it wins over full ON; set, all LEDs are white).
+# "-": no error when i2c-tools or the chip is missing.
+ExecStopPost=-/usr/bin/i2cset -y 1 0x40 0xFB 0x10
+ExecStopPost=-/usr/bin/i2cset -y 1 0x40 0xFD 0x00
+# Nebulae exits at once on SIGTERM (nebulae.py); a hanging instrument must
+# not hold up a reboot for systemd's default 90 s.
+TimeoutStopSec=5
 # Everything Nebulae prints and logs (classlogger.py, nebio, Csound, Pd) is in
 # the journal under this name: journalctl -u nebulae. No rate limit: with
 # log_level DEBUG it can write more than journald's 10000 lines per 30 s,
