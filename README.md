@@ -26,3 +26,9 @@ Good to know:
 
 -- To see heat in rpi (I dont want to install not needed packages) -- 
 cat /sys/class/thermal/thermal_zone0/temp | sed 's/\(..\)\(...\)/\1.\2°C/'
+
+-- Alter the usb stick instr so it can be reloaded ---
+
+sudo mkdir -p /tmp/stick && sudo mount /dev/sda1 /tmp/stick
+sudo nano /tmp/stick/2_wave_tables.scd   # make your changes and save
+sudo umount /tmp/stick

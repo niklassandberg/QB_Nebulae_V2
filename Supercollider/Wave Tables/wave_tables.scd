@@ -32,7 +32,7 @@ s.waitForBoot {
                 )
             };
             var wtScan = NebWindow.kr(0, bufs.size - 1);
-            SelectX.ar(wtScan, sigs) ! 2 * 0.1
+            SelectX.ar(wtScan, sigs) ! 2 * 0.7
         }.play;
     };
     NebInterface.ready(s);
