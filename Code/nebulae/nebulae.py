@@ -140,8 +140,9 @@ class Nebulae(object):
 
     def start(self, instr, instr_bank):
         try:
-            #somehow jack starts at startup sometimes, just to be sure...
-            self.wait_for_jack_to_die()
+            # Csound opens the card itself: no jackd (after SC/Pd, or a
+            # Nebulae that starts while one runs)
+            self.leave_jack()
             self.classlog.info("Nebulae Starting")
             if self.currentInstr != self.new_instr:
                 reset_settings_flag = True
@@ -408,6 +409,15 @@ class Nebulae(object):
     def stop_jack(self):
         os.system("systemctl stop 'jack@*.service'")
 
+    # Out of the JACK banks (start() of a Csound instrument): scsynth quits
+    # properly, then jackd goes. jackd runs without -T (it does not end with
+    # its last client), so an SC <-> Pd switch keeps it, and start_jack()
+    # restarts it only for other settings.
+    def leave_jack(self):
+        self.quit_scsynth()
+        self.stop_jack()
+        self.wait_for_jack_to_die()
+
     def wait_for_jack_to_start(self):
         try:
             count = 0
@@ -433,7 +443,7 @@ class Nebulae(object):
                 count += 1
                 if count > 10:
                     self.stop_jack()
-                    raise TimeoutError("jackd did not die within 1 second")
+                    raise TimeoutError("jackd did not die within 2 seconds")
                 time.sleep(0.2)
                 self.classlog.debug("jackd has not died yet...")
         except Exception as e:
@@ -527,6 +537,7 @@ class Nebulae(object):
             self.kernelSwitch(patch, config)
             jack = self.jackSettings(patch, config)
             self.writeBootInstr(jack)
+            self.quit_scsynth()  # an SC bank's scsynth must not stay on jackd next to Pd
             self.start_jack(jack)
             self.orc_handle.refreshFileHandler()
             fullPath = nebconfig.instrumentPath("puredata", patch)
@@ -667,7 +678,6 @@ class Nebulae(object):
         if isinstance(self.c_handle, chSC.SCControlHandler):
             self.c_handle.closeScSynthProcess()
         self.c_handle.closeSockets()
-        self.wait_for_jack_to_die()
         self.st = None
 
     def close_puredata(self):
@@ -689,8 +699,12 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in cleanup_puredata(): %s", e)
         os.system("killall pt")
-        self.stop_jack()
-        self.wait_for_jack_to_die()
+        # The PD connection (one in nebio for all handlers) still counts as
+        # connected to the old Pd: closed here, the next instrument's
+        # enterPureDataMode() connects to its Pd. Left open, a Pd -> Pd switch
+        # sent into the old socket ("Broken pipe") and the new Pd got no knobs.
+        if isinstance(self.c_handle, chPD.PDControlHandler):
+            self.c_handle.closeSockets()
         self.pt = None
 
     def loadUI(self):

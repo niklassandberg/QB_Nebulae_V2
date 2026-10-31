@@ -74,8 +74,10 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh
 # nebulae.py finds the unit running with the same settings and leaves it;
 # with other settings (instrument file changed) it restarts it. No jack line
 # (Csound uses the card itself): nothing.
+# Only when no jackd runs: startup.sh also runs when nebulae.service restarts
+# (Pi still up), and a second jackd would not get the card.
 JACK_EARLY=$(sed -n 's/^jack,\([0-9]*-[0-9]*-[0-9]*\)$/\1/p' /home/alarm/QB_Nebulae_V2/Code/config/bootinstr.txt 2>/dev/null)
-if [ -n "$JACK_EARLY" ]
+if [ -n "$JACK_EARLY" ] && ! pgrep -x jackd > /dev/null
 then
     (
         for i in $(seq 100); do [ -e /proc/asound/sndrpiproto ] && break; sleep 0.1; done

@@ -13,7 +13,7 @@ After=sound.target
 Type=simple
 # %i split at "-" into -p -n -r ($$ is a $ for the shell). Older names:
 # jack@128 gets -n3 -r48000, jack@128-3 gets -r48000.
-ExecStart=/bin/sh -c 'v=%i; IFS=-; set -- $$v; exec dbus-run-session /usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p$$1 -n$${2:-3} -s -r$${3:-48000}'
+ExecStart=/bin/sh -c 'v=%i; IFS=-; set -- $$v; exec dbus-run-session /usr/bin/jackd --timeout 2000 -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p$$1 -n$${2:-3} -s -r$${3:-48000}'
 Restart=no
 # No core dumps on the SD card: jackd aborts when it is stopped right after
 # scsynth crashed on /quit (see sclang.service); logged in the journal only.
