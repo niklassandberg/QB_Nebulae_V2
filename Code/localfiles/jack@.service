@@ -1,11 +1,13 @@
 [Unit]
-Description=JACK Audio Connection Kit
+# One unit for every JACK period: jack@128 runs jackd with -p128, jack@256
+# with -p256. nebulae.py starts it for the SC and Pd banks with the period the
+# instrument asks for ("blocksize,256" in its nebconfig, default 128) and
+# restarts jackd when the next instrument wants another one.
+# Never enabled at boot (no [Install] section on purpose).
+Description=JACK Audio Connection Kit, period %i
 After=sound.target
 
 [Service]
 Type=simple
-ExecStart=dbus-run-session /usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p128 -n3 -s -r48000
+ExecStart=dbus-run-session /usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p%i -n3 -s -r48000
 Restart=no
-
-[Install]
-WantedBy=multi-user.target

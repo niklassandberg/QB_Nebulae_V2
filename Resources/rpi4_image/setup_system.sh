@@ -95,9 +95,10 @@ mkdir -p /mnt/memory /home/alarm/instr /home/alarm/pd /home/alarm/sc /home/alarm
 chown alarm:alarm /home/alarm/instr /home/alarm/pd /home/alarm/sc /home/alarm/audio
 
 echo "== services"
-for s in nebulae sclang jack nebwifi; do
+for s in nebulae sclang jack@ nebwifi; do
     cat $LF/$s.service > /etc/systemd/system/$s.service
 done
+rm -f /etc/systemd/system/jack.service  # replaced by jack@.service
 cat $NEB/Code/web/NebFile/NebFile.service > /etc/systemd/system/NebFile.service
 systemctl daemon-reload
 systemctl enable nebulae.service >/dev/null 2>&1
@@ -105,7 +106,7 @@ systemctl enable nebulae.service >/dev/null 2>&1
 if command -v sclang >/dev/null; then systemctl enable sclang.service >/dev/null 2>&1; fi
 # Never at boot: jack is started by nebulae.py for the SC/PD banks, the access
 # point by the scripts page (1_wifi.ui -> Code/scripts/wifi.sh), NebFile by start_wifi.sh.
-systemctl disable jack.service nebwifi.service NebFile.service >/dev/null 2>&1 || true
+systemctl disable nebwifi.service NebFile.service >/dev/null 2>&1 || true
 
 echo "== Python packages for bootleds.py (leddriver.py)"
 pip install --break-system-packages --root-user-action=ignore -q \

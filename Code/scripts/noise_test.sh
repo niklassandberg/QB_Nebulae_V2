@@ -119,7 +119,7 @@ start() {
     esac
     echo "$mode" > $STATE
     echo "stopping Nebulae and audio engines"
-    systemctl stop nebulae.service sclang.service jack.service 2>/dev/null
+    systemctl stop nebulae.service sclang.service 'jack@*.service' 2>/dev/null
     pkill -x scsynth; pkill -x jackd; pkill -x pd
     # Wait until the audio chip is free: right after "stop" Nebulae may just
     # have opened it, and Csound then ended at once ("cpu", seen 1 of 2).

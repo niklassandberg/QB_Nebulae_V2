@@ -89,12 +89,18 @@ then
         systemctl --system daemon-reload
         systemctl enable sclang.service
     fi
-    if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/jack.service ]
+    # jack@.service: one unit per JACK period (jack@128, jack@256, ...),
+    # started by nebulae.py, never at boot. It replaces jack.service.
+    if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/jack@.service ]
     then
-        echo "updating /etc/systemd/system/jack.service for next boot up."
-        bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/jack.service > /etc/systemd/system/jack.service"
+        echo "updating /etc/systemd/system/jack@.service for next boot up."
+        bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/jack@.service > /etc/systemd/system/jack@.service"
+        if [ -f /etc/systemd/system/jack.service ]
+        then
+            systemctl disable jack.service
+            rm -f /etc/systemd/system/jack.service
+        fi
         systemctl --system daemon-reload
-        systemctl disable jack.service
     fi
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/nebwifi.service ]
     then

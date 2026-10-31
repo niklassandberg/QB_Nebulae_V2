@@ -10,6 +10,7 @@
 #   freeze,latching,rising   button mode and edge (controlhandler*.py)
 #   speed,rawencoder         .scd: the patch reads the encoder itself
 #   kernel,rt                rt | normal | any (kernelswitch.py)
+#   blocksize,256            .scd/.pd: JACK period (jack@.service), default 128
 #
 # Where the entries are:
 #   .instr  nebconfigbegin              .scd  /*
@@ -31,6 +32,11 @@ INSTR_DIRS = {"instr": ("/home/alarm/instr/", ".instr"),
               "puredata": ("/home/alarm/pd/", ".pd")}
 
 KERNELS = ("rt", "normal", "any")
+
+# JACK periods an instrument may ask for (frames; at 48 kHz with 3 periods
+# 128 is ~8 ms, 256 ~16 ms). Csound does not use JACK: it has ksmps/-b/-B.
+BLOCK_SIZES = (32, 64, 128, 256, 512, 1024)
+DEFAULT_BLOCK_SIZE = 128
 
 # a Pd statement: "#X text X Y nebconfig ..." up to its unescaped ";"
 PD_STATEMENT = re.compile(r"(?<!\\);[ \t]*\r?\n")
@@ -109,6 +115,21 @@ class NebConfig(object):
         returned as it is (the caller says so and treats it as any)."""
         value = self.value("kernel")
         return value.strip().lower() if value else "any"
+
+    def blockSize(self):
+        """The JACK period, DEFAULT_BLOCK_SIZE without an entry. ValueError
+        for a value not in BLOCK_SIZES (the caller says so and uses the
+        default)."""
+        value = self.value("blocksize")
+        if value is None:
+            return DEFAULT_BLOCK_SIZE
+        try:
+            size = int(value.strip())
+        except ValueError:
+            size = None
+        if size not in BLOCK_SIZES:
+            raise ValueError("blocksize %r: one of %s" % (value, BLOCK_SIZES))
+        return size
 
 
 def _blockEntries(text):

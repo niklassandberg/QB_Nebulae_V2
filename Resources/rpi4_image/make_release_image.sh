@@ -207,9 +207,11 @@ if [ -n "$FIRMWARE" ]; then
     chown -R "$UIDG" "$old"
     # As update.sh does: services and SC config from Code/localfiles.
     lf=$old/Code/localfiles
-    for s in nebulae.service sclang.service jack.service nebwifi.service; do
+    for s in nebulae.service sclang.service jack@.service nebwifi.service; do
         [ -f "$lf/$s" ] && install -m 644 "$lf/$s" "$R/etc/systemd/system/$s"
     done
+    # jack.service was replaced by jack@.service (one unit per JACK period)
+    [ -f "$lf/jack@.service" ] && rm -f "$R/etc/systemd/system/jack.service"
     [ -f "$lf/jackdrc" ] && install -m 644 "$lf/jackdrc" "$R/etc/jackdrc"
     [ -f "$lf/startup.scd" ] && mkdir -p "$R/root/.config/SuperCollider" &&
         install -m 644 "$lf/startup.scd" "$R/root/.config/SuperCollider/startup.scd"

@@ -283,13 +283,49 @@ class Nebulae(object):
     def wait_on_jack(self):
         pass #maybe take this and fill in of a old commit.
 
-    def start_jack(self):
+    # The JACK period the instrument asks for ("blocksize,256" in its
+    # nebconfig), else 128.
+    def jackPeriod(self, instr, config):
         try:
-            if os.system("pgrep jackd > /dev/null 2>&1") != 0:
-                self.classlog.debug("jackd is not running, starting service...")
-                os.system("systemctl start jack")
+            return config.blockSize()
+        except ValueError as e:
+            self.classlog.warning("%s: %s, using %d", instr, e, nebconfig.DEFAULT_BLOCK_SIZE)
+            return nebconfig.DEFAULT_BLOCK_SIZE
+
+    # The period of the running jack@<period>.service, or None.
+    def runningJackPeriod(self):
+        try:
+            out = subprocess.run(["systemctl", "list-units", "--plain", "--no-legend",
+                                  "--state=active", "jack@*.service"],
+                                 stdout=subprocess.PIPE, stderr=subprocess.DEVNULL,
+                                 universal_newlines=True).stdout
+            for line in out.splitlines():
+                unit = line.split()[0] if line.split() else ""
+                if unit.startswith("jack@") and unit.endswith(".service"):
+                    return int(unit[len("jack@"):-len(".service")])
+        except Exception as e:
+            self.classlog.error("Error in runningJackPeriod(): %s", e)
+        return None
+
+    # jackd (jack@.service) with this period. One already running with
+    # another period is stopped first: its clients (scsynth, Pd) must be gone
+    # by then.
+    def start_jack(self, period):
+        try:
+            running = self.runningJackPeriod()
+            if running == period:
+                return
+            if running is not None or os.system("pgrep jackd > /dev/null 2>&1") == 0:
+                self.classlog.info("jackd period %s -> %d: restarting jackd", running, period)
+                self.stop_jack()
+                self.wait_for_jack_to_die()
+            self.classlog.debug("starting jack@%d", period)
+            os.system("systemctl start jack@%d" % period)
         except Exception as e:
             self.classlog.error("Error in start_jack(): %s", e)
+
+    def stop_jack(self):
+        os.system("systemctl stop 'jack@*.service'")
 
     def wait_for_jack_to_start(self):
         try:
@@ -315,7 +351,7 @@ class Nebulae(object):
             ) == 0:
                 count += 1
                 if count > 10:
-                    os.system("systemctl stop jack")
+                    self.stop_jack()
                     raise TimeoutError("jackd did not die within 1 second")
                 time.sleep(0.2)
                 self.classlog.debug("jackd has not died yet...")
@@ -332,8 +368,6 @@ class Nebulae(object):
                 self.c.cleanup()
                 self.c = None
 
-            self.start_jack()
-
             self.currentInstr = patch
             self.newInstr = patch
 
@@ -347,8 +381,6 @@ class Nebulae(object):
                 fullPath = floader.copyFileInternaly(fullPath, nebconfig.instrumentDir("supercollider")) #if no new file, copy it back
             else:
                 fullPath = fullPathTmp
-                
-            self.wait_for_jack_to_start()
 
             self.orc_handle.refreshFileHandler() #also the audio files
 
@@ -357,6 +389,15 @@ class Nebulae(object):
             reuseResources = fromSC and isinstance(self.c_handle, chSC.SCControlHandler)
             scConfig = nebconfig.NebConfig.read("supercollider", patch)
             self.kernelSwitch(patch, scConfig)
+            period = self.jackPeriod(patch, scConfig)
+            if reuseResources and self.runningJackPeriod() not in (None, period):
+                # The previous patch's scsynth runs on jackd with another
+                # period: it quits, and this patch starts afresh.
+                self.classlog.info("%s wants JACK period %d: restarting scsynth", patch, period)
+                self.close_sc()
+                reuseResources = False
+            self.start_jack(period)
+            self.wait_for_jack_to_start()
             scConfigData = scConfig.asDict()
             scConfigData['output_period'] = [scConfig.outputPeriod()]
             scConfigData['holdwithtrigg_combos'] = scConfig.holdWithTriggCombos()
@@ -388,7 +429,6 @@ class Nebulae(object):
 
     def start_puredata(self, patch):
         try:
-            self.start_jack()
             self.log.spill_basic_info()
             self.c_handle = None
             self.currentInstr = patch
@@ -403,6 +443,7 @@ class Nebulae(object):
                 self.classlog.warning("No nebconfig from %s: %s", patch, e)
                 config = nebconfig.NebConfig([])
             self.kernelSwitch(patch, config)
+            self.start_jack(self.jackPeriod(patch, config))
             self.orc_handle.refreshFileHandler()
             fullPath = nebconfig.instrumentPath("puredata", patch)
             cmd = "pd -jack -rt -callback -nogui -verbose".split() if debug else "pd -jack -rt -callback -nogui".split()
@@ -564,7 +605,7 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in cleanup_puredata(): %s", e)
         os.system("killall pt")
-        os.system("systemctl stop jack")
+        self.stop_jack()
         self.wait_for_jack_to_die()
         self.pt = None
 
