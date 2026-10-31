@@ -6,6 +6,7 @@
 #include <time.h>
 #include <unistd.h>
 
+#include <algorithm>
 #include <chrono>
 #include <cmath>
 #include <cstring>
@@ -132,8 +133,10 @@ bool Pca9685::open(const char *bus, int address, double pwmFreqHz) {
 // other level every PWM period (250 Hz edges on every "off" LED).
 // stagger (quiet mode): a dimmed LED is high for v of the 4096 ticks as
 // always, but every channel starts at its own point of the period (ON =
-// channel * 256; the chip wraps OFF past 4095), so the 16 channels do not
-// all switch at the same moment. Otherwise all start at 0.
+// channel * 256), so the 16 channels do not all switch at the same moment.
+// Otherwise all start at 0. The start is moved back so that ON + v stays
+// inside the period: a pulse that wrapped past 4095 (OFF < ON) showed fully
+// on, a dim colour turned white and flashed while it changed (2026-10-31).
 bool Pca9685::writeRange(const int *offValues, int first, int last, bool stagger) {
     if (fd_ < 0) return false;
     uint8_t buf[1 + 16 * 4];
@@ -141,8 +144,8 @@ bool Pca9685::writeRange(const int *offValues, int first, int last, bool stagger
     buf[n++] = static_cast<uint8_t>(kLed0OnL + 4 * first);
     for (int ch = first; ch <= last; ++ch) {
         int v = offValues[ch];
-        int on = stagger ? ch * 256 : 0;
-        int off = (on + v) & 0x0FFF;
+        int on = stagger ? std::min(ch * 256, std::max(0, kLedOff - v)) : 0;
+        int off = on + v;
         uint8_t onL = static_cast<uint8_t>(on & 0xFF), onH = static_cast<uint8_t>((on >> 8) & 0x0F);
         uint8_t offL = static_cast<uint8_t>(off & 0xFF), offH = static_cast<uint8_t>((off >> 8) & 0x0F);
         if (v >= kLedOff) { onL = 0; onH = kFullBit; offL = 0; offH = 0; }  // output always high: LED off
@@ -406,20 +409,26 @@ void Leds::run() {
             writtenValid_ = false;
         }
 
-        int first = -1, last = -1;
-        for (int ch = 0; ch < 16; ++ch) {
-            if (!writtenValid_ || out[ch] != written_[ch]) {
-                if (first < 0) first = ch;
-                last = ch;
-            }
-        }
+        // Only the channels that changed are written, each run of neighbours
+        // in one transfer: an LED that stands still is never touched, and
+        // there is less I2C traffic.
         // No sleep at dim 0: in sleep the PCA9685 drives its outputs low, and
         // the LEDs are active low, so they all lit up (tested 2026-10-21).
         // Dim 0 = all outputs static high with the full bit (writeRange).
-        if (first >= 0 && pca_.writeRange(out, first, last, staggered_)) {
-            std::memcpy(written_, out, sizeof(written_));
-            writtenValid_ = true;
+        bool ok = true;
+        for (int ch = 0; ch < 16;) {
+            if (writtenValid_ && out[ch] == written_[ch]) {
+                ++ch;
+                continue;
+            }
+            int first = ch;
+            while (ch < 16 && (!writtenValid_ || out[ch] != written_[ch])) ++ch;
+            if (pca_.writeRange(out, first, ch - 1, staggered_))
+                std::memcpy(written_ + first, out + first, (ch - first) * sizeof(int));
+            else
+                ok = false;
         }
+        if (ok) writtenValid_ = true;
     }
 }
 
