@@ -49,7 +49,10 @@ normal one:
 - `.instr`, `.scd`: `kernel,rt` in the nebconfig block
 - `.pd`: a comment box with the text `nebconfig kernel,rt`
   (all instrument settings are read by `Code/nebulae/nebconfig.py`)
-- values `rt`, `normal`, `any`; no line = `any` (never a restart)
+- values `rt`, `normal`, `any`; no line (or an unknown value) = `normal`:
+  an instrument that does not ask for RT plays on the normal kernel, so
+  loading it while RT runs restarts the Pi back. `any` = either kernel, never
+  a restart (only when the line says so).
 
 The switch writes and removes only its own block at the end of
 `/boot/nebulae-image.txt`: `[all]`, a comment, `arm_64bit=1` and

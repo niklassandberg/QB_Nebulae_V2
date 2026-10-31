@@ -11,9 +11,10 @@
 #   a comment box "nebconfig kernel,rt" in a .pd)
 # Values:
 #   rt      the RT kernel; restarts into it when it is not running
-#   normal  the normal kernel; restarts back when the RT kernel is running
-#   any     either one, never a restart. Also when there is no line: old
-#           instruments never cause a restart.
+#   normal  the normal kernel; restarts back when the RT kernel is running.
+#           Also when there is no line (or an unknown value): an instrument
+#           that does not ask for RT plays on the normal kernel.
+#   any     either one, never a restart (only when the line says so)
 #
 # The normal kernel is whatever the card boots without the switch's line
 # (stock kernel8.img, or a kernel= line set by hand). The switch owns one
@@ -145,12 +146,12 @@ class KernelSwitch(object):
         self.log = ClassLogger.loggerSetup(self)
 
     def wanted(self, instr, config):
-        """rt | normal | any from the instrument's NebConfig; an unknown
-        value is any."""
+        """rt | normal | any from the instrument's NebConfig (normal without
+        an entry); an unknown value is normal."""
         value = config.kernel()
         if value not in nebconfig.KERNELS:
-            self.log.warning("%s: unknown kernel value '%s' (rt, normal, any): any", instr, value)
-            return "any"
+            self.log.warning("%s: unknown kernel value '%s' (rt, normal, any): normal", instr, value)
+            return "normal"
         return value
 
     def switchFor(self, instr, config):

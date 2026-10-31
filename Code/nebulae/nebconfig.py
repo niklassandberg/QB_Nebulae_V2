@@ -9,7 +9,7 @@
 #   -B,2048  -b,512  sr,48000
 #   freeze,latching,rising   button mode and edge (controlhandler*.py)
 #   speed,rawencoder         .scd: the patch reads the encoder itself
-#   kernel,rt                rt | normal | any (kernelswitch.py)
+#   kernel,rt                rt | normal | any, default normal (kernelswitch.py)
 #   blocksize,256            .scd/.pd: JACK period (jack@.service), default 128
 #
 # Where the entries are:
@@ -111,10 +111,10 @@ class NebConfig(object):
         return []
 
     def kernel(self):
-        """rt | normal | any; any without an entry. An unknown value is
-        returned as it is (the caller says so and treats it as any)."""
+        """rt | normal | any; normal without an entry. An unknown value is
+        returned as it is (the caller says so and treats it as normal)."""
         value = self.value("kernel")
-        return value.strip().lower() if value else "any"
+        return value.strip().lower() if value else "normal"
 
     def blockSize(self):
         """The JACK period, DEFAULT_BLOCK_SIZE without an entry. ValueError
