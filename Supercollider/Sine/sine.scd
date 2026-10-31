@@ -1,3 +1,9 @@
+/*
+nebconfigbegin
+kernel,rt
+blocksize,64
+nebconfigend
+*/
 s.waitForBoot {
 	NebInterface.init(s);
 	NebInterface.synthDef(\sineSynth, {
