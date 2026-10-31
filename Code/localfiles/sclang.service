@@ -13,6 +13,12 @@ Restart=always
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=sclang
+# No core dumps (sclang and scsynth, which inherits it). scsynth crashes on
+# /quit (SC 3.14: plugins unloaded while its audio thread still runs), and
+# writing its core to the SD card took ~25 s: a JACK period change made the
+# next instrument give up waiting for the synth (2026-10-31). The crash is
+# still logged in the journal, just without a dump.
+LimitCORE=0
 
 [Install]
 WantedBy=multi-user.target

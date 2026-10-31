@@ -11,3 +11,6 @@ After=sound.target
 Type=simple
 ExecStart=dbus-run-session /usr/bin/jackd --timeout 2000 -T -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p%i -n3 -s -r48000
 Restart=no
+# No core dumps on the SD card: jackd aborts when it is stopped right after
+# scsynth crashed on /quit (see sclang.service); logged in the journal only.
+LimitCORE=0
