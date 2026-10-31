@@ -4,6 +4,7 @@
 #include <mutex>
 #include <string>
 
+#include "cardclip.h"
 #include "inputs.h"
 #include "leds.h"
 #include "links.h"
@@ -25,6 +26,7 @@ const char *lastError() { return errorText; }
 
 }  // namespace nebio
 
+using nebio::CardClip;
 using nebio::Inputs;
 using nebio::Leds;
 using nebio::PdLink;
@@ -120,7 +122,10 @@ void nebio_sc_set_synth_down(void) {
 }
 int nebio_sc_handshake(void) { return ScLink::instance().handshake; }
 void nebio_sc_zero_handshake(void) { ScLink::instance().handshake = false; }
-int nebio_sc_clip_count(void) { return ScLink::instance().clipCount; }
+
+// ---- Codec card ------------------------------------------------------------
+
+int nebio_card_clip_count(void) { return CardClip::instance().count(); }
 
 // ---- Pure Data -------------------------------------------------------------
 

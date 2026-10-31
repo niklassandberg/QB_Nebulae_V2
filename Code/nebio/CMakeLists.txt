@@ -15,6 +15,9 @@ find_package(Threads REQUIRED)
 find_package(PkgConfig REQUIRED)
 pkg_check_modules(GPIOD REQUIRED IMPORTED_TARGET libgpiod>=2.0)
 pkg_check_modules(LIBLO REQUIRED IMPORTED_TARGET liblo)
+# Optional: the card driver's input clip counter (src/cardclip.cpp). Without
+# alsa-lib nebio still builds, without the input clip warning.
+pkg_check_modules(ALSA IMPORTED_TARGET alsa)
 
 add_library(nebio SHARED
   src/nebio.cpp
@@ -24,10 +27,15 @@ add_library(nebio SHARED
   src/inputs.cpp
   src/leds.cpp
   src/links.cpp
+  src/cardclip.cpp
 )
 
 target_include_directories(nebio PUBLIC include)
 target_link_libraries(nebio PRIVATE PkgConfig::GPIOD PkgConfig::LIBLO Threads::Threads)
+if(ALSA_FOUND)
+  target_link_libraries(nebio PRIVATE PkgConfig::ALSA)
+  target_compile_definitions(nebio PRIVATE NEBIO_HAVE_ALSA)
+endif()
 target_compile_options(nebio PRIVATE -Wall -Wextra)
 set_target_properties(nebio PROPERTIES
   CXX_VISIBILITY_PRESET hidden

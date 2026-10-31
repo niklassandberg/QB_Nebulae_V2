@@ -1,6 +1,7 @@
 #!/bin/bash
 # Only the codec card driver (snd-soc-rpi-proto) with
-# 0002-rpi-proto-bclk-ratio-per-rate.patch, for a kernel that is already on
+# 0002-rpi-proto-bclk-ratio-per-rate.patch and
+# 0003-rpi-proto-input-clip-count.patch, for a kernel that is already on
 # the card: the stock linux-rpi or a Nebulae kernel. A minute instead of a
 # kernel build. Needs the source tree of build_kernel.sh (same commit as the
 # stock kernel) and the kernel's config:
@@ -27,6 +28,8 @@ S=$(ls -d /root/kernel/work/linux-*/ | head -1)
 cd "$S"
 grep -q 'MODULE_VERSION("nebulae-rates-1")' sound/soc/bcm/rpi-proto.c \
     || patch -p1 -i "$HERE/0002-rpi-proto-bclk-ratio-per-rate.patch"
+grep -q '"Input Clip Count"' sound/soc/bcm/rpi-proto.c \
+    || patch -p1 -i "$HERE/0003-rpi-proto-input-clip-count.patch"
 cp "$CONFIG" .config
 echo "-$NAME" > localversion.20-pkgname
 make -s olddefconfig

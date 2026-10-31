@@ -130,3 +130,22 @@ have that version and the same vermagic (others are skipped and keep their
 driver: `-r` snaps to 48000). For a new kernel version: build it
 (`build_kernel.sh`), then `build_proto_modules.sh` on the build Pi (stock +
 both Nebulae kernels) and copy its output folders into `Code/kernel_modules/`.
+
+## Codec card driver: input clip counter (`0003-rpi-proto-input-clip-count.patch`)
+The driver counts input clipping itself, the same for Csound, SuperCollider
+and Pd: while the capture stream is prepared a timer (three looks per
+buffer) reads the new samples in the DMA buffer (read only, no copy, no
+delay) and counts per channel the samples at or above `clip_permille`
+(module parameter, default 999) of full scale. Userspace reads the counts and
+shows a clip when they change:
+```
+amixer -D hw:sndrpiproto cget name='Input Clip Count'     # values=left,right
+cat /sys/module/snd_soc_rpi_proto/parameters/clip_permille
+```
+One threshold for every device and input gain, because the ADC clips first:
+on a Nebulae (2026-10-31) a signal 1.65 x full scale at 0 dB gain stayed
+clean at every lower gain step. A test: `echo 0 >
+/sys/module/snd_soc_rpi_proto/parameters/clip_permille` (as root) counts
+every sample, so the counts rise by the sample rate per second (48000
+measured), then back to 999. `build_kernel.sh` and `build_proto_module.sh`
+apply it after 0002; `MODULE_VERSION` stays `nebulae-rates-1`.

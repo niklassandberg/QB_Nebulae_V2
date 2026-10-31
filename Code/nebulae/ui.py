@@ -245,9 +245,9 @@ class UserInterface(object):
         if self.mode == "secondary controls":
             self.showInputClip()
     
-    # Follows the input clip count of the engine (every update, so a clip from
-    # long ago never shows when secondary controls is entered). A new
-    # controlhandler (instr load) starts its own count: that is no clip.
+    # Follows the input clip count of the card driver (every update, so a clip
+    # from long ago never shows when secondary controls is entered). A new
+    # controlhandler (instr load) only takes the count over: that is no clip.
     def trackInputClip(self):
         count = self.controlhandler.inputClipCount()
         if self.clip_handler is not self.controlhandler:

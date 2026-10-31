@@ -56,6 +56,8 @@ patch -p1 -i "$HERE/alarm/0001-Make-proc-cpuinfo-consistent-on-arm64-and-arm.pat
 # Nebulae's own: the codec card driver runs every sample rate right
 # (build_proto_module.sh builds only this module, e.g. for the stock kernel)
 patch -p1 -i "$HERE/0002-rpi-proto-bclk-ratio-per-rate.patch"
+# and counts input clipping for every engine (ALSA control "Input Clip Count")
+patch -p1 -i "$HERE/0003-rpi-proto-input-clip-count.patch"
 echo "-$KREL" > localversion.10-pkgrel
 echo "-$NAME" > localversion.20-pkgname
 sed -i '/^CONFIG_LOCALVERSION=/d' arch/arm64/configs/bcm2711_defconfig

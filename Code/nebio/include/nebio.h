@@ -158,9 +158,14 @@ NEBIO_API void nebio_sc_set_synth_down(void);   /* also clears the cache */
 /* Set by "/neb/ready" from sclang. */
 NEBIO_API int  nebio_sc_handshake(void);
 NEBIO_API void nebio_sc_zero_handshake(void);
-/* Number of "/sc/clip" from sclang (the audio input clipped). Only changes
- * matter; it is never reset. */
-NEBIO_API int  nebio_sc_clip_count(void);
+
+/* ---- Codec card ---------------------------------------------------------- */
+
+/* Clipped input samples (both channels) counted by the card driver, the same
+ * for every engine. Only changes matter; wraps from INT_MAX to 0. -1 while
+ * the card driver has no counter (older driver, nebio without alsa-lib):
+ * then no clip is shown. */
+NEBIO_API int  nebio_card_clip_count(void);
 
 /* ---- Pure Data (TCP text) ---------------------------------------------- */
 

@@ -1,0 +1,223 @@
+rpi-proto: input clip counter as an ALSA control
+
+Nebulae shows input clipping (the encoder LEDs red in secondary controls).
+Until now every engine measured it itself: a synth in SuperCollider
+(NebInterface), an instrument in Csound, nothing in Pd. Here the card
+driver does it once for all of them: while the capture stream is prepared
+a timer (three looks per buffer) reads the samples the DMA has written
+since its last look, read only, and counts per channel the samples at or
+above clip_permille (module parameter, default 999) of full scale.
+Userspace reads the counts from the ALSA control "Input Clip Count"
+(2 values, left and right, read only) and shows a clip when they change:
+  amixer -D hw:sndrpiproto cget name='Input Clip Count'
+
+Full scale is the one threshold for every device and input gain: the ADC
+clips first (measured on a Nebulae, 2026-10-31: a signal 1.65 x full scale
+at 0 dB gain stayed clean at every lower gain step, so nothing clips before
+the gain stage). Tested on a Pi 4 (stock kernel): threshold 0 counts exactly
+48000 samples per second and channel (no sample missed, none twice).
+
+MODULE_VERSION stays nebulae-rates-1 (nebulae.py compares it exactly); the
+control itself shows that the counter is there.
+
+--- a/sound/soc/bcm/rpi-proto.c
++++ b/sound/soc/bcm/rpi-proto.c
+@@ -12,6 +12,8 @@
+ 
+ #include <linux/module.h>
+ #include <linux/platform_device.h>
++#include <linux/hrtimer.h>
++#include <linux/atomic.h>
+ 
+ #include <sound/core.h>
+ #include <sound/pcm.h>
+@@ -20,6 +22,137 @@
+ 
+ #include "../codecs/wm8731.h"
+ 
++/*
++ * Nebulae: input clip counter, the same for every program that records
++ * (Csound, JACK for SuperCollider and Pd). While the capture stream is
++ * prepared a timer reads the samples the DMA has written since its last
++ * look (read only: no copy, no delay, the samples stay as they are) and
++ * counts per channel the samples at or above clip_permille of full scale.
++ * The ADC clips first at any input gain (measured on a Nebulae: a signal
++ * 1.65 x full scale at 0 dB stayed clean before the gain stage), so full
++ * scale is the one threshold for every device and gain. Userspace reads
++ * the counts (ALSA control "Input Clip Count", 2 values: left, right) and
++ * shows a clip when they change. Nebulae, 2026-10-31.
++ */
++static unsigned int clip_permille = 999;
++module_param(clip_permille, uint, 0644);
++MODULE_PARM_DESC(clip_permille, "Input clip threshold, 1/1000 of full scale (default 999)");
++
++static struct rpi_proto_clip {
++	struct hrtimer timer;
++	struct snd_pcm_substream *substream;	/* capture, while the timer runs */
++	snd_pcm_uframes_t pos;			/* hw_ptr read up to */
++	ktime_t period;
++	atomic_t count[2];
++} clip;
++
++/* The samples since the last look, at most one buffer (older ones are
++ * written over already). hw_ptr moves with every DMA period. */
++static void rpi_proto_clip_scan(struct snd_pcm_runtime *rt)
++{
++	snd_pcm_uframes_t hw = READ_ONCE(rt->status->hw_ptr);
++	snd_pcm_uframes_t bs = rt->buffer_size;
++	snd_pcm_uframes_t n = hw >= clip.pos ? hw - clip.pos : hw + rt->boundary - clip.pos;
++	snd_pcm_uframes_t off, i;
++	unsigned int channels = min(rt->channels, 2U), c;
++	unsigned int hits[2] = { 0, 0 };
++	s64 limit;
++
++	clip.pos = hw;
++	if (n > bs)
++		n = bs;
++	off = (hw % bs + bs - n) % bs;
++	limit = (s64)(rt->format == SNDRV_PCM_FORMAT_S16_LE ? S16_MAX : S32_MAX)
++		* clip_permille / 1000;
++	for (i = 0; i < n; i++) {
++		const u8 *frame = rt->dma_area + frames_to_bytes(rt, off);
++
++		for (c = 0; c < channels; c++) {
++			s32 v;
++
++			if (rt->format == SNDRV_PCM_FORMAT_S16_LE)
++				v = ((const s16 *)frame)[c];
++			else if (rt->format == SNDRV_PCM_FORMAT_S24_LE)
++				v = (s32)(((const u32 *)frame)[c] << 8);	/* 24 bits in 32, low */
++			else
++				v = ((const s32 *)frame)[c];
++			if (v >= limit || v <= -limit)
++				hits[c]++;
++		}
++		if (++off == bs)
++			off = 0;
++	}
++	for (c = 0; c < channels; c++)
++		if (hits[c])
++			atomic_add(hits[c], &clip.count[c]);
++}
++
++static enum hrtimer_restart rpi_proto_clip_tick(struct hrtimer *t)
++{
++	rpi_proto_clip_scan(clip.substream->runtime);
++	hrtimer_forward_now(t, clip.period);
++	return HRTIMER_RESTART;
++}
++
++/* Process context only (prepare, hw_free, shutdown): hrtimer_cancel waits
++ * for a running tick, so the runtime is never read after it is gone. */
++static void rpi_proto_clip_stop(void)
++{
++	if (clip.substream) {
++		hrtimer_cancel(&clip.timer);
++		clip.substream = NULL;
++	}
++}
++
++static void rpi_proto_clip_start(struct snd_pcm_substream *substream)
++{
++	struct snd_pcm_runtime *rt = substream->runtime;
++	u64 ns;
++
++	rpi_proto_clip_stop();	/* prepared again (e.g. after an xrun): hw_ptr is 0 again */
++	if (rt->format != SNDRV_PCM_FORMAT_S16_LE && rt->format != SNDRV_PCM_FORMAT_S24_LE
++	    && rt->format != SNDRV_PCM_FORMAT_S32_LE)
++		return;
++	if (!rt->buffer_size || !rt->rate || !rt->dma_area)
++		return;
++	/* Three looks per buffer, so nothing is written over before it is
++	 * read: 2.7 ms with JACK -p128 -n3 at 48 kHz, 0.25 ms at least. */
++	ns = div_u64((u64)rt->buffer_size * NSEC_PER_SEC, rt->rate * 3);
++	clip.period = ns_to_ktime(clamp_t(u64, ns, 250 * NSEC_PER_USEC, 5 * NSEC_PER_MSEC));
++	clip.pos = rt->status->hw_ptr;
++	clip.substream = substream;
++	hrtimer_start(&clip.timer, clip.period, HRTIMER_MODE_REL_SOFT);
++}
++
++static int rpi_proto_clip_info(struct snd_kcontrol *kcontrol,
++			       struct snd_ctl_elem_info *uinfo)
++{
++	uinfo->type = SNDRV_CTL_ELEM_TYPE_INTEGER;
++	uinfo->count = 2;
++	uinfo->value.integer.min = 0;
++	uinfo->value.integer.max = INT_MAX;
++	return 0;
++}
++
++/* Counts wrap from INT_MAX to 0: a reader only looks for a change. */
++static int rpi_proto_clip_get(struct snd_kcontrol *kcontrol,
++			      struct snd_ctl_elem_value *ucontrol)
++{
++	ucontrol->value.integer.value[0] = atomic_read(&clip.count[0]) & INT_MAX;
++	ucontrol->value.integer.value[1] = atomic_read(&clip.count[1]) & INT_MAX;
++	return 0;
++}
++
++static const struct snd_kcontrol_new snd_rpi_proto_controls[] = {
++	{
++		.iface	= SNDRV_CTL_ELEM_IFACE_MIXER,
++		.name	= "Input Clip Count",
++		.access	= SNDRV_CTL_ELEM_ACCESS_READ | SNDRV_CTL_ELEM_ACCESS_VOLATILE,
++		.info	= rpi_proto_clip_info,
++		.get	= rpi_proto_clip_get,
++	},
++};
++
+ static const unsigned int wm8731_rates_12288000[] = {
+ 	8000, 32000, 48000, 96000,
+ };
+@@ -74,10 +207,34 @@
+ 	return 0;
+ }
+ 
++static int snd_rpi_proto_prepare(struct snd_pcm_substream *substream)
++{
++	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE)
++		rpi_proto_clip_start(substream);
++	return 0;
++}
++
++/* Before the buffer can change (hw_free) or the runtime goes (shutdown). */
++static int snd_rpi_proto_hw_free(struct snd_pcm_substream *substream)
++{
++	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE)
++		rpi_proto_clip_stop();
++	return 0;
++}
++
++static void snd_rpi_proto_shutdown(struct snd_pcm_substream *substream)
++{
++	if (substream->stream == SNDRV_PCM_STREAM_CAPTURE)
++		rpi_proto_clip_stop();
++}
++
+ /* machine stream operations */
+ static struct snd_soc_ops snd_rpi_proto_ops = {
+ 	.startup = snd_rpi_proto_startup,
+ 	.hw_params = snd_rpi_proto_hw_params,
++	.prepare = snd_rpi_proto_prepare,
++	.hw_free = snd_rpi_proto_hw_free,
++	.shutdown = snd_rpi_proto_shutdown,
+ };
+ 
+ SND_SOC_DAILINK_DEFS(rpi_proto,
+@@ -103,6 +260,8 @@
+ 	.owner		= THIS_MODULE,
+ 	.dai_link	= snd_rpi_proto_dai,
+ 	.num_links	= ARRAY_SIZE(snd_rpi_proto_dai),
++	.controls	= snd_rpi_proto_controls,
++	.num_controls	= ARRAY_SIZE(snd_rpi_proto_controls),
+ };
+ 
+ static int snd_rpi_proto_probe(struct platform_device *pdev)
+@@ -110,6 +269,7 @@
+ 	int ret = 0;
+ 
+ 	snd_rpi_proto.dev = &pdev->dev;
++	hrtimer_setup(&clip.timer, rpi_proto_clip_tick, CLOCK_MONOTONIC, HRTIMER_MODE_REL_SOFT);
+ 
+ 	if (pdev->dev.of_node) {
+ 		struct device_node *i2s_node;
