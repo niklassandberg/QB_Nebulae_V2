@@ -67,6 +67,23 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/enable_inputs.sh
 ) &
 
+# JACK early: the boot instrument's JACK settings ("jack,64-3-48000" in
+# bootinstr.txt, period-periods-rate, written by nebulae.py for the SC and Pd
+# banks) start jackd as soon as the card is there, and sclang (startup.scd)
+# boots scsynth on it before Nebulae asks for the patch (~1 s sooner sound).
+# nebulae.py finds the unit running with the same settings and leaves it;
+# with other settings (instrument file changed) it restarts it. No jack line
+# (Csound uses the card itself): nothing.
+JACK_EARLY=$(sed -n 's/^jack,\([0-9]*-[0-9]*-[0-9]*\)$/\1/p' /home/alarm/QB_Nebulae_V2/Code/config/bootinstr.txt 2>/dev/null)
+if [ -n "$JACK_EARLY" ]
+then
+    (
+        for i in $(seq 100); do [ -e /proc/asound/sndrpiproto ] && break; sleep 0.1; done
+        echo "starting jack@$JACK_EARLY early (boot instrument)"
+        systemctl start "jack@$JACK_EARLY.service"
+    ) &
+fi
+
 if ! cmp -s /home/alarm/QB_Nebulae_V2/Code/localfiles/environment /etc/environment
 then
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw

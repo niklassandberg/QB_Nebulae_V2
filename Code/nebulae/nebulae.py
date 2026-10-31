@@ -10,6 +10,8 @@ import nebconfig
 import ui
 import fileloader
 import time
+import socket
+import struct
 import logger
 import neb_globals
 import multiprocessing
@@ -258,16 +260,31 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in cleanup(): %s", e)
 
-    def writeBootInstr(self):
+    # bootinstr.txt: the instrument the next boot starts, and for the SC/Pd
+    # banks its JACK settings once they are known (start_supercollider,
+    # start_puredata), as the jack@ unit is named:
+    #   bank,supercollider
+    #   instr,1_sine
+    #   jack,64-3-48000        (period-periods-rate)
+    # startup.sh starts jackd with it as soon as the card is there, and
+    # sclang (startup.scd) boots scsynth on it, before Nebulae asks for the
+    # patch. No jack line (Csound, or not known yet): nothing starts early.
+    def writeBootInstr(self, jack=None):
         try:
+            text = 'bank,' + self.new_bank + '\n' + 'instr,' + self.new_instr + '\n'
+            if jack is not None:
+                text += 'jack,%d-%d-%d\n' % jack
+            try:
+                with open(self.instr_cfg) as f:
+                    if f.read() == text:
+                        return  # unchanged: no write on the SD card
+            except OSError:
+                pass
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
             with open(self.instr_cfg, 'w') as f:
-                self.classlog.debug("bank: %s, instr: %s",self.new_bank,self.new_instr)
-                bankstr = 'bank,'+self.new_bank
-                instrstr = 'instr,'+self.new_instr
-                f.write(bankstr + '\n')
-                f.write(instrstr + '\n')
+                self.classlog.debug("bootinstr: %s", text.replace('\n', ' '))
+                f.write(text)
                 #TODO: uncomment, maybe dead code. Do testing and see what happens. If working, remove. If now uncomment.
                 #for line in f:
                 #    templist = line.strip().split(',')
@@ -283,17 +300,53 @@ class Nebulae(object):
     def wait_on_jack(self):
         pass #maybe take this and fill in of a old commit.
 
-    # The JACK period the instrument asks for ("blocksize,256" in its
-    # nebconfig), else 128.
-    def jackPeriod(self, instr, config):
-        try:
-            return config.blockSize()
-        except ValueError as e:
-            self.classlog.warning("%s: %s, using %d", instr, e, nebconfig.DEFAULT_BLOCK_SIZE)
-            return nebconfig.DEFAULT_BLOCK_SIZE
+    # Sample rates the codec card really runs. The WM8731 has a 12.288 MHz
+    # crystal (no 44100). The stock card driver (snd-soc-rpi-proto) runs only
+    # 48000 right: it accepts others, but plays them at another speed. Our
+    # patched one (Resources/kernel/0002-rpi-proto-bclk-ratio-per-rate.patch)
+    # runs all four and says so in /sys/module/snd_soc_rpi_proto/version.
+    PROTO_VERSION_FILE = "/sys/module/snd_soc_rpi_proto/version"
+    PROTO_RATES = (8000, 32000, 48000, 96000)
 
-    # The period of the running jack@<period>.service, or None.
-    def runningJackPeriod(self):
+    def jackRates(self):
+        try:
+            with open(self.PROTO_VERSION_FILE) as f:
+                if f.read().strip() == "nebulae-rates-1":
+                    return self.PROTO_RATES
+        except OSError:
+            pass
+        return (nebconfig.DEFAULT_SAMPLE_RATE,)
+
+    # The JACK settings the instrument asks for in its nebconfig, as
+    # (period, periods, sample rate): "blocksize,256", "-n,3", "-r,48000";
+    # each one missing or wrong is its default (128, 3, 48000). The rate is
+    # snapped to the nearest one the card runs (a tie: the higher one).
+    def jackSettings(self, instr, config):
+        settings = []
+        for read, default in ((config.blockSize, nebconfig.DEFAULT_BLOCK_SIZE),
+                              (config.nPeriods, nebconfig.DEFAULT_NPERIODS),
+                              (config.sampleRate, nebconfig.DEFAULT_SAMPLE_RATE)):
+            try:
+                settings.append(read())
+            except ValueError as e:
+                self.classlog.warning("%s: %s, using %d", instr, e, default)
+                settings.append(default)
+        rates = self.jackRates()
+        wished = settings[2]
+        settings[2] = min(rates, key=lambda r: (abs(r - wished), -r))
+        if settings[2] != wished:
+            self.classlog.warning("%s: -r %d is not possible on this card (%s): using %d",
+                                  instr, wished, ", ".join(str(r) for r in rates), settings[2])
+        return tuple(settings)
+
+    # The unit of these settings: jack@<period>-<periods>-<rate>.service.
+    @staticmethod
+    def jackUnit(settings):
+        return "jack@%d-%d-%d.service" % settings
+
+    # The settings of the running jack@....service, or None. Older names:
+    # jack@128 has -n3 -r48000, jack@128-3 has -r48000.
+    def runningJack(self):
         try:
             out = subprocess.run(["systemctl", "list-units", "--plain", "--no-legend",
                                   "--state=active", "jack@*.service"],
@@ -302,27 +355,55 @@ class Nebulae(object):
             for line in out.splitlines():
                 unit = line.split()[0] if line.split() else ""
                 if unit.startswith("jack@") and unit.endswith(".service"):
-                    return int(unit[len("jack@"):-len(".service")])
+                    values = [int(v) for v in unit[len("jack@"):-len(".service")].split("-")]
+                    defaults = [None, nebconfig.DEFAULT_NPERIODS, nebconfig.DEFAULT_SAMPLE_RATE]
+                    return tuple(values[:3] + defaults[len(values):])
         except Exception as e:
-            self.classlog.error("Error in runningJackPeriod(): %s", e)
+            self.classlog.error("Error in runningJack(): %s", e)
         return None
 
-    # jackd (jack@.service) with this period. One already running with
-    # another period is stopped first: its clients (scsynth, Pd) must be gone
+    # jackd (jack@.service) with these settings. One already running with
+    # other settings is stopped first: its clients (scsynth, Pd) must be gone
     # by then.
-    def start_jack(self, period):
+    def start_jack(self, settings):
         try:
-            running = self.runningJackPeriod()
-            if running == period:
+            running = self.runningJack()
+            if running == settings:
                 return
             if running is not None or os.system("pgrep jackd > /dev/null 2>&1") == 0:
-                self.classlog.info("jackd period %s -> %d: restarting jackd", running, period)
+                self.classlog.info("jackd %s -> %s: restarting jackd",
+                                   self.jackUnit(running) if running else "running", self.jackUnit(settings))
+                self.quit_scsynth()
                 self.stop_jack()
                 self.wait_for_jack_to_die()
-            self.classlog.debug("starting jack@%d", period)
-            os.system("systemctl start jack@%d" % period)
+            self.classlog.debug("starting %s", self.jackUnit(settings))
+            os.system("systemctl start %s" % self.jackUnit(settings))
         except Exception as e:
             self.classlog.error("Error in start_jack(): %s", e)
+
+    # A scsynth still on jackd must quit before jackd restarts: killed by
+    # jackd, sclang does not boot a new server and the next SC instrument
+    # stays silent. An instrument switch quits it already (close_sc); this is
+    # for a Nebulae that starts while jackd runs with other settings (restart
+    # of nebulae.service). Same message as close_sc, without the SC handle:
+    # OSC /neb/quit 0 to sclang (NebInterface.sc).
+    def quit_scsynth(self):
+        try:
+            if subprocess.call(["pgrep", "-x", "scsynth"], stdout=subprocess.DEVNULL) != 0:
+                return
+            self.classlog.info("scsynth still runs on jackd: asking sclang to quit it")
+            address = b"/neb/quit\0\0\0"            # OSC string, padded to 4
+            message = address + b",i\0\0" + struct.pack(">i", 0)
+            sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+            sock.sendto(message, ("127.0.0.1", 3010))
+            sock.close()
+            for _ in range(50):
+                if subprocess.call(["pgrep", "-x", "scsynth"], stdout=subprocess.DEVNULL) != 0:
+                    return
+                time.sleep(0.1)
+            self.classlog.warning("scsynth did not quit within 5 s")
+        except Exception as e:
+            self.classlog.error("Error in quit_scsynth(): %s", e)
 
     def stop_jack(self):
         os.system("systemctl stop 'jack@*.service'")
@@ -389,14 +470,15 @@ class Nebulae(object):
             reuseResources = fromSC and isinstance(self.c_handle, chSC.SCControlHandler)
             scConfig = nebconfig.NebConfig.read("supercollider", patch)
             self.kernelSwitch(patch, scConfig)
-            period = self.jackPeriod(patch, scConfig)
-            if reuseResources and self.runningJackPeriod() not in (None, period):
-                # The previous patch's scsynth runs on jackd with another
-                # period: it quits, and this patch starts afresh.
-                self.classlog.info("%s wants JACK period %d: restarting scsynth", patch, period)
+            jack = self.jackSettings(patch, scConfig)
+            if reuseResources and self.runningJack() not in (None, jack):
+                # The previous patch's scsynth runs on jackd with other
+                # settings: it quits, and this patch starts afresh.
+                self.classlog.info("%s wants %s: restarting scsynth", patch, self.jackUnit(jack))
                 self.close_sc()
                 reuseResources = False
-            self.start_jack(period)
+            self.writeBootInstr(jack)
+            self.start_jack(jack)
             self.wait_for_jack_to_start()
             scConfigData = scConfig.asDict()
             scConfigData['output_period'] = [scConfig.outputPeriod()]
@@ -443,7 +525,9 @@ class Nebulae(object):
                 self.classlog.warning("No nebconfig from %s: %s", patch, e)
                 config = nebconfig.NebConfig([])
             self.kernelSwitch(patch, config)
-            self.start_jack(self.jackPeriod(patch, config))
+            jack = self.jackSettings(patch, config)
+            self.writeBootInstr(jack)
+            self.start_jack(jack)
             self.orc_handle.refreshFileHandler()
             fullPath = nebconfig.instrumentPath("puredata", patch)
             cmd = "pd -jack -rt -callback -nogui -verbose".split() if debug else "pd -jack -rt -callback -nogui".split()

@@ -1,6 +1,18 @@
 [Unit]
 Description=SuperCollider Language Server
-After=network.target sound.target
+# Early, like nebulae.service: sclang (class library ~1.4 s + startup.scd)
+# was the slowest step to sound in the SC bank, and it waited for
+# basic.target/sound.target (D-Bus, ALSA mixer restore) that it does not use:
+# scsynth reaches the card through jackd, OSC is on localhost (up before
+# userspace). Started at 4.1 s of userspace, nebulae.service at 1.7 s
+# (2026-10-31).
+DefaultDependencies=false
+After=systemd-remount-fs.service tmp.mount
+Wants=tmp.mount
+# Without DefaultDependencies these are not there by themselves: a reboot
+# stops sclang (and its scsynth) like any service.
+Conflicts=shutdown.target
+Before=shutdown.target
 
 [Service]
 Type=simple

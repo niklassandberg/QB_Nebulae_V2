@@ -96,3 +96,28 @@ drive in Windows, and the line can be removed with Notepad.
 
 To compare: boot time (`systemd-analyze`, `Code/scripts/boot_time.py` on a
 Pi 4), audio dropouts in the Csound and SC banks, `free -m`.
+
+## Codec card driver: every sample rate right (`0002-rpi-proto-bclk-ratio-per-rate.patch`)
+The WM8731 card driver (`sound/soc/bcm/rpi-proto.c`, overlay `rpi-proto`,
+also on Qu-Bit's original firmware) told the Pi a fixed 64 bit clocks per
+frame. The codec is the clock provider (12.288 MHz crystal, bit clock
+MCLK/4, MCLK at 96 kHz), so the Pi ran every rate at bit clock/64: 32000 and
+8000 played at 48000, 96000 as 192000, without an error. The patch sets the
+ratio from the rate; measured right on a Pi 4 (stock, nebulae, nebulae-rt):
+8000, 32000, 48000, 96000. 44100 is impossible (needs 11.2896 MHz).
+`build_kernel.sh` applies it; `MODULE_VERSION("nebulae-rates-1")` tells
+nebulae.py that it runs (`/sys/module/snd_soc_rpi_proto/version`): then an
+instrument's `-r,N` is snapped to the nearest of the four rates, else always
+48000.
+
+Only this module, for a kernel already on the card (also the stock one),
+without a kernel build:
+```
+build_proto_module.sh rpi /root/kernel/work/config.stock
+build_proto_module.sh nebulae /root/kernel/out/config-6.18.57-1-nebulae
+cp /root/kernel/proto-modules/<version>/snd-soc-rpi-proto.ko.xz /lib/modules/<version>/updates/
+depmod <version>     # then reboot
+```
+`updates/` wins over the package's own module; deleting it (+ depmod) goes
+back. Never `rmmod`/`insmod` it while running: the codec then has no clock
+until the next boot.

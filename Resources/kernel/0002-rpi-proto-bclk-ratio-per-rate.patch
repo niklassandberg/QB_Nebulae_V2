@@ -1,0 +1,42 @@
+rpi-proto: bit clocks per frame from the sample rate, not always 64
+
+The WM8731 on the PROTO board (the Nebulae's codec) is the I2S clock
+provider: with its fixed 12.288 MHz crystal the bit clock is MCLK/4
+(3.072 MHz), MCLK at 96 kHz. The driver told the Pi a fixed 64 bit clocks
+per frame, so the Pi ran every rate at bit clock/64: 32000 and 8000 played
+at 48000, 96000 as 192000 (measured with hw_ptr; ALSA gave no error).
+Now the ratio follows the rate (48k 64, 32k 96, 8k 384, 96k 128): all four
+rates of the board's list measured right on a Pi 4 (stock, nebulae and
+nebulae-rt kernels, 2026-10-31). 44100 stays impossible (needs 11.2896 MHz).
+
+MODULE_VERSION lets Nebulae see that this driver runs
+(/sys/module/snd_soc_rpi_proto/version = nebulae-rates-1).
+
+--- a/sound/soc/bcm/rpi-proto.c
++++ b/sound/soc/bcm/rpi-proto.c
+@@ -45,9 +45,17 @@
+ 	struct snd_soc_dai *codec_dai = snd_soc_rtd_to_codec(rtd, 0);
+ 	struct snd_soc_dai *cpu_dai = snd_soc_rtd_to_cpu(rtd, 0);
+ 	int sysclk = 12288000; /* This is fixed on this board */
++	unsigned int rate = params_rate(params);
++	/*
++	 * The WM8731 is the clock provider: its bit clock is MCLK/4 (MCLK at
++	 * 96 kHz), so a frame has sysclk/4/rate bit clocks, not always 64. With
++	 * a fixed 64 the Pi ran every rate at bit clock/64 (48 kHz, 96 kHz as
++	 * 192 kHz). Nebulae, 2026-10-31.
++	 */
++	unsigned int ratio = rate == 96000 ? sysclk / rate : sysclk / 4 / rate;
+ 
+ 	/* Set proto bclk */
+-	int ret = snd_soc_dai_set_bclk_ratio(cpu_dai,32*2);
++	int ret = snd_soc_dai_set_bclk_ratio(cpu_dai, ratio);
+ 	if (ret < 0){
+ 		dev_err(rtd->card->dev,
+ 				"Failed to set BCLK ratio %d\n", ret);
+@@ -145,3 +153,6 @@
+ MODULE_AUTHOR("Florian Meier");
+ MODULE_DESCRIPTION("ASoC Driver for Raspberry Pi connected to PROTO board (WM8731)");
+ MODULE_LICENSE("GPL");
++/* Nebulae: userspace (nebulae.py) checks /sys/module/snd_soc_rpi_proto/version
++ * to know that every rate of the list above really runs. */
++MODULE_VERSION("nebulae-rates-1");

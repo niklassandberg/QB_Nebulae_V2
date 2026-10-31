@@ -11,6 +11,9 @@
 #   speed,rawencoder         .scd: the patch reads the encoder itself
 #   kernel,rt                rt | normal | any, default normal (kernelswitch.py)
 #   blocksize,256            .scd/.pd: JACK period (jack@.service), default 128
+#   -n,3                     .scd/.pd: JACK periods in the buffer (jackd -n), default 3
+#   -r,48000                 .scd/.pd: JACK sample rate (jackd -r), default 48000,
+#                            snapped to the nearest rate the card runs
 #
 # Where the entries are:
 #   .instr  nebconfigbegin              .scd  /*
@@ -37,6 +40,14 @@ KERNELS = ("rt", "normal", "any")
 # 128 is ~8 ms, 256 ~16 ms). Csound does not use JACK: it has ksmps/-b/-B.
 BLOCK_SIZES = (32, 64, 128, 256, 512, 1024)
 DEFAULT_BLOCK_SIZE = 128
+# JACK periods in the sound card's buffer (jackd -n): 3 leaves one spare
+# block for a late one (experimental Pd/SC code); 2 = lower latency, less
+# margin; 4 = more margin for heavy patches.
+NPERIODS = (2, 3, 4)
+DEFAULT_NPERIODS = 3
+# JACK sample rate (jackd -r) without an entry. nebulae.py snaps a wished
+# rate to the nearest one the card really runs (jackRates()).
+DEFAULT_SAMPLE_RATE = 48000
 
 # a Pd statement: "#X text X Y nebconfig ..." up to its unescaped ";"
 PD_STATEMENT = re.compile(r"(?<!\\);[ \t]*\r?\n")
@@ -120,16 +131,39 @@ class NebConfig(object):
         """The JACK period, DEFAULT_BLOCK_SIZE without an entry. ValueError
         for a value not in BLOCK_SIZES (the caller says so and uses the
         default)."""
-        value = self.value("blocksize")
+        return self._choice("blocksize", BLOCK_SIZES, DEFAULT_BLOCK_SIZE)
+
+    def nPeriods(self):
+        """JACK periods in the buffer ("-n,3", as jackd -n),
+        DEFAULT_NPERIODS without an entry. ValueError as blockSize()."""
+        return self._choice("-n", NPERIODS, DEFAULT_NPERIODS)
+
+    def sampleRate(self):
+        """The wished JACK sample rate ("-r,48000", as jackd -r),
+        DEFAULT_SAMPLE_RATE without an entry; not checked against the card
+        (nebulae.py snaps it). ValueError for no positive number."""
+        value = self.value("-r")
         if value is None:
-            return DEFAULT_BLOCK_SIZE
+            return DEFAULT_SAMPLE_RATE
         try:
-            size = int(value.strip())
+            rate = int(value.strip())
         except ValueError:
-            size = None
-        if size not in BLOCK_SIZES:
-            raise ValueError("blocksize %r: one of %s" % (value, BLOCK_SIZES))
-        return size
+            rate = 0
+        if rate <= 0:
+            raise ValueError("-r %r: a sample rate in Hz, e.g. 48000" % value)
+        return rate
+
+    def _choice(self, key, choices, default):
+        value = self.value(key)
+        if value is None:
+            return default
+        try:
+            number = int(value.strip())
+        except ValueError:
+            number = None
+        if number not in choices:
+            raise ValueError("%s %r: one of %s" % (key, value, choices))
+        return number
 
 
 def _blockEntries(text):

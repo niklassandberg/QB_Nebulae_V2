@@ -5,6 +5,12 @@ NebInterface {
 	classvar remote;
 	classvar server;
 	classvar <>onReset;
+	// true while startup.scd boots scsynth early (bootinstr.txt jack line):
+	// /neb/loadScFile then waits until the boot is confirmed. A patch loaded
+	// between "server ready" and sclang's first status reply found the
+	// server "unresponsive" and rebooted it, and the reboot ended jackd
+	// (-T: it quits with its last client): silence (2026-10-31).
+	classvar <>earlyBoot = false;
 
     classvar initialized = false;
 	
@@ -93,10 +99,16 @@ NebInterface {
 
         OSCdef.new(\loadScFile, { |msg|
             var file = msg[1].asString;
-            OSCdef(\hasBeenLoaded).free; // remove previous handshake listener before loading new file
-			this.prSaveState; // the old patch's values, before its clocks are cleared
-			currentPatch = PathName(file).fileNameWithoutExtension;
-			file.load;
+			fork {
+				var waited = 0;
+				// the early boot first (at most 15 s), see earlyBoot
+				while { earlyBoot and: { waited < 300 } } { 0.05.wait; waited = waited + 1 };
+				earlyBoot = false;
+				OSCdef(\hasBeenLoaded).free; // remove previous handshake listener before loading new file
+				this.prSaveState; // the old patch's values, before its clocks are cleared
+				currentPatch = PathName(file).fileNameWithoutExtension;
+				file.load;
+			};
         }, '/neb/loadScFile');
 		
 		OSCdef.new(\quit_n, { |msg|
