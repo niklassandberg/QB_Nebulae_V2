@@ -145,6 +145,12 @@ then
 
     rm -rf /home/alarm/QB_Nebulae_V2/Code/packages
 
+    # Our kernel modules (the codec card driver for every sample rate) into
+    # the kernels on the card that they fit; used after this stage's reboot.
+    # Here and not in the first stage: that one runs the old firmware's
+    # update.sh, this one already the new.
+    bash /home/alarm/QB_Nebulae_V2/Code/scripts/kernel_modules.sh
+
     #TODO: in wrong elif. Should test -d /home/alarm/QB_Nebulae_V2/Code/localfiles
     echo "Supercollider config"
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/jackdrc ]

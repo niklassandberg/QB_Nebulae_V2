@@ -20,6 +20,9 @@ pacman -S --noconfirm --needed sudo alsa-utils csound dnsmasq hostapd i2c-tools 
 # (Code/engine_packages/ -> /home/alarm/engine_packages/: Csound optimised + -B working,
 # SuperCollider) replace them, IgnorePkg keeps them.
 bash $NEB/Code/scripts/engines_check.sh
+# Our kernel modules (codec card driver for every sample rate) into the
+# kernels they fit, as update.sh does.
+bash $NEB/Code/scripts/kernel_modules.sh
 # The Nebulae's own SuperCollider classes (NebInterface, MultiWtOsc), as
 # update.sh installs them.
 if [ -d $NEB/SuperColliderExtensions ]; then

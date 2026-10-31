@@ -121,3 +121,12 @@ depmod <version>     # then reboot
 `updates/` wins over the package's own module; deleting it (+ depmod) goes
 back. Never `rmmod`/`insmod` it while running: the codec then has no clock
 until the next boot.
+
+### In the firmware (`Code/kernel_modules/`)
+Every firmware update (and `setup_system.sh` for a new image) runs
+`Code/scripts/kernel_modules.sh`: each `Code/kernel_modules/<version>/*.ko.xz`
+goes into `/lib/modules/<version>/updates/` of the kernels on the card that
+have that version and the same vermagic (others are skipped and keep their
+driver: `-r` snaps to 48000). For a new kernel version: build it
+(`build_kernel.sh`), then `build_proto_modules.sh` on the build Pi (stock +
+both Nebulae kernels) and copy its output folders into `Code/kernel_modules/`.
