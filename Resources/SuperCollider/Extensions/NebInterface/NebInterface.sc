@@ -24,7 +24,7 @@ NebInterface {
 	classvar busValues;
 
 	// Values the patch saves itself (see *stateAt / *statePut), one file per patch.
-	classvar <>statePath = "/home/alarm/QB_Nebulae_V2/Code/config/sc/";
+	classvar <>statePath = "/home/alarm/sc/";  // <patch>.state next to the .scd
 	classvar <>saveDelay = 1.0;  // seconds after the last change before writing
 	classvar currentPatch;       // name of the loaded .scd, nil when not loaded by Nebulae
 	classvar state;
@@ -33,7 +33,7 @@ NebInterface {
 	// Settings (see *initSettings): name -> value, name -> bus.
 	classvar settings;
 	classvar settingBuses;
-	// Layout of the .scstate file. Version 0 (no \version key) was the state dictionary alone.
+	// Layout of the .state file. Version 0 (no \version key) was the state dictionary alone.
 	classvar stateVersion = 1;
 	// The NebPatch init gave back; +1 on every init, so an older NebPatch knows it's stale.
 	classvar patch;
@@ -148,8 +148,10 @@ NebInterface {
 	/* Saved values of the patch: any key, any archivable SC object. They are
 	   read in NebInterface.init and written by sclang itself (writeArchive)
 	   saveDelay seconds after the last change, and at once when the next patch
-	   is loaded or on /neb/quit. File: statePath ++ <patch> ++ ".scstate"
-	   (not next to the .scd: /home/alarm/sc/ is erased on every USB load).
+	   is loaded or on /neb/quit. File: statePath ++ <patch> ++ ".state", next
+	   to the .scd. A firmware update keeps it, a USB load leaves it, and a
+	   <patch>.state on the USB stick replaces it when that one is new or
+	   changed (fileloader.py).
 
 	   ~cutoff = NebInterface.stateAt(\cutoff, 1000);
 	   NebInterface.statePut(\cutoff, ~cutoff);
@@ -222,7 +224,7 @@ NebInterface {
 		settings = IdentityDictionary.new;
 		stateDirty = false;
 		if (currentPatch.isNil) { ^this };
-		path = statePath ++ currentPatch ++ ".scstate";
+		path = statePath ++ currentPatch ++ ".state";
 		if (File.exists(path).not) { ^this };
 		try {
 			data = Object.readArchive(path);
@@ -248,7 +250,7 @@ NebInterface {
 		if (saveTask.notNil and: { thisThread !== saveTask }) { saveTask.stop };
 		saveTask = nil;
 		if (stateDirty.not or: { currentPatch.isNil }) { ^this };
-		path = statePath ++ currentPatch ++ ".scstate";
+		path = statePath ++ currentPatch ++ ".state";
 		try {
 			File.mkdir(statePath);
 			IdentityDictionary[

@@ -87,7 +87,7 @@ There are no save or load messages: sclang reads and writes its own file.
 
 ## Saving (sclang, NebInterface)
 
-- One file per patch: `Code/config/sc/<patch>.scstate` (`NebInterface.statePath`), written with
+- One file per patch: `/home/alarm/sc/<patch>.state`, next to the .scd (`NebInterface.statePath`), written with
   SC's `writeArchive`, so it can hold any archivable SC object, not only numbers.
 - **Not** next to the .scd: `fileloader.copyType()` runs `rm /home/alarm/sc/*` on every USB load.
 - `<patch>` comes from the path in `/neb/loadScFile`. When a patch isn't loaded by Nebulae

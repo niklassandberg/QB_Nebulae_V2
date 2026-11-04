@@ -12,6 +12,16 @@ import nebio
 
 USB_POWER = "bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh"
 
+# Saved values of an instrument: <name>.state next to <name>.scd / .prog
+# (NebInterface.sc, progpages.py). They belong to the Nebulae: a USB load
+# never erases them. A <name>.state on the stick, next to its instrument,
+# replaces the Nebulae's when it is new or changed on the stick (not at every
+# load: what was changed on the Nebulae since stays until the stick's file
+# changes). STATE_RECORD remembers the stick's files last copied.
+STATE_EXT = ".state"
+STATE_TYPES = {"sc": ".scd", "prog": ".prog"}
+STATE_RECORD = ".stick_states"
+
 class FileLoader(object):
 
     #find /mnt/memory -printf '%P %s %T@\n' #gets hash for the last modified, when if differ, copy result. We dont have rsync.
@@ -86,15 +96,76 @@ class FileLoader(object):
                 d = os.stat(os.path.join(fullDir, os.path.basename(f)))
                 if s.st_size != d.st_size or int(s.st_mtime) != int(d.st_mtime):
                     return False
-            return True
+            return not self.changedStates(fileType, usb)
         except OSError:
             return False
 
     # Files of a type folder that are not the stick's: hidden files, and the
-    # programs' saved pages (<name>.state, progpages.py), which belong to the
-    # Nebulae. They are neither compared nor erased.
+    # saved values (<name>.state). They are neither compared nor erased.
     def keepLocal(self, fileType, name):
-        return name.startswith('.') or (fileType == "prog" and name.endswith(".state"))
+        return name.startswith('.') or (fileType in STATE_TYPES and name.endswith(STATE_EXT))
+
+    # The stick's <name>.state files of its instruments (usb: the stick's
+    # files of the type) that are new or changed since they were last copied.
+    def changedStates(self, fileType, usb):
+        ext = STATE_TYPES.get(fileType)
+        if ext is None:
+            return []
+        record = self.readStateRecord(fileType)
+        changed = []
+        for f in usb:
+            if not f.endswith(ext):
+                continue
+            state = f[:-len(ext)] + STATE_EXT
+            if os.path.isfile(state):
+                st = os.stat(state)
+                if record.get(os.path.basename(state)) != (st.st_size, int(st.st_mtime)):
+                    changed.append(state)
+        return changed
+
+    def readStateRecord(self, fileType):
+        record = {}
+        try:
+            with open(os.path.join("/home/alarm", fileType, STATE_RECORD)) as f:
+                for line in f:
+                    parts = line.split()
+                    if len(parts) == 3:
+                        record[parts[0]] = (int(parts[1]), int(parts[2]))
+        except (OSError, ValueError):
+            pass
+        return record
+
+    # Copies the stick's new or changed .state files over the Nebulae's.
+    def copyStates(self, fileType, usb, fullDir):
+        changed = self.changedStates(fileType, usb)
+        if not changed:
+            return
+        record = self.readStateRecord(fileType)
+        for f in changed:
+            try:
+                self.copyFile(f, fullDir)
+                st = os.stat(f)
+                record[os.path.basename(f)] = (st.st_size, int(st.st_mtime))
+                self.classlog.info("Saved values from the stick: %s", os.path.basename(f))
+            except OSError as e:
+                self.classlog.error("Could not copy %s: %s", f, e)
+        try:
+            with open(os.path.join(fullDir, STATE_RECORD), "w") as out:
+                for name, (size, mtime) in sorted(record.items()):
+                    out.write("%s %d %d\n" % (name, size, mtime))
+        except OSError as e:
+            self.classlog.error("Could not write %s: %s", STATE_RECORD, e)
+
+    # copy2 (keeps the mtime for typeIsCurrent()), on the SD card even if
+    # the power is cut.
+    def copyFile(self, f, fullDir):
+        dest = shutil.copy2(f, fullDir)
+        fd = os.open(dest, os.O_RDONLY)
+        try:
+            os.fsync(fd)
+        finally:
+            os.close(fd)
+        return dest
 
     def typeFiles(self, fileType):
         files = []
@@ -212,16 +283,12 @@ class FileLoader(object):
                     os.remove(path)
             for f in files:
                 try:
-                    dest = shutil.copy2(f, fullDir)  # keeps the mtime for typeIsCurrent()
+                    dest = self.copyFile(f, fullDir)
                     if fileType == "prog" and not dest.endswith(".prog"):
                         os.chmod(dest, 0o755)  # the program a .prog runs
-                    fd = os.open(dest, os.O_RDONLY)
-                    try:
-                        os.fsync(fd)  # on the SD card even if the power is cut
-                    finally:
-                        os.close(fd)
                 except OSError as e:
                     self.classlog.error("Could not copy %s: %s", f, e)
+            self.copyStates(fileType, files, fullDir)
             fd = os.open(fullDir, os.O_RDONLY)
             try:
                 os.fsync(fd)  # the new directory entries
