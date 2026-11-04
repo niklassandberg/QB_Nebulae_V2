@@ -1,7 +1,5 @@
-// cardclip.h - the input clip counter of the codec card driver
-// (Resources/kernel/0003-rpi-proto-input-clip-count.patch: ALSA control
-// "Input Clip Count" on hw:sndrpiproto, left and right). The same for every
-// engine (Csound, SuperCollider, Pure Data).
+// ALSA control "Input Clip Count" of the patched card driver
+// (Resources/kernel/0003-rpi-proto-input-clip-count.patch).
 #pragma once
 
 #include <chrono>
@@ -13,9 +11,7 @@ class CardClip {
 public:
     static CardClip &instance();
 
-    // Clipped samples of both channels so far, wraps from INT_MAX to 0: only
-    // changes matter. -1 while the card has no counter (older driver, nebio
-    // built without alsa-lib): then no clip is shown.
+    // See nebio_card_clip_count.
     int count();
 
 private:

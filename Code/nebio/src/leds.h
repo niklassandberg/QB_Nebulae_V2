@@ -1,8 +1,5 @@
-// leds.h - PCA9685 LED driver (I2C) + reset LED (GPIO 12 software PWM).
-//
-// Python stages LED values and commits them once per ui.update(), like the
-// old leddriver.update(). The LED thread then writes every changed channel in
-// one I2C transaction (auto-increment), instead of one LED per loop.
+// PCA9685 LED driver (I2C) + reset LED (GPIO 12 software PWM). Python stages
+// values and commits; the LED thread writes the changed channels.
 #pragma once
 
 #include <atomic>
@@ -45,22 +42,12 @@ public:
     void commit();
     void animation(const std::string &color, const std::string &behavior);
     void animationStop();
-    // 0..1, applied to every LED (Python's, animations, sclang's) as the
-    // last step before the hardware. The LED dim script on the scripts page.
     void setDim(double dim);
-    // Quiet mode: the file (next) and freeze LEDs only fully on or off: the
-    // file LED's PWM is heard in the audio (tested 2026-10-21), the freeze
-    // LED was added by the user. On from half brightness, the dim factor only
-    // counts as 0 = off. All other LEDs keep their PWM.
+    // File and freeze LEDs: on from half brightness, else off.
     void setNoPwm(bool on);
-    // Quiet mode (every level): the PCA9685 channels start their pulses at
-    // different points of the period (see Pca9685::writeRange).
     void setStagger(bool on);
 
-    // sclang's colour for an RGB LED (/sc/led/<led>, 0-4095 per colour). It is
-    // always remembered, and shown while sclang owns the LED; then setRgb()
-    // from Python is ignored for it. Taking ownership shows the remembered
-    // colour (off if sclang has sent none since clearSc()).
+    // Remembered always, shown while sclang owns the LED.
     void setScRgb(int id, double r, double g, double b);
     void setScOwned(int id, bool owned);
     void clearSc();  // new patch: forget sclang's colours

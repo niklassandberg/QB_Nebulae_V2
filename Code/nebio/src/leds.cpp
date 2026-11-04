@@ -80,8 +80,6 @@ void hsvToRgb(double h, double &r, double &g, double &b) {  // s = v = 1, colors
 
 }  // namespace
 
-// ---- PCA9685 -------------------------------------------------------------
-
 Pca9685::~Pca9685() { close(); }
 
 void Pca9685::close() {
@@ -128,15 +126,9 @@ bool Pca9685::open(const char *bus, int address, double pwmFreqHz) {
     return ok;
 }
 
-// A fully off (4095) or fully on (0) LED uses the full ON/OFF bit: then the
-// output is static. With ON = 0 / OFF = 4095 it still gets one tick of the
-// other level every PWM period (250 Hz edges on every "off" LED).
-// stagger (quiet mode): a dimmed LED is high for v of the 4096 ticks as
-// always, but every channel starts at its own point of the period (ON =
-// channel * 256), so the 16 channels do not all switch at the same moment.
-// Otherwise all start at 0. The start is moved back so that ON + v stays
-// inside the period: a pulse that wrapped past 4095 (OFF < ON) showed fully
-// on, a dim colour turned white and flashed while it changed (2026-10-31).
+// Fully off/on uses the full bit: else one tick of the other level every
+// period (250 Hz edges). Stagger: channel n starts at n * 256, moved back so
+// the pulse never wraps past 4095 (a wrapped pulse shows fully on).
 bool Pca9685::writeRange(const int *offValues, int first, int last, bool stagger) {
     if (fd_ < 0) return false;
     uint8_t buf[1 + 16 * 4];
@@ -158,8 +150,6 @@ bool Pca9685::writeRange(const int *offValues, int first, int last, bool stagger
     return ::write(fd_, buf, n) == n;
 }
 
-
-// ---- Leds ----------------------------------------------------------------
 
 Leds &Leds::instance() {
     static Leds *leds = new Leds();  // never destroyed, see GpioChip
@@ -386,9 +376,7 @@ void Leds::run() {
             pwmCv_.notify_all();
         }
 
-        // Dim: the on part of each channel (LEDs are active low, 4095 = off).
-        // Quiet mode (no PWM) for the file and freeze LEDs: fully on from half
-        // brightness, else off; the dim factor only counts as 0 = off.
+        // LEDs are active low, 4095 = off.
         double dim = dim_.load();
         const int noPwmCh[2] = {kButtonChannel[kButtonNext], kButtonChannel[kButtonFreeze]};
         int noPwmOut[2];
@@ -401,20 +389,15 @@ void Leds::run() {
         if (noPwm_) {
             for (int k = 0; k < 2; ++k) out[noPwmCh[k]] = noPwmOut[k];
         }
-        // Quiet mode staggers the channels (writeRange): a switch changes
-        // every channel's start, so all are written again.
+        // A stagger switch moves every channel's start: write all.
         const bool stagger = stagger_;
         if (stagger != staggered_) {
             staggered_ = stagger;
             writtenValid_ = false;
         }
 
-        // Only the channels that changed are written, each run of neighbours
-        // in one transfer: an LED that stands still is never touched, and
-        // there is less I2C traffic.
-        // No sleep at dim 0: in sleep the PCA9685 drives its outputs low, and
-        // the LEDs are active low, so they all lit up (tested 2026-10-21).
-        // Dim 0 = all outputs static high with the full bit (writeRange).
+        // No PCA9685 sleep at dim 0: sleep drives the outputs low, and the
+        // LEDs are active low.
         bool ok = true;
         for (int ch = 0; ch < 16;) {
             if (writtenValid_ && out[ch] == written_[ch]) {

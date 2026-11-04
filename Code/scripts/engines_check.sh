@@ -1,36 +1,15 @@
 #!/bin/bash
-# The Nebulae's audio engines and their plugins, as packages in
-# /home/alarm/engine_packages/ (recipes in Resources/engine_build/, same layout):
-#   <engine>/*.pkg.tar.*            level 1: the engines
-#   <engine>/<plugins>/*.pkg.tar.*  level 2: plugins, externals
-# /home/alarm/engine_packages/ is outside the firmware folder, so a firmware update
-# keeps what was built on this Nebulae. At each run (firmware update) first:
-#  - the firmware's Code/engine_packages/ is merged in: its recipes and scripts
-#    replace the old ones, its packages are added, nothing is deleted
-#  - the USB stick's engine_build/ folder too (same layout: your own recipes, or
-#    ready packages), only its engine folders (not the scripts)
-#  - the first time: the packages of the previous firmware (the update's
-#    backup in /home/alarm/backup/old) are taken over
-# Nothing is built here: a recipe with no package of its version is only
-# reported (on the stick: neb_engines_report.txt); build it on the Nebulae
-# with Code/scripts/engines_build.sh. After the install the package files of
-# other versions are deleted.
-#  - csound: optimised and -B working. The Arch Linux ARM package is built
-#    without optimisation (3x slower: constant dropouts on a Pi 3), ignores -B.
-#  - supercollider: supercollider-headless (headless, JACK, libscsynth);
-#    plugins: sc3-plugins, GutterSynth, XPlayBuf, SuperBufRd.
-#  - puredata: the Arch package (built with optimisation, checked), kept at
-#    this version; externals: cyclone, ELSE.
-# Run by update.sh after a firmware update (root file system read-write) and
-# by setup_system.sh. Installs every package whose version is not the one
-# installed: the engines first, then the plugins (they are built against the
-# engines). All of them go in IgnorePkg so pacman -Syu keeps them.
+# Engine packages in /home/alarm/engine_packages/ (kept across updates):
+#   <engine>/*.pkg.tar.*  <engine>/<plugins>/*.pkg.tar.*
+# Merges in the firmware's Code/engine_packages/ and the stick's
+# engine_build/, reports recipes without a package (neb_engines_report.txt on
+# the stick; build them with engines_build.sh), installs other versions,
+# engines before plugins, all in IgnorePkg. See Resources/engine_build/README.md.
 #   engines_check.sh           merge, report what has no package, install
 #   engines_check.sh install   only install (engines_build.sh after a build)
 #   engines_check.sh status    list them; exit 0 = all installed
 
-# Needs root. The services start it as root; started by hand it runs
-# itself again with sudo (sudo as root only adds lines to the journal).
+# Needs root.
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 DIR=/home/alarm/engine_packages
 FIRMWARE=/home/alarm/QB_Nebulae_V2/Code/engine_packages
@@ -42,15 +21,13 @@ ARCH=$(pacman-conf Architecture | head -1)
 
 merge() {
     local first="" old
-    # Up to 2026-10-25 the folder was called /home/alarm/engines: moved, so
-    # what was built on this Nebulae stays.
+    # Old name of the folder.
     if [ ! -d $DIR ] && [ -d /home/alarm/engines ]; then
         mv /home/alarm/engines $DIR && echo "engines: /home/alarm/engines renamed to $DIR"
     fi
     [ -d $DIR ] || first=1
     mkdir -p $DIR
-    # The first time: what the previous firmware had built, so it is not
-    # built again.
+    # The first time: what the previous firmware built.
     for old in $OLD/engine_packages $OLD/engines; do
         if [ -n "$first" ] && [ -d $old ]; then
             (cd $old && find . -name "*.pkg.tar.*" -exec cp --parents -n {} $DIR/ \;)
@@ -174,8 +151,7 @@ fi
 for level in 1 2; do
     check $level
     [ -n "$need" ] || continue
-    # Plugins installed by hand before they were packages: their files may be
-    # replaced. The rules are in legacy_overwrite.sh (one place, to comment out).
+    # Plugins installed by hand before they were packages.
     LEGACY_OVERWRITE=()
     . $DIR/legacy_overwrite.sh 2>/dev/null
     pacman --noconfirm -U "${LEGACY_OVERWRITE[@]}" $need ||

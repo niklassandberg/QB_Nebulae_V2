@@ -1,11 +1,6 @@
 #!/bin/sh
-# Builds the nebio C++ library (Code/nebio -> Code/nebio/build/libnebio.so).
-# Incremental: only rebuilds what changed, so it is cheap to run at every boot.
+# Builds Code/nebio/build/libnebio.so; a stamp skips cmake when nothing changed.
 # Needs: pacman -S cmake gcc libgpiod liblo
-# -j3 leaves one core free (thermal headroom on the RPi4).
-#
-# A stamp (md5 of the sources + libgpiod/liblo versions) is kept next to the
-# library. When it matches, cmake is skipped entirely (saves ~2 s at boot).
 #   build_nebio.sh         build unless up to date
 #   build_nebio.sh check   only test: exit 0 if up to date, 1 if a build is needed
 

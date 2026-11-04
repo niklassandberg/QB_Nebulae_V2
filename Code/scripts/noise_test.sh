@@ -1,48 +1,16 @@
 #!/bin/bash
-# Noise test: everything off except the audio chip (i2s, WM8731) and the LAN
-# (to run this over ssh), to hear how much noise is left from the sound chip
-# itself. Run as root over ssh:
-#   sudo bash noise_test.sh start [silence|thru|poll|leds|cpu|jitter|lock|wake|gpio|spi] [spin|spin=yield|work|shell[:cores]]
-#       (stop a running test first)
-#       silence (default): the DAC plays digital zero, so only the chip's own
-#                          noise (and what reaches it from the board) is heard
-#       thru: input -> output with nothing in between (ADC -> DAC), for
-#             feedback at the input
-#     Steps, each with everything of the one before, to find what in a
-#     running Nebulae makes the noise:
-#       poll: + nebio reads knobs/CV (SPI, 400/s) and buttons/encoders (GPIO,
-#             1200/s), a Python loop takes the values ~400/s (noise_test_load.py)
-#       leds: + every LED at half brightness (PWM), the reset LED too
-#       cpu:  + Csound with a DSP load like the granular looper's, output
-#             multiplied by 0 (Csound plays the silence instead of aplay)
-#     Against the tones of "poll" (compare with poll, same parts running):
-#       jitter: poll, but every scan interval varies randomly by up to
-#               +-JITTER (the mean rate stays): the tone should become noise
-#       lock:   poll, but the scans are triggered by the audio chip's clock
-#               (one per 64 samples = 750/s, knobs/buttons 375/s, in audio
-#               time: no drift; 64 is the smallest block the chip takes)
-#     How the scans' pulse gets into the audio (compare with poll):
-#       wake: no nebio, no GPIO, no SPI: a program only wakes 1200/s and
-#             sleeps again. Tones here: the CPU waking up (supply current)
-#       gpio: nebio scans 1200/s (encoders) and buttons/shift register 400/s,
-#             ADC (SPI) only 1/s; no Python loop. Tones: GPIO toggling
-#       spi:  ADC (SPI) 400/s, encoder scans down to 400/s, buttons 1/s; no
-#             Python loop. Compare with gpio: SPI to the ADC chips
-#     Result (2026-10-21): "wake" alone gives a high tone: the CPU waking from
-#     sleep is a current pulse that is heard. Against that, any step with
-#     "spin" after it (e.g. start wake spin): the CPU never sleeps, a
-#     do-nothing loop on every core at the lowest priority (SCHED_IDLE).
-#     spin = shell loop on every core; spin=KIND[:CORES] with KIND yield
-#     (least current, lowest hiss), work (even work, closer to real work's
-#     current) or shell, on the first CORES cores, e.g. start cpu spin=work:2
-#   sudo bash noise_test.sh stop      everything back, Nebulae starts again
-#   sudo bash noise_test.sh status
-#
-# Off while the test runs: Nebulae (Python loop, Csound, nebio's knob/button
-# polling at 400/1200 Hz, LED updates), SuperCollider/jack/pd, all LEDs
-# (static off: PCA9685 full bit, reset LED pin held high), the Pi's own LEDs,
-# USB (controller unbound), Wi-Fi/BT chip (driver removed), time sync,
-# wpa_supplicant, scheduled jobs, journal writes to the SD card.
+# Noise test: everything off except the codec and the LAN. Root, over ssh:
+#   noise_test.sh start [STEP] [spin|spin=yield|work|shell[:cores]]
+#     silence (default)  the DAC plays digital zero
+#     thru               ADC -> DAC
+#     poll               + nebio scans, a Python loop (noise_test_load.py)
+#     leds               + every LED at half brightness
+#     cpu                + Csound with the granular looper's DSP load, muted
+#     jitter, lock       poll with random / audio-clocked scans
+#     wake, gpio, spi    only CPU wake-ups / GPIO / SPI at the scan rates
+#   noise_test.sh stop      everything back, Nebulae starts again
+#   noise_test.sh status
+#   noise_test.sh measure [seconds] [label]
 
 CODE=/home/alarm/QB_Nebulae_V2/Code
 STATE=/tmp/noise_test_active
@@ -59,9 +27,7 @@ CSD=/tmp/noise_test_load.csd
 CPU_VOICES=8  # Csound load: voices of vco2 + moogladder (tuned to ~ the granular looper)
 JITTER=0.3    # step "jitter": scan intervals vary by up to +-30 %
 
-# Csound as Nebulae runs it (alsa, hw:0,0, -B512, ksmps 64), with CPU_VOICES
-# voices of DSP whose sum is multiplied by 0. Output only: the input stays
-# free for noise_measure.py (cable from output to input).
+# Csound as Nebulae runs it, CPU_VOICES voices muted; the input stays free.
 write_csd() {
     cat > $CSD <<EOF
 <CsoundSynthesizer>
@@ -121,8 +87,7 @@ start() {
     echo "stopping Nebulae and audio engines"
     systemctl stop nebulae.service sclang.service 'jack@*.service' 2>/dev/null
     pkill -x scsynth; pkill -x jackd; pkill -x pd
-    # Wait until the audio chip is free: right after "stop" Nebulae may just
-    # have opened it, and Csound then ended at once ("cpu", seen 1 of 2).
+    # Right after "stop" Nebulae may still hold the card.
     for i in $(seq 1 25); do
         grep -q closed /proc/asound/card0/pcm0p/sub0/status 2>/dev/null && break
         sleep 0.2
@@ -180,11 +145,6 @@ start() {
     fi
     case "$2" in
         spin|spin=*)
-        # The CPU never sleeps: a do-nothing loop per core at the lowest
-        # priority (SCHED_IDLE, any real work goes first). Waking from sleep
-        # (WFI) is a current pulse that is heard ("wake" gives a tone).
-        # spin = shell loop on every core (as the first tests);
-        # spin=KIND[:CORES], KIND yield|work|shell (Code/scripts/spin.sh).
         spec=${2#spin}; spec=${spec#=}
         kind=${spec%%:*}; kind=${kind:-shell}
         cores=$(nproc); [ "$spec" != "${spec#*:}" ] && cores=${spec#*:}
@@ -204,9 +164,7 @@ start() {
 
 stop() {
     [ -f $STATE ] || echo "(no noise test was running, restoring anyway)"
-    # gpioset rewrites its command line ("12 1"), so match the name: a
-    # -f "...12=1" never matched, and the pin stayed held after stop, so
-    # nebio could not drive the reset LED (seen 2026-10-22).
+    # gpioset rewrites its command line: match the name.
     pkill -x aplay; pkill -x arecord; pkill -x csound; pkill -x gpioset
     pkill -f noise_test_load.py; pkill -f "scripts/spin.sh .* noise_test"  # its loops go with it
     sleep 0.5  # releases nebio's GPIO lines before Nebulae starts
@@ -216,9 +174,6 @@ stop() {
     [ -e $USB_DRV/$USB_DEV ] || echo $USB_DEV > $USB_DRV/bind
     bash $CODE/scripts/wifi.sh driver
     journalctl --flush
-    # Started again as before the test; Nebulae then applies its saved Quiet
-    # mode itself (level 1: LAN goes down!). Units Quiet mode masked do not
-    # start (no harm).
     echo "services and timers back"
     systemctl start $TIMERS 2>/dev/null
     for s in $SERVICES; do
@@ -241,8 +196,6 @@ case "$1" in
     start) start "$2" "$3" ;;
     stop) stop ;;
     status) status ;;
-    # Records the input (cable from output to input) and shows the tones:
-    # noise_test.sh measure [seconds] [label]
     measure) shift; python3 $CODE/scripts/noise_measure.py "${1:-10}" "${2:-$(cat $STATE 2>/dev/null || echo nebulae)} ${*:3}" ;;
     *) echo "usage: sudo bash $0 start [silence|thru|poll|leds|cpu|jitter|lock|wake|gpio|spi] [spin|spin=yield|work|shell[:cores]] | stop | status | measure [secs] [label]"; exit 2 ;;
 esac

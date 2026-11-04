@@ -1,62 +1,17 @@
 #!/usr/bin/env python3
-# How much noise each part of the Pi puts into the audio, one part at a time.
-# Starts from noise_test.sh's "silence" state (Nebulae, engines, LEDs, Pi
-# LEDs, USB, Wi-Fi driver, services, scheduled jobs off; journal in RAM; the
-# DAC plays digital zero) and switches ONE part between two states, A (the
-# reference) and B, recording the audio input in each (noise_measure.py's
-# analysis: rms, noise floor, tones). Every part runs A B A B A, so chance
-# does not decide; after each switch it waits until the part has settled.
-#
-# Run as root, detached: the "lan" part cuts the ssh connection. Everything is
-# kept in RAM (/tmp) while measuring; nothing writes to the SD card except
-# the "journal" and "sd_write" parts (on purpose). Results are copied to
-# /home/alarm/noise_parts/ at the end, and everything is switched back
-# (noise_test.sh stop: Nebulae starts again with its saved settings).
-#   sudo systemd-run --unit noise-parts python3 noise_parts.py run [PARTS] [options]
-#       PARTS: comma list, default all that fit this Pi (see PARTS below)
-#       --secs 10      seconds per recording
-#       --reps 2       B recordings per part (A gets reps + 1)
-#       --gain 23      Capture step while measuring (23 = 0 dB), then restored
-#       --label TEXT   free text in the report (e.g. "input open", "out->in cable")
-#   python3 noise_parts.py baseline LABEL   only the A state of everything,
-#       (reps + 1) recordings: for parts that need a restart (nohlt, HDMI),
-#       run once per boot setup and compare the labels in the report
-#   python3 noise_parts.py boot nohlt|hdmi   only the NEXT boot with that, then
-#       reboots: nohlt into /boot/cmdline.txt (Nebulae takes it out again at
-#       its start: its power_regulator is not nohlt), HDMI forced on in
-#       /boot/config.txt (startup.sh puts Code/localfiles/config.txt back at
-#       every boot). So the boot after that is normal again by itself.
-#       Order: baseline normal; boot nohlt; baseline nohlt; boot hdmi;
-#       baseline hdmi; reboot. --nebulae: measured beside a playing Nebulae
-#       through the tap (see below) instead of the silence state.
-#   python3 noise_parts.py sequence start   all of that by itself, Nebulae
-#       playing (tap): normal, nohlt, hdmi, 3 reboots. A boot unit
-#       (noise-parts-seq.service) goes on after each reboot and removes
-#       itself at the end; then the tap comes out and the Pi reboots to
-#       normal. Comparison: /home/alarm/noise_parts/sequence_compare.txt,
-#       progress: sequence.log next to it. sequence stop: abort (tap out,
-#       unit gone; nohlt/HDMI are gone after the next boot by themselves).
-#
-#   With Nebulae playing (the real load: scans, LEDs, Csound), cable from
-#   output to input. Csound holds the sound card, so it records its own input
-#   through a tap: one fout line in the instrument file (only on this Pi,
-#   restored afterwards), into a file in RAM.
-#   python3 noise_parts.py tap on|off   tap into /home/alarm/instr/
-#       a_granularlooper.instr and restart Nebulae (off: original back)
-#   sudo systemd-run --unit noise-parts --collect python3 noise_parts.py nebulae [PARTS] [options]
-#       the parts that can be switched beside a running Nebulae (no LED
-#       parts: Nebulae drives the LEDs); every part ends as it was before.
-#       Granular looper set up so the output is digital silence and the
-#       input can't reach the output (no feedback through the cable):
-#       source on live input, buffer empty, never record, blend_alt at 0.
-#   python3 noise_parts.py report [DIR]     table of one run (default: latest)
-#   python3 noise_parts.py compare DIR...   baselines side by side
-#   journalctl -u noise-parts -f            follow a detached run
-#
-# What is plugged in counts: input open measures the ADC side; a cable from
-# output to input measures what comes out of the Nebulae (DAC + ADC). Say which
-# with --label. Made on a Pi 4 (2026-11-01); on a Pi 3 the "usb" part is
-# skipped (USB and LAN are one chip there: switching USB off cuts the LAN).
+# Noise of each part of the Pi, one at a time: A B A B A recordings from
+# noise_test.sh's silence state. Root, detached (the lan part cuts ssh):
+#   systemd-run --unit noise-parts python3 noise_parts.py run [PARTS]
+#       [--secs 10] [--reps 2] [--gain 23] [--label TEXT]
+#   noise_parts.py baseline LABEL          only the A states
+#   noise_parts.py boot nohlt|hdmi         the next boot only with that
+#   noise_parts.py sequence start|stop     normal, nohlt, hdmi, with reboots
+#   noise_parts.py tap on|off              Csound records its input (fout)
+#   systemd-run --unit noise-parts --collect python3 noise_parts.py nebulae [PARTS]
+#                                          beside a playing granular looper
+#   noise_parts.py report [DIR]
+#   noise_parts.py compare DIR...
+# Results in /home/alarm/noise_parts/.
 import glob
 import json
 import os
@@ -90,8 +45,7 @@ TAP = "/tmp/noise_tap.raw"   # Csound's input, raw 32-bit float stereo (fout for
 TAP_INSTR = "/home/alarm/instr/a_granularlooper.instr"
 TAP_AFTER = "ainl, ainr inch 1, 2"
 TAP_LINE = 'fout "%s", 0, ainl, ainr' % TAP
-# Not in the instrument folder: fileloader.py would see an extra file and copy
-# the stick's instruments over everything at Nebulae's start.
+# Not in the instrument folder: fileloader.py would see an extra file.
 TAP_BACKUP = "/home/alarm/.noise_parts_instr_backup"
 CONFIG = CODE + "/config/configsettings.txt"
 
@@ -457,9 +411,7 @@ def nebulae_run(names):
 
 
 def tap(on):
-    # fileloader.py copies the stick's instruments again when a file's size or
-    # mtime differs: the tap replaces a comment line after TAP_AFTER with a
-    # line of the same length, and the mtime is set back.
+    # Same size and mtime, or fileloader.py copies the stick's instruments.
     if on:
         st = os.stat(TAP_INSTR)
         with open(TAP_INSTR, "rb") as f:
@@ -567,8 +519,7 @@ def setup():
     with open(OUT + "/info.json", "w") as f:
         json.dump(info, f, indent=1)
     log("noise_parts: %s, kernel %s, %s" % (info["model"], info["kernel"], opts["label"]))
-    # spin.sh compiles its loop into /tmp on first use: now, not inside a
-    # settle time.
+    # Compile spin.sh's loop now, not inside a settle time.
     if not os.path.exists("/tmp/nebulae_spin"):
         sh("gcc -O2 -o /tmp/nebulae_spin %s/spin.c" % HERE, check=True)
     log("silence state (noise_test.sh start silence)")

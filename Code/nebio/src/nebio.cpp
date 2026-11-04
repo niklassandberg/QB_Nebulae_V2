@@ -1,4 +1,3 @@
-// nebio.cpp - the C API that Python loads with ctypes.
 #include "nebio.h"
 
 #include <mutex>

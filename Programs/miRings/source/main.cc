@@ -1,20 +1,11 @@
-// miRings - Mutable Instruments Rings (Emilie Gillet, MIT, src/rings and
-// src/stmlib) as a JACK program for the Nebulae's "programs" bank.
+// miRings - Mutable Instruments Rings (Emilie Gillet, MIT) as a JACK program.
 //
 //   miRings --port 3020 [--name miRings] [--no-connect] [file.prog]
 //
-// Audio: two inputs and two outputs (Rings' ODD and EVEN outputs, to
-// system:playback_1/2). "in" (system:capture_1) is the exciter, as Rings'
-// IN jack. "fm_in" (system:capture_2) is audio-rate FM: Rings reads its
-// pitch once per block, so the mean of each block's 24 samples (2 kHz)
-// is added to the pitch, times /rings/fm_in semitones (0 = off). Rings
-// computes 24 samples at a time at 48 kHz; the JACK period is cut into
-// those blocks, which adds 24 samples (0.5 ms) of latency. Other sample
-// rates are refused: Rings' tuning and filters are fixed to 48 kHz.
+// Inputs: "in" (capture_1) the exciter, "fm_in" (capture_2) FM, averaged per
+// 24-sample block. Outputs: ODD and EVEN. 48 kHz only.
 //
-// Control: OSC on 127.0.0.1:<port>, one float per message. Which Nebulae
-// control drives which address (and its range) is in the .prog file and
-// done by nebulae.py, so this program has fixed addresses only:
+// OSC on 127.0.0.1:<port>, one float per message:
 //   /rings/note              tonic, MIDI note (60 = C4)
 //   /rings/fm                frequency offset, semitones (-48..48)
 //   /rings/fm_in             depth of the FM input: semitones at full
@@ -34,7 +25,6 @@
 //   /rings/mono              1: ODD + EVEN on both outputs (what the module
 //                            gives with only one cable in), 0: ODD left,
 //                            EVEN right (default)
-// The file argument (the .prog that started it) is not read here.
 
 #include <jack/jack.h>
 #include <lo/lo.h>
@@ -58,9 +48,8 @@ namespace {
 
 const int kNumResonatorModels = 6;   // RESONATOR_MODEL_MODAL .. STRING_AND_REVERB
 const int kNumModels = kNumResonatorModels + FX_LAST;
-const float kNoiseGateThreshold = 0.00003f;  // as rings.cc
+const float kNoiseGateThreshold = 0.00003f;
 
-// Values from OSC, read once per 24-sample block by the audio thread.
 struct Controls {
   std::atomic<float> note{48.0f};
   std::atomic<float> fm{0.0f};
@@ -88,8 +77,8 @@ Strummer strummer;
 
 // Audio thread state
 float in_block[kMaxBlockSize];
-float fm_sum = 0.0f;  // sum of the FM input over the block being filled
-float fm_mean = 0.0f;  // its mean over the last complete block
+float fm_sum = 0.0f;
+float fm_mean = 0.0f;  // of the last complete block
 float out_block[kMaxBlockSize];
 float aux_block[kMaxBlockSize];
 size_t block_pos = 0;
@@ -110,8 +99,7 @@ float clampf(float v, float lo, float hi) {
   return v < lo ? lo : (v > hi ? hi : v);
 }
 
-// Tiny values in the resonators' feedback would otherwise be computed as
-// denormals, many times slower.
+// Denormals in the resonators' feedback are many times slower.
 void flushDenormals() {
 #if defined(__aarch64__)
   uint64_t fpcr;
@@ -171,7 +159,6 @@ void processBlock() {
     strummer.Process(NULL, kMaxBlockSize, &state);
     string_synth.Process(state, patch, in_block, out_block, aux_block, kMaxBlockSize);
   } else {
-    // Noise gate on the input (rings.cc)
     for (size_t i = 0; i < kMaxBlockSize; ++i) {
       float x = in_block[i];
       float error = x * x - in_level;
@@ -204,8 +191,7 @@ int onProcess(jack_nframes_t nframes, void*) {
   const float* fm = static_cast<const float*>(jack_port_get_buffer(port_fm_in, nframes));
   float* out_l = static_cast<float*>(jack_port_get_buffer(port_out_l, nframes));
   float* out_r = static_cast<float*>(jack_port_get_buffer(port_out_r, nframes));
-  // Each sample goes into the block and the block computed before comes out:
-  // a constant delay of one block.
+  // One block of delay.
   for (jack_nframes_t i = 0; i < nframes; ++i) {
     in_block[block_pos] = in[i];
     fm_sum += fm[i];
@@ -313,8 +299,7 @@ int main(int argc, char** argv) {
   lo_server_thread_add_method(osc, "/rings/internal_strum", "f", onBool, &controls.internal_strum);
   lo_server_thread_add_method(osc, "/rings/mono", "f", onBool, &controls.mono);
 
-  // nebulae.py starts the program as soon as the jackd process exists; the
-  // server may need a moment more before it takes clients.
+  // jackd may not take clients yet when the program starts.
   jack_status_t status;
   for (int i = 0; i < 100 && !quit; ++i) {
     client = jack_client_open(name.c_str(), JackNoStartServer, &status);

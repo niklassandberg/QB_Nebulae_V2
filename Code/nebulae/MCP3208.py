@@ -1,8 +1,6 @@
 import nebio
 
-# MCP3208 12-bit ADC. Both chips (CV on spidev0.0, POT on spidev0.1) are
-# scanned by nebio (C++); read_adc() returns the code from the current input
-# snapshot. The SPI command bytes now live in Code/nebio/src/adc.cpp.
+# MCP3208 12-bit ADC, scanned by nebio: read_adc() reads the snapshot.
 
 class MCP3208(object):
 

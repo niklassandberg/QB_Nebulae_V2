@@ -1,14 +1,6 @@
-// gpiomem.h - direct GPIO register access through /dev/gpiomem (no syscall
-// per read/write). Used only for the fast input path (shift register clock and
-// latch, reading input levels); libgpiod still owns the lines and sets their
-// direction, pulls and edge detection.
-//
-// Works on BCM2835/2836/2837 (Pi 1-3, Zero) and BCM2711 (Pi 4): same register
-// layout for GPFSEL/GPSET/GPCLR/GPLEV, /dev/gpiomem hides the base address.
-// Refuses anything else (e.g. Pi 5, where GPIO lives on the RP1 chip).
-//
-// Safety: pin functions (GPFSEL) are only read, never written, and only the
-// pins in the writable mask can be set or cleared.
+// GPIO registers through /dev/gpiomem, for the fast input path; libgpiod
+// still owns the lines. Pi 1-4 only (Pi 5 has GPIO on the RP1). Pin
+// functions are never written; only pins in the writable mask are set.
 #pragma once
 
 #include <cstdint>

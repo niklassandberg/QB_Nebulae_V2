@@ -30,22 +30,15 @@ const std::vector<unsigned> kGates = {4, 25, 23, 24};  // freeze, reset, next, r
 // NOTE: GPIO 7/8 (POT/CV select in control.py) are the SPI chip selects and
 // are owned by the spidev driver, so they are deliberately not touched here.
 
-// Scan/ADC rates: default 1000/500 Hz (inputs.h), Python can change them at
-// run time (nebio_set_input_rates).
 constexpr int kMinScanHz = 100;
 constexpr int kMaxScanHz = 2000;
 constexpr int kButtonDebounceUs = 8000;  // buttons/clicks, kept at 8 ms for any scan rate
 constexpr int kSrGateBit = 6;        // source gate arrives through the shift register
 constexpr uint32_t kSpiHz = 1000000;  // MCP3208.py
-// Knob ADC channels in use: 0 start, 1 blend, 2 density, 5 window, 6 size,
-// 7 overlap (controlhandler.py). 3 and 4 are not connected to a knob, so they
-// are not read (2 SPI transfers less per scan). All 8 CV channels are used.
+// POT channels 3 and 4 have no knob: not read.
 constexpr uint8_t kPotChannels = 0b11100111;
 
-// Fast GPIO (see gpiomem.h): every latch/clock level is held for at least
-// this long, whatever the scan rate (CD4021 needs a few hundred ns at 3.3 V;
-// the libgpiod path takes microseconds per step). A higher scan or digital
-// rate means more reads per second, never shorter pulses.
+// The CD4021 needs a few hundred ns per latch/clock level at 3.3 V.
 constexpr int64_t kFastPulseNs = 1000;
 // Self-check before switching to fast GPIO: reads compared both ways.
 constexpr int kFastCheckRounds = 50;
@@ -57,7 +50,6 @@ int64_t nowNs() {
     return static_cast<int64_t>(ts.tv_sec) * 1000000000LL + ts.tv_nsec;
 }
 
-// encoder.py VALID_SEQ_3
 int seqDirection(int a, int b, int c) {
     static const int fwd[4][3] = {{0, 1, 3}, {1, 3, 2}, {3, 2, 0}, {2, 0, 1}};
     static const int rev[4][3] = {{0, 2, 3}, {2, 3, 1}, {3, 1, 0}, {1, 0, 2}};
@@ -69,8 +61,6 @@ int seqDirection(int a, int b, int c) {
 }
 
 }  // namespace
-
-// ---- small helpers -------------------------------------------------------
 
 int Debounce::feed(int v) {
     if (v == raw) {
@@ -119,8 +109,6 @@ void Encoder::update(int state) {
     hist[1] = hist[2];
     histLen = 2;
 }
-
-// ---- Inputs --------------------------------------------------------------
 
 Inputs &Inputs::instance() {
     static Inputs *inputs = new Inputs();  // never destroyed, see GpioChip
@@ -194,8 +182,7 @@ int Inputs::init() {
 
     gatesPolled_ = !edges_.requestInputs(kGates, Bias::PullUp, true);
     std::vector<unsigned> polledPins = {kClickPitch, kClickSpeed};
-    // encoder.Worker(17, 27) and (6, 13): encoder.py swaps the pins,
-    // so state = level(27) | level(17) << 1 and level(13) | level(6) << 1.
+    // state = level(27) | level(17) << 1 and level(13) | level(6) << 1.
     enc_[0].pinA = 27;
     enc_[0].pinB = 17;
     enc_[1].pinA = 13;
@@ -231,8 +218,7 @@ int Inputs::init() {
         applyDebounce();
     }
 
-    // Start from the real levels, so a button held at boot is seen at once
-    // (check_wifi.py / check_calibration.py read a single value).
+    // Real levels: a button held at boot is seen at once.
     for (int s = 0; s < slotCount_; ++s) {
         unsigned pin = static_cast<unsigned>(slotPin_[s]);
         int level = polled_.get(pin);
@@ -243,7 +229,7 @@ int Inputs::init() {
         pinBits_[s].reset(level);
         snapPin_[s] = level;
     }
-    // Shift register starts at 0 and needs a stable read, like shiftregister.py.
+    // Shift register starts at 0 and needs a stable read.
     for (int i = 0; i < 8; ++i) srBits_[i].reset(0);
     snapSr_ = 0;
 
@@ -281,7 +267,7 @@ void Inputs::shutdown() {
 
 bool Inputs::readShiftRegister(uint8_t &bits) {
     if (!srOut_.ok() || !srIn_.ok()) return false;
-    // Same sequence as shiftregister.py: pulse latch, then clock out 8 bits.
+    // Pulse latch, then clock out 8 bits.
     srOut_.set(kSrLatch, 1);
     srOut_.set(kSrLatch, 0);
     bits = 0;
@@ -400,14 +386,10 @@ void Inputs::run() {
     while (!stop_) {
         int64_t start = nowNs();
 
-        // Rates can be changed from Python at any time; read them once per scan.
-        // Relaxed: compiles to a plain load (no barrier); one scan with a mixed
-        // old/new set after a change is harmless.
+        // Relaxed: one scan with mixed old/new rates is harmless.
         const int periodUs = scanPeriodUs_.load(std::memory_order_relaxed);
         const int digitalNth = digitalEveryNth_.load(std::memory_order_relaxed);
         const int adcNth = adcEveryNth_.load(std::memory_order_relaxed);
-        // Encoders every scan; shift register + clicks (+ polled gates) every
-        // digitalNth scan; ADCs every adcNth scan.
         bool digitalScan = (tick % static_cast<uint64_t>(digitalNth)) == 0;
         bool adcScan = (tick % static_cast<uint64_t>(adcNth)) == 0;
 
@@ -660,9 +642,8 @@ void Inputs::sendRawEncoders(const int clickLevel[2]) {
         RawState &r = raw_[id];
         if (!r.sendsClick()) continue;
         if (r.on) {
-            // As ui.py does for a hybrid encoder: the first steps after a
-            // direction change are dropped, so a single glitch step backwards
-            // (worn or bouncing contacts) never reaches sclang.
+            // The first steps after a direction change are dropped: a glitch
+            // step backwards never reaches sclang.
             int steps = enc_[id].steps.exchange(0);
             if (steps != 0) {
                 int dir = steps > 0 ? 1 : -1;

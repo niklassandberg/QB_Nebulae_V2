@@ -33,9 +33,7 @@ if pitch_click.state() == True or arg == 'force' or arg == 'only':
     launch_bootled()
     #time.sleep(2)
     print('Calibration commencing')
-    # Imported and built only when calibrating: a full ControlHandler took
-    # ~1 s at every boot. nebio starts from the real pin levels, so the
-    # click above is valid without it.
+    # Imported here: building it costs ~1 s at every boot.
     import calibration_collector
     collector = calibration_collector.CalibrationCollector()
     collector.collect()

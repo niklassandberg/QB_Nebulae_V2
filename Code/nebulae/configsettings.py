@@ -1,36 +1,15 @@
-# Nebulae's config settings (the configsettings page): read and saved here only.
-#
-# Nebulae code never opens the file itself: it reads the values from the
-# singleton configSettings (configSettings.ledDim, .wifiOn, .powerRegulator) and
-# saves a change through it (configSettings.setLedDim(0.4), ...), which also
-# starts the part that switches the system (the shell scripts below).
-#
-# All settings are in one file, CONFIG_FILE, one "key=value" per line:
-#   power_regulator=off  off | yield | shell | nohlt: keeps the CPU from
-#                    sleeping (its wake-ups are heard as a tone). yield/shell
-#                    = spin.sh loops (scripts/quiet.sh spin, at once); nohlt =
-#                    kernel option in /boot/cmdline.txt (the Pi restarts).
-#   no_pwm=off       on: the file and freeze LEDs without PWM (ui.py)
-#   led_stagger=on   on: the LED PWM channels switch on spread over the cycle
-#   services_quiet=off  on: Pi LEDs, USB, log, time sync, scheduled jobs quiet
-#                    (scripts/quiet.sh services)
-#   wifi=on          on | off                        (scripts/wifi.sh)
-#   led_dim=0.50     0.00 = off .. 1.00 = full
-#   log_level=INFO   DEBUG, STATS, INFO .. CRITICAL, set by hand (classlogger.py;
-#                    STATS: also the status lines every 10 s)
-#   nebio_scan_hz=1200, nebio_digital_hz=400, nebio_adc_hz=400, nebio_fast_gpio=off
-#                    nebio's input rates and GPIO access (controlhandler.py);
-#                    no UI yet, set by hand
-#   csound_rt_priority=70  Csound thread SCHED_FIFO 1-99, 0 = normal
-#                    (nebulae.py setRealtime); no UI, set by hand
-# The defaults are in the constructor. A missing file is created empty; a
-# missing or invalid value keeps its default. Every save writes all values.
-# Nothing else reads the file: the system starts with the quiet settings and
-# Wi-Fi off, and Nebulae applies the saved settings once it has loaded its first
-# instrument (applyAtStart). The shell scripts only switch (quiet.sh, wifi.sh).
-#
-# A firmware update replaces Code/config: every setting back to its default.
-# Knob values of the instruments are not here: settings.py (nebsettings.txt).
+# The config settings, "key=value" lines in CONFIG_FILE:
+#   power_regulator=off    off | yield | shell | nohlt (nohlt: the Pi restarts)
+#   no_pwm=off             file and freeze LEDs without PWM
+#   led_stagger=on
+#   services_quiet=off
+#   wifi=on
+#   led_dim=0.50
+#   log_level=INFO         DEBUG, STATS, INFO .. CRITICAL (by hand)
+#   nebio_scan_hz=1200, nebio_digital_hz=400, nebio_adc_hz=400,
+#   nebio_fast_gpio=off    (by hand)
+#   csound_rt_priority=70  SCHED_FIFO 1-99, 0 = normal (by hand)
+# A missing or invalid value keeps its default.
 
 import os
 import queue
@@ -42,13 +21,12 @@ SCRIPTS_DIR = "/home/alarm/QB_Nebulae_V2/Code/scripts/"
 QUIET_SCRIPT = SCRIPTS_DIR + "quiet.sh"
 WIFI_SCRIPT = SCRIPTS_DIR + "wifi.sh"
 
-CMDLINE = "/boot/cmdline.txt"   # kernel options, read at boot
+CMDLINE = "/boot/cmdline.txt"
 
 POWER_REGULATOR = ("off", "yield", "shell", "nohlt")
 
 
 def _kernelHasNohlt():
-    """The running kernel was started with nohlt."""
     try:
         with open("/proc/cmdline") as f:
             return "nohlt" in f.read().split()
@@ -58,7 +36,6 @@ LOG_LEVELS = ("DEBUG", "STATS", "INFO", "WARNING", "ERROR", "CRITICAL")
 
 
 def _rate(text, default):
-    """A rate in Hz from the file (whole number 1-10000), else the default."""
     try:
         hz = int(text)
     except (TypeError, ValueError):
@@ -69,7 +46,6 @@ def _rate(text, default):
 class ConfigSettings(object):
 
     def __init__(self):
-        # Defaults: used when the file has no (valid) value.
         self._powerRegulator = "off"
         self._noPwm = False
         self._ledStagger = True
@@ -77,30 +53,15 @@ class ConfigSettings(object):
         self._wifiOn = False
         self._ledDim = 1.0
         self._logLevel = "INFO"
-        # nebio input rates: the hardware read as often as the original
-        # firmware (0419df1) did, so the CPU use can be compared:
-        # - shift register, encoder clicks and ADCs were read once per
-        #   updateAll(), measured about 400 times/s -> digital 400 Hz, ADC
-        #   400 Hz. The ADC rate is also the highest rate updateAll() runs at.
-        # - encoders were polled by their own threads with sleep(0.001), just
-        #   under 1 kHz -> scan 1200 Hz (every 3rd scan: exactly 400 Hz).
-        # - button debounce: original 3 equal reads, nebio 8 ms = 3 at 400 Hz.
+        # As often as the original firmware read the hardware.
         self._nebioScanHz = 1200
         self._nebioDigitalHz = 400
         self._nebioAdcHz = 400
-        # Fast GPIO: shift register + encoder/click pins through /dev/gpiomem
-        # (Code/nebio/src/gpiomem.h) instead of libgpiod.
         self._nebioFastGpio = False
-        # Csound's performance thread in real-time priority (SCHED_FIFO),
-        # below jackd (75); 0 = normal priority.
-        self._csoundRtPriority = 70
+        self._csoundRtPriority = 70  # below jackd's 75
         self._lock = threading.Lock()
-        self._jobs = None  # queue of shell commands, started on first use
+        self._jobs = None
         self.load()
-
-    # -------------------------
-    # Reading
-    # -------------------------
 
     def load(self):
         # No logging in here: classlogger reads logLevel before logging is set up.
@@ -156,8 +117,6 @@ class ConfigSettings(object):
 
     @property
     def powerNeedsRestart(self):
-        """True while the setting wants nohlt and the running kernel does
-        not have it, or the other way round."""
         return self._wantNohlt() != _kernelHasNohlt()
 
     @property
@@ -204,31 +163,18 @@ class ConfigSettings(object):
     def csoundRtPriority(self):
         return self._csoundRtPriority
 
-    # -------------------------
-    # Applying at Nebulae's start
-    # -------------------------
-
+    # The system boots with Quiet mode and Wi-Fi off. Called after the first
+    # instrument load: start_wifi.sh mounts the stick.
     def applyAtStart(self):
-        """The saved settings to the system, which starts with Quiet mode and
-        Wi-Fi off. Called by Nebulae after its first instrument load: the
-        stick is free then (start_wifi.sh mounts it). Again after a restart
-        of Nebulae does no harm (nothing is switched twice)."""
         if self._servicesQuiet:
             self._runInBackground([QUIET_SCRIPT, "services", "on"])
         if self._powerRegulator in ("yield", "shell"):
             self._runInBackground([QUIET_SCRIPT, "spin", self._powerRegulator])
         self._runInBackground([WIFI_SCRIPT, "on" if self._wifiOn else "off"])
-        self._runInBackground(self._syncCmdline)  # also after a change by hand
+        self._runInBackground(self._syncCmdline)
 
-    # -------------------------
-    # Saving (file + switching the system)
-    # -------------------------
-
+    # Returns True when the Pi must restart (nohlt is read at boot).
     def setPowerRegulator(self, value):
-        """off | yield | shell | nohlt. Returns True when the Pi must restart
-        for it (nohlt switched on or off: a kernel option, read at boot; the
-        caller saves the instrument settings and reboots). Until then the
-        running kernel keeps what it has."""
         if value not in POWER_REGULATOR:
             raise ValueError("power_regulator %s, not %r" % ("|".join(POWER_REGULATOR), value))
         with self._lock:
@@ -237,14 +183,13 @@ class ConfigSettings(object):
             self._powerRegulator = value
             self._save()
         self._log().info("Power regulator: %s", value)
-        self._syncCmdline()   # now, not in the background: a reboot may follow
+        self._syncCmdline()   # not in the background: a reboot may follow
         if self.powerNeedsRestart:
             return True
         self._runInBackground([QUIET_SCRIPT, "spin", value if value != "nohlt" else "off"])
         return False
 
     def setNoPwm(self, on):
-        # Only saved: the UI gives it to nebio (ui.py applyNoPwm).
         on = bool(on)
         with self._lock:
             if on == self._noPwm:
@@ -254,7 +199,6 @@ class ConfigSettings(object):
         self._log().info("No PWM: %s", "on" if on else "off")
 
     def setLedStagger(self, on):
-        # Only saved: the UI gives it to nebio (ui.py applyLeds).
         on = bool(on)
         with self._lock:
             if on == self._ledStagger:
@@ -284,7 +228,6 @@ class ConfigSettings(object):
         self._runInBackground([WIFI_SCRIPT, "on" if on else "off"])
 
     def setLedDim(self, value):
-        # Only saved: the UI gives it to nebio while it is being turned.
         value = round(min(1.0, max(0.0, float(value))), 2)
         with self._lock:
             if value == self._ledDim:
@@ -293,16 +236,10 @@ class ConfigSettings(object):
             self._save()
         self._log().info("LED dim %.2f", value)
 
-    # -------------------------
-    # Internal
-    # -------------------------
-
+    # Synced with its folder: else the rename reaches the SD card only after
+    # up to 5 s, and a case switched off sooner keeps the old values.
+    # Called with self._lock held.
     def _save(self):
-        """All values to a new file, renamed over the old one: a power cut
-        leaves the old or the new file, never half a file. The folder is
-        synced too: the rename is otherwise only on the SD card after up to
-        5 s (ext4 journal), and a Eurorack case switched off sooner started
-        with the old values. Called with self._lock held."""
         text = ("power_regulator=%s\n" % self._powerRegulator
                 + "no_pwm=%s\n" % ("on" if self._noPwm else "off")
                 + "led_stagger=%s\n" % ("on" if self._ledStagger else "off")
@@ -330,9 +267,7 @@ class ConfigSettings(object):
         except OSError as e:
             self._log().error("Could not save %s: %s", CONFIG_FILE, e)
 
-    # The shell scripts run one after the other in one background thread:
-    # in the order the settings were changed (Wi-Fi off before the Quiet
-    # mode change), and the UI never waits for them.
+    # One thread: the scripts run in the order the settings were changed.
     def _runInBackground(self, command):
         if self._jobs is None:
             self._jobs = queue.Queue()
@@ -341,7 +276,7 @@ class ConfigSettings(object):
 
     def _worker(self):
         while True:
-            command = self._jobs.get()   # a shell script + args, or a function
+            command = self._jobs.get()
             try:
                 if callable(command):
                     command()
@@ -357,9 +292,6 @@ class ConfigSettings(object):
         return self._powerRegulator == "nohlt"
 
     def _syncCmdline(self):
-        """nohlt in /boot/cmdline.txt exactly when the power regulator is
-        nohlt. The kernel reads it at boot only (setPowerRegulator asks for
-        the restart). Same safe write as _save (new file, rename)."""
         want = self._wantNohlt()
         with open(CMDLINE) as f:
             words = f.read().split()
@@ -381,15 +313,12 @@ class ConfigSettings(object):
                          "Added" if want else "Removed", CMDLINE)
 
     def waitUntilApplied(self):
-        """Until the shell scripts of all changes so far have run."""
         if self._jobs is not None:
             self._jobs.join()
 
     def _log(self):
-        # Imported here: classlogger reads logLevel from this module.
-        from classlogger import ClassLogger
+        from classlogger import ClassLogger  # circular import
         return ClassLogger.loggerSetup(self)
 
 
-# The one instance all of Nebulae uses.
 configSettings = ConfigSettings()

@@ -1,19 +1,15 @@
 #!/bin/bash
-# Needs root. The services start it as root; started by hand it runs
-# itself again with sudo (sudo as root only adds lines to the journal).
+# Needs root.
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 mount /dev/sda1 /mnt/memory
-# Bootloader (EEPROM) update, only when a file "update_bootloader" is on the
-# stick: removed first (once only), then eeprom_update.sh flashes and reboots,
-# or logs to neb_log.txt why not (already up to date, 32-bit image).
+# "update_bootloader" on the stick: flash the EEPROM once.
 if [ -f /mnt/memory/update_bootloader ]
 then
     rm -f /mnt/memory/update_bootloader
     sync
     bash /home/alarm/QB_Nebulae_V2/Code/scripts/eeprom_update.sh flash
 fi
-# Nothing to install (no update zip, no packages on the stick or left in
-# Code/packages): done without remounting / read-write and back (~0.3 s at boot).
+# Nothing to install: no remount (~0.3 s at boot).
 if [ ! -f /mnt/memory/neb_update.zip ] && [ ! -d /home/alarm/QB_Nebulae_V2/Code/packages ] \
     && ! ls /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst >/dev/null 2>&1
 then
@@ -28,8 +24,6 @@ then
     pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
     python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
     echo "neb_update.zip detected."
-    # The engines report of an earlier update or build is stale now; this
-    # update writes a new one only when a recipe has no package.
     rm -f /mnt/memory/neb_engines_report.txt /mnt/memory/neb_engines_build.log.gz
     echo "Commencing Firmware Update Procedure"
     echo "Creating Backup Directories"
@@ -66,14 +60,9 @@ then
     now=$(date +"%a %D - %T")
     echo "$now - Firmware updated to: $VERSION" >> /mnt/memory/neb_log.txt
     rm -rf /mnt/memory/neb_update.zip
-    # The new firmware has no nebio build yet, and check_calibration.py reads
-    # the knobs through nebio, so build it first (file system is still rw).
+    # check_calibration.py reads the knobs through nebio.
     echo "building nebio for the new firmware"
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh
-    # Audio engines: the firmware's Code/engine_packages/ and the stick's engine_build/
-    # are merged into /home/alarm/engine_packages/ (kept across updates, so what was
-    # built here stays), other versions installed. Nothing is built: what has
-    # no package is reported on the stick (build it: engines_build.sh).
     bash /home/alarm/QB_Nebulae_V2/Code/scripts/engines_check.sh
     python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/check_calibration.py force
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/nebulae.service ]
@@ -89,8 +78,7 @@ then
         systemctl --system daemon-reload
         systemctl enable sclang.service
     fi
-    # jack@.service: one unit per JACK period (jack@128, jack@256, ...),
-    # started by nebulae.py, never at boot. It replaces jack.service.
+    # Started by nebulae.py, never at boot.
     if [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/jack@.service ]
     then
         echo "updating /etc/systemd/system/jack@.service for next boot up."
@@ -124,8 +112,7 @@ then
 
     cd /home/alarm/QB_Nebulae_V2/Code/packages
 
-    # Only packages built for this Pi's architecture: Code/packages holds old
-    # armv7h packages (and Python 2 wheels), which the aarch64 image must skip.
+    # Code/packages also holds old armv7h packages.
     ARCH=$(pacman-conf Architecture | head -1)
     PKGS=$(ls *-$ARCH.pkg.tar.* *-any.pkg.tar.* 2>/dev/null)
     if [ -n "$PKGS" ]
@@ -145,10 +132,7 @@ then
 
     rm -rf /home/alarm/QB_Nebulae_V2/Code/packages
 
-    # Our kernel modules (the codec card driver for every sample rate) into
-    # the kernels on the card that they fit; used after this stage's reboot.
-    # Here and not in the first stage: that one runs the old firmware's
-    # update.sh, this one already the new.
+    # In this stage: the first one runs the old firmware's update.sh.
     bash /home/alarm/QB_Nebulae_V2/Code/scripts/kernel_modules.sh
 
     #TODO: in wrong elif. Should test -d /home/alarm/QB_Nebulae_V2/Code/localfiles
@@ -180,10 +164,8 @@ then
 
     #mkdir dir if they dont exist
     mkdir -p /home/alarm/sc
-    mkdir -p /home/alarm/prog  # programs bank (.prog + program from the USB stick)
-    # No instrument in any bank (Csound, SC, Pd, programs): a copy of the
-    # factory granular looper, so the Nebulae has something to start. The
-    # original stays in Code/instr/.
+    mkdir -p /home/alarm/prog
+    # No instrument in any bank: a copy of the granular looper.
     if ! ls /home/alarm/instr/*.instr /home/alarm/sc/*.scd /home/alarm/pd/*.pd /home/alarm/prog/*.prog >/dev/null 2>&1
     then
         mkdir -p /home/alarm/instr
@@ -192,8 +174,7 @@ then
 
     reboot
 else
-    # Arch packages on the stick (.tar.xz, or .tar.zst which newer packages use),
-    # e.g. libgpiod and liblo for nebio.
+    # Arch packages on the stick, e.g. libgpiod and liblo for nebio.
     FC=`ls /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst 2>/dev/null | wc -l`
     if [ $FC -gt 0 ] 
     then 

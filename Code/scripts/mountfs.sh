@@ -1,6 +1,5 @@
 #!/bin/bash
-# Needs root. The services start it as root; started by hand it runs
-# itself again with sudo (sudo as root only adds lines to the journal).
+# Needs root.
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 
 case "${1}" in

@@ -1,17 +1,6 @@
 #!/bin/bash
-# Nebulae's own kernel modules: Code/kernel_modules/<kernel version>/*.ko.xz
-# (built with Resources/kernel/build_proto_modules.sh) go into
-# /lib/modules/<kernel version>/updates/ of every kernel on the card that has
-# that version, then depmod. updates/ wins over the kernel package's own
-# module, which stays untouched (deleting ours + depmod goes back).
-# Today: snd-soc-rpi-proto, the codec card driver that runs every sample rate
-# right (Resources/kernel/0002-rpi-proto-bclk-ratio-per-rate.patch).
-#
-# A module is only installed when its vermagic equals that of the kernel's
-# own module: same version, same kind of build. Other kernels (another
-# version, the old 32-bit images) keep their driver; the instruments' -r then
-# snaps to 48000 (nebulae.py jackRates()). The new module is used from the
-# next boot on (update.sh reboots).
+# Code/kernel_modules/<version>/*.ko.xz into /lib/modules/<version>/updates/
+# of each kernel with the same vermagic, then depmod.
 #   kernel_modules.sh          install what fits, report the rest
 #   kernel_modules.sh status   only report
 SRC=/home/alarm/QB_Nebulae_V2/Code/kernel_modules

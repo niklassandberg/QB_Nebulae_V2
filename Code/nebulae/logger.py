@@ -29,8 +29,6 @@ class NebLogger(object):
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
 
-    # Written from Python instead of one shell per line (was ~0.5 s per
-    # instrument start, mostly gettemp.sh calling the RPi3-only vcgencmd).
     def write_info(self, path):
         ts = self.getTimeStamp() + " --- "
         lines = [ts + key + ", " + value.rstrip() + "\n" for key, value in self.system_data.items()]
@@ -70,8 +68,7 @@ class NebLogger(object):
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
             print("Mounting USB Device")
-            # Quiet mode switches USB off between uses. Not switched off after
-            # unmount_usb(): the file loader mounts right after, and switches it off.
+            # Left on: the file loader mounts right after and switches it off.
             os.system("bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh on")
             os.system("mount /dev/sda1 /mnt/memory")
             self.check_usb_status()

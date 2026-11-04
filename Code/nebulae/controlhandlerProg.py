@@ -2,27 +2,20 @@ import encoderpages
 import nebio
 from controlhandlerEncoders import EncoderControlHandler
 
-# Only changed values are sent to the program, and every value again at least
-# this often: a program that starts (or restarts) late gets them all.
+# Everything is resent this often, so a program that starts late gets all values.
 PROG_RESEND_MS = 1000
 
-# Control handler for the programs bank (a .prog: any program that listens
-# for OSC, e.g. miRings). Owns the OSC link to the program (nebio OscLink on
-# the .prog's port). Which control goes to which OSC path, and in which range,
-# is in the .prog (osc: lines, nebconfig.py oscBindings()); a control without
-# a binding is not sent. Encoders, button modes and pages per .prog:
-# EncoderControlHandler.
+# Programs bank: controls go to the program as OSC, by the .prog's osc: lines.
 class ProgControlHandler(EncoderControlHandler):
 
     def __init__(self, *args, **kwargs):
         self.oscPort = kwargs.pop("oscPort")
         bindings = kwargs.pop("bindings")
         super(ProgControlHandler, self).__init__(*args, **kwargs)
-        # control name -> [(path, min, max, curve)]
-        self.bindings = {}
+        self.bindings = {}  # control -> [(path, min, max, curve)]
         for control, path, lo, hi, curve in bindings:
             self.bindings.setdefault(control, []).append((path, lo, hi, curve))
-        self.prog_sent = {}  # path -> last value sent
+        self.prog_sent = {}
         self.prog_resend_time = 0
 
     def closeSockets(self):
@@ -50,13 +43,9 @@ class ProgControlHandler(EncoderControlHandler):
         nebio.osc_open(self.oscPort)
         self.control_mode = "programs"
 
-    # The programs bank has no Csound "normal" mode: leaving secondary
-    # controls or the instr selector (ui.py) goes back to programs mode.
     def enterNormalMode(self):
         self.enterProgramsMode()
 
-    # Sends each bound channel and page whose value changed since it was last
-    # sent (all of them every PROG_RESEND_MS).
     def sendProgMessages(self, channels):
         full = self.now - self.prog_resend_time >= PROG_RESEND_MS
         if full:
@@ -73,8 +62,6 @@ class ProgControlHandler(EncoderControlHandler):
                     sent[path] = out
         self.sendPages(full)
 
-    # Only the programs part of ControlHandler.updateAll(): no Csound (end
-    # of loop, record status, file handling).
     def updateAll(self):
         self.countUpdateAll()
         self.shiftReg.update()

@@ -1,16 +1,9 @@
 [Unit]
 Description=SuperCollider Language Server
-# Early, like nebulae.service: sclang (class library ~1.4 s + startup.scd)
-# was the slowest step to sound in the SC bank, and it waited for
-# basic.target/sound.target (D-Bus, ALSA mixer restore) that it does not use:
-# scsynth reaches the card through jackd, OSC is on localhost (up before
-# userspace). Started at 4.1 s of userspace, nebulae.service at 1.7 s
-# (2026-10-31).
+# Early, like nebulae.service: sclang was the slowest step to sound.
 DefaultDependencies=false
 After=systemd-remount-fs.service tmp.mount
 Wants=tmp.mount
-# Without DefaultDependencies these are not there by themselves: a reboot
-# stops sclang (and its scsynth) like any service.
 Conflicts=shutdown.target
 Before=shutdown.target
 
@@ -18,18 +11,13 @@ Before=shutdown.target
 Type=simple
 User=root
 WorkingDirectory=/root/
-# tail keeps sclang's stdin open (it quits at end of input). Its output (and
-# scsynth's) goes to the journal: journalctl -u sclang (was /tmp/sclang.log).
+# tail keeps sclang's stdin open (it quits at end of input).
 ExecStart=/bin/bash -c 'exec tail -f /dev/null | /usr/bin/sclang'
 Restart=always
 StandardOutput=journal
 StandardError=journal
 SyslogIdentifier=sclang
-# No core dumps (sclang and scsynth, which inherits it). scsynth crashes on
-# /quit (SC 3.14: plugins unloaded while its audio thread still runs), and
-# writing its core to the SD card took ~25 s: a JACK period change made the
-# next instrument give up waiting for the synth (2026-10-31). The crash is
-# still logged in the journal, just without a dump.
+# scsynth crashes on /quit (SC 3.14), and writing its core took ~25 s.
 LimitCORE=0
 
 [Install]

@@ -5,18 +5,14 @@ NebInterface {
 	classvar remote;
 	classvar server;
 	classvar <>onReset;
-	// true while startup.scd boots scsynth early (bootinstr.txt jack line):
-	// /neb/loadScFile then waits until the boot is confirmed. A patch loaded
-	// between "server ready" and sclang's first status reply found the
-	// server "unresponsive" and rebooted it, and the reboot ended jackd
-	// (-T: it quits with its last client): silence (2026-10-31).
+	// While startup.scd boots scsynth early, /neb/loadScFile waits: a patch
+	// loaded before the first status reply rebooted the server.
 	classvar <>earlyBoot = false;
 
     classvar initialized = false;
 	
 	classvar <>audioPath = nil;
-	// Processed wavetables (NebPatch.loadWavetables). Not in audioPath: that is
-	// emptied on every USB load, and not in QB_Nebulae_V2: replaced by updates.
+	// Not in audioPath (emptied by USB loads) nor QB_Nebulae_V2 (updates).
 	classvar <>wavetableCachePath = "/home/alarm/cache/wavetables/";
 	
 	classvar <>storedBuffers;
@@ -34,9 +30,9 @@ NebInterface {
 	classvar settings;
 	classvar settingBuses;
 	classvar pageBuses;          // encoder pages (Python): name -> bus of /neb/page/<name>
-	// Layout of the .state file. Version 0 (no \version key) was the state dictionary alone.
+	// Version 0 (no \version key): the state dictionary alone.
 	classvar stateVersion = 1;
-	// The NebPatch init gave back; +1 on every init, so an older NebPatch knows it's stale.
+	// +1 on every init, so an older NebPatch knows it is stale.
 	classvar patch;
 	classvar <generation = 0;
 
@@ -614,7 +610,6 @@ NebPatch {
 		var prep = WavetablePrep(src, wtSize, numMaps, ratio).fudgeFactor_(fudgeFactor), t = Main.elapsedTime;
 		"NebPatch: preparing wavetable % ...".format(PathName(src).fileName).postln;
 		prep.readSync;
-		// Older cache files of this audio file (it was changed).
 		(NebInterface.wavetableCachePath ++ base ++ "_*.wav").pathMatch.do { |old|
 			if (old != cacheFile) { File.delete(old) };
 		};

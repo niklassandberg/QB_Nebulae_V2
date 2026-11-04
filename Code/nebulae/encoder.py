@@ -1,7 +1,4 @@
-# encoder.py
-#
-# The rotary encoders are polled by nebio (C++) at 1 kHz with the same
-# 3-state sequence check that used to live here (VALID_SEQ_3).
+# The rotary encoders are polled by nebio.
 
 import nebio
 from classlogger import ClassLogger

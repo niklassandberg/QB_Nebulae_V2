@@ -1,44 +1,29 @@
 #!/bin/bash
-# The quiet settings: only switching, no settings. Nebulae saves them
-# (configsettings.py) and runs this when one is changed on the configsettings
-# page, and once at its start for the saved ones (all off until then).
-# Whatever puts noise on the power is heard by the cheap ADC/DAC on i2s.
-#   quiet.sh spin off|yield|shell   "Power regulator" (2_power_regulator.ui):
-#       the CPU never sleeps. Every scan woke it from sleep (WFI), a current
-#       pulse heard as a tone; a do-nothing loop on all cores at the lowest
-#       priority (SCHED_IDLE) keeps the current even. Measured (400 Hz scan
-#       tone): none -98.5, yield or nohlt -103.5, shell -107.2 dBFS. yield
-#       touches no memory: on a Pi 3 the shell loop slowed Csound (shared
-#       cache/bus) to dropouts while recording. The 4th choice, nohlt, is the
-#       kernel option (configsettings.py writes /boot/cmdline.txt, restart):
-#       with it no spin runs. Pi 3 without heatsink: 83 C, no slowdown.
-#   quiet.sh services on|off        "Services no sounds" (4_services_quiet.ui):
-#       the Pi's LEDs off (green blinks with every SD card access), USB off
-#       while the stick is not in use (usb_power.sh), the system log in RAM,
-#       network time sync, netctl-auto and the scheduled jobs stopped.
-# "No PWM" (3_no_pwm.ui) is in the LEDs themselves (nebio, ui.py).
+# Switches the quiet settings (saved by configsettings.py). Power noise is
+# heard through the codec.
+#   quiet.sh spin off|yield|shell   the CPU never sleeps: each wake-up was a
+#                                   tone. yield, as shell slows Csound on a Pi 3.
+#   quiet.sh services on|off        Pi LEDs, USB, log in RAM, time sync,
+#                                   netctl-auto and timers off
 
 CODE=/home/alarm/QB_Nebulae_V2/Code
 USB=$CODE/scripts/usb_power.sh
 SERVICES="systemd-timesyncd.service netctl-auto@wlan0.service"
-# Scheduled jobs: keyring sync goes online weekly, shadow runs at midnight,
-# tmpfiles-clean at a random time.
 TIMERS="archlinux-keyring-wkd-sync.timer shadow.timer systemd-tmpfiles-clean.timer"
 SPIN=nebulae-spin
 
 spin() {  # off | yield | shell
     systemctl stop $SPIN 2>/dev/null
     [ "$1" = off ] && return
-    # Started with "nohlt": the kernel itself keeps the cores awake.
     if grep -qw nohlt /proc/cmdline; then
         echo "nohlt: the kernel keeps the cores awake, no spin"; return
     fi
-    # Own unit, so it survives a Nebulae restart.
+    # Own unit: survives a Nebulae restart.
     systemd-run --unit=$SPIN --collect --quiet -p CPUSchedulingPolicy=idle \
         /bin/bash $CODE/scripts/spin.sh $1
 }
 
-# The Pi's green/red LEDs: led0/led1 on kernel 5.15, ACT/PWR on newer kernels.
+# led0/led1 on kernel 5.15, ACT/PWR on newer kernels.
 ACT_LED=/sys/class/leds/ACT; [ -e $ACT_LED ] || ACT_LED=/sys/class/leds/led0
 PWR_LED=/sys/class/leds/PWR; [ -e $PWR_LED ] || PWR_LED=/sys/class/leds/led1
 
@@ -50,8 +35,7 @@ services() {  # on | off
         done
         bash $USB off
         journalctl --relinquish-var
-        # --runtime: until the next reboot. In the background: mask reloads
-        # systemd (1.4 s), stopping netctl-auto takes ~1.4 s.
+        # In the background: each takes ~1.4 s.
         if [ "$(systemctl is-enabled systemd-timesyncd.service 2>/dev/null)" != masked-runtime ]; then
             ( systemctl mask --runtime $SERVICES $TIMERS; systemctl stop $SERVICES $TIMERS ) &
         fi
@@ -62,7 +46,7 @@ services() {  # on | off
         systemctl unmask --runtime $SERVICES $TIMERS
         systemctl start $TIMERS
         journalctl --flush
-        # Right after the unmask netctl-auto can fail once; a few seconds later it starts.
+        # netctl-auto can fail once right after the unmask.
         for s in $SERVICES; do
             ( for i in 1 2 3 4 5; do systemctl start $s && break; sleep 2; done ) &
         done

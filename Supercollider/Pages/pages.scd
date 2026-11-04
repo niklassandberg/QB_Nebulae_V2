@@ -11,9 +11,9 @@ nebconfigend
 
 /* Encoder pages in a .scd: a template (the same pages as in a program's .prog).
 
-   speed  page 1 detune (white)  0..24 semitones, the second oscillator
+   speed  page 1 detune  0..24 semitones, the second oscillator
           page 2 drive (red)  1..20
-   pitch  page 1 note (white)  C1..C6, pitch CV here (1V/oct)
+   pitch  page 1 note  C1..C6, pitch CV here (1V/oct)
           page 2 cutoff (red)  100..12000 Hz
    blend  volume
 

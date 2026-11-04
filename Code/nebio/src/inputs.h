@@ -1,9 +1,5 @@
-// inputs.h - input thread: shift register, gate/click GPIOs, encoders, ADCs.
-//
-// The thread scans at 1 kHz (ADC every 2nd tick) by default; both rates can be
-// changed at run time with setRates(). Python takes snapshots;
-// every bit that changes between two snapshots is stretched so Python sees
-// the press/pulse for at least one snapshot, in order.
+// Input thread: shift register, gate/click GPIOs, encoders, ADCs. A change
+// between two snapshots is stretched so Python sees it at least once.
 #pragma once
 
 #include <atomic>
@@ -18,8 +14,7 @@
 
 namespace nebio {
 
-// Debounce like shiftregister.py: the value is accepted after `need`
-// consecutive identical reads following a change. need = 0 -> no debounce.
+// Accepted after `need` identical reads; 0 = no debounce.
 struct Debounce {
     int need = 0;
     int raw = -1;
@@ -38,9 +33,9 @@ struct StretchBit {
     int consume();
 };
 
-// Rotary encoder, same 3-state sequence check as encoder.py (VALID_SEQ_3).
+// Rotary encoder with a 3-state sequence check.
 struct Encoder {
-    unsigned pinA = 0;  // bit 0 of the state (encoder.py swaps the constructor pins)
+    unsigned pinA = 0;  // bit 0 of the state
     unsigned pinB = 0;  // bit 1
     int hist[3] = {0, 0, 0};
     int histLen = 0;
@@ -65,39 +60,24 @@ public:
     int gpioLevels(int *out, int n) const;
     int encoderId(int pinA, int pinB) const;
     int encoderSteps(int id);
-    // Raw encoder (rawencoder in a .scd): steps and click edges go straight
-    // from the input thread to sclang (/neb/enc/<name>, /neb/enc/<name>/click)
-    // and encoderSteps() returns 0. Switching off while the click is held
-    // sends the release, so sclang always gets press + release.
+    // See nebio_encoder_set_raw / nebio_encoder_set_click.
     void setEncoderRaw(int id, bool on);
     bool encoderRaw(int id) const;
-    // Click only (a hybrid encoder in a SuperCollider patch): the click edges
-    // go to sclang as for a raw encoder, the steps stay with Python.
     void setEncoderClick(int id, bool on);
     void setEol(int high);
     void stats(char *buf, size_t len);
 
-    // Scan rate (100-2000 Hz, encoders are read every scan), digital rate
-    // (shift register, clicks, polled gates) and ADC rate, both <= scan rate
-    // and rounded to every nth scan. Takes effect on the next scan.
-    // 0 = ok, -1 = invalid.
+    // See nebio_set_input_rates.
     int setRates(int scanHz, int digitalHz, int adcHz);
     int scanHz() const;
     int digitalHz() const;
     int adcHz() const;
 
-    // Fast GPIO: shift register and polled pins through /dev/gpiomem instead
-    // of libgpiod (see gpiomem.h). Switching on checks the board and the pin
-    // functions and runs a self-check (fast and libgpiod reads compared) in the
-    // input thread; on any problem it stays on libgpiod. 0 = ok, -1 = refused.
+    // See nebio_set_fast_gpio.
     int setFastGpio(bool on);
     bool fastGpio() const { return fastGpio_.load(std::memory_order_relaxed); }
 
-    // Scan timing, against the tones the scans put into the audio
-    // (noise_test.sh). Jitter: every scan interval varies randomly by up to
-    // +-fraction (0 = off, max 0.9); the mean rate stays the same, so the
-    // tone is spread out as noise. Trigger: scans no longer run on the timer
-    // but one per scanTrigger(), e.g. from the audio clock (locked to it).
+    // See nebio_set_scan_jitter / nebio_set_scan_trigger.
     void setScanJitter(double fraction);
     void setScanTrigger(bool external);
     void scanTrigger();
@@ -118,7 +98,7 @@ private:
 
     // Hardware
     GpioLines srOut_;    // clock, latch
-    GpioLines srIn_;     // data (no pull, like shiftregister.py)
+    GpioLines srIn_;     // data (no pull)
     GpioLines polled_;   // clicks, encoders (+ gates if no edge events)
     GpioLines edges_;    // gates with edge events
     GpioLines eolOut_;
@@ -130,13 +110,10 @@ private:
     std::atomic<bool> stop_{false};
     bool gatesPolled_ = false;
 
-    // Rates, see setRates(). Default: scan 1000 Hz, digital every scan
-    // (1000 Hz), ADC every 2nd scan (500 Hz).
     std::atomic<int> scanPeriodUs_{1000};
     std::atomic<int> digitalEveryNth_{1};
     std::atomic<int> adcEveryNth_{2};
 
-    // Scan timing, see setScanJitter()/setScanTrigger().
     std::atomic<double> scanJitter_{0.0};
     std::atomic<bool> externalTrigger_{false};
     std::mutex triggerMutex_;
@@ -144,7 +121,6 @@ private:
     int triggers_ = 0;  // pending, guarded by triggerMutex_
     uint64_t rng_ = 88172645463325252ULL;  // input thread only (xorshift)
 
-    // Fast GPIO, see setFastGpio(). Off by default.
     std::atomic<bool> fastGpio_{false};
     std::atomic<bool> fastRequest_{false};  // Python asks the input thread to self-check
     std::atomic<int> fastResult_{0};        // 1 ok, -1 failed
@@ -178,7 +154,7 @@ private:
         std::atomic<bool> click{false};  // click only to sclang
         bool pressed = false;      // press sent to sclang, release not yet
         bool waitRelease = false;  // held when the click was routed: skip until released
-        int lastDir = 0;           // direction of the last steps read, as ui.py's *_inc_dir
+        int lastDir = 0;
         bool sendsClick() const { return on || click; }
     };
     std::mutex rawMutex_;

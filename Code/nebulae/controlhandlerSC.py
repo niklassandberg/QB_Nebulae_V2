@@ -5,15 +5,12 @@ import nebio
 import scsender
 from controlhandlerEncoders import EncoderControlHandler, ENCODERS
 
-# Control handler for the SuperCollider bank. Owns the OSC link to sclang
-# (scSock). Encoders, button modes and pages per .scd: EncoderControlHandler.
 class SCControlHandler(EncoderControlHandler):
 
     def __init__(self, *args, **kwargs):
         super(SCControlHandler, self).__init__(*args, **kwargs)
         self.scSock = scsender.ScSend()
-        self.rawReady = False  # patch loaded, sclang can take the raw encoders
-        # The SC bank's own encoder source: sclang reads the encoder itself.
+        self.rawReady = False
         for name in ENCODERS:
             self.encoders[name]["rawencoder"] = control.ControlChannel(None, name, 0, "rawencoder")
 
@@ -30,38 +27,29 @@ class SCControlHandler(EncoderControlHandler):
     def sendPath(self, path, value):
         nebio.sc_send_path_float(path, value)
 
-    # ---- rawencoder -------------------------------------------------------
-
     def rawChannels(self):
         return [chn for chn in self.channels if chn.source == "rawencoder"]
 
-    # Called for every patch, also when this handler is reused for the next
-    # .scd (EncoderControlHandler.setConfig: encoders, buttons, pages).
-    def setConfig(self, config, pages_path):  # nebconfig.NebConfig of the .scd
+    def setConfig(self, config, pages_path):
         self.setRawActive(False)
         self.rawReady = False
         nebio.led_clear_sc()  # the old patch's LED colours
         super(SCControlHandler, self).setConfig(config, pages_path)
 
-    # Declared rawencoder by the loaded .scd (in supercollider mode Python
-    # never sets its value or LEDs).
     def isRaw(self, name):
         chn = self.channeldict.get(name)
         return chn is not None and chn.source == "rawencoder"
 
-    # Raw routing in nebio: only in supercollider mode and once the patch is loaded.
-    # Also the press/release of both encoders (raw or hybrid) goes to sclang
-    # in the same window, so a patch always knows when speed/pitch are clicked.
+    # Also routes the clicks of both encoders (raw or hybrid) to sclang.
     def setRawActive(self, state):
         for chn in self.rawChannels():
             chn.input.setActive(state)
         for name in ENCODERS:
             nebio.encoder_set_click(name, state)
 
-    # After loadScSynth(): the patch is running, sclang can take the raw encoders.
     def startRawEncoders(self):
         self.rawReady = True
-        self.page_sent = {}  # the patch's NebPage buses exist now: all pages again
+        self.page_sent = {}  # the patch's NebPage buses exist now
         if self.control_mode == "supercollider":
             self.setRawActive(True)
 
@@ -84,8 +72,6 @@ class SCControlHandler(EncoderControlHandler):
         if self.rawReady:
             self.setRawActive(True)
 
-    # The SC bank has no Csound "normal" mode: leaving secondary controls or the
-    # instr selector (ui.py) goes back to supercollider mode.
     def enterNormalMode(self):
         self.enterSuperColliderMode()
 
@@ -94,15 +80,13 @@ class SCControlHandler(EncoderControlHandler):
             self.classlog.info("def enterSecondaryMode: Connecting to SC Socket")
             #TODO: why call this???!!
             self.scSock.connectSender()
-        self.setRawActive(False)  # Python needs the encoders in secondary controls
+        self.setRawActive(False)
         super(SCControlHandler, self).enterSecondaryMode()
 
     def enterInstrSelMode(self):
-        self.setRawActive(False)  # and in the instr selector
+        self.setRawActive(False)
         super(SCControlHandler, self).enterInstrSelMode()
 
-    # Only the supercollider part of ControlHandler.updateAll(): no Csound
-    # (end of loop, record status, file handling) and no Pure Data.
     def updateAll(self):
         self.countUpdateAll()
         self.shiftReg.update()
@@ -133,8 +117,6 @@ class SCControlHandler(EncoderControlHandler):
     def startScOscServer(self):
         self.classlog.info("startScOscServer")
         self.scSock.connectSender()
-        # /sc/up and /neb/ready are handled inside nebio (see scsender.py),
-        # read with synthIsUpStatus()/sclangHandshakeStatus(); no callbacks.
         self.scSock.addResiver('/sc/up', None)
         self.scSock.addResiver('/neb/ready', None)
         #TODO: add other listener
@@ -171,14 +153,10 @@ class SCControlHandler(EncoderControlHandler):
         except Exception as e:
             self.classlog.error("Error in synthIsUpStatus(): %s", e)
 
-    # sclang listens on 3010 once its class library is compiled and
-    # startup.scd has run NebInterface.init (~16 s after power on, on a Pi 3).
-    # A loadScFile sent earlier is lost, and the pings after it only ask
-    # whether a patch is loaded: the bank stayed silent. Nebulae used to start
-    # ~3 s later (a sudo per command), which hid this.
+    # A loadScFile sent before sclang listens is lost: the bank stays silent.
     def waitForSclangPort(self, timeout=30.0):
         self.classlog.info("wait until sclang lisen on port %d", scsender.ScSend.rPort)
-        port = ":%04X" % scsender.ScSend.rPort  # local address, e.g. 00000000:0BC2
+        port = ":%04X" % scsender.ScSend.rPort
         start = time.time()
         while time.time() - start < timeout:
             for table in ("/proc/net/udp", "/proc/net/udp6"):

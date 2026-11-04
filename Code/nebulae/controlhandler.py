@@ -29,7 +29,7 @@ RESET_GATE_PIN = 25
 NEXT_GATE_PIN = 23
 RECORD_GATE_PIN = 24
 
-# Buttons whose mode and edge a patch can set in its nebconfig block (e.g. freeze,latching,rising).
+# Buttons whose mode and edge a nebconfig block can set.
 DIGITAL_CONTROLS = [
     "reset", "freeze", "source", "record", "file", "filestate", "sourcegate",
     "reset_alt", "freeze_alt", "source_alt", "record_alt", "file_alt"
@@ -43,10 +43,9 @@ class ControlHandler(object):
         self.classlog = ClassLogger.loggerSetup(self)
 
         self.csound = csound # Share csound instance with object
-        nebio.inputs() # all hardware is owned by nebio
+        nebio.inputs()
         self.eol_state = False
         self.shiftReg = libSR.ShiftRegister()
-        # nebio settings: configsettings.py (no UI for them yet).
         self.classlog.info("nebio input rates (scan, digital, adc): %s",
                            nebio.set_input_rates(configSettings.nebioScanHz,
                                                  configSettings.nebioDigitalHz,
@@ -67,7 +66,6 @@ class ControlHandler(object):
         self.settings.read()
         self.saveFlag = 0
         self.now = int(round(time.time() * 1000))
-        # updateAll() call counter, logged every 10 s (for CPU measurements)
         self.updateAllCount = 0
         self.updateAllLogCount = 0
         self.updateAllLogTime = self.now
@@ -181,13 +179,9 @@ class ControlHandler(object):
         self.writeThread = threading.Thread(target=self.dummyThread())
         self.writeThread.start()
         
-    # rawencoder only exists in the SuperCollider bank (SCControlHandler).
     def isRaw(self, name):
         return False
 
-    # Grows while the audio input clips (ui.py: encoder LEDs flicker red in
-    # secondary controls), counted by the card driver for every engine. A
-    # driver without the counter gives -1, which never changes: no clip shown.
     def inputClipCount(self):
         return nebio.card_clip_count()
 
@@ -256,7 +250,6 @@ class ControlHandler(object):
     def mode(self):
         return self.control_mode
     
-    # Csound has no sockets; SCControlHandler and PDControlHandler close theirs.
     def closeSockets(self):
         pass
 
@@ -410,9 +403,7 @@ class ControlHandler(object):
         if name in self.editFunctionFlag:
             self.editFunctionFlag[name] = True
 
-    # Start of every updateAll(): time stamp and the call counter, logged
-    # every 10 s at log level STATS (for CPU measurements; log_level STATS or
-    # DEBUG in configsettings.py). Otherwise not even nebio's counters are read.
+    # Logged every 10 s at log level STATS.
     def countUpdateAll(self):
         self.now = int(round(time.time() * 1000))
         self.updateAllCount += 1
@@ -425,8 +416,6 @@ class ControlHandler(object):
             self.updateAllLogCount = self.updateAllCount
             self.updateAllLogTime = self.now
 
-    # Holding the source button enters secondary controls, releasing it goes
-    # back to the previous mode.
     def handleSourceHold(self):
         self.sourceStateCtrl.update()
         #print "source state: " + str(self.sourceStateCtrl.getValue())
@@ -438,8 +427,6 @@ class ControlHandler(object):
             if self.sourceStateCtrl.getPrevValue() == 1:
                 self.prep_mode_change = False
                 if self.control_mode == "secondary controls":
-                    # SCControlHandler/PDControlHandler override enterNormalMode()
-                    # to go back to supercollider/puredata mode
                     self.enterNormalMode()
 
         if self.prep_mode_change == True and self.now - self.prep_mode_change_time > 175:# and numChanged > 0:
@@ -457,7 +444,6 @@ class ControlHandler(object):
                 if sel_idx < self.instr_sel_numfiles:
                     self.instr_sel_idx = sel_idx
 
-    # Csound. SCControlHandler and PDControlHandler have their own updateAll().
     def updateAll(self):
         #GPIO.output(self.eol_pin, False) # For debugging
         self.countUpdateAll()

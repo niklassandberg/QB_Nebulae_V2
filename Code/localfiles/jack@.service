@@ -1,20 +1,13 @@
 [Unit]
-# One unit for every JACK setting: jack@<period>-<periods>-<rate>, e.g.
-# jack@128-3-48000 runs jackd with -p128 -n3 -r48000. nebulae.py starts it
-# for the SC and Pd banks with what the instrument asks for in its nebconfig
-# ("blocksize,256", "-n,3", "-r,48000"; defaults 128, 3, 48000; the rate
-# snapped to one the card really runs) and restarts jackd when the next
-# instrument wants other settings.
-# Never enabled at boot (no [Install] section on purpose).
+# jack@<period>-<periods>-<rate>, e.g. jack@128-3-48000, started by
+# nebulae.py. Never enabled at boot (no [Install] on purpose).
 Description=JACK Audio Connection Kit, %i (period-periods-rate)
 After=sound.target
 
 [Service]
 Type=simple
-# %i split at "-" into -p -n -r ($$ is a $ for the shell). Older names:
-# jack@128 gets -n3 -r48000, jack@128-3 gets -r48000.
+# $$ is a $ for the shell.
 ExecStart=/bin/sh -c 'v=%i; IFS=-; set -- $$v; exec dbus-run-session /usr/bin/jackd --timeout 2000 -ndefault -R -P75 -dalsa -dhw:sndrpiproto -p$$1 -n$${2:-3} -s -r$${3:-48000}'
 Restart=no
-# No core dumps on the SD card: jackd aborts when it is stopped right after
-# scsynth crashed on /quit (see sclang.service); logged in the journal only.
+# See sclang.service.
 LimitCORE=0

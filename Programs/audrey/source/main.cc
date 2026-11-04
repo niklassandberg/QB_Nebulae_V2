@@ -1,18 +1,11 @@
 // audrey - AudreyTouch's sound engine (Infrasonic Audio / Synthux Academy,
-// MIT, src/audrey; DaisySP MIT and DaisySP-LGPL, src/daisysp*) as a JACK
-// program for the Nebulae's "programs" bank. Only the engine and its knobs:
-// no touch pads, no MIDI, no Daisy hardware.
+// MIT; DaisySP MIT and LGPL) as a JACK program, without touch and MIDI.
 //
 //   audrey --port 3021 [--name audrey] [--no-connect] [file.prog]
 //
-// Audio: one input (system:capture_1; AudreyTouch also reads only the left
-// input) and two outputs (system:playback_1/2), through the same limiters
-// as on the hardware. The engine runs as there: parameters are updated every
-// 4 samples (its audio block size), so their smoothing is the same. 48 kHz
-// only, as the hardware.
+// One input, two outputs, 48 kHz only.
 //
-// Control: OSC on 127.0.0.1:<port>, one float per message. Values 0..1 go
-// through the same curves as AudreyTouch's knobs (FeedbackSynthControls.cpp):
+// OSC on 127.0.0.1:<port>, one float per message, 0..1 through the knob curves:
 //   /audrey/feedback     feedback gain, the main control (S30)
 //   /audrey/input        input level (S31)
 //   /audrey/output       output level (P10 + S31)
@@ -28,7 +21,6 @@
 //   /audrey/note         string pitch, MIDI note 16..88 (pads + S36 + octave)
 //   /audrey/gate         >= 0.5: note on (as touching a pad), < 0.5: note off
 //   /audrey/drone        1: the loop keeps ringing without a gate (P11 + P02)
-// The file argument (the .prog that started it) is not read here.
 
 #include <jack/jack.h>
 #include <lo/lo.h>
@@ -68,8 +60,7 @@ enum class Parameter : uint8_t {
   LFODistribution,
 };
 
-// One control: the value from OSC and a counter that says it changed. The
-// audio thread applies changed values once per 4-sample block.
+// Applied by the audio thread once per block when the counter changed.
 struct Control {
   std::atomic<float> value;
   std::atomic<unsigned> sets{0};
@@ -208,7 +199,7 @@ int onProcess(jack_nframes_t nframes, void*) {
   const float* in = static_cast<const float*>(jack_port_get_buffer(port_in, nframes));
   float* out_l = static_cast<float*>(jack_port_get_buffer(port_out_l, nframes));
   float* out_r = static_cast<float*>(jack_port_get_buffer(port_out_r, nframes));
-  // Each sample goes into the block and the block computed before comes out.
+  // One block of delay.
   for (jack_nframes_t i = 0; i < nframes; ++i) {
     in_block[block_pos] = in[i];
     out_l[i] = out_l_block[block_pos];
@@ -267,7 +258,6 @@ int main(int argc, char** argv) {
   params.Init(kSampleRate / kBlockSize);
   registerParams();
   for (auto& lim : limiter) lim.Init();
-  // Every control applied once at the start (the knob defaults above)
   for (Control* c : {&c_feedback, &c_input, &c_output, &c_reverb_mix, &c_reverb_size, &c_lpf,
                      &c_hpf, &c_body, &c_shape, &c_lfo, &c_note}) {
     c->sets.fetch_add(1);
@@ -289,8 +279,7 @@ int main(int argc, char** argv) {
     lo_server_thread_add_method(osc, a.path, "f", onFloat, a.c);
   }
 
-  // nebulae.py starts the program as soon as the jackd process exists; the
-  // server may need a moment more before it takes clients.
+  // jackd may not take clients yet when the program starts.
   jack_status_t status;
   for (int i = 0; i < 100 && !quit; ++i) {
     client = jack_client_open(name.c_str(), JackNoStartServer, &status);

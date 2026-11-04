@@ -1,15 +1,9 @@
 #!/bin/bash
-# Switches Wi-Fi on or off; only switching, no settings. Nebulae saves the
-# setting (configsettings.py) and runs "wifi.sh on|off" when it is changed on
-# the configsettings page (1_wifi.ui), and once at its start for the saved setting
-# (Wi-Fi is off until then: startup.sh blocks the radio).
 #   wifi.sh on|off
-#   wifi.sh driver   load the Wi-Fi driver (after Quiet level 1 removed it)
-# "On" is nebwifi.service (start_wifi.sh): the home network if wlan0-wifi is
-# on the USB stick, else the Nebulae access point + NebFile.
+#   wifi.sh driver   load the Wi-Fi driver
+# On: the home network if wlan0-wifi is on the stick, else the access point.
 
-# Quiet level 1 (Code/scripts/quiet.sh) removes the Wi-Fi driver; load it again and wait
-# for wlan0. The radio stays blocked until start_wifi.sh unblocks it.
+# The radio stays blocked until start_wifi.sh unblocks it.
 driver() {
     [ -e /sys/class/net/wlan0 ] && return
     modprobe brcmfmac
@@ -23,13 +17,10 @@ wifi_on() {
     systemctl start nebwifi.service
 }
 
-# Also at Nebulae's start when it is off: startup.sh's early "rfkill block
-# wifi" comes before the Wi-Fi driver has loaded (~8 s), which then starts
-# with the radio unblocked.
+# Also at start: the driver loads after startup.sh's rfkill block.
 wifi_off() {
     echo "wifi off"
     systemctl stop NebFile.service
-    # Kills what start_wifi.sh left running (create_ap, its delayed starts).
     systemctl stop nebwifi.service
     netctl stop-all
     rfkill block wifi

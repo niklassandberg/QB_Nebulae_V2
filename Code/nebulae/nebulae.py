@@ -28,9 +28,7 @@ import kernelswitch
 from classlogger import ClassLogger
 from configsettings import configSettings
 
-# Before the first Csound(): Csound's own signal handlers caught SIGTERM
-# without exiting, so "systemctl stop nebulae" (and every reboot) waited
-# 90 s for systemd's SIGKILL. With the default action it stops at once.
+# Csound's own handlers ignore SIGTERM: systemd would wait 90 s for SIGKILL.
 ctcsound.csoundInitialize(ctcsound.CSOUNDINIT_NO_SIGNAL_HANDLER)
 
 cfg_path = "/home/alarm/QB_Nebulae_V2/Code/config/"
@@ -59,7 +57,7 @@ class Nebulae(object):
             self.ui = None
             self.c_handle = None
             self.led_process = None
-            self.prog = None  # the process of the programs bank
+            self.prog = None
             # Check the config file for last instr
             self.new_bank = None
             self.new_instr = None
@@ -73,8 +71,6 @@ class Nebulae(object):
                             self.new_bank = templist[1]
                         elif templist[0] == 'instr':
                             self.new_instr = templist[1] 
-            # The boot instrument must exist; else the first one there is
-            # (only when there is none at all: the granular looper).
             if self.new_bank not in nebconfig.INSTR_DIRS or not self.new_instr or \
                     not os.path.isfile(nebconfig.instrumentPath(self.new_bank, self.new_instr)):
                 if self.new_bank is not None:
@@ -87,10 +83,6 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in __init__: %s", e)
 
-    # The first instrument there is, in the order of the instr selector's
-    # banks (Csound, SuperCollider, Pure Data, programs), as (bank, name).
-    # Only when no bank has any: the factory granular looper, copied into the
-    # Csound bank. (The USB stick is loaded later, at the instrument's start.)
     def firstInstrument(self):
         for bank in ("instr", "supercollider", "puredata", "programs"):
             folder, ext = nebconfig.INSTR_DIRS[bank]
@@ -107,14 +99,8 @@ class Nebulae(object):
         shutil.copy2("/home/alarm/QB_Nebulae_V2/Code/instr/a_granularlooper.instr", folder)
         return "instr", "a_granularlooper"
 
-    # Csound's performance thread (it computes and plays every audio block)
-    # in real-time priority (SCHED_FIFO, csound_rt_priority in
-    # configsettings.py, below jackd's 75): nothing else may interrupt it.
-    # At normal priority even the Quiet mode spin loops (SCHED_IDLE) got
-    # ~2 ms turns on its core; on a Pi 3 while recording that was constant
-    # dropouts (measured 2026-10-24: ~1400 interruptions per 20 s, 1800 to
-    # 2000 dropouts per 160 s; with FIFO 0 and 0).
-    # new_threads: the thread ids CsoundPerformanceThread() created.
+    # At normal priority even SCHED_IDLE threads interrupt the performance
+    # thread: dropouts on a Pi 3 while recording.
     def setRealtime(self, new_threads):
         prio = configSettings.csoundRtPriority
         if prio == 0:
@@ -137,13 +123,7 @@ class Nebulae(object):
             self.classlog.error("Error in getSysCores(): %s", e)
             return 1
 
-    # Kernel per instrument (kernelswitch.py, "kernel,rt" in the instrument's
-    # nebconfig): when the running kernel is the wrong one, the Pi restarts
-    # into the one this instrument wants. Called after floader.reload(), with
-    # the NebConfig the engine then uses (the file is read once). The
-    # instrument is not started meanwhile: the loading animation runs until
-    # systemd stops Nebulae. If the restart does not come, the instrument
-    # starts on this kernel after all.
+    # Restarts the Pi into the kernel the instrument wants; waits for it.
     def kernelSwitch(self, instr, config):
         if not self.kernel_switch.switchFor(instr, config):
             return
@@ -152,17 +132,11 @@ class Nebulae(object):
         self.classlog.error("No restart after 60 s: starting %s on this kernel", instr)
         self.kill_bootled()
 
-    # Start-time measurement of the Csound bank: each step of start() as
-    # "csound start: <step> at <s since boot> (+<s since the step before>)".
-    # Seconds since boot are comparable with neb_boottime.sh's markers.
     def startMark(self, step):
         now = time.monotonic()
         self.classlog.info("csound start: %s at %.3f s (+%.3f s)", step, now, now - self.start_mark)
         self.start_mark = now
 
-    # After pt.play(): the score's time 0 is passed once the f statements
-    # (GEN01: every sample loaded into a table) are done; instr 1 (the
-    # instrument itself, "i1 1" in conductor.py) starts at score time 1.
     def watchScoreStart(self):
         def watch():
             marks = [(0.0, "score running (sample tables loaded)"), (1.0, "score time 1 s (instr 1 starts)")]
@@ -177,9 +151,7 @@ class Nebulae(object):
         try:
             self.start_mark = time.monotonic()
             self.startMark("begin")
-            # Csound opens the card itself: no jackd (after SC/Pd, or a
-            # Nebulae that starts while one runs)
-            self.leave_jack()
+            self.leave_jack()  # Csound opens the card itself
             self.classlog.info("Nebulae Starting")
             if self.currentInstr != self.new_instr:
                 reset_settings_flag = True
@@ -310,15 +282,7 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in cleanup(): %s", e)
 
-    # bootinstr.txt: the instrument the next boot starts, and for the SC/Pd/programs
-    # banks its JACK settings once they are known (start_supercollider,
-    # start_puredata, start_programs), as the jack@ unit is named:
-    #   bank,supercollider
-    #   instr,1_sine
-    #   jack,64-3-48000        (period-periods-rate)
-    # startup.sh starts jackd with it as soon as the card is there, and
-    # sclang (startup.scd) boots scsynth on it, before Nebulae asks for the
-    # patch. No jack line (Csound, or not known yet): nothing starts early.
+    # The jack line lets startup.sh start jackd (and sclang scsynth) early.
     def writeBootInstr(self, jack=None):
         try:
             text = 'bank,' + self.new_bank + '\n' + 'instr,' + self.new_instr + '\n'
@@ -327,7 +291,7 @@ class Nebulae(object):
             try:
                 with open(self.instr_cfg) as f:
                     if f.read() == text:
-                        return  # unchanged: no write on the SD card
+                        return
             except OSError:
                 pass
             if neb_globals.remount_fs is True:
@@ -350,11 +314,8 @@ class Nebulae(object):
     def wait_on_jack(self):
         pass #maybe take this and fill in of a old commit.
 
-    # Sample rates the codec card really runs. The WM8731 has a 12.288 MHz
-    # crystal (no 44100). The stock card driver (snd-soc-rpi-proto) runs only
-    # 48000 right: it accepts others, but plays them at another speed. Our
-    # patched one (Resources/kernel/0002-rpi-proto-bclk-ratio-per-rate.patch)
-    # runs all four and says so in /sys/module/snd_soc_rpi_proto/version.
+    # The stock rpi-proto driver plays only 48000 at the right speed; the
+    # patched one (Resources/kernel/0002-*) runs all four.
     PROTO_VERSION_FILE = "/sys/module/snd_soc_rpi_proto/version"
     PROTO_RATES = (8000, 32000, 48000, 96000)
 
@@ -367,10 +328,7 @@ class Nebulae(object):
             pass
         return (nebconfig.DEFAULT_SAMPLE_RATE,)
 
-    # The JACK settings the instrument asks for in its nebconfig, as
-    # (period, periods, sample rate): "blocksize,256", "-n,3", "-r,48000";
-    # each one missing or wrong is its default (128, 3, 48000). The rate is
-    # snapped to the nearest one the card runs (a tie: the higher one).
+    # (period, periods, rate); the rate snapped to one the card runs.
     def jackSettings(self, instr, config):
         settings = []
         for read, default in ((config.blockSize, nebconfig.DEFAULT_BLOCK_SIZE),
@@ -389,13 +347,10 @@ class Nebulae(object):
                                   instr, wished, ", ".join(str(r) for r in rates), settings[2])
         return tuple(settings)
 
-    # The unit of these settings: jack@<period>-<periods>-<rate>.service.
     @staticmethod
     def jackUnit(settings):
         return "jack@%d-%d-%d.service" % settings
 
-    # The settings of the running jack@....service, or None. Older names:
-    # jack@128 has -n3 -r48000, jack@128-3 has -r48000.
     def runningJack(self):
         try:
             out = subprocess.run(["systemctl", "list-units", "--plain", "--no-legend",
@@ -412,9 +367,6 @@ class Nebulae(object):
             self.classlog.error("Error in runningJack(): %s", e)
         return None
 
-    # jackd (jack@.service) with these settings. One already running with
-    # other settings is stopped first: its clients (scsynth, Pd) must be gone
-    # by then.
     def start_jack(self, settings):
         try:
             running = self.runningJack()
@@ -431,18 +383,14 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in start_jack(): %s", e)
 
-    # A scsynth still on jackd must quit before jackd restarts: killed by
-    # jackd, sclang does not boot a new server and the next SC instrument
-    # stays silent. An instrument switch quits it already (close_sc); this is
-    # for a Nebulae that starts while jackd runs with other settings (restart
-    # of nebulae.service). Same message as close_sc, without the SC handle:
-    # OSC /neb/quit 0 to sclang (NebInterface.sc).
+    # A scsynth killed by jackd is never rebooted by sclang: the next SC
+    # instrument would stay silent.
     def quit_scsynth(self):
         try:
             if subprocess.call(["pgrep", "-x", "scsynth"], stdout=subprocess.DEVNULL) != 0:
                 return
             self.classlog.info("scsynth still runs on jackd: asking sclang to quit it")
-            address = b"/neb/quit\0\0\0"            # OSC string, padded to 4
+            address = b"/neb/quit\0\0\0"
             message = address + b",i\0\0" + struct.pack(">i", 0)
             sock = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
             sock.sendto(message, ("127.0.0.1", 3010))
@@ -458,10 +406,6 @@ class Nebulae(object):
     def stop_jack(self):
         os.system("systemctl stop 'jack@*.service'")
 
-    # Out of the JACK banks (start() of a Csound instrument): scsynth quits
-    # properly, then jackd goes. jackd runs without -T (it does not end with
-    # its last client), so an SC <-> Pd switch keeps it, and start_jack()
-    # restarts it only for other settings.
     def leave_jack(self):
         self.quit_scsynth()
         self.stop_jack()
@@ -524,15 +468,11 @@ class Nebulae(object):
 
             self.orc_handle.refreshFileHandler() #also the audio files
 
-            # Only an SCControlHandler can be reused (a Csound/PD handler has no
-            # SC updateAll() and no OSC listener).
             reuseResources = fromSC and isinstance(self.c_handle, chSC.SCControlHandler)
             scConfig = nebconfig.NebConfig.read("supercollider", patch)
             self.kernelSwitch(patch, scConfig)
             jack = self.jackSettings(patch, scConfig)
             if reuseResources and self.runningJack() not in (None, jack):
-                # The previous patch's scsynth runs on jackd with other
-                # settings: it quits, and this patch starts afresh.
                 self.classlog.info("%s wants %s: restarting scsynth", patch, self.jackUnit(jack))
                 self.close_sc()
                 reuseResources = False
@@ -548,14 +488,13 @@ class Nebulae(object):
                 self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
                 self.st = None #just to be sertain.
-            # Encoders (hybrid, rawencoder or pages), button modes and pages, as the .scd declares them
             self.c_handle.setConfig(scConfig, self.pagesPath("supercollider", patch))
 
             self.c_handle.enterSuperColliderMode()
             self.classlog.info("Load patch!")
             #self.kill_bootled() #maybe warning is because scsynth starts??? Moved here
             self.c_handle.loadScSynth(fullPath)
-            self.c_handle.startRawEncoders() # patch is running: sclang takes its rawencoders
+            self.c_handle.startRawEncoders()
             
             self.kill_bootled()
 
@@ -577,8 +516,6 @@ class Nebulae(object):
             self.newInstr = patch
             floader = fileloader.FileLoader()
             floader.reload()
-            # Pd itself reads the patch; here only its nebconfig (kernel). A
-            # patch that is not readable as text still starts (Pd may know).
             try:
                 config = nebconfig.NebConfig.read("puredata", patch)
             except (OSError, ValueError) as e:
@@ -587,12 +524,11 @@ class Nebulae(object):
             self.kernelSwitch(patch, config)
             jack = self.jackSettings(patch, config)
             self.writeBootInstr(jack)
-            self.quit_scsynth()  # an SC bank's scsynth must not stay on jackd next to Pd
+            self.quit_scsynth()
             self.start_jack(jack)
             self.orc_handle.refreshFileHandler()
             fullPath = nebconfig.instrumentPath("puredata", patch)
             cmd = "pd -jack -rt -callback -nogui -verbose".split() if debug else "pd -jack -rt -callback -nogui".split()
-            # Pd libraries (Code/engine_packages/puredata/externals), when installed.
             for lib in ("else", "cyclone"):
                 libDir = "/usr/lib/pd/extra/" + lib
                 if os.path.isdir(libDir):
@@ -613,9 +549,7 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in start_puredata(): %s", e)
 
-    # Waits until Pd listens on its netreceive port (3000, see pdsender.py),
-    # i.e. the patch is loaded, instead of a fixed 2 s. At most 2 s (as
-    # before, also for a patch without netreceive), or until pd exits.
+    # Until Pd listens on its netreceive port 3000 (the patch is loaded).
     def wait_for_puredata(self, timeout=2.0):
         start = time.time()
         while time.time() - start < timeout:
@@ -693,7 +627,7 @@ class Nebulae(object):
                 request = self.ui.getReloadRequest()
             nebmixer.disable()
             if isinstance(self.c_handle, chSC.SCControlHandler):
-                self.c_handle.setRawActive(False) # give the encoders back to Python
+                self.c_handle.setRawActive(False)
             if request == True:
                 self.first_run = False
                 self.classlog.info("Received Reload Request from UI")
@@ -732,7 +666,6 @@ class Nebulae(object):
     def close_sc(self):
         #os.system("sudo killall sclang")
         #os.system("sudo killall jackd") #chould not be needed but just to be sure
-        # c_handle is not an SCControlHandler if start_supercollider() failed early
         if isinstance(self.c_handle, chSC.SCControlHandler):
             self.c_handle.closeScSynthProcess()
         self.c_handle.closeSockets()
@@ -757,27 +690,18 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in cleanup_puredata(): %s", e)
         os.system("killall pt")
-        # The PD connection (one in nebio for all handlers) still counts as
-        # connected to the old Pd: closed here, the next instrument's
-        # enterPureDataMode() connects to its Pd. Left open, a Pd -> Pd switch
-        # sent into the old socket ("Broken pipe") and the new Pd got no knobs.
+        # nebio has one Pd connection; left open, the next Pd gets no knobs.
         if isinstance(self.c_handle, chPD.PDControlHandler):
             self.c_handle.closeSockets()
         self.pt = None
 
-    # Programs bank: a .prog names a program (miRings, any binary or script)
-    # that runs as its own JACK client and listens for OSC; which control
-    # goes to which OSC path is in the .prog (nebconfig.py). The program
-    # connects its own JACK ports.
-    # The saved encoder pages of an instrument: <name>.pages next to it
-    # (encoderpages.py).
     def pagesPath(self, bank, name):
         return nebconfig.instrumentDir(bank) + name + encoderpages.PAGES_EXT
 
     def start_programs(self, name):
         try:
             self.log.spill_basic_info()
-            if self.c is not None:  # Csound was the bank before
+            if self.c is not None:
                 self.c.cleanup()
                 self.c = None
             self.c_handle = None
@@ -789,7 +713,7 @@ class Nebulae(object):
             self.kernelSwitch(name, config)
             jack = self.jackSettings(name, config)
             self.writeBootInstr(jack)
-            self.quit_scsynth()  # scsynth of an SC bank must not stay on jackd next to the program
+            self.quit_scsynth()
             self.start_jack(jack)
             self.orc_handle.refreshFileHandler()
             bindings, errors = config.oscBindings()
@@ -811,12 +735,11 @@ class Nebulae(object):
                 elif program.endswith(".py"):
                     cmd.insert(0, "python3")
                 elif os.path.isfile(program) and not os.access(program, os.X_OK):
-                    os.chmod(program, 0o755)  # a firmware update or copy may lose the bit
+                    os.chmod(program, 0o755)
                 self.classlog.info("Starting %s", " ".join(cmd))
                 self.prog = subprocess.Popen(cmd)
             self.c_handle = chProg.ProgControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr,
                                                       bank="programs", oscPort=port, bindings=bindings)
-            # Encoders (hybrid or pages), button modes and pages, as the .prog declares them
             self.c_handle.setConfig(config, self.pagesPath("programs", name))
             self.c_handle.setCsoundPerformanceThread(None)
             self.c_handle.enterProgramsMode()
@@ -865,7 +788,6 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in run_programs(): %s", e)
 
-    # Stops the program (SIGTERM, after 4 s SIGKILL) and closes its OSC.
     def close_programs(self):
         try:
             if self.prog is not None:
@@ -889,8 +811,6 @@ class Nebulae(object):
             cmd = "pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py"
             os.system(cmd)
             if self.ui is None:
-                # First instrument loaded: the saved Quiet mode and Wi-Fi to
-                # the system (both off until now).
                 configSettings.applyAtStart()
                 self.ui = ui.UserInterface(self.c_handle)
             else:
@@ -901,8 +821,6 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in loadUI(): %s", e)
 
-    # The loading animation runs inside nebio (same look as bootleds.py), so
-    # no second process writes to the LED driver.
     def launch_bootled(self):
         try:
             self.classlog.info("Starting loading LED animation")
@@ -933,5 +851,4 @@ try:
         app.start(app.new_instr, app.new_bank)
         app.run()
 except Exception:
-    # With the traceback, also when Nebulae() itself failed (no app yet).
     ClassLogger.logCrash("Unhandled error in main execution")

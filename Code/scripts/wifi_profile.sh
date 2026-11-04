@@ -1,17 +1,10 @@
 #!/bin/bash
-# wlan0-wifi from the USB stick (a netctl profile) made safe. netctl reads a
-# profile as a shell script, so values must be in plain single quotes: in
-# "double quotes" a $ in the password is replaced (Key="ab$cd" gives "ab"), and
-# typographic quotes (’…’ “…”, from word processors and web pages) are no
-# quotes at all (Description=’wifi for netctl’ is a broken line). People write
-# all of these, also from old instructions (TechnoBear's firmware), so every
-# value is taken as written, with whatever quotes around it, or none.
+# netctl reads a profile as shell: every value of wlan0-wifi is put in plain
+# single quotes, whatever quotes (also typographic) people wrote.
 #   wifi_profile.sh clean FILE      the profile with every value as 'value',
 #                                   to stdout (start_wifi.sh -> /etc/netctl)
 #   wifi_profile.sh get FILE KEY    one value without its quotes
 #                                   (engines_build.sh)
-# Lines without KEY=value (comments, empty) and arrays (KEY=(...)) stay as
-# they are. Windows line endings are removed.
 
 QUOTES="\"|'|’|‘|“|”"
 

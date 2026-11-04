@@ -1,18 +1,8 @@
 #!/bin/bash
-# Builds, on the Nebulae itself, the engine packages that have a recipe but
-# no package of its version in /home/alarm/engine_packages/ (the firmware's
-# Code/engine_packages/ and the stick's engine_build/, merged in by a firmware update;
-# see Resources/engine_build/README.md), natively for this Pi's CPU
-# (build_engines.sh), then installs them (engines_check.sh install).
-# A firmware update builds nothing; it reports what has no package. Run by
-# hand, it takes long:
+# Builds the engine packages that have a recipe but no package, on the
+# Nebulae, then installs them. Takes minutes to hours:
 #   sudo bash /home/alarm/QB_Nebulae_V2/Code/scripts/engines_build.sh
-# Nothing missing: it does nothing.
-# Internet for the sources and build tools:
-#  1. the LAN (Ethernet), when it has internet
-#  2. else Wi-Fi as a client, when the file wlan0-wifi (no extension) is on
-#     the USB stick: the netctl profile start_wifi.sh uses for the home
-#     network too, e.g.
+# Internet: the LAN, else Wi-Fi from wlan0-wifi on the stick, e.g.
 #       Description='wifi for netctl'
 #       Interface=wlan0
 #       Connection=wireless
@@ -20,14 +10,7 @@
 #       ESSID=YourWifiNetworkName
 #       IP=dhcp
 #       Key=YourWifiPassword
-#     Only ESSID, Key, Security and Hidden are used here, with any quotes
-#     (wifi_profile.sh); the file is read as text (not run) and only into
-#     RAM (/tmp), never written to the SD card.
-#  3. else nothing is built and the installed engines stay.
-# Report: neb_engines_report.txt on the stick (what was missing, the
-# network, what was built or why not); one line in neb_log.txt.
-# A build takes minutes (a UGen) to hours (Csound, sc3-plugins, ELSE) on a
-# Pi 3. The Wi-Fi it set up is taken down again at the end.
+# Report: neb_engines_report.txt on the stick.
 
 # Needs root. Started by hand it runs itself again with sudo.
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"

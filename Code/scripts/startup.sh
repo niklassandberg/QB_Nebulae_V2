@@ -1,6 +1,5 @@
 #!/bin/bash
-# Needs root. The services start it as root; started by hand it runs
-# itself again with sudo (sudo as root only adds lines to the journal).
+# Needs root.
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 
 #disable network by default.
@@ -13,12 +12,9 @@ modprobe i2c-dev
 echo "starting bootup LEDs"
 python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py booting &
 
-# After a bootloader (EEPROM) update (update_bootloader on the stick, see
-# update.sh): remove its files from /boot again. Otherwise nothing, a few ms.
 bash /home/alarm/QB_Nebulae_V2/Code/scripts/eeprom_update.sh
 
-# nebio (C++ hardware/OSC library) must exist before any Python script that
-# reads buttons or knobs (check_wifi.py, check_calibration.py, nebulae.py).
+# Before any Python script that reads buttons or knobs.
 echo "building nebio (only if changed)"
 if ! sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh check
 then
@@ -38,13 +34,8 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh
 #then
 #    sh /home/alarm/revertfactoryfw.sh
 #fi
-# Update Local Files - Config.txt (nebulae.service handled in update.)
-# Only write when changed: /boot is FAT, and a write left it marked dirty
-# ("Volume was not properly unmounted") when the power is cut.
-# nebulae.service starts before /boot is mounted (an automount on the aarch64
-# image, mounted when udev has seen the partition, ~1.5 s later). config.txt
-# is for the next boot, so this runs in the background: wait for /boot, at most
-# 20 s, and never write into the empty /boot directory of the root file system.
+# config.txt for the next boot, only when changed (/boot is FAT). /boot is
+# automounted ~1.5 s later: never write into the empty mount point.
 (
     for i in $(seq 200); do mountpoint -q /boot && [ -f /boot/cmdline.txt ] && break; sleep 0.1; done
     if [ -f /boot/cmdline.txt ] && [ -f /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt ] && ! cmp -s /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt /boot/config.txt
@@ -53,29 +44,17 @@ sh /home/alarm/QB_Nebulae_V2/Code/scripts/update.sh
         bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/config.txt > /boot/config.txt"
     fi
 ) &
-#sh /home/alarm/QB_Nebulae_V2/Code/scripts/handleuserfiles.sh
 
 
-# Configure Audio Codec
-# nebulae.service starts before the sound card is there (~5.5-7 s after kernel
-# start), and then alsa-restore sets the mixer state saved at shutdown. So in
-# the background: wait for the card, then for alsa-restore (at most 15 s in
-# all), so these settings come last. Audio is opened later (~8.5 s).
+# Codec inputs, after the card and alsa-restore are there.
 (
     for i in $(seq 100); do [ -e /proc/asound/sndrpiproto ] && break; sleep 0.1; done
     for i in $(seq 50); do systemctl is-active --quiet alsa-restore.service && break; sleep 0.1; done
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/enable_inputs.sh
 ) &
 
-# JACK early: the boot instrument's JACK settings ("jack,64-3-48000" in
-# bootinstr.txt, period-periods-rate, written by nebulae.py for the SC, Pd and
-# programs banks) start jackd as soon as the card is there, and sclang (startup.scd)
-# boots scsynth on it before Nebulae asks for the patch (~1 s sooner sound).
-# nebulae.py finds the unit running with the same settings and leaves it;
-# with other settings (instrument file changed) it restarts it. No jack line
-# (Csound uses the card itself): nothing.
-# Only when no jackd runs: startup.sh also runs when nebulae.service restarts
-# (Pi still up), and a second jackd would not get the card.
+# jackd early for the boot instrument (jack line in bootinstr.txt), unless
+# one runs already (nebulae.service restarted).
 JACK_EARLY=$(sed -n 's/^jack,\([0-9]*-[0-9]*-[0-9]*\)$/\1/p' /home/alarm/QB_Nebulae_V2/Code/config/bootinstr.txt 2>/dev/null)
 if [ -n "$JACK_EARLY" ] && ! pgrep -x jackd > /dev/null
 then
@@ -92,15 +71,10 @@ then
     bash -c "cat /home/alarm/QB_Nebulae_V2/Code/localfiles/environment > /etc/environment"
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro
 fi
-# What "sudo python3 nebulae.py" gave it before: HOME and /etc/environment
-# (LD_LIBRARY_PATH, SC_JACK_DEFAULT_*), now for everything started from here.
 export HOME=/root
 set -a; . /etc/environment; set +a
 
-# Hardware test firmware (create_fw_update.sh --hwtest): run the nebio
-# hardware test instead of nebulae. The log goes to the USB stick
-# (hwtest_log.txt), or /tmp when no stick is in. Ends with exit 0 so
-# nebulae.service (Restart=on-failure) does not restart startup.sh.
+# Hardware test firmware (create_fw_update.sh --hwtest). exit 0: no restart.
 if [ -f /home/alarm/QB_Nebulae_V2/Code/hwtest_mode ]
 then
     echo "hardware test mode"
@@ -109,7 +83,7 @@ then
     then
         HWLOG=/mnt/memory/hwtest_log.txt
     fi
-    # Build again: update.sh may just have installed libgpiod/liblo from the stick.
+    # update.sh may just have installed libgpiod/liblo.
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh > /tmp/nebio_build.log 2>&1
     BUILD=$?
@@ -129,10 +103,8 @@ fi
 
 #sudo systemctl start sclang.service
 
-# Calibration starts when the pitch encoder is held at boot. Its pin (GPIO22,
-# pull-up, 0 = held) is read here directly (a few ms) instead of starting
-# Python and nebio only to read it (~1.2 s). Anything but a clear 1 (held,
-# or no gpioget v2) runs check_calibration.py as before.
+# Pitch encoder held at boot (GPIO22 = 0): calibration. Read here, as
+# starting Python only for it takes ~1.2 s.
 if [ "$(gpioget -c gpiochip0 --bias=pull-up --numeric 22 2>/dev/null)" != 1 ]
 then
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw

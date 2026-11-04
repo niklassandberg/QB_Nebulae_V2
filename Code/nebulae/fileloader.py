@@ -12,13 +12,8 @@ import nebio
 
 USB_POWER = "bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh"
 
-# Saved values of an instrument, next to <name>.scd / .prog: <name>.pages
-# (its encoder pages, encoderpages.py) and <name>.state (sclang's own values,
-# NebInterface.sc). They belong to the Nebulae: a USB load never erases them.
-# One on the stick, next to its instrument, replaces the Nebulae's when it is
-# new or changed on the stick (not at every load: what was changed on the
-# Nebulae since stays until the stick's file changes). STATE_RECORD remembers
-# the stick's files last copied.
+# Saved values next to an instrument. A USB load never erases them; the
+# stick's copy replaces them only when it is new or changed (STATE_RECORD).
 STATE_EXTS = (".pages", ".state")
 STATE_TYPES = {"sc": ".scd", "prog": ".prog"}
 STATE_RECORD = ".stick_states"
@@ -58,8 +53,8 @@ class FileLoader(object):
         self.pdtypes = [".pd",".pd_linux"]
         self.csdtypes = [".csd"]
         self.scdtypes = [".scd",".sc"]
-        self.scripttypes = [".sh", ".neb"]  # configsettings page (scripts.py); .neb = executable
-        self.progtypes = [".prog"]  # programs bank; each brings the file its run entry names
+        self.scripttypes = [".sh", ".neb"]
+        self.progtypes = [".prog"]
         self.othertypes = [".c", ".cpp", ".cc"]
         self.dirs = [ "audio", "instr", "pd", "sc", "scripts", "prog", "csound", "other"]
         self.dirtypes = {}
@@ -81,10 +76,7 @@ class FileLoader(object):
               self.stateFunctions[self.currentState]
               self.currentState += 1
     
-    # A type is up to date when /home/alarm/<type> holds exactly the stick's
-    # files with the same size and mtime (copy2 keeps the mtime). Unlike the
-    # old in-memory hash of the whole stick this survives a reboot, and
-    # neb_log.txt (appended at every start) no longer counts as a change.
+    # Same names, sizes and mtimes as on the stick.
     def typeIsCurrent(self, fileType):
         fullDir = "/home/alarm/" + fileType
         try:
@@ -101,13 +93,9 @@ class FileLoader(object):
         except OSError:
             return False
 
-    # Files of a type folder that are not the stick's: hidden files, and the
-    # saved values (STATE_EXTS). They are neither compared nor erased.
     def keepLocal(self, fileType, name):
         return name.startswith('.') or (fileType in STATE_TYPES and name.endswith(STATE_EXTS))
 
-    # The stick's saved-value files of its instruments (usb: the stick's
-    # files of the type) that are new or changed since they were last copied.
     def changedStates(self, fileType, usb):
         ext = STATE_TYPES.get(fileType)
         if ext is None:
@@ -137,7 +125,6 @@ class FileLoader(object):
             pass
         return record
 
-    # Copies the stick's new or changed .state files over the Nebulae's.
     def copyStates(self, fileType, usb, fullDir):
         changed = self.changedStates(fileType, usb)
         if not changed:
@@ -158,8 +145,6 @@ class FileLoader(object):
         except OSError as e:
             self.classlog.error("Could not write %s: %s", STATE_RECORD, e)
 
-    # copy2 (keeps the mtime for typeIsCurrent()), on the SD card even if
-    # the power is cut.
     def copyFile(self, f, fullDir):
         dest = shutil.copy2(f, fullDir)
         fd = os.open(dest, os.O_RDONLY)
@@ -177,9 +162,7 @@ class FileLoader(object):
             files.extend(self.progRunFiles(files))
         return files
 
-    # The files the stick's .prog files run ("run,miRings"): a bare name
-    # that is on the stick too goes with its .prog (a binary has no
-    # extension to be sorted by). Programs come only from the stick.
+    # A binary has no extension: it comes along with the .prog that runs it.
     def progRunFiles(self, progs):
         runs = []
         for prog in progs:
@@ -219,15 +202,12 @@ class FileLoader(object):
                 self.classlog.info("Modified content: %s", ", ".join(changed))
             else:
                 self.classlog.info("No modified content.")
-            # copyType() flushes what it copied; a global sync waited for
-            # all other boot-time writes too (5 s seen).
             self.umount(sync=False)
             self.classlog.info("Time it took: %s", t.end())
         #why self.launch_bootled when right after kill it?
         #else: 
         #    self.launch_bootled(0)
         if self.led_process is not None:
-            # Stop the USB loading animation
             nebio.led_animation_stop()
             self.led_process = None
         if neb_globals.remount_fs is True:
@@ -235,7 +215,7 @@ class FileLoader(object):
 
     def mount(self):
         self.classlog.info("Mounting USB Device")
-        os.system(USB_POWER + " on")  # quiet mode switches USB off between uses
+        os.system(USB_POWER + " on")
         os.system("mount /dev/sda1 /mnt/memory")
         self.usb_mounted = self.isUSBMounted()
 
@@ -247,7 +227,7 @@ class FileLoader(object):
             os.system("sync")
         self.usb_mounted = self.isUSBMounted()
         if configSettings.servicesQuiet:
-            os.system(USB_POWER + " off")  # quiet mode: USB only on while in use
+            os.system(USB_POWER + " off")
 
     def isUSBMounted(self):
         try:
@@ -287,13 +267,13 @@ class FileLoader(object):
                 try:
                     dest = self.copyFile(f, fullDir)
                     if fileType == "prog" and not dest.endswith(".prog"):
-                        os.chmod(dest, 0o755)  # the program a .prog runs
+                        os.chmod(dest, 0o755)
                 except OSError as e:
                     self.classlog.error("Could not copy %s: %s", f, e)
             self.copyStates(fileType, files, fullDir)
             fd = os.open(fullDir, os.O_RDONLY)
             try:
-                os.fsync(fd)  # the new directory entries
+                os.fsync(fd)
             finally:
                 os.close(fd)
 
@@ -301,11 +281,10 @@ class FileLoader(object):
     def getState(self):
         return self.currentState
 
-    # Runs inside nebio (same look as bootleds.py), no second LED process.
     def launch_bootled(self, mode):
         self.classlog.info("Starting loading LED animation")
         if mode == 0:
             nebio.led_animation("loading")
         else:
             nebio.led_animation("loadingusb")
-        self.led_process = True # animation running, stopped at the end of reload()
+        self.led_process = True

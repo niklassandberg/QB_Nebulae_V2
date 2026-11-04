@@ -377,15 +377,11 @@ class HybridData(object):
 
                 
 
-# Encoder whose value is owned by sclang (rawencoder in a .scd). While active,
-# nebio sends the steps and the click straight to sclang and sclang drives the
-# encoder's LEDs. sclang also saves the value. This class keeps no value: it
-# only switches that routing.
+# rawencoder: sclang owns the value and LEDs; this only switches the routing.
 class RawEncoderData(object):
     def __init__(self, name):
         self.name = name
 
-    # nebio ignores a call that doesn't change the state.
     def setActive(self, state):
         nebio.encoder_set_raw(self.name, state)
 
@@ -414,10 +410,7 @@ class CommChannel(object):
         else:
             self.channel = None
 
-    # Read straight from the channel memory (the pointer from channelPtr),
-    # not with controlChannel(name): same value, without the name lookup and
-    # ctypes call every update. The .orc chnexports these, so Csound writes
-    # that memory with plain stores either way.
+    # Read from the channel pointer: no name lookup and ctypes call per update.
     def update(self):
         if self.channel is not None:
             self.prev_state = self.state

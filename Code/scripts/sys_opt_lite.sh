@@ -1,14 +1,10 @@
 #!/bin/bash
-# Needs root. The services start it as root; started by hand it runs
-# itself again with sudo (sudo as root only adds lines to the journal).
+# Needs root.
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 
 # Exporting LIB path for nebulae
 echo export LD_LIBRARY_PATH=/usr/local/lib:$LD_LIBRARY_PATH
 
-# Everything in one sh call (with one sudo per line this script took 0.74 s
-# at boot; it runs as root now, no sudo at all). "service ntp stop" is gone:
-# there is no service command (nor ntp) on the Arch images.
 sh -c '
 # Probing i2c dev to enable i2c
 modprobe i2c-dev
@@ -21,9 +17,7 @@ killall -q console-kit-daemon polkitd
 ## This may cause hardfaults if more memory than is available is actually committed.
 echo 1 > /proc/sys/vm/overcommit_memory
 
-## Remount /dev/shm to prevent memory allocation errors. 512M: on the 64-bit
-## image JACK alone takes 107 MB there, and a crashed jackd leaves its copy
-## behind (128M then made the next jackd die with SIGBUS).
+## JACK takes 107 MB of /dev/shm, and a crashed jackd leaves its copy.
 mount -o remount,size=512M /dev/shm
 
 ## Set the CPU scaling governor to performance

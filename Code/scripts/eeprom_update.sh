@@ -1,28 +1,10 @@
 #!/bin/bash
-# Raspberry Pi 4 bootloader (EEPROM) update, only when asked for: a file
-# called "update_bootloader" on the USB stick (update.sh removes it and runs
-# "eeprom_update.sh flash"). The kit in Code/localfiles/eeprom (pieeprom.upd
-# + .sig, recovery.bin) is the bootloader 2026-09-23 with the Nebulae config
-# (~0.9 s faster to the kernel than older ones).
-#
-#   eeprom_update.sh flash   (update.sh, stick mounted) 64-bit image and an
-#                            older bootloader: copies the kit to /boot and
-#                            reboots; the Pi's firmware flashes it (a few
-#                            seconds, green LED blinks; do not switch the
-#                            power off then) and starts normally.
-#   eeprom_update.sh         (startup.sh, every boot) after a flash: removes
-#                            the files from /boot and logs the result.
-#                            Otherwise nothing (no /boot access: it is an
-#                            automount, the first access waits ~1.5 s at boot).
-#
-# Only on the 64-bit image (aarch64, kernel 6 or newer): the old 32-bit image
-# (kernel 5.15) has no USB with this bootloader (no vl805.bin). To go back to
-# the 32-bit image on a Pi with this bootloader, first flash an older
-# bootloader (Raspberry Pi Imager: Misc utility images > Bootloader, or an
-# older release from github.com/raspberrypi/rpi-eeprom).
+# Pi 4 bootloader update from Code/localfiles/eeprom, 64-bit image only (the
+# 32-bit image has no USB with this bootloader).
+#   eeprom_update.sh flash   copy the kit to /boot and reboot; the firmware flashes
+#   eeprom_update.sh         after a flash: clean /boot and log
 
-# Needs root. The services start it as root; started by hand it runs
-# itself again with sudo (sudo as root only adds lines to the journal).
+# Needs root.
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 KIT=/home/alarm/QB_Nebulae_V2/Code/localfiles/eeprom
 MARK=/home/alarm/.eeprom_update   # kit timestamp while a flash is pending
@@ -42,7 +24,6 @@ kit=$(awk '/^ts:/{print $2}' $KIT/pieeprom.sig 2>/dev/null)
 
 if [ "$MODE" != flash ]; then
     [ -f $MARK ] || exit 0
-    # After a flash: clean /boot and log.
     sh $MOUNTFS rw
     rm -f /boot/RECOVERY.000 /boot/recovery.bin /boot/pieeprom.upd /boot/pieeprom.sig
     if [ -n "$current" ] && [ "$current" -ge "$(cat $MARK)" ]; then
