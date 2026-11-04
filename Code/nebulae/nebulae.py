@@ -1,10 +1,13 @@
 # Main Nebulae Source File
 import sys
 import os
+import glob
+import shutil
 import ctcsound
 import controlhandler as ch
 import controlhandlerSC as chSC
 import controlhandlerPD as chPD
+import controlhandlerProg as chProg
 import conductor
 import nebconfig
 import ui
@@ -16,6 +19,7 @@ import logger
 import neb_globals
 import multiprocessing
 import subprocess
+import threading
 
 import nebmixer
 import nebio
@@ -55,6 +59,7 @@ class Nebulae(object):
             self.ui = None
             self.c_handle = None
             self.led_process = None
+            self.prog = None  # the process of the programs bank
             # Check the config file for last instr
             if os.path.isfile(self.instr_cfg) and os.path.getsize(self.instr_cfg) > 0:
                 # Get bank/instr from factory
@@ -76,6 +81,7 @@ class Nebulae(object):
                 instr_files = sorted([f[:-6] for f in os.listdir(instr_path) if f.endswith(".instr")])
                 self.new_instr = instr_files[0] if instr_files else 'a_granularlooper'
             self.currentInstr = self.new_instr
+            self.installFactoryPrograms()
             # Check if file exists, else reset to default instr
             if self.new_bank in nebconfig.INSTR_DIRS:
                 path = nebconfig.instrumentPath(self.new_bank, self.new_instr)
@@ -92,6 +98,21 @@ class Nebulae(object):
             self.last_debug_print = time.time()
         except Exception as e:
             self.classlog.error("Error in __init__: %s", e)
+
+    # The programs bank starts with the firmware's .prog files (Code/programs/,
+    # e.g. miRings.prog) while /home/alarm/prog/ is empty; a USB stick with
+    # .prog files replaces them (fileloader.py).
+    def installFactoryPrograms(self):
+        prog_dir = nebconfig.instrumentDir("programs")
+        try:
+            if os.path.isdir(prog_dir) and os.listdir(prog_dir):
+                return
+            os.makedirs(prog_dir, exist_ok=True)
+            for f in glob.glob("/home/alarm/QB_Nebulae_V2/Code/programs/*.prog"):
+                shutil.copy2(f, prog_dir)
+                self.classlog.info("Installed %s", os.path.basename(f))
+        except OSError as e:
+            self.classlog.error("Could not install the factory programs: %s", e)
 
     # Csound's performance thread (it computes and plays every audio block)
     # in real-time priority (SCHED_FIFO, csound_rt_priority in
@@ -138,8 +159,31 @@ class Nebulae(object):
         self.classlog.error("No restart after 60 s: starting %s on this kernel", instr)
         self.kill_bootled()
 
+    # Start-time measurement of the Csound bank: each step of start() as
+    # "csound start: <step> at <s since boot> (+<s since the step before>)".
+    # Seconds since boot are comparable with neb_boottime.sh's markers.
+    def startMark(self, step):
+        now = time.monotonic()
+        self.classlog.info("csound start: %s at %.3f s (+%.3f s)", step, now, now - self.start_mark)
+        self.start_mark = now
+
+    # After pt.play(): the score's time 0 is passed once the f statements
+    # (GEN01: every sample loaded into a table) are done; instr 1 (the
+    # instrument itself, "i1 1" in conductor.py) starts at score time 1.
+    def watchScoreStart(self):
+        def watch():
+            marks = [(0.0, "score running (sample tables loaded)"), (1.0, "score time 1 s (instr 1 starts)")]
+            end = time.monotonic() + 30
+            while marks and time.monotonic() < end:
+                if self.c.scoreTime() > marks[0][0]:
+                    self.startMark(marks.pop(0)[1])
+                time.sleep(0.005)
+        threading.Thread(target=watch, daemon=True).start()
+
     def start(self, instr, instr_bank):
         try:
+            self.start_mark = time.monotonic()
+            self.startMark("begin")
             # Csound opens the card itself: no jackd (after SC/Pd, or a
             # Nebulae that starts while one runs)
             self.leave_jack()
@@ -154,9 +198,11 @@ class Nebulae(object):
             self.log.spill_basic_info()
             floader = fileloader.FileLoader()
             floader.reload()
+            self.startMark("files loaded from the stick")
             config = nebconfig.NebConfig.read("instr", instr)
             self.kernelSwitch(instr, config)
             self.orc_handle.generate_orc(instr, instr_bank, config)
+            self.startMark("orchestra generated (%d files)" % self.orc_handle.numFiles())
             configData = self.orc_handle.getConfigDict()
             
             self.c.setOption("-iadc:hw:0,0")
@@ -184,15 +230,22 @@ class Nebulae(object):
                 self.c.setOption("-m0")  # Set option for Csound
                 self.c.setOption("-d")
             self.c.compileOrc(self.orc_handle.curOrc)     # Compile Orchestra from String
-            self.c.readScore(self.orc_handle.curSco)     # Read in Score generated from notes 
+            self.startMark("compileOrc")
+            self.c.readScore(self.orc_handle.curSco)     # Read in Score generated from notes
+            self.startMark("readScore")
             self.c.start() # Start Csound
+            self.startMark("start (global code incl. filepeak, audio card open)")
             self.c_handle = ch.ControlHandler(self.c, self.orc_handle.numFiles(), configData, self.new_instr, bank=self.new_bank) # Create handler for all csound comm.
+            self.startMark("ControlHandler")
             self.loadUI()
+            self.startMark("UI")
             threads = set(os.listdir("/proc/self/task"))
             self.pt = ctcsound.CsoundPerformanceThread(self.c.csound()) # Create CsoundPerformanceThread
             self.setRealtime(set(os.listdir("/proc/self/task")) - threads)
             self.c_handle.setCsoundPerformanceThread(self.pt)
             self.pt.play() # Begin Performing the Score in the perforamnce thread
+            self.startMark("play")
+            self.watchScoreStart()
             nebmixer.init()
             nebmixer.enable()
             self.c_handle.updateAll() # Update all values to ensure their at their initial state.
@@ -241,6 +294,9 @@ class Nebulae(object):
                 elif self.new_bank == "supercollider":
                     self.start_supercollider(self.new_instr)
                     self.run_supercollider()
+                elif self.new_bank == "programs":
+                    self.start_programs(self.new_instr)
+                    self.run_programs()
                 else:
                     self.c.reset()
                     self.start(self.new_instr, self.new_bank)
@@ -261,9 +317,9 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in cleanup(): %s", e)
 
-    # bootinstr.txt: the instrument the next boot starts, and for the SC/Pd
+    # bootinstr.txt: the instrument the next boot starts, and for the SC/Pd/programs
     # banks its JACK settings once they are known (start_supercollider,
-    # start_puredata), as the jack@ unit is named:
+    # start_puredata, start_programs), as the jack@ unit is named:
     #   bank,supercollider
     #   instr,1_sine
     #   jack,64-3-48000        (period-periods-rate)
@@ -616,6 +672,10 @@ class Nebulae(object):
                     self.close_puredata()
                     self.start_supercollider(self.new_instr)
                     self.run_supercollider()
+                elif self.new_bank == "programs":
+                    self.close_puredata()
+                    self.start_programs(self.new_instr)
+                    self.run_programs()
                 else:
                     self.close_puredata()
                     self.start(self.new_instr, self.new_bank)
@@ -658,6 +718,10 @@ class Nebulae(object):
                 elif self.new_bank == "supercollider":
                     self.start_supercollider(self.new_instr,True)
                     self.run_supercollider()
+                elif self.new_bank == "programs":
+                    self.close_sc()
+                    self.start_programs(self.new_instr)
+                    self.run_programs()
                 else:
                     time.sleep(0.5)
                     self.close_sc()
@@ -707,6 +771,117 @@ class Nebulae(object):
             self.c_handle.closeSockets()
         self.pt = None
 
+    # Programs bank: a .prog names a program (miRings, any binary or script)
+    # that runs as its own JACK client and listens for OSC; which control
+    # goes to which OSC path is in the .prog (nebconfig.py). The program
+    # connects its own JACK ports.
+    def start_programs(self, name):
+        try:
+            self.log.spill_basic_info()
+            if self.c is not None:  # Csound was the bank before
+                self.c.cleanup()
+                self.c = None
+            self.c_handle = None
+            self.currentInstr = name
+            self.newInstr = name
+            floader = fileloader.FileLoader()
+            floader.reload()
+            config = nebconfig.NebConfig.read("programs", name)
+            self.kernelSwitch(name, config)
+            jack = self.jackSettings(name, config)
+            self.writeBootInstr(jack)
+            self.quit_scsynth()  # scsynth of an SC bank must not stay on jackd next to the program
+            self.start_jack(jack)
+            self.orc_handle.refreshFileHandler()
+            bindings, errors = config.oscBindings()
+            for error in errors:
+                self.classlog.error("%s.prog: %s", name, error)
+            try:
+                port = config.oscPort()
+            except ValueError as e:
+                self.classlog.error("%s.prog: %s", name, e)
+                port = nebconfig.DEFAULT_OSC_PORT
+            self.wait_for_jack_to_start()
+            program = config.run()
+            if program is None:
+                self.classlog.error("%s.prog has no run entry: nothing started", name)
+            else:
+                cmd = [program, "--port", str(port), nebconfig.instrumentPath("programs", name)]
+                if program.endswith(".sh"):
+                    cmd.insert(0, "sh")
+                elif program.endswith(".py"):
+                    cmd.insert(0, "python3")
+                elif os.path.isfile(program) and not os.access(program, os.X_OK):
+                    os.chmod(program, 0o755)  # a firmware update or copy may lose the bit
+                self.classlog.info("Starting %s", " ".join(cmd))
+                self.prog = subprocess.Popen(cmd)
+            self.c_handle = chProg.ProgControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr,
+                                                      bank="programs", oscPort=port, bindings=bindings)
+            self.c_handle.setCsoundPerformanceThread(None)
+            self.c_handle.enterProgramsMode()
+            self.loadUI()
+            nebmixer.init()
+            nebmixer.enable()
+        except Exception as e:
+            self.classlog.error("Error in start_programs(): %s", e)
+
+    def run_programs(self):
+        try:
+            request = False
+            self.c_handle.enterProgramsMode()
+            profile = loopprofile.LoopProfile(self.classlog)
+            while(request != True):
+                self.c_handle.updateAll()
+                self.ui.update()
+                profile.tick()
+                request = self.ui.getReloadRequest()
+            nebmixer.disable()
+            if request == True:
+                self.classlog.info("Received Reload Request from UI")
+                self.new_instr = self.ui.getNewInstr()
+                self.new_bank = self.c_handle.getInstrSelBank()
+                self.ui.reload_flag = False
+                self.classlog.info("Reloading %s from %s", self.new_instr, self.new_bank)
+                self.writeBootInstr()
+                self.close_programs()
+                if self.new_bank == "puredata":
+                    self.start_puredata(self.new_instr)
+                    self.run_puredata()
+                elif self.new_bank == "supercollider":
+                    self.start_supercollider(self.new_instr)
+                    self.run_supercollider()
+                elif self.new_bank == "programs":
+                    self.start_programs(self.new_instr)
+                    self.run_programs()
+                else:
+                    self.start(self.new_instr, self.new_bank)
+                    self.run()
+            else:
+                self.classlog.info("Run Loop Ending.")
+                self.close_programs()
+                self.classlog.info("Goodbye!")
+                sys.exit()
+        except Exception as e:
+            self.classlog.error("Error in run_programs(): %s", e)
+
+    # Stops the program (SIGTERM, after 4 s SIGKILL) and closes its OSC.
+    def close_programs(self):
+        try:
+            if self.prog is not None:
+                self.classlog.info("Stopping the program")
+                self.prog.terminate()
+                try:
+                    self.prog.wait(timeout=4.0)
+                except subprocess.TimeoutExpired:
+                    self.classlog.error("The program did not stop in time, killing it")
+                    self.prog.kill()
+                    self.prog.wait()
+        except Exception as e:
+            self.classlog.error("Error in close_programs(): %s", e)
+        if isinstance(self.c_handle, chProg.ProgControlHandler):
+            self.c_handle.closeSockets()
+        self.prog = None
+
     def loadUI(self):
         try:
             self.classlog.info("Killing LED program")
@@ -750,6 +925,9 @@ try:
     elif app.new_bank == "supercollider":
         app.start_supercollider(app.new_instr)
         app.run_supercollider()
+    elif app.new_bank == "programs":
+        app.start_programs(app.new_instr)
+        app.run_programs()
     else:
         app.start(app.new_instr, app.new_bank)
         app.run()

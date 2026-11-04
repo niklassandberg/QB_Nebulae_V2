@@ -159,6 +159,14 @@ NEBIO_API void nebio_sc_set_synth_down(void);   /* also clears the cache */
 NEBIO_API int  nebio_sc_handshake(void);
 NEBIO_API void nebio_sc_zero_handshake(void);
 
+/* ---- Programs bank (OSC to a program's port) ----------------------------- */
+
+/* To 127.0.0.1:<port>; opening again changes the port. 0 = ok, -1 = error. */
+NEBIO_API int  nebio_osc_open(int port);
+NEBIO_API void nebio_osc_close(void);
+/* "<path> <float>", always sent (no change check). */
+NEBIO_API void nebio_osc_send_float(const char *path, double value);
+
 /* ---- Codec card ---------------------------------------------------------- */
 
 /* Clipped input samples (both channels) counted by the card driver, the same

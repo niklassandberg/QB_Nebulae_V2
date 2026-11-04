@@ -28,8 +28,10 @@ CLIP_HOLD_MS = 8
 LED_DRAW_MS = 10
 
 # Instr selector pages, in the order the speed encoder steps through them.
-# "configsettings": the config settings and scripts instead of instruments (scripts.py).
-BANKS = ["instr", "supercollider", "puredata", "configsettings"]
+# "programs": .prog files (any program steered by OSC, e.g. miRings).
+# "configsettings": the config settings and scripts instead of instruments
+# (scripts.py), always the last page.
+BANKS = ["instr", "supercollider", "puredata", "programs", "configsettings"]
 
 # The config settings of the configsettings page (LED dim, Wi-Fi, Quiet mode) are
 # read from and saved through configSettings (configsettings.py).
@@ -215,6 +217,8 @@ class UserInterface(object):
                     tempidx = self.sc_fhandle.getIndex(self.controlhandler.currentInstr)
                 elif self.controlhandler.currentBank == 'puredata':
                     tempidx = self.puredata_fhandle.getIndex(self.controlhandler.currentInstr)
+                elif self.controlhandler.currentBank == 'programs':
+                    tempidx = self.prog_fhandle.getIndex(self.controlhandler.currentInstr)
                 self.controlhandler.setInstrSelIdx(tempidx)
                 self.controlhandler.setInstrSelBank(self.controlhandler.currentBank)
                 self.reload_flag = True
@@ -508,7 +512,11 @@ class UserInterface(object):
     
     # Returns duple of neg_brightness, pos_brightness
     def set_speed_leds(self, mode):
-        if mode == "normal" or mode == "puredata" or mode == "supercollider":
+        if mode == "programs":
+            # No speed colours for programs (the speed value is still sent)
+            self.set_rgb("speed_neg", 0, 0, 0, 0.0)
+            self.set_rgb("speed_pos", 0, 0, 0, 0.0)
+        elif mode in ("normal", "puredata", "supercollider"):
             pink = libDriver.Color(3037, 200, 3825)
             white = libDriver.Color(4095,4095,4095)
             red = libDriver.Color(4095, 0, 0) #octave 0 / record
@@ -613,6 +621,9 @@ class UserInterface(object):
             elif self.controlhandler.getInstrSelBank() == "puredata":
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 0.0)
                 self.set_rgb("speed_pos", tempc.red(), tempc.green(), tempc.blue(), 1.0)
+            elif self.controlhandler.getInstrSelBank() == "programs":
+                self.set_rgb("speed_neg", 0, 0, 0, 0.0)  # no colour: the programs page
+                self.set_rgb("speed_pos", 0, 0, 0, 0.0)
             elif self.controlhandler.getInstrSelBank() == "configsettings":
                 tempc = libDriver.Color(4095, 1200, 0) # orange: not an instrument page
                 self.set_rgb("speed_neg", tempc.red(), tempc.green(), tempc.blue(), 1.0)
@@ -621,7 +632,7 @@ class UserInterface(object):
             pass
 
     def update_speed(self, mode):
-        if mode == "normal" or mode == "puredata" or mode == "supercollider":
+        if mode in ("normal", "puredata", "supercollider", "programs"):
             if self.speed_click.risingEdge() == True:
                 self.time_pressed_speed = self.now
             if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500:
@@ -871,7 +882,7 @@ class UserInterface(object):
         purple = libDriver.Color(511, 0, 4095) # octave 5 (5V)
         colororder = [ white, orange, yellow, blue, green, purple]
         octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-        if mode == "normal" or mode == "puredata" or mode == "supercollider":
+        if mode in ("normal", "puredata", "supercollider", "programs"):
             original_pitch = 0.6
             tolerance = 0.001
             pitch_amt = round(self.controlhandler.getValue("pitch"), 4) # I don't like that I have to do this
@@ -984,7 +995,7 @@ class UserInterface(object):
             
 
     def update_pitch(self, mode):
-        if mode == "normal" or mode == "puredata" or mode == "supercollider":
+        if mode in ("normal", "puredata", "supercollider", "programs"):
             if self.pitch_click.risingEdge() == True:
                 self.time_pressed_pitch = self.now
             if not self.controlhandler.isRaw("pitch"): # rawencoder: value is sclang's
@@ -1067,6 +1078,8 @@ class UserInterface(object):
             return self.sc_fhandle
         elif bank == "puredata":
             return self.puredata_fhandle
+        elif bank == "programs":
+            return self.prog_fhandle
         elif bank == "configsettings":
             return self.script_fhandle
         return self.instr_fhandle
@@ -1082,6 +1095,9 @@ class UserInterface(object):
         elif self.controlhandler.getInstrSelBank() == "puredata":
             if idx < self.puredata_fhandle.numFiles():
                 instr = self.puredata_fhandle.getFilename(idx)
+        elif self.controlhandler.getInstrSelBank() == "programs":
+            if idx < self.prog_fhandle.numFiles():
+                instr = self.prog_fhandle.getFilename(idx)
         return instr
 
     # The instr selector's file lists. Read again on every instr load
@@ -1091,6 +1107,7 @@ class UserInterface(object):
         self.instr_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("instr"), ".instr")
         self.sc_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("supercollider"), ".scd")
         self.puredata_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("puredata"), ".pd")
+        self.prog_fhandle = filehandler.FileHandler(nebconfig.instrumentDir("programs"), [".prog"])
         if self.script_fhandle is not None:
             self.script_fhandle.stopPolling()
             self.scripts_shown = False
@@ -1100,7 +1117,7 @@ class UserInterface(object):
         self.refreshFileHandlers()
         self.currentInstr = instr
         self.controlhandler.setCurrentInstr(instr)
-        handlers = [self.instr_fhandle, self.sc_fhandle, self.puredata_fhandle]
+        handlers = [self.instr_fhandle, self.sc_fhandle, self.puredata_fhandle, self.prog_fhandle]
         tempbank = None
         for handle in handlers:
             tempidx = handle.getIndex(instr)
@@ -1112,6 +1129,8 @@ class UserInterface(object):
                     tempbankname = "supercollider"
                 elif tempbank == self.puredata_fhandle:
                     tempbankname = "puredata"
+                elif tempbank == self.prog_fhandle:
+                    tempbankname = "programs"
                 break
         # Only udpate if the instr is found
         if tempidx is not None and tempbank is not None:

@@ -56,6 +56,25 @@ private:
     std::map<std::string, Last> last_;
 };
 
+// A program of the "programs" bank (controlhandlerProg.py): OSC to a port of
+// 127.0.0.1 given by its .prog, a float to any path. No change check here:
+// Python sends only what changed (and everything again now and then).
+class OscLink {
+public:
+    static OscLink &instance();
+
+    bool open(int port);
+    void close();
+    bool isOpen() const { return target_ != nullptr; }
+    void sendFloat(const char *path, double value);
+
+private:
+    OscLink() = default;
+
+    std::mutex mutex_;
+    lo_address target_ = nullptr;
+};
+
 class PdLink {
 public:
     static PdLink &instance();

@@ -1,0 +1,38 @@
+miRings: Mutable Instruments Rings (Emilie Gillet, MIT) as a Nebulae program.
+Only the lines between nebconfigbegin and nebconfigend are read; this text is not.
+
+Controls (change the osc: lines to move them, no compile needed):
+  pitch    note, C1..C6 (knob + 1V/oct CV over 5 octaves)
+  speed    FM, -12..+12 semitones
+  blend    structure (also the chord of the sympathetic-string models)
+  window   brightness
+  density  damping
+  start    position
+  overlap  model: 0-5 resonators (modal, sympathetic, string, FM, quantized
+           sympathetic, string + reverb), 6-11 string synth with fx
+  size     polyphony 1..4
+  reset    strum (button or gate)
+  freeze   on: the left audio input excites Rings; off: Rings excites itself
+  blend_alt (secondary controls) depth of the right audio input as FM,
+           0..48 semitones at full scale (0 = off): an oscillator there
+           modulates the pitch at audio rate (2 kHz, Rings' block rate)
+A pitch change also strums. The OSC paths miRings knows are listed in
+Code/programs/rings/main.cc.
+
+nebconfigbegin
+run,miRings
+oscport,3020
+kernel,normal
+blocksize,128
+osc:pitch,/rings/note,24,84
+osc:speed,/rings/fm,-12,12
+osc:blend,/rings/structure,0,1
+osc:window,/rings/brightness,0,1
+osc:density,/rings/damping,0,1
+osc:start,/rings/position,0,1
+osc:overlap,/rings/model,0,11,int
+osc:size,/rings/polyphony,1,4,int
+osc:reset,/rings/strum,0,1
+osc:freeze,/rings/internal_exciter,1,0
+osc:blend_alt,/rings/fm_in,0,48
+nebconfigend

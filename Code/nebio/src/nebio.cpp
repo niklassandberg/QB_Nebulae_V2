@@ -29,6 +29,7 @@ const char *lastError() { return errorText; }
 using nebio::CardClip;
 using nebio::Inputs;
 using nebio::Leds;
+using nebio::OscLink;
 using nebio::PdLink;
 using nebio::ScLink;
 
@@ -122,6 +123,12 @@ void nebio_sc_set_synth_down(void) {
 }
 int nebio_sc_handshake(void) { return ScLink::instance().handshake; }
 void nebio_sc_zero_handshake(void) { ScLink::instance().handshake = false; }
+
+// ---- Programs bank ---------------------------------------------------------
+
+int nebio_osc_open(int port) { return OscLink::instance().open(port) ? 0 : -1; }
+void nebio_osc_close(void) { OscLink::instance().close(); }
+void nebio_osc_send_float(const char *path, double value) { OscLink::instance().sendFloat(path, value); }
 
 // ---- Codec card ------------------------------------------------------------
 

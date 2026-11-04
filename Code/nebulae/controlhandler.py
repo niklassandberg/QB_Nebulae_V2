@@ -277,7 +277,7 @@ class ControlHandler(object):
     def enterSecondaryMode(self):
         #self.modeChangeControl = "pitch"
         #self.altchanneldict[self.modeChangeControl + "_alt"].setIgnoreNextButton()
-        if self.control_mode == "normal" or self.control_mode == "puredata" or self.control_mode == "supercollider":
+        if self.control_mode in ("normal", "puredata", "supercollider", "programs"):
             self.classlog.info("entering secondary")
             self.resistNormalSettings()
 
@@ -291,7 +291,7 @@ class ControlHandler(object):
     def enterInstrSelMode(self):
         #self.modeChangeControl = "speed"
         #self.instrchanneldict[self.modeChangeControl + "_instr"].setIgnoreNextButton()
-        if self.control_mode == "normal" or self.control_mode == "puredata" or self.control_mode == "supercollider":
+        if self.control_mode in ("normal", "puredata", "supercollider", "programs"):
             self.classlog.info("entering instr selector")
             self.control_mode = "instr selector"
         self.settings.update(self.now)
@@ -326,7 +326,7 @@ class ControlHandler(object):
             self.defaultConfig["sourcegate"] = ["triggered", "rising"]
             self.defaultConfig["ksmps"] = ["128"]
             self.defaultConfig["sr"] = ["44100"]
-        elif self.control_mode == "puredata" or self.control_mode == "supercollider":
+        elif self.control_mode in ("puredata", "supercollider", "programs"):
             self.defaultConfig["reset"] = ["triggered", "rising"]
             self.defaultConfig["freeze"] = ["latching", "rising"]
             self.defaultConfig["source"] = ["latching", "falling"]

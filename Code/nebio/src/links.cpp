@@ -203,6 +203,35 @@ void ScLink::clearCache() {
     last_.clear();
 }
 
+// ---- Programs bank -------------------------------------------------------
+
+OscLink &OscLink::instance() {
+    static OscLink *link = new OscLink();  // never destroyed, see GpioChip
+    return *link;
+}
+
+bool OscLink::open(int port) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (target_) lo_address_free(target_);
+    std::string p = std::to_string(port);
+    target_ = lo_address_new(kScHost, p.c_str());
+    if (!target_) logError("could not create OSC address %s:%s", kScHost, p.c_str());
+    return target_ != nullptr;
+}
+
+void OscLink::close() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (target_) lo_address_free(target_);
+    target_ = nullptr;
+}
+
+void OscLink::sendFloat(const char *path, double value) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!target_) return;
+    if (lo_send(target_, path, "f", static_cast<float>(value)) < 0)
+        logError("could not send %s: %s", path, lo_address_errstr(target_));
+}
+
 // ---- Pure Data -----------------------------------------------------------
 
 PdLink &PdLink::instance() {

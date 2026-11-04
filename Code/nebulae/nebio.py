@@ -105,6 +105,9 @@ def lib():
         "nebio_sc_handshake": (c_int, []),
         "nebio_sc_zero_handshake": (None, []),
         "nebio_card_clip_count": (c_int, []),
+        "nebio_osc_open": (c_int, [c_int]),
+        "nebio_osc_close": (None, []),
+        "nebio_osc_send_float": (None, [c_char_p, c_double]),
         "nebio_pd_connect": (None, []),
         "nebio_pd_close": (None, []),
         "nebio_pd_is_connected": (c_int, []),
@@ -380,6 +383,30 @@ class LedDriver(object):
 # ---------------------------------------------------------------------------
 # SuperCollider / Pure Data
 # ---------------------------------------------------------------------------
+
+# Programs bank (controlhandlerProg.py): OSC to the port of the running
+# program, a float to any path. The handler sends only what changed.
+_osc_paths = {}
+
+
+def osc_open(port):
+    """Sends go to 127.0.0.1:port from now on. False on error."""
+    if lib().nebio_osc_open(int(port)) != 0:
+        _log.error("nebio: %s", last_error())
+        return False
+    return True
+
+
+def osc_close():
+    lib().nebio_osc_close()
+
+
+def osc_send(path, value):
+    bpath = _osc_paths.get(path)
+    if bpath is None:
+        bpath = _osc_paths[path] = _b(path)
+    lib().nebio_osc_send_float(bpath, float(value))
+
 
 def card_clip_count():
     """Clipped input samples counted by the card driver, the same for every

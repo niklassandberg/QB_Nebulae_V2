@@ -1,7 +1,7 @@
-# An instrument's own settings (the nebconfig block), for all three engines.
-# The one reader of instrument files: Csound (.instr), SuperCollider (.scd)
-# and Pure Data (.pd) instruments are read here, with the same rules, and
-# the instrument folders are named here only.
+# An instrument's own settings (the nebconfig block), for every bank.
+# The one reader of instrument files: Csound (.instr), SuperCollider (.scd),
+# Pure Data (.pd) instruments and programs (.prog) are read here, with the
+# same rules, and the instrument folders are named here only.
 # (The device's settings are another thing: configsettings.py.)
 #
 # One entry per line, "key,value[,value...]":
@@ -14,10 +14,20 @@
 #   -n,3                     .scd/.pd: JACK periods in the buffer (jackd -n), default 3
 #   -r,48000                 .scd/.pd: JACK sample rate (jackd -r), default 48000,
 #                            snapped to the nearest rate the card runs
+#                            (.prog: all four JACK/kernel keys as .scd/.pd)
+#   run,miRings              .prog: the program to start, a binary or a script
+#                            (.sh with sh, .py with python3); a bare name is
+#                            looked up in /home/alarm/prog/, then Code/bin/
+#   oscport,3020             .prog: the UDP port the program listens on
+#   osc:blend,/rings/structure,0,1[,lin|exp|int]
+#                            .prog: control "blend" (0..1) is sent to that
+#                            OSC path as a float, scaled to min..max (exp:
+#                            min and max > 0; int: rounded). One line per
+#                            control; no comments after an entry.
 #
 # Where the entries are:
 #   .instr  nebconfigbegin              .scd  /*
-#           ksmps,64                          nebconfigbegin
+#   .prog   ksmps,64                          nebconfigbegin
 #           nebconfigend                      speed,rawencoder
 #                                             nebconfigend
 #                                             */   (sclang never sees it)
@@ -28,11 +38,19 @@
 # A key given twice: the last one counts. Blank lines are skipped.
 
 import io
+import os
 import re
 
 INSTR_DIRS = {"instr": ("/home/alarm/instr/", ".instr"),
               "supercollider": ("/home/alarm/sc/", ".scd"),
-              "puredata": ("/home/alarm/pd/", ".pd")}
+              "puredata": ("/home/alarm/pd/", ".pd"),
+              "programs": ("/home/alarm/prog/", ".prog")}
+
+# Programs that ship with the firmware (.prog "run," with a bare name, when
+# /home/alarm/prog/ has no file of that name).
+PROGRAM_BIN_DIR = "/home/alarm/QB_Nebulae_V2/Code/bin/"
+DEFAULT_OSC_PORT = 3020
+OSC_CURVES = ("lin", "exp", "int")
 
 KERNELS = ("rt", "normal", "any")
 
@@ -81,7 +99,11 @@ class NebConfig(object):
     def read(cls, bank, instr):
         """The instrument's settings, read once per load (nebulae.py passes
         the object on). OSError when the file cannot be read."""
-        path = instrumentPath(bank, instr)
+        return cls.readFile(instrumentPath(bank, instr))
+
+    @classmethod
+    def readFile(cls, path):
+        """As read(), for a file anywhere (e.g. a .prog on the USB stick)."""
         with open(path, "r") as f:
             text = f.read()
         if path.endswith(".pd"):
@@ -152,6 +174,58 @@ class NebConfig(object):
         if rate <= 0:
             raise ValueError("-r %r: a sample rate in Hz, e.g. 48000" % value)
         return rate
+
+    def run(self):
+        """.prog: the program's path, or None without a run entry. A bare
+        name: /home/alarm/prog/<name> if it exists, else Code/bin/<name>."""
+        value = self.value("run")
+        if not value or not value.strip():
+            return None
+        value = value.strip()
+        if os.path.isabs(value):
+            return value
+        local = os.path.join(INSTR_DIRS["programs"][0], value)
+        if os.path.exists(local):
+            return local
+        return os.path.join(PROGRAM_BIN_DIR, value)
+
+    def oscPort(self):
+        """.prog: the program's OSC port, DEFAULT_OSC_PORT without an entry.
+        ValueError for no port number."""
+        value = self.value("oscport")
+        if value is None:
+            return DEFAULT_OSC_PORT
+        try:
+            port = int(value.strip())
+        except ValueError:
+            port = 0
+        if not 1024 <= port <= 65535:
+            raise ValueError("oscport %r: a UDP port, 1024..65535" % value)
+        return port
+
+    def oscBindings(self):
+        """.prog: [(control, path, min, max, curve)] from the osc:<control>
+        lines. A line that cannot be read is skipped and listed in the
+        second value: (bindings, [error text, ...])."""
+        bindings, errors = [], []
+        for key, values in self._dict.items():
+            if not key.startswith("osc:"):
+                continue
+            control = key[4:].strip()
+            values = [v.strip() for v in values]
+            try:
+                if not control or len(values) < 3 or not values[0].startswith("/"):
+                    raise ValueError("osc:<control>,<path>,<min>,<max>[,curve]")
+                lo, hi = float(values[1]), float(values[2])
+                curve = values[3].lower() if len(values) > 3 and values[3] else "lin"
+                if curve not in OSC_CURVES:
+                    raise ValueError("curve one of %s" % (OSC_CURVES,))
+                if curve == "exp" and (lo <= 0 or hi <= 0):
+                    raise ValueError("exp needs min and max > 0")
+                bindings.append((control, values[0], lo, hi, curve))
+            except ValueError as e:
+                errors.append("%s,%s: %s" % (key, ",".join(values), e))
+        return bindings, errors
 
     def _choice(self, key, choices, default):
         value = self.value(key)

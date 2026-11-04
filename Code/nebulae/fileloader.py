@@ -7,6 +7,7 @@ import shutil
 #import shutil
 
 import endtimer
+import nebconfig
 import nebio
 
 USB_POWER = "bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh"
@@ -47,8 +48,9 @@ class FileLoader(object):
         self.csdtypes = [".csd"]
         self.scdtypes = [".scd",".sc"]
         self.scripttypes = [".sh", ".neb"]  # configsettings page (scripts.py); .neb = executable
+        self.progtypes = [".prog"]  # programs bank; each brings the file its run entry names
         self.othertypes = [".c", ".cpp", ".cc"]
-        self.dirs = [ "audio", "instr", "pd", "sc", "scripts", "csound", "other"]
+        self.dirs = [ "audio", "instr", "pd", "sc", "scripts", "prog", "csound", "other"]
         self.dirtypes = {}
         self.dirtypes["audio"] = self.audiotypes
         self.dirtypes["instr"] = self.instrtypes
@@ -56,6 +58,7 @@ class FileLoader(object):
         self.dirtypes["csd"] = self.csdtypes
         self.dirtypes["sc"] = self.scdtypes
         self.dirtypes["scripts"] = self.scripttypes
+        self.dirtypes["prog"] = self.progtypes
         self.dirtypes["other"] = self.othertypes
         self.usb_mounted = self.isUSBMounted()
         self.led_process = None
@@ -91,7 +94,27 @@ class FileLoader(object):
         files = []
         for ext in self.dirtypes[fileType]:
             files.extend(glob.glob('/mnt/memory/*' + ext))
+        if fileType == "prog":
+            files.extend(self.progRunFiles(files))
         return files
+
+    # The files the stick's .prog files run ("run,miRings"): a bare name
+    # that is on the stick too goes with its .prog (a binary has no
+    # extension to be sorted by). Names not on the stick are the firmware's
+    # (Code/bin, nebconfig.py).
+    def progRunFiles(self, progs):
+        runs = []
+        for prog in progs:
+            try:
+                run = nebconfig.NebConfig.readFile(prog).value("run")
+            except (OSError, ValueError) as e:
+                self.classlog.error("Could not read %s: %s", prog, e)
+                continue
+            run = run.strip() if run else ""
+            path = os.path.join('/mnt/memory', run)
+            if run and "/" not in run and os.path.isfile(path) and path not in runs:
+                runs.append(path)
+        return runs
     
     def copyFileInternaly(self, filepath, destPath):
         if os.path.isfile(filepath) and os.path.isdir(destPath):
@@ -109,7 +132,7 @@ class FileLoader(object):
         t = endtimer.EndTimer()
         self.mount()
         if self.usb_mounted == True:
-            changed = [ft for ft in ("audio", "instr", "pd", "sc", "scripts")
+            changed = [ft for ft in ("audio", "instr", "pd", "sc", "scripts", "prog")
                        if self.typeFiles(ft) and not self.typeIsCurrent(ft)]
             if changed:
                 self.launch_bootled(1)
@@ -185,6 +208,8 @@ class FileLoader(object):
             for f in files:
                 try:
                     dest = shutil.copy2(f, fullDir)  # keeps the mtime for typeIsCurrent()
+                    if fileType == "prog" and not dest.endswith(".prog"):
+                        os.chmod(dest, 0o755)  # the program a .prog runs
                     fd = os.open(dest, os.O_RDONLY)
                     try:
                         os.fsync(fd)  # on the SD card even if the power is cut
