@@ -12,13 +12,14 @@ import nebio
 
 USB_POWER = "bash /home/alarm/QB_Nebulae_V2/Code/scripts/usb_power.sh"
 
-# Saved values of an instrument: <name>.state next to <name>.scd / .prog
-# (NebInterface.sc, progpages.py). They belong to the Nebulae: a USB load
-# never erases them. A <name>.state on the stick, next to its instrument,
-# replaces the Nebulae's when it is new or changed on the stick (not at every
-# load: what was changed on the Nebulae since stays until the stick's file
-# changes). STATE_RECORD remembers the stick's files last copied.
-STATE_EXT = ".state"
+# Saved values of an instrument, next to <name>.scd / .prog: <name>.pages
+# (its encoder pages, encoderpages.py) and <name>.state (sclang's own values,
+# NebInterface.sc). They belong to the Nebulae: a USB load never erases them.
+# One on the stick, next to its instrument, replaces the Nebulae's when it is
+# new or changed on the stick (not at every load: what was changed on the
+# Nebulae since stays until the stick's file changes). STATE_RECORD remembers
+# the stick's files last copied.
+STATE_EXTS = (".pages", ".state")
 STATE_TYPES = {"sc": ".scd", "prog": ".prog"}
 STATE_RECORD = ".stick_states"
 
@@ -101,11 +102,11 @@ class FileLoader(object):
             return False
 
     # Files of a type folder that are not the stick's: hidden files, and the
-    # saved values (<name>.state). They are neither compared nor erased.
+    # saved values (STATE_EXTS). They are neither compared nor erased.
     def keepLocal(self, fileType, name):
-        return name.startswith('.') or (fileType in STATE_TYPES and name.endswith(STATE_EXT))
+        return name.startswith('.') or (fileType in STATE_TYPES and name.endswith(STATE_EXTS))
 
-    # The stick's <name>.state files of its instruments (usb: the stick's
+    # The stick's saved-value files of its instruments (usb: the stick's
     # files of the type) that are new or changed since they were last copied.
     def changedStates(self, fileType, usb):
         ext = STATE_TYPES.get(fileType)
@@ -116,11 +117,12 @@ class FileLoader(object):
         for f in usb:
             if not f.endswith(ext):
                 continue
-            state = f[:-len(ext)] + STATE_EXT
-            if os.path.isfile(state):
-                st = os.stat(state)
-                if record.get(os.path.basename(state)) != (st.st_size, int(st.st_mtime)):
-                    changed.append(state)
+            for state_ext in STATE_EXTS:
+                state = f[:-len(ext)] + state_ext
+                if os.path.isfile(state):
+                    st = os.stat(state)
+                    if record.get(os.path.basename(state)) != (st.st_size, int(st.st_mtime)):
+                        changed.append(state)
         return changed
 
     def readStateRecord(self, fileType):

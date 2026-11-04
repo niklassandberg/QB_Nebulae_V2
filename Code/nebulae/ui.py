@@ -4,7 +4,7 @@ import nebio as libDriver # LedDriver/Color backed by the nebio C++ library
 import switch as libSwitch
 import filehandler
 import nebconfig
-import progpages
+import encoderpages
 import scripts
 import subprocess
 import threading
@@ -33,6 +33,9 @@ LED_DRAW_MS = 10
 # "configsettings": the config settings and scripts instead of instruments
 # (scripts.py), always the last page.
 BANKS = ["instr", "supercollider", "puredata", "programs", "configsettings"]
+
+# Modes in which speed/pitch can have pages (controlhandlerEncoders.py).
+PAGED_MODES = ("supercollider", "programs")
 
 # The config settings of the configsettings page (LED dim, Wi-Fi, Quiet mode) are
 # read from and saved through configSettings (configsettings.py).
@@ -120,6 +123,10 @@ class UserInterface(object):
         self.blink = False
         self.time_pressed_pitch = self.now
         self.time_pressed_speed = self.now
+        self.speed_turned_held = False  # speed turned while held (no instr selector then)
+        # Paged encoders held and turned (updatePagedEncoder), as pitch_delay/pitch_inc_dir
+        self.page_jump_delay = {"speed": 0, "pitch": 0}
+        self.page_inc_dir = {"speed": 0, "pitch": 0}
         self.ignore_next_pitch_click = False
         self.ignore_next_speed_click = False
         self.clearAllLEDs()
@@ -512,15 +519,23 @@ class UserInterface(object):
             self.alt_speed_amount = 23
         self.controlhandler.setAltValue("speed_alt", self.alt_speed_amount)
     
-    # Programs bank: the pages of encoder `name` (speed/pitch) when its .prog
-    # declares them (progpages.py), else None.
-    def pagedEncoder(self, name):
+    # SuperCollider and programs banks: the pages of encoder `name`
+    # (speed/pitch) when the instrument declares them (encoderpages.py), in
+    # their playing mode only, else None.
+    def pagedEncoder(self, name, mode):
+        if mode not in PAGED_MODES:
+            return None
         get = getattr(self.controlhandler, "encoderPages", None)
         return get(name) if get is not None else None
 
     # A paged encoder, as chompi.scd: turning sets the shown page's value, a
-    # click (shorter than 1 s) shows the next page. While file + reset are
-    # held, turning chooses where the encoder's CV goes instead.
+    # click (shorter than 1 s) shows the next page. It turns as pitch does
+    # (set_pitch_amount): the page's step x inc^3 (one click one step, faster
+    # turning much more), held PAGE_JUMP per click, at most one jump per
+    # PAGE_JUMP_DELAY_MS; the first click after a turn of direction dropped,
+    # and the release after a jump is no click. While file + reset are held,
+    # each click chooses the next place for the encoder's CV instead (turning
+    # does nothing then).
     def updatePagedEncoder(self, name):
         inc = self.get_delta(name)
         if name == "speed":
@@ -528,43 +543,66 @@ class UserInterface(object):
         else:
             pressed, since, clicked = self.pitch_click.state(), self.time_pressed_pitch, self.clicked_pitch()
         if self.controlhandler.cvAssignActive():
-            if inc != 0:
-                self.controlhandler.stepCvTarget(name, inc)
+            if clicked == 1:
+                self.controlhandler.stepCvTarget(name, 1)
             return
         if inc != 0 and not pressed:
-            self.controlhandler.pageStep(name, inc)
+            direction = 1 if inc > 0 else -1
+            if self.page_inc_dir[name] == direction:
+                self.controlhandler.pageStep(name, inc ** 3)
+            self.page_inc_dir[name] = direction
+        elif inc != 0 and self.now >= self.page_jump_delay[name]:
+            direction = 1 if inc > 0 else -1
+            if self.page_inc_dir[name] == direction:
+                self.controlhandler.pageJump(name, inc ** 3)
+                self.page_jump_delay[name] = self.now + encoderpages.PAGE_JUMP_DELAY_MS
+                if name == "speed":
+                    self.ignore_next_speed_click = True
+                    self.speed_turned_held = True
+                else:
+                    self.ignore_next_pitch_click = True
+            self.page_inc_dir[name] = direction
         if clicked == 1 and self.now - since < 1000:
             self.controlhandler.nextPage(name)
 
-    # The two LEDs of a paged encoder: colour = page, crossfade = its value
-    # (only the left LED at 0, only the right one at 1). Choosing the CV
-    # target: both blink in the candidate page's colour (dim white = none).
+    # The two LEDs of a paged encoder: its value as pitch shows it
+    # (pitchLeds), with the encoder's CV when the page shown is its CV
+    # target, and the LED that leaves dark pulses dimly in the page's colour.
+    # Choosing the CV target: both LEDs steady in the chosen page's colour
+    # (page 1 has none: off, as it has no pulse; dim white = none).
     def drawPageLeds(self, name, pages):
         if self.controlhandler.cvAssignActive():
-            on = (self.now // 150) % 2 == 0
             if pages.candidate is None:
                 colour, bright = (4095, 4095, 4095), 0.1
             else:
-                colour, bright = pages.colours(pages.names().index(pages.candidate))[1], progpages.LED_BRIGHT
-            bright = bright if on else 0.0
+                index = pages.names().index(pages.candidate)
+                colour = pages.colour(index)
+                bright = encoderpages.CHOOSE_BRIGHT if index > 0 else 0.0
             self.set_rgb(name + "_neg", colour[0], colour[1], colour[2], bright)
             self.set_rgb(name + "_pos", colour[0], colour[1], colour[2], bright)
             return
-        neg, pos = pages.colours(pages.current)
-        value = pages.page().value
-        self.set_rgb(name + "_neg", neg[0], neg[1], neg[2], progpages.LED_BRIGHT * (1.0 - value))
-        self.set_rgb(name + "_pos", pos[0], pos[1], pos[2], progpages.LED_BRIGHT * value)
+        index = pages.current
+        value = pages.withCV(pages.page(), self.controlhandler.encoderCV(name))
+        neg_color, neg_bright, pos_color, pos_bright = self.pitchLeds(round(value, 4))
+        if index > 0:  # page 1 looks like the plain encoder
+            page = libDriver.Color(*pages.colour(index))
+            dim = encoderpages.pulse(self.now)
+            if neg_bright == 0.0:
+                neg_color, neg_bright = page, dim
+            if pos_bright == 0.0:
+                pos_color, pos_bright = page, dim
+        self.set_rgb(name + "_neg", neg_color.red(), neg_color.green(), neg_color.blue(), neg_bright)
+        self.set_rgb(name + "_pos", pos_color.red(), pos_color.green(), pos_color.blue(), pos_bright)
 
     # Returns duple of neg_brightness, pos_brightness
     def set_speed_leds(self, mode):
-        if mode == "programs":
-            pages = self.pagedEncoder("speed")
-            if pages is not None:
-                self.drawPageLeds("speed", pages)
-            else:
-                # No speed colours for programs (the speed value is still sent)
-                self.set_rgb("speed_neg", 0, 0, 0, 0.0)
-                self.set_rgb("speed_pos", 0, 0, 0, 0.0)
+        pages = self.pagedEncoder("speed", mode)
+        if pages is not None:
+            self.drawPageLeds("speed", pages)
+        elif mode == "programs":
+            # No speed colours for programs (the speed value is still sent)
+            self.set_rgb("speed_neg", 0, 0, 0, 0.0)
+            self.set_rgb("speed_pos", 0, 0, 0, 0.0)
         elif mode in ("normal", "puredata", "supercollider"):
             pink = libDriver.Color(3037, 200, 3825)
             white = libDriver.Color(4095,4095,4095)
@@ -684,10 +722,14 @@ class UserInterface(object):
         if mode in ("normal", "puredata", "supercollider", "programs"):
             if self.speed_click.risingEdge() == True:
                 self.time_pressed_speed = self.now
-            if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500:
+                self.speed_turned_held = False
+            # Held 1.5 s: the instr selector (not when it was turned while held:
+            # a paged encoder jumps then, updatePagedEncoder)
+            if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500 \
+                    and not self.speed_turned_held:
                 self.ignore_next_speed_click = True
                 self.controlhandler.enterInstrSelMode()
-            if mode == "programs" and self.pagedEncoder("speed") is not None:
+            if self.pagedEncoder("speed", mode) is not None:
                 self.updatePagedEncoder("speed")
             elif not self.controlhandler.isRaw("speed"): # rawencoder: value is sclang's
                 self.set_speed_amount()
@@ -922,71 +964,14 @@ class UserInterface(object):
         self.controlhandler.setAltValue("pitch_alt", self.alt_pitch_amount)
 
     def set_pitch_leds(self, mode):
-        pages = self.pagedEncoder("pitch") if mode == "programs" else None
+        pages = self.pagedEncoder("pitch", mode)
         if pages is not None:
             self.drawPageLeds("pitch", pages)
             return
-        # Pitch input 0-1.0 neg | 1.0-4.0 pos
-        pink = libDriver.Color(3037, 200, 3825)
-        white = libDriver.Color(4095,4095,4095)
-        red = libDriver.Color(4095, 0, 0) #octave 0 / record
-        orange = libDriver.Color(4095, 1100, 0) #octave 1 (1V)
-        yellow = libDriver.Color(4095, 3395, 0) #octave 2 (2V)
-        blue = libDriver.Color(0,0,4095) #octave 3 (3V original pitch)
-        green = libDriver.Color(0, 4095, 0) # octave 4 (4V)
         purple = libDriver.Color(511, 0, 4095) # octave 5 (5V)
-        colororder = [ white, orange, yellow, blue, green, purple]
-        octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
         if mode in ("normal", "puredata", "supercollider", "programs"):
-            original_pitch = 0.6
-            tolerance = 0.001
             pitch_amt = round(self.controlhandler.getValue("pitch"), 4) # I don't like that I have to do this
-            sector_total = pitch_amt / 0.2
-            sector_int = int(sector_total)
-            sector_brightness = sector_total - sector_int
-            if pitch_amt > original_pitch + tolerance:
-                # handle blending up ward
-                if pitch_amt > octaves[5]:
-                    scalar = (pitch_amt - octaves[5]) * 5.00   
-                    pos_color = self.blendColor(colororder[5], colororder[0], scalar)
-                elif pitch_amt > octaves[4]:
-                    ## Blend green to purple
-                    scalar = (pitch_amt - octaves[4]) * 5.00
-                    pos_color = self.blendColor(colororder[4], colororder[5], scalar)
-                else:
-                    scalar = (pitch_amt - octaves[3]) * 5.00
-                    pos_color = self.blendColor(colororder[3], colororder[4], scalar)
-                neg_color = white
-                #pitch_pos_bright = sector_brightness * 0.33
-                pitch_pos_bright = 0.33
-                pitch_neg_bright = 0.0
-            elif pitch_amt < original_pitch - tolerance:
-                if pitch_amt < octaves[1]:
-                    scalar = (pitch_amt - octaves[0]) * 5.0
-                    neg_color = self.blendColor(colororder[0], colororder[1], scalar)
-                elif pitch_amt < octaves[2]:
-                    scalar = (pitch_amt - octaves[1]) * 5.0
-                    neg_color = self.blendColor(colororder[1], colororder[2], scalar)
-                elif pitch_amt < octaves[3]:
-                    scalar = (pitch_amt - octaves[2]) * 5.0
-                    neg_color = self.blendColor(colororder[2], colororder[3], scalar)
-                pos_color = white
-                pitch_pos_bright = 0.0
-                pitch_neg_bright = 0.33
-            octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
-            for idx, octave in enumerate(octaves):
-                if pitch_amt >= octave - tolerance and pitch_amt <= octave + tolerance:
-                    if octave < 0.6:
-                        pitch_neg_bright = 1.0
-                        neg_color = colororder[idx]
-                    elif octave > 0.6:
-                        pitch_pos_bright = 1.0
-                        pos_color = colororder[idx]
-                    else:
-                        pitch_pos_bright = 1.0
-                        pitch_neg_bright = 1.0
-                        pos_color = colororder[idx]
-                        neg_color = colororder[idx]
+            neg_color, pitch_neg_bright, pos_color, pitch_pos_bright = self.pitchLeds(pitch_amt)
             self.set_rgb("pitch_neg", neg_color.red(), neg_color.green(),neg_color.blue(), pitch_neg_bright)
             self.set_rgb("pitch_pos", pos_color.red(), pos_color.green(),pos_color.blue(), pitch_pos_bright)
         elif mode == "secondary controls":
@@ -1034,6 +1019,71 @@ class UserInterface(object):
         else:
             pass
 
+    # Pitch's LED pair for a value (0..1, an octave per 0.2): the octave
+    # colours blended, the left LED (neg) below the original pitch (0.6), the
+    # right one (pos) above it, both on it; a third of full brightness, full
+    # exactly on an octave. Also the value of an encoder page (drawPageLeds).
+    # Returns neg_color, neg_bright, pos_color, pos_bright.
+    def pitchLeds(self, pitch_amt):
+        # Pitch input 0-1.0 neg | 1.0-4.0 pos
+        white = libDriver.Color(4095,4095,4095)
+        orange = libDriver.Color(4095, 1100, 0) #octave 1 (1V)
+        yellow = libDriver.Color(4095, 3395, 0) #octave 2 (2V)
+        blue = libDriver.Color(0,0,4095) #octave 3 (3V original pitch)
+        green = libDriver.Color(0, 4095, 0) # octave 4 (4V)
+        purple = libDriver.Color(511, 0, 4095) # octave 5 (5V)
+        colororder = [ white, orange, yellow, blue, green, purple]
+        octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+        original_pitch = 0.6
+        tolerance = 0.001
+        sector_total = pitch_amt / 0.2
+        sector_int = int(sector_total)
+        sector_brightness = sector_total - sector_int
+        if pitch_amt > original_pitch + tolerance:
+            # handle blending up ward
+            if pitch_amt > octaves[5]:
+                scalar = (pitch_amt - octaves[5]) * 5.00   
+                pos_color = self.blendColor(colororder[5], colororder[0], scalar)
+            elif pitch_amt > octaves[4]:
+                ## Blend green to purple
+                scalar = (pitch_amt - octaves[4]) * 5.00
+                pos_color = self.blendColor(colororder[4], colororder[5], scalar)
+            else:
+                scalar = (pitch_amt - octaves[3]) * 5.00
+                pos_color = self.blendColor(colororder[3], colororder[4], scalar)
+            neg_color = white
+            #pitch_pos_bright = sector_brightness * 0.33
+            pitch_pos_bright = 0.33
+            pitch_neg_bright = 0.0
+        elif pitch_amt < original_pitch - tolerance:
+            if pitch_amt < octaves[1]:
+                scalar = (pitch_amt - octaves[0]) * 5.0
+                neg_color = self.blendColor(colororder[0], colororder[1], scalar)
+            elif pitch_amt < octaves[2]:
+                scalar = (pitch_amt - octaves[1]) * 5.0
+                neg_color = self.blendColor(colororder[1], colororder[2], scalar)
+            elif pitch_amt < octaves[3]:
+                scalar = (pitch_amt - octaves[2]) * 5.0
+                neg_color = self.blendColor(colororder[2], colororder[3], scalar)
+            pos_color = white
+            pitch_pos_bright = 0.0
+            pitch_neg_bright = 0.33
+        octaves = [0.0, 0.2, 0.4, 0.6, 0.8, 1.0]
+        for idx, octave in enumerate(octaves):
+            if pitch_amt >= octave - tolerance and pitch_amt <= octave + tolerance:
+                if octave < 0.6:
+                    pitch_neg_bright = 1.0
+                    neg_color = colororder[idx]
+                elif octave > 0.6:
+                    pitch_pos_bright = 1.0
+                    pos_color = colororder[idx]
+                else:
+                    pitch_pos_bright = 1.0
+                    pitch_neg_bright = 1.0
+                    pos_color = colororder[idx]
+                    neg_color = colororder[idx]
+        return neg_color, pitch_neg_bright, pos_color, pitch_pos_bright
+
     # Configsettings page: the pitch encoder turns whole pages (offset 0, 5,
     # 10, ...); it stops at the first and the last page.
     def turnConfigPage(self):
@@ -1053,7 +1103,7 @@ class UserInterface(object):
         if mode in ("normal", "puredata", "supercollider", "programs"):
             if self.pitch_click.risingEdge() == True:
                 self.time_pressed_pitch = self.now
-            if mode == "programs" and self.pagedEncoder("pitch") is not None:
+            if self.pagedEncoder("pitch", mode) is not None:
                 self.updatePagedEncoder("pitch")
             elif not self.controlhandler.isRaw("pitch"): # rawencoder: value is sclang's
                 self.set_pitch_amount()

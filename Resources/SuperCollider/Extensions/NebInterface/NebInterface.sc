@@ -33,6 +33,7 @@ NebInterface {
 	// Settings (see *initSettings): name -> value, name -> bus.
 	classvar settings;
 	classvar settingBuses;
+	classvar pageBuses;          // encoder pages (Python): name -> bus of /neb/page/<name>
 	// Layout of the .state file. Version 0 (no \version key) was the state dictionary alone.
 	classvar stateVersion = 1;
 	// The NebPatch init gave back; +1 on every init, so an older NebPatch knows it's stale.
@@ -73,6 +74,7 @@ NebInterface {
 		synthDefs = [];
 		buses = Dictionary.new;
 		settingBuses = IdentityDictionary.new;
+		pageBuses = IdentityDictionary.new;
 		initialized = true;
 		generation = generation + 1;
 		patch = NebPatch(s, generation);
@@ -210,6 +212,29 @@ NebInterface {
 		settingBuses[name].set(value);
 		this.prStateChanged;
 		^value
+	}
+
+	/* Encoder pages: values a .scd gives the speed/pitch encoder in its
+	   nebconfig block, owned by Python (encoderpages.py: click = next page,
+	   turn = value, LEDs, CV target, saved as <patch>.pages):
+
+	       page:speed:reverb,/neb/page/reverb,0,1
+	       page:speed:tape,/neb/page/tape,0,1
+	       cv:speed,none
+
+	   Python sends each page, scaled to its range, to its path. A SynthDef
+	   reads it with NebPage.kr(\reverb), the bus of /neb/page/reverb, made
+	   on first use. (Pages and rawencoder are two ways to give an encoder more
+	   values: with pages Python does the encoder, with rawencoder sclang.)
+	*/
+	*pageBus { |name|
+		var bus = pageBuses[name];
+		if (bus.isNil) {
+			bus = Bus.control(server, 1);
+			pageBuses[name] = bus;
+			OSCdef(("page_" ++ name).asSymbol, { |msg| bus.set(msg[1]) }, "/neb/page/" ++ name);
+		};
+		^bus
 	}
 
 	*prStateChanged {
@@ -350,6 +375,7 @@ NebInterface {
 		// OSC / MIDI
 		if(buses.notNil) { buses.values.do { |b| b.free }; buses.clear };
 		if(settingBuses.notNil) { settingBuses.do(_.free); settingBuses.clear };
+		if(pageBuses.notNil) { pageBuses.do(_.free); pageBuses.clear };
 		OSCdef.all.do(_.free);   // free OSC callbacks
 		MIDIdef.freeAll;
 		
@@ -637,6 +663,11 @@ UGenValueRange : UGen {
 // A setting declared with NebInterface.initSettings: NebSetting.kr(\reverb)
 NebSetting {
 	*kr { |name| ^In.kr(NebInterface.settingBus(name)) }
+}
+
+// An encoder page of the .scd's nebconfig block (page:speed:reverb,...): NebPage.kr(\reverb)
+NebPage {
+	*kr { |name| ^In.kr(NebInterface.pageBus(name.asSymbol)) }
 }
 
 NebPitch         : UGenValueRange { *busKey { ^\pitch } }

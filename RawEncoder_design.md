@@ -13,6 +13,10 @@ For those encoders:
   Python and nebio take no part in saving.
 - The ControlHandler holds **no value** for the control. It only switches the routing on and off.
 - Encoders that aren't declared `rawencoder` stay `hybrid`, exactly as today.
+- The other way to give an encoder more values is **pages** (`speed,pages` / `page:` lines, 2026-11-04):
+  there Python does the encoder (pages, LEDs, CV target, saved as `<patch>.pages`) and sclang only
+  reads the values (`NebPage.kr`). Both live in `Code/nebulae/controlhandlerEncoders.py`, shared by
+  the SC and programs banks; see `Supercollider/Pages/pages.scd` and `Programs/README.md`.
 
 Buttons (`freeze`, `reset`, ...) will get the same treatment later (`/neb/btn/<name>`). In the
 .scd that will be declared for all buttons at once. They aren't covered here.

@@ -3,31 +3,32 @@ import time
 import control
 import nebio
 import scsender
-import digitaldata
-from controlhandler import ControlHandler, DIGITAL_CONTROLS
+from controlhandlerEncoders import EncoderControlHandler, ENCODERS
 
-# Encoders a .scd can declare as "rawencoder" in its nebconfig block.
-RAW_ENCODERS = ("speed", "pitch")
-
-# Control handler for the SuperCollider bank. Owns the OSC link to sclang (scSock).
-class SCControlHandler(ControlHandler):
+# Control handler for the SuperCollider bank. Owns the OSC link to sclang
+# (scSock). Encoders, button modes and pages per .scd: EncoderControlHandler.
+class SCControlHandler(EncoderControlHandler):
 
     def __init__(self, *args, **kwargs):
         super(SCControlHandler, self).__init__(*args, **kwargs)
         self.scSock = scsender.ScSend()
         self.rawReady = False  # patch loaded, sclang can take the raw encoders
-        # Both channels of each encoder, built once: encoders[name][source].
-        self.encoders = dict()
-        for name in RAW_ENCODERS:
-            self.encoders[name] = dict()
-            self.encoders[name]["hybrid"] = self.channeldict[name] # built by ControlHandler
+        # The SC bank's own encoder source: sclang reads the encoder itself.
+        for name in ENCODERS:
             self.encoders[name]["rawencoder"] = control.ControlChannel(None, name, 0, "rawencoder")
 
     def closeSockets(self):
         self.setRawActive(False)
+        self.savePages()
         super(SCControlHandler, self).closeSockets()
         if self.scSock.is_connected():
             self.scSock.close()
+
+    def sendControl(self, name, value):
+        self.scSock.send(name, value)
+
+    def sendPath(self, path, value):
+        nebio.sc_send_path_float(path, value)
 
     # ---- rawencoder -------------------------------------------------------
 
@@ -35,38 +36,12 @@ class SCControlHandler(ControlHandler):
         return [chn for chn in self.channels if chn.source == "rawencoder"]
 
     # Called for every patch, also when this handler is reused for the next
-    # .scd: speed/pitch become rawencoder or hybrid as the patch declares them.
-    # The channel keeps its place in self.channels, resistNormalSettings()
-    # pairs channels[i] with altchannels[i].
-    def setConfig(self, config):  # nebconfig.NebConfig of the .scd
+    # .scd (EncoderControlHandler.setConfig: encoders, buttons, pages).
+    def setConfig(self, config, pages_path):  # nebconfig.NebConfig of the .scd
         self.setRawActive(False)
         self.rawReady = False
         nebio.led_clear_sc()  # the old patch's LED colours
-        for name in RAW_ENCODERS:
-            source = config.encoderType(name)
-            old = self.channeldict[name]
-            new = self.encoders[name][source]
-            if new is old:
-                continue
-            self.channels[self.channels.index(old)] = new
-            self.channeldict[name] = new
-            self.classlog.info("%s: %s", name, source)
-        self.setButtonConfig(config)
-
-    # Button mode and edge as the .scd declares them (e.g. freeze,latching,rising),
-    # else the default, the same as ControlHandler.__init__ does for a new handler.
-    def setButtonConfig(self, nebConfig):
-        output_period = nebConfig.outputPeriod()
-        for ctrl in DIGITAL_CONTROLS:
-            chn = self.channeldict.get(ctrl) or self.altchanneldict.get(ctrl)
-            config = nebConfig.entry(ctrl) or self.defaultConfig.get(ctrl)
-            if chn is None or config is None or len(config) < 2:
-                continue
-            chn.setMode(config[0], config[1])
-            if config[0] == "triggered":
-                chn.setOutputPeriod(output_period)
-            else:
-                chn.setOutputPeriod(digitaldata.DEFAULT_OUTPUT_PERIOD)
+        super(SCControlHandler, self).setConfig(config, pages_path)
 
     # Declared rawencoder by the loaded .scd (in supercollider mode Python
     # never sets its value or LEDs).
@@ -80,12 +55,13 @@ class SCControlHandler(ControlHandler):
     def setRawActive(self, state):
         for chn in self.rawChannels():
             chn.input.setActive(state)
-        for name in RAW_ENCODERS:
+        for name in ENCODERS:
             nebio.encoder_set_click(name, state)
 
     # After loadScSynth(): the patch is running, sclang can take the raw encoders.
     def startRawEncoders(self):
         self.rawReady = True
+        self.page_sent = {}  # the patch's NebPage buses exist now: all pages again
         if self.control_mode == "supercollider":
             self.setRawActive(True)
 
@@ -138,13 +114,16 @@ class SCControlHandler(ControlHandler):
         elif self.control_mode == "instr selector":
             self.updateInstrSelector()
         else: # supercollider
+            self.updateCvAssign()
             for chn in self.channels: #for each of the adc channels
                 if chn.source == "rawencoder":
                     continue # nebio and sclang handle it
                 if chn.name != "sourcegate":
                     chn.setIgnoreHID(False)
                 chn.update() #update all control values
-                self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
+                if self.sendsControl(chn.name):
+                    self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
+            self.sendPages()
 
     # specific supercollider things
 
@@ -232,8 +211,10 @@ class SCControlHandler(ControlHandler):
             if chn.source == "rawencoder":
                 continue # nebio and sclang handle it
             chn.update()
-            self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
+            if self.sendsControl(chn.name):
+                self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
         for chn in self.altchannels:
             chn.update()
             self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message
+        self.sendPages()
 

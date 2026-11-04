@@ -99,6 +99,7 @@ def lib():
         "nebio_sc_send_bool": (None, [c_char_p, c_int]),
         "nebio_sc_send_string": (None, [c_char_p, c_char_p]),
         "nebio_sc_send_path_int": (None, [c_char_p, c_int]),
+        "nebio_sc_send_path_float": (None, [c_char_p, c_double]),
         "nebio_sc_clear_cache": (None, []),
         "nebio_sc_synth_is_up": (c_int, []),
         "nebio_sc_set_synth_down": (None, []),
@@ -387,6 +388,15 @@ class LedDriver(object):
 # Programs bank (controlhandlerProg.py): OSC to the port of the running
 # program, a float to any path. The handler sends only what changed.
 _osc_paths = {}
+
+
+def sc_send_path_float(path, value):
+    """A float to any OSC path of sclang (encoder pages: /neb/page/<name>),
+    always sent: the caller sends only what changed."""
+    bpath = _osc_paths.get(path)
+    if bpath is None:
+        bpath = _osc_paths[path] = _b(path)
+    lib().nebio_sc_send_path_float(bpath, float(value))
 
 
 def osc_open(port):

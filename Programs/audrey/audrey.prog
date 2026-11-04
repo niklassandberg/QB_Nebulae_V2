@@ -12,15 +12,42 @@ Knobs and buttons (change the osc: lines to move them, no compile needed):
   reset    gate: held = note on, as touching a pad (button or gate input)
   freeze   drone: the loop keeps ringing without a gate
 
-Encoder pages (click = next page, turn = value; LEDs: colour = page,
-left/right = value; the values are saved):
-  pitch    1 note (white; pitch CV here: 1V/oct)   2 envelope shape (cyan/blue)
-  speed    1 input level (white)   2 output level (cyan/blue)
-           3 body LFO (yellow/red): off, fast 1-8 Hz, slow 0.01-0.5 Hz
+Encoder pages (click = next page, turn = value; the LEDs show the value as
+pitch does, the LED that stays dark shows the page colour, dim; saved):
+  pitch    1 note (white; pitch CV here: 1V/oct)   2 envelope shape (red)
+  speed    1 input level (white)   2 output level (red)
+           3 body LFO (blue): off, fast 1-8 Hz, slow 0.01-0.5 Hz
            (with the LFO on, start sets its rate and spread)
 
-Where the pitch and speed CV go: hold file + reset, turn pitch or speed to
-choose a page (its LEDs blink that page's colour, dim white = nowhere),
+Example:
+Field by field, page:speed:output,/audrey/output,0,1,lin,0.5,0.005 means:
+
+┌────────────────┬─────────┬───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┐
+│      Part      │  Value  │                                                                  Meaning                                                                  │
+├────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ page:          │         │ This line is an encoder page.                                                                                                             │
+├────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ speed          │         │ Which encoder: speed or pitch.                                                                                                            │
+├────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ output         │         │ The page's name. Used in .pages (saved values), in cv:speed,output, and as NebPage.kr(\output) in a .scd.                                 │
+├────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ /audrey/output │ path    │ The OSC address the value is sent to. The program (audrey/source/main.cc) listens for exactly this path.                                  │
+├────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 0              │ min     │ What is sent when the page is at its lowest.                                                                                              │
+├────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 1              │ max     │ What is sent when the page is at its highest.                                                                                             │
+├────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ lin            │ curve   │ How min to max is spread over the turns: lin evenly; exp exponentially, good for frequencies and times (min and max must be > 0); int     │
+│                │         │ evenly, rounded to whole numbers (e.g. lfo 0, 1, 2).                                                                                      │
+├────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 0.5            │ default │ Where the page starts the first time, before anything is saved, as a fraction of the range from 0 to 1. Here halfway, so 0.5 is sent.     │
+│                │         │ After that the saved value in audrey.pages is used.                                                                                       │
+├────────────────┼─────────┼───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┤
+│ 0.005          │ step    │ How much of the range one encoder click moves: 0.005 means 200 clicks from min to max.                                                    │
+└────────────────┴─────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
+
+Where the pitch and speed CV go: hold file + reset, click pitch or speed to
+choose a page (its LEDs glow in that page's colour, dim white = nowhere),
 release both. Saved for this program.
 
 The OSC paths audrey knows are listed in source/main.cc.

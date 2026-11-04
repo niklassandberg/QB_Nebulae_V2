@@ -25,15 +25,21 @@
 #                            OSC path as a float, scaled to min..max (exp:
 #                            min and max > 0; int: rounded). One line per
 #                            control; no comments after an entry.
-#   page:pitch:note,/audrey/note,16,76[,curve[,default]]
-#                            .prog: a page of the pitch (or speed) encoder,
-#                            as chompi.scd: a click shows the next page,
-#                            turning sets its value (0..1, default 0), sent
-#                            scaled like osc:. Pages in the order written.
-#                            An encoder with pages is not sent as a control.
-#   cv:pitch,note            .prog: the page the encoder's CV input is added
-#                            to at first (or none); hold file + reset and
-#                            turn the encoder to choose another (progpages.py)
+#   speed,pages              .scd/.prog: the encoder has pages (also without
+#                            this line when it has page: lines)
+#   page:pitch:note,/audrey/note,16,76[,curve[,default[,step]]]
+#                            .scd/.prog: a page of the pitch (or speed)
+#                            encoder, as chompi.scd: a click shows the next
+#                            page, turning sets its value (0..1, default 0),
+#                            sent scaled like osc: to the OSC path (.scd: read
+#                            /neb/page/<name> with NebPage.kr(\<name>)). Pages
+#                            in the order written. step: how much of the range
+#                            one encoder click moves (default 0.01 = 100 clicks
+#                            from min to max; 0.002 = 500, finer). An encoder
+#                            with pages is not sent as a control (encoderpages.py).
+#   cv:pitch,note            .scd/.prog: the page the encoder's CV input is
+#                            added to at first (or none); hold file + reset
+#                            and click the encoder to choose another
 #
 # Where the entries are:
 #   .instr  nebconfigbegin              .scd  /*
@@ -58,6 +64,7 @@ INSTR_DIRS = {"instr": ("/home/alarm/instr/", ".instr"),
 
 DEFAULT_OSC_PORT = 3020
 OSC_CURVES = ("lin", "exp", "int")
+PAGE_STEP = 0.01  # a page's step without one in its line (encoderpages.py)
 
 KERNELS = ("rt", "normal", "any")
 
@@ -133,10 +140,15 @@ class NebConfig(object):
         return self._dict
 
     def encoderType(self, name):
-        """speed/pitch: "rawencoder" if the instrument declares it, else "hybrid"."""
+        """speed/pitch: "rawencoder" or "pages" if the instrument declares it
+        ("pages" also when it has page:<name>:... lines), else "hybrid"."""
         value = self.value(name)
-        if value and value.strip().lower() == "rawencoder":
-            return "rawencoder"
+        value = value.strip().lower() if value else ""
+        if value in ("rawencoder", "pages"):
+            return value
+        prefix = "page:%s:" % name
+        if any(key.startswith(prefix) for key in self._dict):
+            return "pages"
         return "hybrid"
 
     def outputPeriod(self):
@@ -243,9 +255,9 @@ class NebConfig(object):
             try:
                 parts = key.split(":")
                 if len(parts) != 3 or parts[1] not in ("speed", "pitch") or not parts[2]:
-                    raise ValueError("page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default]]")
+                    raise ValueError("page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]]")
                 if len(values) < 3 or not values[0].startswith("/"):
-                    raise ValueError("page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default]]")
+                    raise ValueError("page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]]")
                 lo, hi = float(values[1]), float(values[2])
                 curve = values[3].lower() if len(values) > 3 and values[3] else "lin"
                 if curve not in OSC_CURVES:
@@ -253,8 +265,11 @@ class NebConfig(object):
                 if curve == "exp" and (lo <= 0 or hi <= 0):
                     raise ValueError("exp needs min and max > 0")
                 default = float(values[4]) if len(values) > 4 and values[4] else 0.0
+                step = float(values[5]) if len(values) > 5 and values[5] else PAGE_STEP
+                if not 0.0 < step <= 1.0:
+                    raise ValueError("step: a part of the range per click, 0 < step <= 1")
                 pages.setdefault(parts[1], []).append(
-                    (parts[2], values[0], lo, hi, curve, min(1.0, max(0.0, default))))
+                    (parts[2], values[0], lo, hi, curve, min(1.0, max(0.0, default)), step))
             except ValueError as e:
                 errors.append("%s,%s: %s" % (key, ",".join(values), e))
         return pages, errors

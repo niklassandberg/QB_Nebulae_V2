@@ -28,6 +28,7 @@ public:
     void sendBool(const char *name, bool value);
     void sendString(const char *name, const char *value);
     void sendPathInt(const char *path, int value);
+    void sendPathFloat(const char *path, double value);
     void clearCache();
 
     std::atomic<bool> synthIsUp{false};

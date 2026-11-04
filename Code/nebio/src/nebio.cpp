@@ -114,6 +114,9 @@ void nebio_sc_send_string(const char *name, const char *value) {
     ScLink::instance().sendString(name, value);
 }
 void nebio_sc_send_path_int(const char *path, int value) { ScLink::instance().sendPathInt(path, value); }
+void nebio_sc_send_path_float(const char *path, double value) {
+    ScLink::instance().sendPathFloat(path, value);
+}
 void nebio_sc_clear_cache(void) { ScLink::instance().clearCache(); }
 
 int nebio_sc_synth_is_up(void) { return ScLink::instance().synthIsUp; }

@@ -7,6 +7,7 @@ import controlhandler as ch
 import controlhandlerSC as chSC
 import controlhandlerPD as chPD
 import controlhandlerProg as chProg
+import encoderpages
 import conductor
 import nebconfig
 import ui
@@ -547,7 +548,8 @@ class Nebulae(object):
                 self.c_handle.startScOscServer()
                 self.c_handle.setCsoundPerformanceThread(None)
                 self.st = None #just to be sertain.
-            self.c_handle.setConfig(scConfig) # rawencoder or hybrid speed/pitch, as the .scd declares
+            # Encoders (hybrid, rawencoder or pages), button modes and pages, as the .scd declares them
+            self.c_handle.setConfig(scConfig, self.pagesPath("supercollider", patch))
 
             self.c_handle.enterSuperColliderMode()
             self.classlog.info("Load patch!")
@@ -767,6 +769,11 @@ class Nebulae(object):
     # that runs as its own JACK client and listens for OSC; which control
     # goes to which OSC path is in the .prog (nebconfig.py). The program
     # connects its own JACK ports.
+    # The saved encoder pages of an instrument: <name>.pages next to it
+    # (encoderpages.py).
+    def pagesPath(self, bank, name):
+        return nebconfig.instrumentDir(bank) + name + encoderpages.PAGES_EXT
+
     def start_programs(self, name):
         try:
             self.log.spill_basic_info()
@@ -786,8 +793,7 @@ class Nebulae(object):
             self.start_jack(jack)
             self.orc_handle.refreshFileHandler()
             bindings, errors = config.oscBindings()
-            pages, page_errors = config.encoderPages()
-            for error in errors + page_errors:
+            for error in errors:
                 self.classlog.error("%s.prog: %s", name, error)
             try:
                 port = config.oscPort()
@@ -808,11 +814,10 @@ class Nebulae(object):
                     os.chmod(program, 0o755)  # a firmware update or copy may lose the bit
                 self.classlog.info("Starting %s", " ".join(cmd))
                 self.prog = subprocess.Popen(cmd)
-            # The .prog's entries as configData: button modes such as
-            # reset,momentary,rising (the other keys are not button names).
-            self.c_handle = chProg.ProgControlHandler(None, self.orc_handle.numFiles(), config.asDict(), self.new_instr,
-                                                      bank="programs", oscPort=port, bindings=bindings,
-                                                      pages=pages, cvTargets=config.cvTargets(), progName=name)
+            self.c_handle = chProg.ProgControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr,
+                                                      bank="programs", oscPort=port, bindings=bindings)
+            # Encoders (hybrid or pages), button modes and pages, as the .prog declares them
+            self.c_handle.setConfig(config, self.pagesPath("programs", name))
             self.c_handle.setCsoundPerformanceThread(None)
             self.c_handle.enterProgramsMode()
             self.loadUI()

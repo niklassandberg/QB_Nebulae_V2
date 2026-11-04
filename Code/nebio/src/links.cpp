@@ -198,6 +198,13 @@ void ScLink::sendPathInt(const char *path, int value) {
         logError("could not send %s: %s", path, lo_address_errstr(target_));
 }
 
+void ScLink::sendPathFloat(const char *path, double value) {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (!target_) return;
+    if (lo_send(target_, path, "f", static_cast<float>(value)) < 0)
+        logError("could not send %s: %s", path, lo_address_errstr(target_));
+}
+
 void ScLink::clearCache() {
     std::lock_guard<std::mutex> lock(mutex_);
     last_.clear();

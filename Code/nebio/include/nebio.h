@@ -149,6 +149,7 @@ NEBIO_API void nebio_sc_send_bool(const char *name, int value);
 NEBIO_API void nebio_sc_send_string(const char *name, const char *value);
 /* Sends to a full OSC path without the change check. */
 NEBIO_API void nebio_sc_send_path_int(const char *path, int value);
+NEBIO_API void nebio_sc_send_path_float(const char *path, double value);
 /* Forgets the last sent values, so everything is sent again. */
 NEBIO_API void nebio_sc_clear_cache(void);
 
