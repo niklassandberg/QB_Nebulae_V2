@@ -77,7 +77,7 @@ class FileLoader(object):
     def typeIsCurrent(self, fileType):
         fullDir = "/home/alarm/" + fileType
         try:
-            local = set(f for f in os.listdir(fullDir) if not f.startswith('.'))
+            local = set(f for f in os.listdir(fullDir) if not self.keepLocal(fileType, f))
             usb = self.typeFiles(fileType)
             if local != set(os.path.basename(f) for f in usb):
                 return False
@@ -89,6 +89,12 @@ class FileLoader(object):
             return True
         except OSError:
             return False
+
+    # Files of a type folder that are not the stick's: hidden files, and the
+    # programs' saved pages (<name>.state, progpages.py), which belong to the
+    # Nebulae. They are neither compared nor erased.
+    def keepLocal(self, fileType, name):
+        return name.startswith('.') or (fileType == "prog" and name.endswith(".state"))
 
     def typeFiles(self, fileType):
         files = []
@@ -202,7 +208,7 @@ class FileLoader(object):
             self.classlog.info("Erasing " + fullDir)
             for f in os.listdir(fullDir):
                 path = os.path.join(fullDir, f)
-                if not f.startswith('.') and os.path.isfile(path):
+                if not self.keepLocal(fileType, f) and os.path.isfile(path):
                     os.remove(path)
             for f in files:
                 try:

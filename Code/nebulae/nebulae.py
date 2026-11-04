@@ -1,6 +1,7 @@
 # Main Nebulae Source File
 import sys
 import os
+import shutil
 import ctcsound
 import controlhandler as ch
 import controlhandlerSC as chSC
@@ -59,6 +60,8 @@ class Nebulae(object):
             self.led_process = None
             self.prog = None  # the process of the programs bank
             # Check the config file for last instr
+            self.new_bank = None
+            self.new_instr = None
             if os.path.isfile(self.instr_cfg) and os.path.getsize(self.instr_cfg) > 0:
                 # Get bank/instr from factory
                 with open(self.instr_cfg, 'r') as f:
@@ -69,32 +72,39 @@ class Nebulae(object):
                             self.new_bank = templist[1]
                         elif templist[0] == 'instr':
                             self.new_instr = templist[1] 
-            else:
-                self.new_bank = 'instr'
-                instr_path = nebconfig.instrumentDir("instr")
-                factory_path = "/home/alarm/QB_Nebulae_V2/Code/instr/"
-                if not os.path.isdir(instr_path) or not os.listdir(instr_path):
-                    os.makedirs(instr_path, exist_ok=True)
-                    os.system("cp " + factory_path + "a_granularlooper.instr " + instr_path)
-                instr_files = sorted([f[:-6] for f in os.listdir(instr_path) if f.endswith(".instr")])
-                self.new_instr = instr_files[0] if instr_files else 'a_granularlooper'
+            # The boot instrument must exist; else the first one there is
+            # (only when there is none at all: the granular looper).
+            if self.new_bank not in nebconfig.INSTR_DIRS or not self.new_instr or \
+                    not os.path.isfile(nebconfig.instrumentPath(self.new_bank, self.new_instr)):
+                if self.new_bank is not None:
+                    self.classlog.info("Boot instrument %s (%s) not found", self.new_instr, self.new_bank)
+                self.new_bank, self.new_instr = self.firstInstrument()
             self.currentInstr = self.new_instr
-            # Check if file exists, else reset to default instr
-            if self.new_bank in nebconfig.INSTR_DIRS:
-                path = nebconfig.instrumentPath(self.new_bank, self.new_instr)
-            else:
-                self.classlog.info("bank not recocgnized.")
-                self.classlog.info(self.new_bank)
-                path = nebconfig.instrumentPath('instr', 'a_granularlooper')
-            if os.path.isfile(path) == False:
-                # set to default instr
-                self.new_bank = 'instr'
-                self.new_instr = 'a_granularlooper'
             self.first_run = True
             nebmixer.disable()
             self.last_debug_print = time.time()
         except Exception as e:
             self.classlog.error("Error in __init__: %s", e)
+
+    # The first instrument there is, in the order of the instr selector's
+    # banks (Csound, SuperCollider, Pure Data, programs), as (bank, name).
+    # Only when no bank has any: the factory granular looper, copied into the
+    # Csound bank. (The USB stick is loaded later, at the instrument's start.)
+    def firstInstrument(self):
+        for bank in ("instr", "supercollider", "puredata", "programs"):
+            folder, ext = nebconfig.INSTR_DIRS[bank]
+            try:
+                names = sorted(f[:-len(ext)] for f in os.listdir(folder) if f.endswith(ext))
+            except OSError:
+                names = []
+            if names:
+                self.classlog.info("Starting %s (%s)", names[0], bank)
+                return bank, names[0]
+        folder = nebconfig.instrumentDir("instr")
+        self.classlog.info("No instrument at all: adding the granular looper")
+        os.makedirs(folder, exist_ok=True)
+        shutil.copy2("/home/alarm/QB_Nebulae_V2/Code/instr/a_granularlooper.instr", folder)
+        return "instr", "a_granularlooper"
 
     # Csound's performance thread (it computes and plays every audio block)
     # in real-time priority (SCHED_FIFO, csound_rt_priority in

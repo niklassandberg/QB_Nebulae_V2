@@ -58,7 +58,8 @@ cv:pitch,note                                    the page the encoder's CV goes 
   the chosen page, dim white = nowhere), **release both**. While both are held,
   file and reset do nothing else.
 - The values and CV targets are saved per program
-  (`Code/config/prog/<name>.txt`, 1 s after a change) and come back at the next
+  next to the `.prog` (`/home/alarm/prog/<name>.state`, 1 s after a change; a
+  firmware update and the USB stick leave it) and come back at the next
   load. The page always starts at page 1.
 - A pitch page over 60 semitones keeps the pitch CV at 1V/oct.
 - An encoder with pages is not sent as the control `speed`/`pitch`.

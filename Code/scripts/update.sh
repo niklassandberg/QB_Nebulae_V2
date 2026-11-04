@@ -181,6 +181,14 @@ then
     #mkdir dir if they dont exist
     mkdir -p /home/alarm/sc
     mkdir -p /home/alarm/prog  # programs bank (.prog + program from the USB stick)
+    # No instrument in any bank (Csound, SC, Pd, programs): a copy of the
+    # factory granular looper, so the Nebulae has something to start. The
+    # original stays in Code/instr/.
+    if ! ls /home/alarm/instr/*.instr /home/alarm/sc/*.scd /home/alarm/pd/*.pd /home/alarm/prog/*.prog >/dev/null 2>&1
+    then
+        mkdir -p /home/alarm/instr
+        cp /home/alarm/QB_Nebulae_V2/Code/instr/a_granularlooper.instr /home/alarm/instr/
+    fi
 
     reboot
 else

@@ -6,13 +6,17 @@
 #   - the encoder's CV input (speed CV, pitch CV) is added to one page, its CV
 #     target; holding file + reset and turning the encoder chooses it.
 # Values and CV targets are saved per program, 1 s after the last change
-# (as NebInterface settings are for a .scd), and back at the next load.
+# (as NebInterface settings are for a .scd), and back at the next load. The
+# file lies next to the program's .prog (/home/alarm/prog/<name>.state), out
+# of the firmware folder: a firmware update keeps it, the USB stick's load
+# leaves it (fileloader.py), and whoever makes the program can look at it.
 import math
 import os
 
 from classlogger import ClassLogger
 
-STATE_DIR = "/home/alarm/QB_Nebulae_V2/Code/config/prog/"
+STATE_DIR = "/home/alarm/prog/"
+STATE_EXT = ".state"
 PAGE_STEP = 0.01      # per encoder step (chompi.scd: 0.02 over a smaller range)
 SAVE_DELAY_MS = 1000  # after the last change
 
@@ -103,7 +107,7 @@ class ProgState(object):
 
     def __init__(self, prog_name):
         self.log = ClassLogger.loggerSetup(self)
-        self.path = os.path.join(STATE_DIR, prog_name + ".txt")
+        self.path = os.path.join(STATE_DIR, prog_name + STATE_EXT)
         self.dirty_time = None
 
     def load(self, encoders):
