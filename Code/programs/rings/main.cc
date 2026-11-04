@@ -31,6 +31,9 @@
 //   /rings/internal_strum    1: strums by itself on input onsets or
 //                            note changes (as with no trigger cable)
 //   /rings/level             output gain, 0..2 (default 1)
+//   /rings/mono              1: ODD + EVEN on both outputs (what the module
+//                            gives with only one cable in), 0: ODD left,
+//                            EVEN right (default)
 // The file argument (the .prog that started it) is not read here.
 
 #include <jack/jack.h>
@@ -71,6 +74,7 @@ struct Controls {
   std::atomic<int> polyphony{1};
   std::atomic<bool> internal_exciter{true};
   std::atomic<bool> internal_strum{true};
+  std::atomic<bool> mono{false};
   std::atomic<unsigned> strums{0};  // counts rising edges of /rings/strum
 };
 
@@ -180,7 +184,11 @@ void processBlock() {
   }
 
   float level = clampf(controls.level.load(), 0.0f, 2.0f);
+  bool mono = controls.mono.load();
   for (size_t i = 0; i < kMaxBlockSize; ++i) {
+    if (mono) {
+      out_block[i] = aux_block[i] = out_block[i] + aux_block[i];
+    }
     out_block[i] = clampf(out_block[i] * level, -1.0f, 1.0f);
     aux_block[i] = clampf(aux_block[i] * level, -1.0f, 1.0f);
   }
@@ -303,6 +311,7 @@ int main(int argc, char** argv) {
   lo_server_thread_add_method(osc, "/rings/strum", "f", onStrum, nullptr);
   lo_server_thread_add_method(osc, "/rings/internal_exciter", "f", onBool, &controls.internal_exciter);
   lo_server_thread_add_method(osc, "/rings/internal_strum", "f", onBool, &controls.internal_strum);
+  lo_server_thread_add_method(osc, "/rings/mono", "f", onBool, &controls.mono);
 
   // nebulae.py starts the program as soon as the jackd process exists; the
   // server may need a moment more before it takes clients.

@@ -1,0 +1,50 @@
+audrey: AudreyTouch's feedback synth (Infrasonic Audio / Synthux Academy, MIT)
+as a Nebulae program. Only the lines between nebconfigbegin and nebconfigend are
+read; this text is not.
+
+Start with density low: Audrey can get loud suddenly.
+
+Knobs and buttons (change the osc: lines to move them, no compile needed):
+  density  feedback gain, the main control (S30): wakes the loop
+  blend    reverb dry/wet (S32)          size     reverb size (S33)
+  window   low pass in the loop (S34)    overlap  high pass in the loop (S35)
+  start    body (S37; right = shortest delay, as the top of the fader)
+  reset    gate: held = note on, as touching a pad (button or gate input)
+  freeze   drone: the loop keeps ringing without a gate
+
+Encoder pages (click = next page, turn = value; LEDs: colour = page,
+left/right = value; the values are saved):
+  pitch    1 note (white; pitch CV here: 1V/oct)   2 envelope shape (cyan/blue)
+  speed    1 input level (white)   2 output level (cyan/blue)
+           3 body LFO (yellow/red): off, fast 1-8 Hz, slow 0.01-0.5 Hz
+           (with the LFO on, start sets its rate and spread)
+
+Where the pitch and speed CV go: hold file + reset, turn pitch or speed to
+choose a page (its LEDs blink that page's colour, dim white = nowhere),
+release both. Saved for this program.
+
+The OSC paths audrey knows are listed in Code/programs/audrey/main.cc.
+
+nebconfigbegin
+run,audrey
+oscport,3021
+kernel,normal
+blocksize,128
+reset,momentary,rising
+freeze,latching,rising
+osc:density,/audrey/feedback,0,1
+osc:blend,/audrey/reverb_mix,0,1
+osc:size,/audrey/reverb_size,0,1
+osc:window,/audrey/lpf,0,1
+osc:overlap,/audrey/hpf,0,1
+osc:start,/audrey/body,0,1
+osc:reset,/audrey/gate,0,1
+osc:freeze,/audrey/drone,0,1
+page:pitch:note,/audrey/note,16,76,lin,0.4
+page:pitch:shape,/audrey/shape,0,1,lin,0
+page:speed:input,/audrey/input,0,1,lin,0.3
+page:speed:output,/audrey/output,0,1,lin,0.5
+page:speed:lfo,/audrey/lfo,0,2,int,0
+cv:pitch,note
+cv:speed,none
+nebconfigend

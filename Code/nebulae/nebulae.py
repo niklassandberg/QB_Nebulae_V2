@@ -99,18 +99,18 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in __init__: %s", e)
 
-    # The programs bank starts with the firmware's .prog files (Code/programs/,
-    # e.g. miRings.prog) while /home/alarm/prog/ is empty; a USB stick with
-    # .prog files replaces them (fileloader.py).
+    # The programs bank always has the firmware's programs (Code/bin/*.prog,
+    # e.g. miRings.prog, audrey.prog): one that is missing in /home/alarm/prog/
+    # is copied there. One that is there (from the USB stick, or changed) is
+    # left as it is.
     def installFactoryPrograms(self):
         prog_dir = nebconfig.instrumentDir("programs")
         try:
-            if os.path.isdir(prog_dir) and os.listdir(prog_dir):
-                return
             os.makedirs(prog_dir, exist_ok=True)
-            for f in glob.glob("/home/alarm/QB_Nebulae_V2/Code/programs/*.prog"):
-                shutil.copy2(f, prog_dir)
-                self.classlog.info("Installed %s", os.path.basename(f))
+            for f in glob.glob("/home/alarm/QB_Nebulae_V2/Code/bin/*.prog"):
+                if not os.path.exists(os.path.join(prog_dir, os.path.basename(f))):
+                    shutil.copy2(f, prog_dir)
+                    self.classlog.info("Installed %s", os.path.basename(f))
         except OSError as e:
             self.classlog.error("Could not install the factory programs: %s", e)
 
@@ -794,7 +794,8 @@ class Nebulae(object):
             self.start_jack(jack)
             self.orc_handle.refreshFileHandler()
             bindings, errors = config.oscBindings()
-            for error in errors:
+            pages, page_errors = config.encoderPages()
+            for error in errors + page_errors:
                 self.classlog.error("%s.prog: %s", name, error)
             try:
                 port = config.oscPort()
@@ -815,8 +816,11 @@ class Nebulae(object):
                     os.chmod(program, 0o755)  # a firmware update or copy may lose the bit
                 self.classlog.info("Starting %s", " ".join(cmd))
                 self.prog = subprocess.Popen(cmd)
-            self.c_handle = chProg.ProgControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr,
-                                                      bank="programs", oscPort=port, bindings=bindings)
+            # The .prog's entries as configData: button modes such as
+            # reset,momentary,rising (the other keys are not button names).
+            self.c_handle = chProg.ProgControlHandler(None, self.orc_handle.numFiles(), config.asDict(), self.new_instr,
+                                                      bank="programs", oscPort=port, bindings=bindings,
+                                                      pages=pages, cvTargets=config.cvTargets(), progName=name)
             self.c_handle.setCsoundPerformanceThread(None)
             self.c_handle.enterProgramsMode()
             self.loadUI()

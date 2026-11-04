@@ -4,6 +4,7 @@ import nebio as libDriver # LedDriver/Color backed by the nebio C++ library
 import switch as libSwitch
 import filehandler
 import nebconfig
+import progpages
 import scripts
 import subprocess
 import threading
@@ -118,6 +119,7 @@ class UserInterface(object):
         self.prev_blink = False
         self.blink = False
         self.time_pressed_pitch = self.now
+        self.time_pressed_speed = self.now
         self.ignore_next_pitch_click = False
         self.ignore_next_speed_click = False
         self.clearAllLEDs()
@@ -510,12 +512,59 @@ class UserInterface(object):
             self.alt_speed_amount = 23
         self.controlhandler.setAltValue("speed_alt", self.alt_speed_amount)
     
+    # Programs bank: the pages of encoder `name` (speed/pitch) when its .prog
+    # declares them (progpages.py), else None.
+    def pagedEncoder(self, name):
+        get = getattr(self.controlhandler, "encoderPages", None)
+        return get(name) if get is not None else None
+
+    # A paged encoder, as chompi.scd: turning sets the shown page's value, a
+    # click (shorter than 1 s) shows the next page. While file + reset are
+    # held, turning chooses where the encoder's CV goes instead.
+    def updatePagedEncoder(self, name):
+        inc = self.get_delta(name)
+        if name == "speed":
+            pressed, since, clicked = self.speed_click.state(), self.time_pressed_speed, self.clicked_speed()
+        else:
+            pressed, since, clicked = self.pitch_click.state(), self.time_pressed_pitch, self.clicked_pitch()
+        if self.controlhandler.cvAssignActive():
+            if inc != 0:
+                self.controlhandler.stepCvTarget(name, inc)
+            return
+        if inc != 0 and not pressed:
+            self.controlhandler.pageStep(name, inc)
+        if clicked == 1 and self.now - since < 1000:
+            self.controlhandler.nextPage(name)
+
+    # The two LEDs of a paged encoder: colour = page, crossfade = its value
+    # (only the left LED at 0, only the right one at 1). Choosing the CV
+    # target: both blink in the candidate page's colour (dim white = none).
+    def drawPageLeds(self, name, pages):
+        if self.controlhandler.cvAssignActive():
+            on = (self.now // 150) % 2 == 0
+            if pages.candidate is None:
+                colour, bright = (4095, 4095, 4095), 0.1
+            else:
+                colour, bright = pages.colours(pages.names().index(pages.candidate))[1], progpages.LED_BRIGHT
+            bright = bright if on else 0.0
+            self.set_rgb(name + "_neg", colour[0], colour[1], colour[2], bright)
+            self.set_rgb(name + "_pos", colour[0], colour[1], colour[2], bright)
+            return
+        neg, pos = pages.colours(pages.current)
+        value = pages.page().value
+        self.set_rgb(name + "_neg", neg[0], neg[1], neg[2], progpages.LED_BRIGHT * (1.0 - value))
+        self.set_rgb(name + "_pos", pos[0], pos[1], pos[2], progpages.LED_BRIGHT * value)
+
     # Returns duple of neg_brightness, pos_brightness
     def set_speed_leds(self, mode):
         if mode == "programs":
-            # No speed colours for programs (the speed value is still sent)
-            self.set_rgb("speed_neg", 0, 0, 0, 0.0)
-            self.set_rgb("speed_pos", 0, 0, 0, 0.0)
+            pages = self.pagedEncoder("speed")
+            if pages is not None:
+                self.drawPageLeds("speed", pages)
+            else:
+                # No speed colours for programs (the speed value is still sent)
+                self.set_rgb("speed_neg", 0, 0, 0, 0.0)
+                self.set_rgb("speed_pos", 0, 0, 0, 0.0)
         elif mode in ("normal", "puredata", "supercollider"):
             pink = libDriver.Color(3037, 200, 3825)
             white = libDriver.Color(4095,4095,4095)
@@ -638,7 +687,9 @@ class UserInterface(object):
             if self.speed_click.state() == True and self.now - self.time_pressed_speed > 1500:
                 self.ignore_next_speed_click = True
                 self.controlhandler.enterInstrSelMode()
-            if not self.controlhandler.isRaw("speed"): # rawencoder: value is sclang's
+            if mode == "programs" and self.pagedEncoder("speed") is not None:
+                self.updatePagedEncoder("speed")
+            elif not self.controlhandler.isRaw("speed"): # rawencoder: value is sclang's
                 self.set_speed_amount()
         elif mode == "secondary controls":
             self.set_alt_speed_amount()
@@ -871,6 +922,10 @@ class UserInterface(object):
         self.controlhandler.setAltValue("pitch_alt", self.alt_pitch_amount)
 
     def set_pitch_leds(self, mode):
+        pages = self.pagedEncoder("pitch") if mode == "programs" else None
+        if pages is not None:
+            self.drawPageLeds("pitch", pages)
+            return
         # Pitch input 0-1.0 neg | 1.0-4.0 pos
         pink = libDriver.Color(3037, 200, 3825)
         white = libDriver.Color(4095,4095,4095)
@@ -998,7 +1053,9 @@ class UserInterface(object):
         if mode in ("normal", "puredata", "supercollider", "programs"):
             if self.pitch_click.risingEdge() == True:
                 self.time_pressed_pitch = self.now
-            if not self.controlhandler.isRaw("pitch"): # rawencoder: value is sclang's
+            if mode == "programs" and self.pagedEncoder("pitch") is not None:
+                self.updatePagedEncoder("pitch")
+            elif not self.controlhandler.isRaw("pitch"): # rawencoder: value is sclang's
                 self.set_pitch_amount()
         elif mode == "secondary controls":
             # TODO: next version: pitch_alt can be declared raw too (sclang sets it).

@@ -16,6 +16,8 @@ Controls (change the osc: lines to move them, no compile needed):
   blend_alt (secondary controls) depth of the right audio input as FM,
            0..48 semitones at full scale (0 = off): an oscillator there
            modulates the pitch at audio rate (2 kHz, Rings' block rate)
+  record_alt (secondary controls) mono: on = ODD + EVEN on both outputs
+           (as the module with one cable), off = ODD left, EVEN right
 A pitch change also strums. The OSC paths miRings knows are listed in
 Code/programs/rings/main.cc.
 
@@ -35,4 +37,5 @@ osc:size,/rings/polyphony,1,4,int
 osc:reset,/rings/strum,0,1
 osc:freeze,/rings/internal_exciter,1,0
 osc:blend_alt,/rings/fm_in,0,48
+osc:record_alt,/rings/mono,0,1
 nebconfigend

@@ -24,6 +24,15 @@
 #                            OSC path as a float, scaled to min..max (exp:
 #                            min and max > 0; int: rounded). One line per
 #                            control; no comments after an entry.
+#   page:pitch:note,/audrey/note,16,76[,curve[,default]]
+#                            .prog: a page of the pitch (or speed) encoder,
+#                            as chompi.scd: a click shows the next page,
+#                            turning sets its value (0..1, default 0), sent
+#                            scaled like osc:. Pages in the order written.
+#                            An encoder with pages is not sent as a control.
+#   cv:pitch,note            .prog: the page the encoder's CV input is added
+#                            to at first (or none); hold file + reset and
+#                            turn the encoder to choose another (progpages.py)
 #
 # Where the entries are:
 #   .instr  nebconfigbegin              .scd  /*
@@ -226,6 +235,44 @@ class NebConfig(object):
             except ValueError as e:
                 errors.append("%s,%s: %s" % (key, ",".join(values), e))
         return bindings, errors
+
+    def encoderPages(self):
+        """.prog: {encoder: [(name, path, min, max, curve, default)]} from
+        the page:<encoder>:<name> lines, in the order written, and a list of
+        error texts for lines that cannot be read."""
+        pages, errors = {}, []
+        for key, values in self._dict.items():
+            if not key.startswith("page:"):
+                continue
+            values = [v.strip() for v in values]
+            try:
+                parts = key.split(":")
+                if len(parts) != 3 or parts[1] not in ("speed", "pitch") or not parts[2]:
+                    raise ValueError("page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default]]")
+                if len(values) < 3 or not values[0].startswith("/"):
+                    raise ValueError("page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default]]")
+                lo, hi = float(values[1]), float(values[2])
+                curve = values[3].lower() if len(values) > 3 and values[3] else "lin"
+                if curve not in OSC_CURVES:
+                    raise ValueError("curve one of %s" % (OSC_CURVES,))
+                if curve == "exp" and (lo <= 0 or hi <= 0):
+                    raise ValueError("exp needs min and max > 0")
+                default = float(values[4]) if len(values) > 4 and values[4] else 0.0
+                pages.setdefault(parts[1], []).append(
+                    (parts[2], values[0], lo, hi, curve, min(1.0, max(0.0, default))))
+            except ValueError as e:
+                errors.append("%s,%s: %s" % (key, ",".join(values), e))
+        return pages, errors
+
+    def cvTargets(self):
+        """.prog: {encoder: page name or None} from the cv:<encoder> lines."""
+        targets = {}
+        for encoder in ("speed", "pitch"):
+            value = self.value("cv:" + encoder)
+            if value is not None:
+                value = value.strip()
+                targets[encoder] = None if value in ("", "none") else value
+        return targets
 
     def _choice(self, key, choices, default):
         value = self.value(key)
