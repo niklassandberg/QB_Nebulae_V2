@@ -19,7 +19,7 @@ Controls (change the osc: lines to move them, no compile needed):
   record_alt (secondary controls) mono: on = ODD + EVEN on both outputs
            (as the module with one cable), off = ODD left, EVEN right
 A pitch change also strums. The OSC paths miRings knows are listed in
-Code/programs/rings/main.cc.
+source/main.cc.
 
 nebconfigbegin
 run,miRings

@@ -1,13 +1,11 @@
 #!/bin/sh
 # Builds audrey on the Pi (needs cmake, g++, jack2 and liblo) and puts the
-# binary in Code/bin/, where the firmware ships it:
-#   sh Code/programs/audrey/build.sh
-# The binary is committed like the kernel modules: the Nebulae does not
-# build it at boot.
+# binary next to its .prog (Programs/audrey/), ready for the USB stick:
+#   sh Programs/audrey/source/build.sh
+# Copy audrey and audrey.prog to the root of the USB stick.
 set -e
 HERE=$(cd "$(dirname "$0")" && pwd)
-mkdir -p "$HERE/../../bin"
-BIN=$(cd "$HERE/../../bin" && pwd)
+BIN=$(cd "$HERE/.." && pwd)
 BUILD=/tmp/audrey-build
 cmake -S "$HERE" -B "$BUILD" -DCMAKE_BUILD_TYPE=Release
 cmake --build "$BUILD" -j3

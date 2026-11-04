@@ -180,6 +180,7 @@ then
 
     #mkdir dir if they dont exist
     mkdir -p /home/alarm/sc
+    mkdir -p /home/alarm/prog  # programs bank (.prog + program from the USB stick)
 
     reboot
 else

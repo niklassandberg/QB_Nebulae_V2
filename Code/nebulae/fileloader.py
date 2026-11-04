@@ -100,8 +100,7 @@ class FileLoader(object):
 
     # The files the stick's .prog files run ("run,miRings"): a bare name
     # that is on the stick too goes with its .prog (a binary has no
-    # extension to be sorted by). Names not on the stick are the firmware's
-    # (Code/bin, nebconfig.py).
+    # extension to be sorted by). Programs come only from the stick.
     def progRunFiles(self, progs):
         runs = []
         for prog in progs:

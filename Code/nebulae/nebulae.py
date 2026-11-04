@@ -1,8 +1,6 @@
 # Main Nebulae Source File
 import sys
 import os
-import glob
-import shutil
 import ctcsound
 import controlhandler as ch
 import controlhandlerSC as chSC
@@ -81,7 +79,6 @@ class Nebulae(object):
                 instr_files = sorted([f[:-6] for f in os.listdir(instr_path) if f.endswith(".instr")])
                 self.new_instr = instr_files[0] if instr_files else 'a_granularlooper'
             self.currentInstr = self.new_instr
-            self.installFactoryPrograms()
             # Check if file exists, else reset to default instr
             if self.new_bank in nebconfig.INSTR_DIRS:
                 path = nebconfig.instrumentPath(self.new_bank, self.new_instr)
@@ -98,21 +95,6 @@ class Nebulae(object):
             self.last_debug_print = time.time()
         except Exception as e:
             self.classlog.error("Error in __init__: %s", e)
-
-    # The programs bank always has the firmware's programs (Code/bin/*.prog,
-    # e.g. miRings.prog, audrey.prog): one that is missing in /home/alarm/prog/
-    # is copied there. One that is there (from the USB stick, or changed) is
-    # left as it is.
-    def installFactoryPrograms(self):
-        prog_dir = nebconfig.instrumentDir("programs")
-        try:
-            os.makedirs(prog_dir, exist_ok=True)
-            for f in glob.glob("/home/alarm/QB_Nebulae_V2/Code/bin/*.prog"):
-                if not os.path.exists(os.path.join(prog_dir, os.path.basename(f))):
-                    shutil.copy2(f, prog_dir)
-                    self.classlog.info("Installed %s", os.path.basename(f))
-        except OSError as e:
-            self.classlog.error("Could not install the factory programs: %s", e)
 
     # Csound's performance thread (it computes and plays every audio block)
     # in real-time priority (SCHED_FIFO, csound_rt_priority in

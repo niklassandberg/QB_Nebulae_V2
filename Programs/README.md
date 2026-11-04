@@ -4,7 +4,11 @@ Any program that makes sound through JACK and listens for OSC can be a
 Nebulae instrument. It is chosen in the instr selector like the Csound, SC
 and Pd instruments: the programs page comes after Pure Data, before the
 config page, and has both speed LEDs dark. While a program plays, the speed
-LEDs stay dark too.
+LEDs stay dark too (unless the program gives speed pages).
+
+The programs are not part of the firmware: like the SuperCollider patches,
+they come from the USB stick. This folder holds one folder per program, with
+what goes on the stick (the program and its `.prog`) and its source.
 
 ## The .prog file
 
@@ -24,7 +28,7 @@ nebconfigend
 
 | Entry | Meaning |
 |---|---|
-| `run,<program>` | What to start. A bare name is looked up in `/home/alarm/prog/` (copied from the USB stick), then in `Code/bin/` (shipped with the firmware). `.sh` runs with `sh`, `.py` with `python3`, anything else as a binary. |
+| `run,<program>` | What to start. A bare name is in `/home/alarm/prog/` (copied from the USB stick together with the `.prog`). `.sh` runs with `sh`, `.py` with `python3`, anything else as a binary. |
 | `oscport,<port>` | The UDP port the program listens on (127.0.0.1), default 3020. |
 | `osc:<control>,<path>,<min>,<max>[,<curve>]` | Control `<control>` is sent to `<path>` as one float, scaled from 0..1 to min..max. Curve `lin` (default), `exp` (min and max > 0) or `int` (rounded). min > max turns the control around. One line per control; no comment after an entry. |
 | `kernel`, `blocksize`, `-n`, `-r` | As for .scd/.pd: kernel, JACK period, periods, sample rate. |
@@ -75,17 +79,17 @@ A change of the bindings is a change of the text: no compile.
 
 Everything goes in the root of the stick, like the other instruments: the
 `.prog` and the program it runs (`miRings.prog` + `miRings`). A program with a
-bare name in `run,` that is on the stick is copied with its .prog and made
-executable. Without it on the stick, the firmware's `Code/bin/` one is used.
+bare name in `run,` that is on the stick is copied with its .prog to
+`/home/alarm/prog/` and made executable. Like the other banks, that folder then
+holds exactly the stick's programs.
 
-## Programs in the firmware
+## The programs here
 
-| Program | Source | Build |
-|---|---|---|
-| `miRings` | `rings/` (Mutable Instruments Rings DSP, vendored, MIT) | `sh Code/programs/rings/build.sh` on the Pi → `Code/bin/miRings` |
-| `audrey` | `audrey/` (AudreyTouch's engine, Infrasonic Audio / Synthux Academy, MIT; DaisySP MIT; ReverbSc and Tone from DaisySP-LGPL, LGPL-2.1) | `sh Code/programs/audrey/build.sh` on the Pi → `Code/bin/audrey` |
+| Folder | For the USB stick | Source | Build (on the Pi) |
+|---|---|---|---|
+| `miRings/` | `miRings`, `miRings.prog` | `source/`: Mutable Instruments Rings DSP (vendored, MIT) | `sh Programs/miRings/source/build.sh` |
+| `audrey/` | `audrey`, `audrey.prog` | `source/`: AudreyTouch's engine (Infrasonic Audio / Synthux Academy, MIT); DaisySP (MIT); ReverbSc and Tone from DaisySP-LGPL (LGPL-2.1) | `sh Programs/audrey/source/build.sh` |
+| `Proxy/` | `proxy`, `proxy.prog` | `source/main.cc`: the template for your own C/C++ program: input to output, one OSC value (`/proxy/level` on blend). Copy the folder, rename, put your sound in `process()` | `sh Programs/Proxy/source/build.sh` |
 
-The firmware's `.prog` files lie next to their programs (`Code/bin/*.prog`, as on
-the USB stick) and are copied to
-`/home/alarm/prog/` when they are missing there; one that is there is not
-replaced.
+The build puts the binary next to its `.prog`. The binaries are built on the Pi
+(aarch64), so they run on the Nebulae's aarch64 image only.

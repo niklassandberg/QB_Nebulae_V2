@@ -17,7 +17,8 @@
 #                            (.prog: all four JACK/kernel keys as .scd/.pd)
 #   run,miRings              .prog: the program to start, a binary or a script
 #                            (.sh with sh, .py with python3); a bare name is
-#                            looked up in /home/alarm/prog/, then Code/bin/
+#                            in /home/alarm/prog/ (from the USB stick, with
+#                            the .prog)
 #   oscport,3020             .prog: the UDP port the program listens on
 #   osc:blend,/rings/structure,0,1[,lin|exp|int]
 #                            .prog: control "blend" (0..1) is sent to that
@@ -55,9 +56,6 @@ INSTR_DIRS = {"instr": ("/home/alarm/instr/", ".instr"),
               "puredata": ("/home/alarm/pd/", ".pd"),
               "programs": ("/home/alarm/prog/", ".prog")}
 
-# Programs that ship with the firmware (.prog "run," with a bare name, when
-# /home/alarm/prog/ has no file of that name).
-PROGRAM_BIN_DIR = "/home/alarm/QB_Nebulae_V2/Code/bin/"
 DEFAULT_OSC_PORT = 3020
 OSC_CURVES = ("lin", "exp", "int")
 
@@ -186,17 +184,14 @@ class NebConfig(object):
 
     def run(self):
         """.prog: the program's path, or None without a run entry. A bare
-        name: /home/alarm/prog/<name> if it exists, else Code/bin/<name>."""
+        name is in /home/alarm/prog/ (from the USB stick, with the .prog)."""
         value = self.value("run")
         if not value or not value.strip():
             return None
         value = value.strip()
         if os.path.isabs(value):
             return value
-        local = os.path.join(INSTR_DIRS["programs"][0], value)
-        if os.path.exists(local):
-            return local
-        return os.path.join(PROGRAM_BIN_DIR, value)
+        return os.path.join(INSTR_DIRS["programs"][0], value)
 
     def oscPort(self):
         """.prog: the program's OSC port, DEFAULT_OSC_PORT without an entry.

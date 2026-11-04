@@ -1,0 +1,9 @@
+proxy: the smallest program, a template (source/main.cc). It passes the
+inputs to the outputs; blend sets the level. Only the lines between
+nebconfigbegin and nebconfigend are read.
+
+nebconfigbegin
+run,proxy
+oscport,3022
+osc:blend,/proxy/level,0,1
+nebconfigend

@@ -23,7 +23,7 @@ Where the pitch and speed CV go: hold file + reset, turn pitch or speed to
 choose a page (its LEDs blink that page's colour, dim white = nowhere),
 release both. Saved for this program.
 
-The OSC paths audrey knows are listed in Code/programs/audrey/main.cc.
+The OSC paths audrey knows are listed in source/main.cc.
 
 nebconfigbegin
 run,audrey
