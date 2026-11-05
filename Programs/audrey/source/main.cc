@@ -22,6 +22,11 @@
 //   /audrey/drone        1: the loop keeps ringing without a gate (P11 + P02)
 //   /audrey/source       >= 0.5: the input is the left output (a feedback
 //                        cable), < 0.5: the input jack (default)
+//   /audrey/echo         >= 0.5: the echo on (not on the hardware)
+//   /audrey/echo_tap     tap tempo: rising edges (>= 0.5); the time between
+//                        two taps is the echo time (0.03..4.9 s)
+//   /audrey/echo_feedback  echo feedback 0..kEchoMaxFeedback; above about 1 the
+//                        repeats never die (soft-clipped, dub style)
 
 #include <jack/jack.h>
 #include <lo/lo.h>
@@ -29,6 +34,7 @@
 #include <atomic>
 #include <cmath>
 #include <csignal>
+#include <cstdint>
 #include <cstdio>
 #include <cstring>
 #include <string>
@@ -46,6 +52,10 @@ namespace {
 const float kSampleRate = 48000.0f;
 const size_t kBlockSize = 4;  // as FeedbackSynth_main.cpp
 const float kOutputLevel = 1.0f;  // normalized, fixed at max
+const float kEchoStartTime = 0.25f;  // seconds
+const float kEchoMinTime = 0.03f;
+const float kEchoMaxFeedback = 1.5f;
+const float kEchoMaxTime = 4.9f;    // the echo holds 5 s; a longer gap starts a new tap
 
 enum class Parameter : uint8_t {
   Frequency,
@@ -80,7 +90,8 @@ struct Control {
 // Defaults: AudreyTouch's registered initial values, as normalized knobs.
 Control c_feedback{0.0f}, c_input{0.5f}, c_reverb_mix{0.0f},
     c_reverb_size{0.0f}, c_lpf{1.0f}, c_hpf{0.0f}, c_body{1.0f}, c_shape{0.0f},
-    c_lfo{0.0f}, c_note{40.0f}, c_gate{0.0f}, c_drone{0.0f}, c_source{0.0f};
+    c_lfo{0.0f}, c_note{40.0f}, c_gate{0.0f}, c_drone{0.0f}, c_source{0.0f},
+    c_echo{0.0f}, c_echo_tap{0.0f}, c_echo_feedback{0.5f};
 
 Engine engine;
 ParameterRegistry<Parameter> params;
@@ -93,6 +104,9 @@ float body = 1.0f;  // last body value (knob orientation)
 int lfo_mode = 0;
 bool gate = false;
 bool input_from_output = false;
+bool echo_tap_high = false;
+uint64_t samples_done = 0;
+uint64_t last_tap = 0;  // in samples_done, 0 = none
 
 jack_client_t* client = nullptr;
 jack_port_t* port_in = nullptr;
@@ -168,6 +182,17 @@ void applyControls() {
   }
   if (c_drone.take(v)) engine.DroneMode(v >= 0.5f);
   if (c_source.take(v)) input_from_output = v >= 0.5f;
+  if (c_echo.take(v)) engine.SetEchoDelaySendAmount(v >= 0.5f ? 1.0f : 0.0f);
+  if (c_echo_feedback.take(v)) engine.SetEchoDelayFeedback(daisysp::fclamp(v, 0.f, kEchoMaxFeedback));
+  if (c_echo_tap.take(v)) {
+    bool high = v >= 0.5f;
+    if (high && !echo_tap_high) {
+      float gap = last_tap ? (samples_done - last_tap) / kSampleRate : 0.0f;
+      if (gap >= kEchoMinTime && gap <= kEchoMaxTime) engine.SetEchoDelayTime(gap);
+      last_tap = samples_done;
+    }
+    echo_tap_high = high;
+  }
 }
 
 void flushDenormals() {
@@ -185,6 +210,7 @@ void flushDenormals() {
 // One block as FeedbackSynth_main.cpp's AudioCallback.
 void processBlock() {
   applyControls();
+  samples_done += kBlockSize;
   params.Process();
   for (size_t i = 0; i < kBlockSize; ++i) {
     engine.Process(in_block[i], out_l_block[i], out_r_block[i]);
@@ -261,9 +287,10 @@ int main(int argc, char** argv) {
   params.Init(kSampleRate / kBlockSize);
   registerParams();
   params.UpdateNormalized(Parameter::OutputVolume, kOutputLevel);
+  engine.SetEchoDelayTime(kEchoStartTime);
   for (auto& lim : limiter) lim.Init();
   for (Control* c : {&c_feedback, &c_input, &c_reverb_mix, &c_reverb_size, &c_lpf,
-                     &c_hpf, &c_body, &c_shape, &c_lfo, &c_note}) {
+                     &c_hpf, &c_body, &c_shape, &c_lfo, &c_note, &c_echo_feedback}) {
     c->sets.fetch_add(1);
   }
 
@@ -278,7 +305,9 @@ int main(int argc, char** argv) {
       {"/audrey/reverb_size", &c_reverb_size}, {"/audrey/lpf", &c_lpf},
       {"/audrey/hpf", &c_hpf}, {"/audrey/body", &c_body}, {"/audrey/shape", &c_shape},
       {"/audrey/lfo", &c_lfo}, {"/audrey/note", &c_note}, {"/audrey/gate", &c_gate},
-      {"/audrey/drone", &c_drone}, {"/audrey/source", &c_source}};
+      {"/audrey/drone", &c_drone}, {"/audrey/source", &c_source},
+      {"/audrey/echo", &c_echo}, {"/audrey/echo_tap", &c_echo_tap},
+      {"/audrey/echo_feedback", &c_echo_feedback}};
   for (auto& a : addresses) {
     lo_server_thread_add_method(osc, a.path, "f", onFloat, a.c);
   }
