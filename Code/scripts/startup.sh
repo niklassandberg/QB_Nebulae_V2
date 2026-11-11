@@ -3,7 +3,9 @@
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
 
 #disable network by default.
-rfkill block wifi
+# Not on a Nebulae restart with the access point up: nebwifi would stay
+# "active" with its radio off. Nebulae applies the Wi-Fi setting itself.
+systemctl -q is-active nebwifi.service || rfkill block wifi
 
 #sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
 
