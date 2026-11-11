@@ -10,6 +10,7 @@ import subprocess
 import threading
 import time
 import random
+import configsettings
 from configsettings import configSettings
 from classlogger import ClassLogger
 
@@ -24,6 +25,9 @@ BANKS = ["instr", "supercollider", "puredata", "programs", "configsettings"]
 PAGED_MODES = ("supercollider", "programs")
 
 LED_DIM_STEP = 0.02
+
+# How often a change from the web page (/config) is looked for.
+WEB_REQUEST_MS = 500
 
 # Configsettings pages: one colour per pair of pages, pitch_pos the first.
 CONFIG_PAGE_SIZE = 5
@@ -118,6 +122,7 @@ class UserInterface(object):
         self.power_select = 0
         self.power_select_acc = 0
         self.config_page_acc = 0
+        self.web_request_time = 0
 
     def update(self):
         self.now = int(round(time.time() * 1000))
@@ -132,6 +137,9 @@ class UserInterface(object):
         self.delta_s = self.encoder_speed.get_steps()
         self.mode = self.controlhandler.mode()
         self.trackInputClip()
+        if self.now - self.web_request_time >= WEB_REQUEST_MS:
+            self.web_request_time = self.now
+            self.applyWebRequest()
         shown = (self.mode == "instr selector" and not self.led_dim_mode
                  and not self.power_select_mode
                  and self.controlhandler.getInstrSelBank() == "configsettings")
@@ -763,6 +771,36 @@ class UserInterface(object):
     def applyLeds(self):
         libDriver.led_set_no_pwm(configSettings.noPwm)
         libDriver.led_set_stagger(configSettings.ledStagger)
+
+    def applyWebRequest(self):
+        request = configsettings.takeRequest()
+        if not request:
+            return
+        self.log.info("Config from the web page: %s", request)
+        if "led_dim" in request:
+            self.led_dim = request["led_dim"]
+            libDriver.led_set_dim(self.led_dim)
+            configSettings.setLedDim(self.led_dim)
+        if "no_pwm" in request:
+            configSettings.setNoPwm(request["no_pwm"])
+        if "led_stagger" in request:
+            configSettings.setLedStagger(request["led_stagger"])
+        self.applyLeds()
+        if "services_quiet" in request:
+            configSettings.setServicesQuiet(request["services_quiet"])
+        if any(key in request for key in configsettings.NEBIO_RATES):
+            rates = configSettings.setNebioRates(request.get("nebio_scan_hz"), request.get("nebio_digital_hz"),
+                                                 request.get("nebio_adc_hz"))
+            libDriver.set_input_rates(*rates)
+        restart ="power_regulator" in request and configSettings.setPowerRegulator(request["power_regulator"])
+        # Last: off cuts the page's own connection.
+        if "wifi" in request:
+            configSettings.setWifiOn(request["wifi"])
+        if self.script_fhandle:
+            self.script_fhandle.refresh()
+        if restart:
+            self.log.info("Power regulator %s: restarting the Pi (nohlt)", request["power_regulator"])
+            subprocess.Popen(["systemctl", "reboot"])
 
     # Speed click sets it, pitch click cancels.
     def updatePowerSelect(self):

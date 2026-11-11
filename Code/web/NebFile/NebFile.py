@@ -13,6 +13,8 @@ import sys
 current_dir = os.path.dirname(os.path.abspath(__file__))
 sys.path.insert(0, current_dir)
 import file_operations
+sys.path.insert(0, os.path.join(current_dir, "..", "..", "nebulae"))
+import configsettings
 
 def get_immediate_subdirectories(dir) :
     return [name for name in os.listdir(dir)
@@ -121,6 +123,41 @@ class Root():
             return b"no operation specified"
 
     fmdata.exposed = True
+
+    def config(self):
+        return static.serve_file(current_dir + '/static/config.html')
+    config.exposed = True
+
+    # pending: Nebulae has not taken the last saved change yet.
+    def config_values(self):
+        s = configsettings.ConfigSettings()
+        values = {
+            'wifi': 'on' if s.wifiOn else 'off',
+            'power_regulator': s.powerRegulator,
+            'no_pwm': 'on' if s.noPwm else 'off',
+            'led_stagger': 'on' if s.ledStagger else 'off',
+            'services_quiet': 'on' if s.servicesQuiet else 'off',
+            'led_dim': s.ledDim,
+            'nebio_scan_hz': s.nebioScanHz,
+            'nebio_digital_hz': s.nebioDigitalHz,
+            'nebio_adc_hz': s.nebioAdcHz,
+            'pending': os.path.exists(configsettings.REQUEST_FILE),
+            'nebio_defaults': configsettings.NEBIO_DEFAULTS,
+            'scan_hz_range': [configsettings.SCAN_HZ_MIN, configsettings.SCAN_HZ_MAX],
+        }
+        cherrypy.response.headers['Content-Type'] = "application/json"
+        cherrypy.response.headers['Cache-Control'] = "no-cache, no-store, must-revalidate"
+        return json.dumps(values).encode('utf-8')
+    config_values.exposed = True
+
+    def config_save(self, **data):
+        cherrypy.response.headers['Content-Type'] = "application/json"
+        if cherrypy.request.method != 'POST':
+            cherrypy.response.status = 405
+            return b'{"ok": false}'
+        request = configsettings.writeRequest(data)
+        return json.dumps({'ok': True, 'saved': sorted(request)}).encode('utf-8')
+    config_save.exposed = True
 
 cherrypy.config.update({
     'server.socket_host': '0.0.0.0',

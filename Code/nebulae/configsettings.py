@@ -22,8 +22,66 @@ QUIET_SCRIPT = SCRIPTS_DIR + "quiet.sh"
 WIFI_SCRIPT = SCRIPTS_DIR + "wifi.sh"
 
 CMDLINE = "/boot/cmdline.txt"
+# Changes from the web page (NebFile /config). Nebulae applies them: it owns
+# the LEDs, the scripts and the restart, and a direct file write would be
+# overwritten by its next save.
+REQUEST_FILE = "/tmp/nebulae_config_request"
 
 POWER_REGULATOR = ("off", "yield", "shell", "nohlt")
+ON_OFF = ("no_pwm", "led_stagger", "services_quiet", "wifi")
+# nebio's limits (inputs.cpp); digital and adc at most the scan rate.
+SCAN_HZ_MIN, SCAN_HZ_MAX = 100, 2000
+NEBIO_RATES = ("nebio_scan_hz", "nebio_digital_hz", "nebio_adc_hz")
+
+# As often as the original firmware read the hardware.
+NEBIO_DEFAULTS = {"nebio_scan_hz": 1200, "nebio_digital_hz": 400, "nebio_adc_hz": 400}
+
+
+def checkedRequest(values):
+    """The valid settings of values (key: text), as setter arguments."""
+    out = {}
+    if values.get("power_regulator") in POWER_REGULATOR:
+        out["power_regulator"] = values["power_regulator"]
+    for key in ON_OFF:
+        if values.get(key) in ("on", "off"):
+            out[key] = values[key] == "on"
+    try:
+        out["led_dim"] = round(min(1.0, max(0.0, float(values["led_dim"]))), 2)
+    except (KeyError, TypeError, ValueError):
+        pass
+    for key in NEBIO_RATES:
+        try:
+            out[key] = min(SCAN_HZ_MAX, max(1, int(values[key])))
+        except (KeyError, TypeError, ValueError):
+            pass
+    return out
+
+
+def writeRequest(values):
+    request = checkedRequest(values)
+    tmp = REQUEST_FILE + ".new"
+    with open(tmp, "w") as f:
+        for key, value in request.items():
+            if isinstance(value, bool):
+                value = "on" if value else "off"
+            f.write("%s=%s\n" % (key, value))
+    os.replace(tmp, REQUEST_FILE)
+    return request
+
+
+def takeRequest():
+    try:
+        with open(REQUEST_FILE) as f:
+            text = f.read()
+        os.remove(REQUEST_FILE)
+    except OSError:
+        return {}
+    values = {}
+    for line in text.splitlines():
+        key, sep, value = line.partition("=")
+        if sep:
+            values[key.strip()] = value.strip()
+    return checkedRequest(values)
 
 
 def _kernelHasNohlt():
@@ -53,10 +111,9 @@ class ConfigSettings(object):
         self._wifiOn = False
         self._ledDim = 1.0
         self._logLevel = "INFO"
-        # As often as the original firmware read the hardware.
-        self._nebioScanHz = 1200
-        self._nebioDigitalHz = 400
-        self._nebioAdcHz = 400
+        self._nebioScanHz = NEBIO_DEFAULTS["nebio_scan_hz"]
+        self._nebioDigitalHz = NEBIO_DEFAULTS["nebio_digital_hz"]
+        self._nebioAdcHz = NEBIO_DEFAULTS["nebio_adc_hz"]
         self._nebioFastGpio = False
         self._csoundRtPriority = 70  # below jackd's 75
         self._lock = threading.Lock()
@@ -235,6 +292,19 @@ class ConfigSettings(object):
             self._ledDim = value
             self._save()
         self._log().info("LED dim %.2f", value)
+
+    # Missing ones keep their value. Returns the saved (scan, digital, adc).
+    def setNebioRates(self, scan=None, digital=None, adc=None):
+        with self._lock:
+            scan = min(SCAN_HZ_MAX, max(SCAN_HZ_MIN, int(scan if scan is not None else self._nebioScanHz)))
+            digital = min(scan, max(1, int(digital if digital is not None else self._nebioDigitalHz)))
+            adc = min(scan, max(1, int(adc if adc is not None else self._nebioAdcHz)))
+            rates = (scan, digital, adc)
+            if rates != (self._nebioScanHz, self._nebioDigitalHz, self._nebioAdcHz):
+                self._nebioScanHz, self._nebioDigitalHz, self._nebioAdcHz = rates
+                self._save()
+        self._log().info("nebio input rates (scan, digital, adc): %s", rates)
+        return rates
 
     # Synced with its folder: else the rename reaches the SD card only after
     # up to 5 s, and a case switched off sooner keeps the old values.
