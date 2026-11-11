@@ -540,7 +540,7 @@ class UserInterface(object):
         index = pages.current
         value = pages.withCV(pages.page(), self.controlhandler.encoderCV(name))
         neg_color, neg_bright, pos_color, pos_bright = self.pitchLeds(round(value, 4))
-        if index > 0:
+        if pages.marked(index):
             page = libDriver.Color(*pages.colour(index))
             dim = encoderpages.pulse(self.now)
             if neg_bright == 0.0:

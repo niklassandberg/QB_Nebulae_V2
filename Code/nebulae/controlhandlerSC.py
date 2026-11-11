@@ -105,6 +105,7 @@ class SCControlHandler(EncoderControlHandler):
             self.updateInstrSelector()
         else: # supercollider
             self.updateCvAssign()
+            self.updateHolds()
             for chn in self.channels: #for each of the adc channels
                 if chn.source == "rawencoder":
                     continue # nebio and sclang handle it

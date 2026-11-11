@@ -66,6 +66,14 @@ class EchoDelay {
             feedback_ = feedback;
         }
 
+        /**
+         * @brief Set the centre of the band-pass in the feedback loop, in Hz (800 at Init).
+         */
+        void SetFilterFreq(const float freq_hz)
+        {
+            bpf_.SetCutoff(freq_hz);
+        }
+
         inline float Process(const float in)
         {
             float out;

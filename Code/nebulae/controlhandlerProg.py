@@ -82,6 +82,7 @@ class ProgControlHandler(EncoderControlHandler):
             self.updateInstrSelector()
         else: # programs
             self.updateCvAssign()
+            self.updateHolds()
             for chn in self.channels:
                 if chn.name != "sourcegate":
                     chn.setIgnoreHID(False)

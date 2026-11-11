@@ -83,6 +83,31 @@ cv:pitch,note                                    the page the encoder's CV goes 
 ame)`, example `Supercollider/Pages/pages.scd`). Both banks use
   `Code/nebulae/controlhandlerEncoders.py`.
 
+## Held buttons (more parameters on the encoders)
+
+While a button is held, speed and pitch can set other values:
+
+```
+hold:record:speed:echo_cutoff,/audrey/echo_cutoff,100,8000,exp,0.4745
+hold:record:pitch:echo_feedback,/audrey/echo_feedback,0,1.5,lin,0.5
+```
+
+`hold:<button>:<encoder>:<name>`, then the same fields as `page:` (path, min,
+max, curve, default, step). Buttons: `record file reset freeze source`.
+
+- While the button is down, the encoders show and change the button's values;
+  turn and click as on the pages (several lines for one encoder are its
+  pages, click = next). The LEDs show the value as on the pages, the dark LED
+  pulses cyan. Released, the encoders show their own pages again, unchanged.
+- The button is pressed only by a short press: released within half a
+  second with no encoder turned. Such a button reacts when it is released (a
+  latching, triggered or incremental button gets the falling edge). A
+  momentary button is also on while it is down.
+- No CV on these values. Saved with the pages (`<name>.pages`, as
+  `record:speed`).
+- Holding file + reset still chooses the CV targets.
+- Works the same in a SuperCollider `.scd`.
+
 A change of the bindings is a change of the text: no compile.
 
 ## What a program must do

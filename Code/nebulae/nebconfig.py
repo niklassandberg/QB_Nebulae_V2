@@ -10,6 +10,8 @@
 #   speed,pages                              .scd/.prog (implied by page: lines)
 #   page:pitch:note,/audrey/note,16,76[,curve[,default[,step]]]
 #   cv:pitch,note                            .scd/.prog: page the CV goes to, or none
+#   hold:record:speed:echo_cutoff,/audrey/echo_cutoff,100,8000[,curve[,default[,step]]]
+#                                            .scd/.prog: the encoder while the button is held
 # Details: Programs/README.md.
 #
 # Where the entries are:
@@ -34,6 +36,10 @@ INSTR_DIRS = {"instr": ("/home/alarm/instr/", ".instr"),
 DEFAULT_OSC_PORT = 3020
 OSC_CURVES = ("lin", "exp", "int")
 PAGE_STEP = 0.01
+PAGE_FIELDS = "<path>,<min>,<max>[,curve[,default[,step]]]"
+ENCODERS = ("speed", "pitch")
+# Buttons on the shift register (controlhandlerEncoders.HOLD_PINS).
+HOLD_BUTTONS = ("record", "file", "reset", "freeze", "source")
 
 KERNELS = ("rt", "normal", "any")
 
@@ -178,31 +184,39 @@ class NebConfig(object):
     # ({encoder: [(name, path, min, max, curve, default, step)]}, [error, ...])
     def encoderPages(self):
         pages, errors = {}, []
+        usage = "page:<speed|pitch>:<name>," + PAGE_FIELDS
         for key, values in self._dict.items():
             if not key.startswith("page:"):
                 continue
             values = [v.strip() for v in values]
             try:
                 parts = key.split(":")
-                if len(parts) != 3 or parts[1] not in ("speed", "pitch") or not parts[2]:
-                    raise ValueError("page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]]")
-                if len(values) < 3 or not values[0].startswith("/"):
-                    raise ValueError("page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]]")
-                lo, hi = float(values[1]), float(values[2])
-                curve = values[3].lower() if len(values) > 3 and values[3] else "lin"
-                if curve not in OSC_CURVES:
-                    raise ValueError("curve one of %s" % (OSC_CURVES,))
-                if curve == "exp" and (lo <= 0 or hi <= 0):
-                    raise ValueError("exp needs min and max > 0")
-                default = float(values[4]) if len(values) > 4 and values[4] else 0.0
-                step = float(values[5]) if len(values) > 5 and values[5] else PAGE_STEP
-                if not 0.0 < step <= 1.0:
-                    raise ValueError("step: a part of the range per click, 0 < step <= 1")
-                pages.setdefault(parts[1], []).append(
-                    (parts[2], values[0], lo, hi, curve, min(1.0, max(0.0, default)), step))
+                if len(parts) != 3 or parts[1] not in ENCODERS or not parts[2]:
+                    raise ValueError(usage)
+                pages.setdefault(parts[1], []).append((parts[2],) + _pageFields(values, usage))
             except ValueError as e:
                 errors.append("%s,%s: %s" % (key, ",".join(values), e))
         return pages, errors
+
+    # The encoders while a button is held: as encoderPages, by button.
+    # ({button: {encoder: [(name, path, min, max, curve, default, step)]}}, [error, ...])
+    def holdPages(self):
+        holds, errors = {}, []
+        usage = "hold:<%s>:<speed|pitch>:<name>,%s" % ("|".join(HOLD_BUTTONS), PAGE_FIELDS)
+        for key, values in self._dict.items():
+            if not key.startswith("hold:"):
+                continue
+            values = [v.strip() for v in values]
+            try:
+                parts = key.split(":")
+                if len(parts) != 4 or parts[1] not in HOLD_BUTTONS or parts[2] not in ENCODERS \
+                        or not parts[3]:
+                    raise ValueError(usage)
+                holds.setdefault(parts[1], {}).setdefault(parts[2], []).append(
+                    (parts[3],) + _pageFields(values, usage))
+            except ValueError as e:
+                errors.append("%s,%s: %s" % (key, ",".join(values), e))
+        return holds, errors
 
     def cvTargets(self):
         targets = {}
@@ -224,6 +238,23 @@ class NebConfig(object):
         if number not in choices:
             raise ValueError("%s %r: one of %s" % (key, value, choices))
         return number
+
+
+# (path, min, max, curve, default, step) of a page: or hold: line.
+def _pageFields(values, usage):
+    if len(values) < 3 or not values[0].startswith("/"):
+        raise ValueError(usage)
+    lo, hi = float(values[1]), float(values[2])
+    curve = values[3].lower() if len(values) > 3 and values[3] else "lin"
+    if curve not in OSC_CURVES:
+        raise ValueError("curve one of %s" % (OSC_CURVES,))
+    if curve == "exp" and (lo <= 0 or hi <= 0):
+        raise ValueError("exp needs min and max > 0")
+    default = float(values[4]) if len(values) > 4 and values[4] else 0.0
+    step = float(values[5]) if len(values) > 5 and values[5] else PAGE_STEP
+    if not 0.0 < step <= 1.0:
+        raise ValueError("step: a part of the range per click, 0 < step <= 1")
+    return (values[0], lo, hi, curve, min(1.0, max(0.0, default)), step)
 
 
 def _blockEntries(text):

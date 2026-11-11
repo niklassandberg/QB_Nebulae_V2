@@ -23,6 +23,12 @@ PAGE_DIM = (0.0, 0.01)
 PAGE_PULSE_MS = 88
 CHOOSE_BRIGHT = 0.4
 
+# hold: lines: while the button is down the encoders change its layer, shown
+# by the dark LED pulsing in HOLD_COLOUR (also on page 1). Released sooner
+# than HOLD_MS with no encoder turned, it was a press.
+HOLD_MS = 500
+HOLD_COLOUR = (0, 4095, 4095)   # cyan
+
 
 def scale(value, lo, hi, curve):
     """0..1 to lo..hi: lin, exp (lo, hi > 0) or int (rounded)."""
@@ -47,12 +53,13 @@ class Page(object):
 
 
 class EncoderPages(object):
-    def __init__(self, encoder, pages, cv_target):
+    def __init__(self, encoder, pages, cv_target, hold=False):
         self.encoder = encoder
         self.pages = pages
         self.current = 0
         self.cv_target = cv_target if cv_target in self.names() else None
         self.candidate = None  # CV target while choosing
+        self.hold = hold       # a hold: layer: no CV
 
     def names(self):
         return [p.name for p in self.pages]
@@ -92,7 +99,13 @@ class EncoderPages(object):
         return [(p.path, scale(self.withCV(p, cv), p.lo, p.hi, p.curve)) for p in self.pages]
 
     def colour(self, index):
+        if self.hold and index == 0:
+            return HOLD_COLOUR
         return PAGE_COLOURS[index % len(PAGE_COLOURS)]
+
+    # The dark LED shows a colour (page 2 on, every page of a hold layer).
+    def marked(self, index):
+        return index > 0 or self.hold
 
 
 def pulse(now_ms):

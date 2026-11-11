@@ -12,17 +12,32 @@ Knobs and buttons (change the osc: lines to move them, no compile needed):
   reset    gate: held = note on, as touching a pad (button or gate input)
   freeze   drone: the loop keeps ringing without a gate
   source   on: the input is audrey's own left output (feedback); off: the input jack
-  record   echo on/off (audrey's hidden stereo echo, not on the hardware)
-  file     tap tempo for the echo: the time between two taps is the echo time
-           (up to 4.9 s; starts at 1/4 s after each start)
+  record   echo on/off, a short press (audrey's hidden stereo echo, not on the
+           hardware); while down: the echo's filter and feedback, see below
+  file     tap tempo for the echo, a short press: the time between two taps
+           is the echo time (up to 4.9 s; starts at 1/4 s after each start);
+           while down: pitch sets the echo volume, see below
 
 Encoder pages (click = next page, turn = value; the LEDs show the value as
 pitch does, the LED that stays dark shows the page colour, dim; saved):
   pitch    1 note (pitch CV here: 1V/oct)   2 envelope shape (red)
   speed    1 input level   2 body LFO (red): off, fast 1-8 Hz, slow 0.01-0.5 Hz
            (with the LFO on, start sets its rate and spread)
-           3 echo feedback (blue): 0..1.5; past the middle (1.0) the repeats
-             never die, as a dub echo (soft-clipped, darker each round)
+
+While record is down, the encoders show and change the echo (the pages come
+back unchanged when it is released):
+  speed    echo filter: the band-pass in the echo loop, 100..8000 Hz (800 at
+           first); each repeat goes through it again
+  pitch    echo feedback: 0..1.5; past 1.0 the repeats never die, as a dub
+           echo (soft-clipped, darker each round)
+  The LEDs show the values as on the pages, the dark LED pulses cyan.
+  The echo switches on/off only on a short press (under half a second) with
+  no encoder turned.
+
+While file is down, the same way:
+  pitch    echo volume: how much goes into the echo, 0..1 (half at first);
+           the repeats follow it, the ones already in it fade out
+  A short press is a tap (counted when file is released).
 
 Example how pageEncoder has for settings in nebsettings:
 Field by field, page:speed:input,/audrey/input,0,1,lin,0.3,0.005 means:
@@ -64,7 +79,7 @@ kernel,normal
 blocksize,128
 reset,momentary,rising
 freeze,latching,rising
-file,momentary,rising
+file,triggered,falling
 osc:density,/audrey/feedback,0,1
 osc:blend,/audrey/reverb_mix,0,1
 osc:size,/audrey/reverb_size,0,1
@@ -80,7 +95,9 @@ page:pitch:note,/audrey/note,16,76,lin,0.4
 page:pitch:shape,/audrey/shape,0,1,lin,0
 page:speed:input,/audrey/input,0,1,lin,0.3
 page:speed:lfo,/audrey/lfo,0,2,int,0
-page:speed:echo_feedback,/audrey/echo_feedback,0,1.5,lin,0.5
+hold:record:speed:echo_cutoff,/audrey/echo_cutoff,100,8000,exp,0.4745
+hold:record:pitch:echo_feedback,/audrey/echo_feedback,0,1.5,lin,0.5
+hold:file:pitch:echo_volume,/audrey/echo_volume,0,1,lin,0.5
 cv:pitch,note
 cv:speed,none
 nebconfigend

@@ -33,6 +33,7 @@ class Engine {
 
         void SetEchoDelayTime(const float echo_time);
         void SetEchoDelayFeedback(const float echo_fb);
+        void SetEchoDelayFilterFreq(const float freq_hz);
         void SetEchoDelaySendAmount(const float echo_send);
 
         // Both range 0-1

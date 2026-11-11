@@ -27,6 +27,10 @@
 //                        two taps is the echo time (0.03..4.9 s)
 //   /audrey/echo_feedback  echo feedback 0..kEchoMaxFeedback; above about 1 the
 //                        repeats never die (soft-clipped, dub style)
+//   /audrey/echo_cutoff  centre of the band-pass in the echo loop, Hz
+//                        (kEchoMinCutoff..kEchoMaxCutoff, 800 at start)
+//   /audrey/echo_volume  how much goes into the echo while it is on, 0..1
+//                        (1 at start); the repeats follow it
 
 #include <jack/jack.h>
 #include <lo/lo.h>
@@ -56,6 +60,8 @@ const float kEchoStartTime = 0.25f;  // seconds
 const float kEchoMinTime = 0.03f;
 const float kEchoMaxFeedback = 1.5f;
 const float kEchoMaxTime = 4.9f;    // the echo holds 5 s; a longer gap starts a new tap
+const float kEchoMinCutoff = 50.0f;
+const float kEchoMaxCutoff = 12000.0f;
 
 enum class Parameter : uint8_t {
   Frequency,
@@ -91,7 +97,8 @@ struct Control {
 Control c_feedback{0.0f}, c_input{0.5f}, c_reverb_mix{0.0f},
     c_reverb_size{0.0f}, c_lpf{1.0f}, c_hpf{0.0f}, c_body{1.0f}, c_shape{0.0f},
     c_lfo{0.0f}, c_note{40.0f}, c_gate{0.0f}, c_drone{0.0f}, c_source{0.0f},
-    c_echo{0.0f}, c_echo_tap{0.0f}, c_echo_feedback{0.5f};
+    c_echo{0.0f}, c_echo_tap{0.0f}, c_echo_feedback{0.5f}, c_echo_cutoff{800.0f},
+    c_echo_volume{1.0f};
 
 Engine engine;
 ParameterRegistry<Parameter> params;
@@ -105,6 +112,8 @@ int lfo_mode = 0;
 bool gate = false;
 bool input_from_output = false;
 bool echo_tap_high = false;
+bool echo_on = false;
+float echo_volume = 1.0f;
 uint64_t samples_done = 0;
 uint64_t last_tap = 0;  // in samples_done, 0 = none
 
@@ -182,8 +191,19 @@ void applyControls() {
   }
   if (c_drone.take(v)) engine.DroneMode(v >= 0.5f);
   if (c_source.take(v)) input_from_output = v >= 0.5f;
-  if (c_echo.take(v)) engine.SetEchoDelaySendAmount(v >= 0.5f ? 1.0f : 0.0f);
+  bool echo_changed = false;
+  if (c_echo.take(v)) {
+    echo_on = v >= 0.5f;
+    echo_changed = true;
+  }
+  if (c_echo_volume.take(v)) {
+    echo_volume = daisysp::fclamp(v, 0.f, 1.f);
+    echo_changed = true;
+  }
+  if (echo_changed) engine.SetEchoDelaySendAmount(echo_on ? echo_volume : 0.0f);
   if (c_echo_feedback.take(v)) engine.SetEchoDelayFeedback(daisysp::fclamp(v, 0.f, kEchoMaxFeedback));
+  if (c_echo_cutoff.take(v))
+    engine.SetEchoDelayFilterFreq(daisysp::fclamp(v, kEchoMinCutoff, kEchoMaxCutoff));
   if (c_echo_tap.take(v)) {
     bool high = v >= 0.5f;
     if (high && !echo_tap_high) {
@@ -290,7 +310,8 @@ int main(int argc, char** argv) {
   engine.SetEchoDelayTime(kEchoStartTime);
   for (auto& lim : limiter) lim.Init();
   for (Control* c : {&c_feedback, &c_input, &c_reverb_mix, &c_reverb_size, &c_lpf,
-                     &c_hpf, &c_body, &c_shape, &c_lfo, &c_note, &c_echo_feedback}) {
+                     &c_hpf, &c_body, &c_shape, &c_lfo, &c_note, &c_echo_feedback,
+                     &c_echo_cutoff, &c_echo_volume}) {
     c->sets.fetch_add(1);
   }
 
@@ -307,7 +328,8 @@ int main(int argc, char** argv) {
       {"/audrey/lfo", &c_lfo}, {"/audrey/note", &c_note}, {"/audrey/gate", &c_gate},
       {"/audrey/drone", &c_drone}, {"/audrey/source", &c_source},
       {"/audrey/echo", &c_echo}, {"/audrey/echo_tap", &c_echo_tap},
-      {"/audrey/echo_feedback", &c_echo_feedback}};
+      {"/audrey/echo_feedback", &c_echo_feedback}, {"/audrey/echo_cutoff", &c_echo_cutoff},
+      {"/audrey/echo_volume", &c_echo_volume}};
   for (auto& a : addresses) {
     lo_server_thread_add_method(osc, a.path, "f", onFloat, a.c);
   }
