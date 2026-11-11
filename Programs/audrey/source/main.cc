@@ -31,6 +31,8 @@
 //                        (kEchoMinCutoff..kEchoMaxCutoff, 800 at start)
 //   /audrey/echo_volume  how much goes into the echo while it is on, 0..1
 //                        (1 at start); the repeats follow it
+//   /audrey/echo_wownflutter  wow and flutter on the echo, 0..1 (0 at start):
+//                        higher is more unstable
 
 #include <jack/jack.h>
 #include <lo/lo.h>
@@ -62,6 +64,64 @@ const float kEchoMaxFeedback = 1.5f;
 const float kEchoMaxTime = 4.9f;    // the echo holds 5 s; a longer gap starts a new tap
 const float kEchoMinCutoff = 50.0f;
 const float kEchoMaxCutoff = 12000.0f;
+
+// Wow and flutter on the echo time, as on a worn tape machine: a slow wow, a
+// fast flutter and a random drift. amount 0..1 (/audrey/echo_wownflutter):
+// the depths grow with amount, the speeds wander more with amount.
+const float kWowHz = 0.6f;
+const float kFlutterHz = 7.0f;
+const float kWowDepth = 0.006f;       // seconds at amount 1
+const float kFlutterDepth = 0.0005f;
+const float kDriftDepth = 0.004f;
+const float kWowRateSpread = 0.6f;    // part of the rate it wanders at amount 1
+const float kFlutterRateSpread = 0.3f;
+const float kAmountLag = 0.05f;       // seconds: a turned encoder does not jump
+const float kTwoPi = 6.2831853f;
+
+uint32_t wow_rng = 0x9e3779b9u;
+
+float wowNoise() {  // -1..1
+  wow_rng ^= wow_rng << 13;
+  wow_rng ^= wow_rng >> 17;
+  wow_rng ^= wow_rng << 5;
+  return (wow_rng >> 8) * (2.0f / 16777216.0f) - 1.0f;
+}
+
+// A slow random value -1..1: a new target every 0.2..1 s, slewed to it.
+struct Wander {
+  float value = 0.0f, target = 0.0f, left = 0.0f;
+  float step(float dt, float lag) {
+    left -= dt;
+    if (left <= 0.0f) {
+      target = wowNoise();
+      left = 0.6f + 0.4f * wowNoise();
+    }
+    value += (target - value) * (dt / lag);
+    return value;
+  }
+};
+
+struct WowFlutter {
+  float amount_target = 0.0f, amount = 0.0f;
+  float wow_phase = 0.0f, flutter_phase = 0.0f;
+  Wander wow_rate, flutter_rate, drift;
+
+  // Seconds to add to the echo time for the next dt seconds.
+  float next(float dt) {
+    amount += (amount_target - amount) * (dt / kAmountLag);
+    if (amount < 1e-4f) return 0.0f;
+    float wow_hz = kWowHz * (1.0f + kWowRateSpread * amount * wow_rate.step(dt, 0.5f));
+    float flutter_hz = kFlutterHz * (1.0f + kFlutterRateSpread * amount * flutter_rate.step(dt, 0.2f));
+    wow_phase += wow_hz * dt;
+    wow_phase -= std::floor(wow_phase);
+    flutter_phase += flutter_hz * dt;
+    flutter_phase -= std::floor(flutter_phase);
+    float depth = amount;
+    return depth * (kWowDepth * std::sin(kTwoPi * wow_phase)
+                    + kFlutterDepth * std::sin(kTwoPi * flutter_phase)
+                    + kDriftDepth * drift.step(dt, 0.3f));
+  }
+};
 
 enum class Parameter : uint8_t {
   Frequency,
@@ -98,7 +158,7 @@ Control c_feedback{0.0f}, c_input{0.5f}, c_reverb_mix{0.0f},
     c_reverb_size{0.0f}, c_lpf{1.0f}, c_hpf{0.0f}, c_body{1.0f}, c_shape{0.0f},
     c_lfo{0.0f}, c_note{40.0f}, c_gate{0.0f}, c_drone{0.0f}, c_source{0.0f},
     c_echo{0.0f}, c_echo_tap{0.0f}, c_echo_feedback{0.5f}, c_echo_cutoff{800.0f},
-    c_echo_volume{1.0f};
+    c_echo_volume{1.0f}, c_echo_wownflutter{0.0f};
 
 Engine engine;
 ParameterRegistry<Parameter> params;
@@ -114,6 +174,7 @@ bool input_from_output = false;
 bool echo_tap_high = false;
 bool echo_on = false;
 float echo_volume = 1.0f;
+WowFlutter wow_flutter;
 uint64_t samples_done = 0;
 uint64_t last_tap = 0;  // in samples_done, 0 = none
 
@@ -202,6 +263,7 @@ void applyControls() {
   }
   if (echo_changed) engine.SetEchoDelaySendAmount(echo_on ? echo_volume : 0.0f);
   if (c_echo_feedback.take(v)) engine.SetEchoDelayFeedback(daisysp::fclamp(v, 0.f, kEchoMaxFeedback));
+  if (c_echo_wownflutter.take(v)) wow_flutter.amount_target = daisysp::fclamp(v, 0.f, 1.f);
   if (c_echo_cutoff.take(v))
     engine.SetEchoDelayFilterFreq(daisysp::fclamp(v, kEchoMinCutoff, kEchoMaxCutoff));
   if (c_echo_tap.take(v)) {
@@ -230,6 +292,7 @@ void flushDenormals() {
 // One block as FeedbackSynth_main.cpp's AudioCallback.
 void processBlock() {
   applyControls();
+  engine.SetEchoDelayTimeMod(wow_flutter.next(kBlockSize / kSampleRate));
   samples_done += kBlockSize;
   params.Process();
   for (size_t i = 0; i < kBlockSize; ++i) {
@@ -311,7 +374,7 @@ int main(int argc, char** argv) {
   for (auto& lim : limiter) lim.Init();
   for (Control* c : {&c_feedback, &c_input, &c_reverb_mix, &c_reverb_size, &c_lpf,
                      &c_hpf, &c_body, &c_shape, &c_lfo, &c_note, &c_echo_feedback,
-                     &c_echo_cutoff, &c_echo_volume}) {
+                     &c_echo_cutoff, &c_echo_volume, &c_echo_wownflutter}) {
     c->sets.fetch_add(1);
   }
 
@@ -329,7 +392,8 @@ int main(int argc, char** argv) {
       {"/audrey/drone", &c_drone}, {"/audrey/source", &c_source},
       {"/audrey/echo", &c_echo}, {"/audrey/echo_tap", &c_echo_tap},
       {"/audrey/echo_feedback", &c_echo_feedback}, {"/audrey/echo_cutoff", &c_echo_cutoff},
-      {"/audrey/echo_volume", &c_echo_volume}};
+      {"/audrey/echo_volume", &c_echo_volume},
+      {"/audrey/echo_wownflutter", &c_echo_wownflutter}};
   for (auto& a : addresses) {
     lo_server_thread_add_method(osc, a.path, "f", onFloat, a.c);
   }

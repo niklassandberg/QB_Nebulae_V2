@@ -100,6 +100,11 @@ void Engine::SetEchoDelayFilterFreq(const float freq_hz) {
   echo_delay_[1]->SetFilterFreq(freq_hz);
 }
 
+void Engine::SetEchoDelayTimeMod(const float time_s) {
+  echo_delay_[0]->SetTimeMod(time_s);
+  echo_delay_[1]->SetTimeMod(time_s);
+}
+
 void Engine::SetEchoDelaySendAmount(const float echo_send) {
   echo_send_ = echo_send;
 }

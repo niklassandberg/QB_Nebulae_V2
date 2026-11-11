@@ -74,11 +74,19 @@ class EchoDelay {
             bpf_.SetCutoff(freq_hz);
         }
 
+        /**
+         * @brief Set an offset added to the smoothed delay time, in seconds (wow and flutter).
+         */
+        void SetTimeMod(const float time_s)
+        {
+            time_mod_ = time_s;
+        }
+
         inline float Process(const float in)
         {
             float out;
             daisysp::fonepole(delay_time_current_, delay_time_target_, delay_smooth_coef_);
-            delayLine_.SetDelay(delay_time_current_ * sample_rate_);
+            delayLine_.SetDelay(daisysp::fmax(delay_time_current_ + time_mod_, 0.001f) * sample_rate_);
             out = delayLine_.Read();
             out = bpf_.Process(out);
             out = daisysp::SoftClip(out);
@@ -99,6 +107,7 @@ class EchoDelay {
         float delay_smooth_coef_;
 
         float feedback_;
+        float time_mod_ = 0.0f;
 
         daisysp::DelayLine<float, MaxLength> delayLine_;
         BPF12 bpf_;

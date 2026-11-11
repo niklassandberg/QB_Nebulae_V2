@@ -16,7 +16,7 @@ Knobs and buttons (change the osc: lines to move them, no compile needed):
            hardware); while down: the echo's filter and feedback, see below
   file     tap tempo for the echo, a short press: the time between two taps
            is the echo time (up to 4.9 s; starts at 1/4 s after each start);
-           while down: pitch sets the echo volume, see below
+           while down: wow and flutter and the echo volume, see below
 
 Encoder pages (click = next page, turn = value; the LEDs show the value as
 pitch does, the LED that stays dark shows the page colour, dim; saved):
@@ -35,6 +35,9 @@ back unchanged when it is released):
   no encoder turned.
 
 While file is down, the same way:
+  speed    wow and flutter on the echo, as a worn tape machine: the repeats
+           waver slowly (wow), tremble (flutter) and drift; higher is more
+           unstable (half at first, 0 = a clean echo)
   pitch    echo volume: how much goes into the echo, 0..1 (half at first);
            the repeats follow it, the ones already in it fade out
   A short press is a tap (counted when file is released).
@@ -98,6 +101,7 @@ page:speed:lfo,/audrey/lfo,0,2,int,0
 hold:record:speed:echo_cutoff,/audrey/echo_cutoff,100,8000,exp,0.4745
 hold:record:pitch:echo_feedback,/audrey/echo_feedback,0,1.5,lin,0.5
 hold:file:pitch:echo_volume,/audrey/echo_volume,0,1,lin,0.5
+hold:file:speed:echo_wownflutter,/audrey/echo_wownflutter,0,1,lin,0.5
 cv:pitch,note
 cv:speed,none
 nebconfigend
