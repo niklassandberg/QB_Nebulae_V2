@@ -1,0 +1,11 @@
+# Gate interrupts, on the configsettings page of the instr selector.
+# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
+# mode = the name after the number, here "gate_interrupts").
+# Speed click on it: on/off, and back to the instrument. Off (default): the
+# gates are read on every nebio scan, with no interrupts, as a Schmitt
+# trigger: an edge counts at once, then the gate is ignored for the hold-off
+# (5 ms, set on the settings web page). On: each gate edge is a kernel
+# interrupt, the lowest latency, but a slow or noisy gate (a triangle LFO)
+# then fires hundreds of them per edge and the audio can drop out (JACK
+# xruns). Saved (configsettings.py).
+# Slot LED bright = on (nebulae-status).

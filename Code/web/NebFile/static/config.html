@@ -183,6 +183,33 @@ input[type=number]:invalid { border-color: var(--warn); }
         </div>
     </div>
 
+    <h2>Gate inputs</h2>
+    <div class="card">
+        <div class="row" data-key="gate_interrupts">
+            <div class="name">Gate interrupts <button type="button" class="info" aria-label="About">i</button></div>
+            <div class="control"><label class="switch"><input type="checkbox" name="gate_interrupts"><span class="slider-knob"></span></label></div>
+            <div class="tip">On: each edge on a gate input (freeze, reset, file, record) is a kernel
+                interrupt, the lowest latency. A slow or noisy gate, such as a triangle LFO, then fires hundreds of
+                them per edge and the audio can drop out (JACK xruns), most of all at small block sizes.
+                Off (default): the gates are read on every encoder scan, with no interrupts, through a Schmitt trigger
+                (the hold-off below): a little later, and a trigger shorter than one scan can be missed.</div>
+        </div>
+        <div class="row" data-key="gate_holdoff_ms">
+            <div class="name">Schmitt trigger hold-off <button type="button" class="info" aria-label="About">i</button></div>
+            <div class="control">
+                <input type="number" name="gate_holdoff_ms" min="0" max="100" step="0.1" required> ms
+            </div>
+            <div class="hint" id="gate_holdoff_ms_hint"></div>
+            <div class="tip">Only with gate interrupts off. An edge counts at once, then the gate is ignored for
+                this long, so a slow or noisy edge is one edge. Both edges have a hold-off, so one gate cycle needs
+                at least two: 5 ms follows gates and triggers up to about 90 Hz, faster ones are missed. Longer for
+                very slow LFOs, 0 = no hold-off. Default 5 ms.</div>
+        </div>
+        <div class="row card-foot">
+            <button type="button" class="b" id="gate_defaults">Restore to default</button>
+        </div>
+    </div>
+
     <h2>Nebulae</h2>
     <div class="card">
         <div class="row" data-key="restart">
@@ -205,11 +232,13 @@ input[type=number]:invalid { border-color: var(--warn); }
 <script>
 (function () {
     var RATES = ["nebio_scan_hz", "nebio_digital_hz", "nebio_adc_hz"];
-    var KEYS = ["wifi", "power_regulator", "no_pwm", "led_stagger", "services_quiet", "led_dim"].concat(RATES);
+    var KEYS = ["wifi", "power_regulator", "no_pwm", "led_stagger", "services_quiet", "led_dim",
+                "gate_interrupts", "gate_holdoff_ms"].concat(RATES);
     var form = document.getElementById("form");
     var saveBtn = document.getElementById("save");
     var cancelBtn = document.getElementById("cancel");
     var defaultsBtn = document.getElementById("defaults");
+    var gateDefaultsBtn = document.getElementById("gate_defaults");
     var statusEl = document.getElementById("status");
     var loaded = null;
     var scanRange = [100, 2000];
@@ -223,12 +252,19 @@ input[type=number]:invalid { border-color: var(--warn); }
 
     function norm(key, value) {
         if (key === "led_dim") return Number(value).toFixed(2);
+        if (key === "gate_holdoff_ms") return holdoffOk(value) ? Number(value).toFixed(1) : String(value).trim();
         return String(value).trim();
     }
 
     function whole(text) { return /^\d+$/.test(String(text).trim()) ? Number(text) : NaN; }
 
     function scanOk(scan) { return scan >= scanRange[0] && scan <= scanRange[1]; }
+
+    var holdoffMax = 100;
+    function holdoffOk(text) {
+        var t = String(text).trim();
+        return /^\d+(\.\d+)?$/.test(t) && Number(t) <= holdoffMax;
+    }
 
     // As nebio does it (inputs.cpp): the scan period in whole microseconds,
     // the others every nth scan with nth = round(scan / hz).
@@ -336,6 +372,13 @@ input[type=number]:invalid { border-color: var(--warn); }
             if (!ok || !c) { out.textContent = "–"; return; }
             out.innerHTML = c.real + " Hz <small>" + (c.nth === 1 ? "every scan" : "1 in " + c.nth) + "</small>";
         });
+        var holdOk = holdoffOk(read("gate_holdoff_ms"));
+        var holdHint = document.getElementById("gate_holdoff_ms_hint");
+        holdHint.textContent = !holdOk ? "allowed 0–" + holdoffMax + " ms" :
+            field("gate_interrupts").checked ? "used when gate interrupts are off" : "";
+        holdHint.classList.toggle("warn", !holdOk);
+        if (loaded) gateDefaultsBtn.disabled = holdOk &&
+            Number(read("gate_holdoff_ms")) === Number(loaded.gate_holdoff_default);
         var c = changes();
         document.querySelectorAll(".row").forEach(function (row) {
             var key = row.dataset.key;
@@ -346,7 +389,7 @@ input[type=number]:invalid { border-color: var(--warn); }
             row.classList.toggle("changed", !!changed);
         });
         var any = Object.keys(c).length > 0;
-        saveBtn.disabled = !any || !ok;
+        saveBtn.disabled = !any || !ok || !holdOk;
         cancelBtn.disabled = !any;
         if (loaded) defaultsBtn.disabled = ok && sameRates(loaded.nebio_defaults);
     }
@@ -362,6 +405,7 @@ input[type=number]:invalid { border-color: var(--warn); }
             .then(function (values) {
                 loaded = values;
                 if (values.scan_hz_range) scanRange = values.scan_hz_range;
+                if (values.gate_holdoff_max) holdoffMax = values.gate_holdoff_max;
                 show(values);
                 if (then) then(values);
             })
@@ -464,6 +508,13 @@ input[type=number]:invalid { border-color: var(--warn); }
         if (!loaded) return;
         showRates(loaded.nebio_defaults);
         setStatus("Default input rates filled in: Save to use them, Cancel to keep yours.");
+    });
+
+    gateDefaultsBtn.addEventListener("click", function () {
+        if (!loaded) return;
+        field("gate_holdoff_ms").value = norm("gate_holdoff_ms", loaded.gate_holdoff_default);
+        refresh();
+        setStatus("Default hold-off filled in: Save to use it, Cancel to keep yours.");
     });
 
     saveBtn.addEventListener("click", function () {

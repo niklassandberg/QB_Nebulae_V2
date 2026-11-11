@@ -50,6 +50,12 @@ int64_t nowNs() {
     return static_cast<int64_t>(ts.tv_sec) * 1000000000LL + ts.tv_nsec;
 }
 
+bool isGate(unsigned pin) {
+    for (unsigned g : kGates)
+        if (g == pin) return true;
+    return false;
+}
+
 int seqDirection(int a, int b, int c) {
     static const int fwd[4][3] = {{0, 1, 3}, {1, 3, 2}, {3, 2, 0}, {2, 0, 1}};
     static const int rev[4][3] = {{0, 2, 3}, {2, 3, 1}, {3, 1, 0}, {1, 0, 2}};
@@ -70,6 +76,14 @@ int Debounce::feed(int v) {
         count = 0;
     }
     if (count >= need) stable = raw;
+    return stable;
+}
+
+int GateHoldoff::feed(int v, int64_t nowNs, int64_t holdNs) {
+    if (nowNs >= untilNs && v != stable) {
+        stable = v;
+        untilNs = nowNs + holdNs;
+    }
     return stable;
 }
 
@@ -229,6 +243,11 @@ int Inputs::init() {
         pinBits_[s].reset(level);
         snapPin_[s] = level;
     }
+    for (size_t g = 0; g < kGates.size(); ++g) {
+        gateHold_[g].stable = snapPin_[pinSlot(static_cast<int>(kGates[g]))];
+        gateHold_[g].untilNs = 0;
+    }
+    if (!gatesPolled_ && !gateIrq_ && !edges_.setEdgeDetection(false)) gateIrq_ = true;
     // Shift register starts at 0 and needs a stable read.
     for (int i = 0; i < 8; ++i) srBits_[i].reset(0);
     snapSr_ = 0;
@@ -245,7 +264,7 @@ int Inputs::init() {
     thread_ = std::thread(&Inputs::run, this);
     if (!gatesPolled_) edgeThread_ = std::thread(&Inputs::runEdges, this);
     logInfo("inputs running (sr=%d clicks/enc=%d gates=%s adc cv=%d pot=%d)", srIn_.ok(),
-            polled_.ok(), gatesPolled_ ? "polled" : "events", adc_[0].ok(), adc_[1].ok());
+            polled_.ok(), gateInterrupts() ? "events" : "polled", adc_[0].ok(), adc_[1].ok());
     return 0;
 }
 
@@ -417,16 +436,28 @@ void Inputs::run() {
             adcOk[0] = adc_[0].readAll(codes[0]);
             adcOk[1] = adc_[1].readAll(codes[1]);
         }
+        // Polled gates are read on every scan, not only the digital ones:
+        // a short trigger is missed only when shorter than one scan.
+        int gateLevel[4];
+        const bool gatesRead = !gateInterrupts() && readGates(polledPins, levels, gateLevel);
+        const int64_t holdNs = gateHoldoffUs_.load(std::memory_order_relaxed) * 1000LL;
 
         {
             std::lock_guard<std::mutex> lock(mutex_);
             if (srOk) {
                 for (int i = 0; i < 8; ++i) srBits_[i].transition(srDebounce_[i].feed((sr >> i) & 1));
             }
+            if (gatesRead) {
+                for (size_t g = 0; g < kGates.size(); ++g) {
+                    int s = pinSlot(static_cast<int>(kGates[g]));
+                    pinBits_[s].transition(gateHold_[g].feed(gateLevel[g], start, holdNs));
+                }
+            }
             if (polledOk && digitalScan) {
                 for (size_t i = 0; i < polledPins.size(); ++i) {
                     int s = pinSlot(static_cast<int>(polledPins[i]));
-                    if (s >= 0) pinBits_[s].transition(pinDebounce_[s].feed(levels[i]));
+                    if (s >= 0 && !isGate(polledPins[i]))  // gates: above
+                        pinBits_[s].transition(pinDebounce_[s].feed(levels[i]));
                 }
                 for (int id = 0; id < 2; ++id) {
                     int s = pinSlot(static_cast<int>(kEncClick[id]));
@@ -485,6 +516,67 @@ void Inputs::run() {
         ts.tv_nsec = next % 1000000000LL;
         clock_nanosleep(CLOCK_MONOTONIC, TIMER_ABSTIME, &ts, nullptr);
     }
+}
+
+// Gate levels in kGates order: from the polled request when there are no
+// edge events, else from the edge request with its edge detection off.
+bool Inputs::readGates(const std::vector<unsigned> &polledPins, const std::vector<int> &levels,
+                       int out[]) {
+    if (!gatesPolled_) {
+        std::vector<int> v;
+        if (!edges_.getAll(v) || v.size() != kGates.size()) return false;
+        for (size_t g = 0; g < kGates.size(); ++g) out[g] = v[g];
+        return true;
+    }
+    if (levels.size() != polledPins.size()) return false;
+    for (size_t g = 0; g < kGates.size(); ++g) {
+        out[g] = -1;
+        for (size_t i = 0; i < polledPins.size(); ++i)
+            if (polledPins[i] == kGates[g]) out[g] = levels[i];
+        if (out[g] < 0) return false;
+    }
+    return true;
+}
+
+int Inputs::setGateInterrupts(bool on) {
+    std::lock_guard<std::mutex> sw(gateSwitchMutex_);
+    if (gatesPolled_) {
+        if (!on) return 0;
+        logError("gate interrupts: no edge events on this system, the gates stay polled");
+        return -1;
+    }
+    if (on == gateIrq_.load()) return 0;
+    if (!running_) {
+        gateIrq_ = on;  // init() applies it
+        return 0;
+    }
+    if (on) {
+        if (!edges_.setEdgeDetection(true)) return -1;
+        gateIrq_ = true;
+    } else {
+        {
+            std::lock_guard<std::mutex> lock(mutex_);
+            for (size_t g = 0; g < kGates.size(); ++g) {
+                gateHold_[g].stable = pinBits_[pinSlot(static_cast<int>(kGates[g]))].current;
+                gateHold_[g].untilNs = 0;
+            }
+        }
+        gateIrq_ = false;
+        if (!edges_.setEdgeDetection(false)) {
+            gateIrq_ = true;
+            return -1;
+        }
+    }
+    logInfo("gates: %s", on ? "interrupts (edge events)"
+                            : "polled every scan, Schmitt trigger hold-off");
+    return 0;
+}
+
+void Inputs::setGateHoldoffUs(int us) {
+    if (us < 0) us = 0;
+    if (us > 100000) us = 100000;
+    gateHoldoffUs_ = us;
+    logInfo("gate hold-off %d us", us);
 }
 
 void Inputs::setScanJitter(double fraction) {
@@ -669,10 +761,10 @@ void Inputs::stats(char *buf, size_t len) {
     double secs = (now - lastStatNs_) / 1e9;
     uint64_t scans = scans_, snaps = snapshots_;
     if (secs <= 0) secs = 1;
-    std::snprintf(buf, len, "scan %.0f Hz, snapshot %.0f Hz, worst scan %lld us, gpio %s",
+    std::snprintf(buf, len, "scan %.0f Hz, snapshot %.0f Hz, worst scan %lld us, gpio %s, gates %s",
                   (scans - lastStatScans_) / secs, (snaps - lastStatSnaps_) / secs,
                   static_cast<long long>(worstScanUs_.exchange(0)),
-                  fastGpio() ? "fast" : "libgpiod");
+                  fastGpio() ? "fast" : "libgpiod", gateInterrupts() ? "interrupts" : "polled");
     lastStatScans_ = scans;
     lastStatSnaps_ = snaps;
     lastStatNs_ = now;

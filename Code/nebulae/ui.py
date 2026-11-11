@@ -738,6 +738,11 @@ class UserInterface(object):
                             configSettings.setServicesQuiet(not configSettings.servicesQuiet)
                             self.script_fhandle.refresh()
                             self.controlhandler.enterNormalMode()
+                        elif ui_mode == "gate_interrupts":
+                            configSettings.setGateInterrupts(not configSettings.gateInterrupts)
+                            self.applyGates()
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
                         elif ui_mode == "led_dim":
                             self.led_dim_mode = True
                         elif ui_mode == "power_regulator":
@@ -777,6 +782,9 @@ class UserInterface(object):
         libDriver.led_set_no_pwm(configSettings.noPwm)
         libDriver.led_set_stagger(configSettings.ledStagger)
 
+    def applyGates(self):
+        libDriver.set_gate_interrupts(configSettings.gateInterrupts, configSettings.gateHoldoffMs)
+
     def applyWebRequest(self):
         request = configsettings.takeRequest()
         if not request:
@@ -797,6 +805,12 @@ class UserInterface(object):
             rates = configSettings.setNebioRates(request.get("nebio_scan_hz"), request.get("nebio_digital_hz"),
                                                  request.get("nebio_adc_hz"))
             libDriver.set_input_rates(*rates)
+        if "gate_interrupts" in request or "gate_holdoff_ms" in request:
+            if "gate_interrupts" in request:
+                configSettings.setGateInterrupts(request["gate_interrupts"])
+            if "gate_holdoff_ms" in request:
+                configSettings.setGateHoldoffMs(request["gate_holdoff_ms"])
+            self.applyGates()
         restart ="power_regulator" in request and configSettings.setPowerRegulator(request["power_regulator"])
         # Last: off cuts the page's own connection.
         if "wifi" in request:

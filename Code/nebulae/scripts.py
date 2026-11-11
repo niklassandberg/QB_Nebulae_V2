@@ -17,7 +17,8 @@ UI_STATES = {"wifi": lambda: configSettings.wifiOn,
              "power_regulator": lambda: configSettings.powerRegulator != "off",
              "no_pwm": lambda: configSettings.noPwm,
              "led_stagger": lambda: configSettings.ledStagger,
-             "services_quiet": lambda: configSettings.servicesQuiet}
+             "services_quiet": lambda: configSettings.servicesQuiet,
+             "gate_interrupts": lambda: configSettings.gateInterrupts}
 STATUS_TIMEOUT_S = 2.0
 STATUS_MARKER = b"nebulae-status"
 

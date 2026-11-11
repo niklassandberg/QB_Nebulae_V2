@@ -35,6 +35,9 @@ public:
     bool requestInputs(const std::vector<unsigned> &pins, Bias bias, bool edgeEvents);
     bool requestOutputs(const std::vector<unsigned> &pins, int initialValue);
     void release();
+    // Inputs only: edge detection on/off on the same request. Off frees the
+    // kernel interrupts; the levels can still be read.
+    bool setEdgeDetection(bool on);
 
     bool ok() const { return req_ != nullptr; }
     int get(unsigned pin) const;            // 0/1, -1 on error
@@ -53,7 +56,9 @@ public:
 
 private:
     bool request(const std::vector<unsigned> &pins, gpiod_line_settings *settings);
+    gpiod_line_settings *inputSettings(Bias bias, bool edgeEvents) const;
     gpiod_line_request *req_ = nullptr;
+    Bias bias_ = Bias::Off;
     gpiod_edge_event_buffer *events_ = nullptr;
     std::vector<unsigned> pins_;
 };

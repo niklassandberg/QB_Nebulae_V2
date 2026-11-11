@@ -76,6 +76,10 @@ int nebio_input_scan_hz(void) { return Inputs::instance().scanHz(); }
 int nebio_input_digital_hz(void) { return Inputs::instance().digitalHz(); }
 int nebio_set_fast_gpio(int on) { return Inputs::instance().setFastGpio(on != 0); }
 int nebio_fast_gpio(void) { return Inputs::instance().fastGpio() ? 1 : 0; }
+int nebio_set_gate_interrupts(int on) { return Inputs::instance().setGateInterrupts(on != 0); }
+int nebio_gate_interrupts(void) { return Inputs::instance().gateInterrupts() ? 1 : 0; }
+void nebio_set_gate_holdoff_us(int us) { Inputs::instance().setGateHoldoffUs(us); }
+int nebio_gate_holdoff_us(void) { return Inputs::instance().gateHoldoffUs(); }
 int nebio_input_adc_hz(void) { return Inputs::instance().adcHz(); }
 void nebio_set_scan_jitter(double fraction) { Inputs::instance().setScanJitter(fraction); }
 void nebio_set_scan_trigger(int external) { Inputs::instance().setScanTrigger(external != 0); }

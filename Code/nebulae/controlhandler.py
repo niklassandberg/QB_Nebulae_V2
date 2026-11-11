@@ -55,6 +55,9 @@ class ControlHandler(object):
                                "on" if nebio.set_fast_gpio(True) else "refused, using libgpiod")
         else:
             self.classlog.info("nebio fast GPIO: off (libgpiod)")
+        gates = nebio.set_gate_interrupts(configSettings.gateInterrupts, configSettings.gateHoldoffMs)
+        self.classlog.info("nebio gates: %s", "interrupts" if gates else
+                           "polled, hold-off %.1f ms" % configSettings.gateHoldoffMs)
         self.numFiles = numberFiles
         self.control_mode = "normal"
         self.prev_control_mode = "normal"

@@ -66,6 +66,10 @@ def lib():
         "nebio_input_digital_hz": (c_int, []),
         "nebio_set_fast_gpio": (c_int, [c_int]),
         "nebio_fast_gpio": (c_int, []),
+        "nebio_set_gate_interrupts": (c_int, [c_int]),
+        "nebio_gate_interrupts": (c_int, []),
+        "nebio_set_gate_holdoff_us": (None, [c_int]),
+        "nebio_gate_holdoff_us": (c_int, []),
         "nebio_input_adc_hz": (c_int, []),
         "nebio_set_scan_jitter": (None, [c_double]),
         "nebio_set_scan_trigger": (None, [c_int]),
@@ -238,6 +242,17 @@ def set_fast_gpio(on):
 
 def fast_gpio():
     return bool(lib().nebio_fast_gpio())
+
+
+# Gate inputs: interrupts (lowest latency) or polled with a Schmitt trigger
+# hold-off (no CPU load from slow or noisy gates). Returns whether interrupts
+# are used.
+def set_gate_interrupts(on, holdoff_ms):
+    l = inputs()
+    l.nebio_set_gate_holdoff_us(int(round(holdoff_ms * 1000)))
+    if l.nebio_set_gate_interrupts(1 if on else 0) != 0:
+        _log.error("nebio: %s", last_error())
+    return bool(l.nebio_gate_interrupts())
 
 
 def stats():

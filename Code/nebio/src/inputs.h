@@ -23,6 +23,14 @@ struct Debounce {
     int feed(int v);
 };
 
+// A polled gate as a Schmitt trigger: a change counts at once, then the pin
+// is ignored for the hold-off, so a slow or noisy edge is one edge.
+struct GateHoldoff {
+    int stable = 1;
+    int64_t untilNs = 0;
+    int feed(int v, int64_t nowNs, int64_t holdNs);
+};
+
 // Remembers transitions Python has not seen yet (max one full pulse queued).
 struct StretchBit {
     int current = 0;
@@ -77,6 +85,12 @@ public:
     int setFastGpio(bool on);
     bool fastGpio() const { return fastGpio_.load(std::memory_order_relaxed); }
 
+    // See nebio_set_gate_interrupts / nebio_set_gate_holdoff_us.
+    int setGateInterrupts(bool on);
+    bool gateInterrupts() const { return !gatesPolled_ && gateIrq_.load(std::memory_order_relaxed); }
+    void setGateHoldoffUs(int us);
+    int gateHoldoffUs() const { return gateHoldoffUs_.load(std::memory_order_relaxed); }
+
     // See nebio_set_scan_jitter / nebio_set_scan_trigger.
     void setScanJitter(double fraction);
     void setScanTrigger(bool external);
@@ -95,6 +109,8 @@ private:
     bool clickPressed(int id) const;
     void sendRawEncoders(const int clickLevel[2]);
     void routeChanged(int id, bool clickBefore);
+    bool readGates(const std::vector<unsigned> &polledPins, const std::vector<int> &levels,
+                   int out[]);
 
     // Hardware
     GpioLines srOut_;    // clock, latch
@@ -108,7 +124,10 @@ private:
     std::thread edgeThread_;
     std::atomic<bool> running_{false};
     std::atomic<bool> stop_{false};
-    bool gatesPolled_ = false;
+    bool gatesPolled_ = false;  // no edge events at all: gates always polled
+    std::atomic<bool> gateIrq_{true};     // edge events, else polled with hold-off
+    std::atomic<int> gateHoldoffUs_{5000};
+    std::mutex gateSwitchMutex_;
 
     std::atomic<int> scanPeriodUs_{1000};
     std::atomic<int> digitalEveryNth_{1};
@@ -136,6 +155,7 @@ private:
     int slotCount_ = 0;
     Debounce pinDebounce_[kMaxPins];
     StretchBit pinBits_[kMaxPins];
+    GateHoldoff gateHold_[4];  // per kGates entry
     uint16_t adcLive_[2][8] = {};
     uint64_t adcGen_ = 0;
 

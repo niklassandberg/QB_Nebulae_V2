@@ -68,6 +68,16 @@ NEBIO_API void nebio_scan_trigger(void);
  * and libgpiod stays. After nebio_inputs_init(). */
 NEBIO_API int nebio_set_fast_gpio(int on);
 NEBIO_API int nebio_fast_gpio(void);
+/* Gate inputs (Nebulae sets it from configsettings, default off). On (the
+ * library's default until set): edge events, each edge a kernel interrupt, the
+ * lowest latency; a slow or noisy gate gives hundreds per edge. Off: read on
+ * every scan with no interrupts, as a Schmitt trigger: a change counts at
+ * once, then the pin is ignored for the hold-off (0-100000 us, default 5000).
+ * -1 when the system has no edge events (the gates are always polled). */
+NEBIO_API int nebio_set_gate_interrupts(int on);
+NEBIO_API int nebio_gate_interrupts(void);
+NEBIO_API void nebio_set_gate_holdoff_us(int us);
+NEBIO_API int nebio_gate_holdoff_us(void);
 
 /* ---- LEDs -------------------------------------------------------------- */
 

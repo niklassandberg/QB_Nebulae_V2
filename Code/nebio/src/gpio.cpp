@@ -64,14 +64,21 @@ bool GpioLines::request(const std::vector<unsigned> &pins, gpiod_line_settings *
     return ok;
 }
 
-bool GpioLines::requestInputs(const std::vector<unsigned> &pins, Bias bias, bool edgeEvents) {
-    release();
+gpiod_line_settings *GpioLines::inputSettings(Bias bias, bool edgeEvents) const {
     gpiod_line_settings *s = gpiod_line_settings_new();
-    if (!s) return false;
+    if (!s) return nullptr;
     gpiod_line_settings_set_direction(s, GPIOD_LINE_DIRECTION_INPUT);
     gpiod_line_settings_set_bias(s, bias == Bias::PullUp ? GPIOD_LINE_BIAS_PULL_UP
                                                          : GPIOD_LINE_BIAS_DISABLED);
-    if (edgeEvents) gpiod_line_settings_set_edge_detection(s, GPIOD_LINE_EDGE_BOTH);
+    gpiod_line_settings_set_edge_detection(s, edgeEvents ? GPIOD_LINE_EDGE_BOTH : GPIOD_LINE_EDGE_NONE);
+    return s;
+}
+
+bool GpioLines::requestInputs(const std::vector<unsigned> &pins, Bias bias, bool edgeEvents) {
+    release();
+    bias_ = bias;
+    gpiod_line_settings *s = inputSettings(bias, edgeEvents);
+    if (!s) return false;
     bool ok = request(pins, s);
     gpiod_line_settings_free(s);
     if (ok && edgeEvents) {
@@ -93,6 +100,19 @@ bool GpioLines::requestOutputs(const std::vector<unsigned> &pins, int initialVal
         s, initialValue ? GPIOD_LINE_VALUE_ACTIVE : GPIOD_LINE_VALUE_INACTIVE);
     bool ok = request(pins, s);
     gpiod_line_settings_free(s);
+    return ok;
+}
+
+bool GpioLines::setEdgeDetection(bool on) {
+    if (!req_ || !events_) return false;
+    gpiod_line_settings *s = inputSettings(bias_, on);
+    gpiod_line_config *lineCfg = gpiod_line_config_new();
+    bool ok = s && lineCfg &&
+              gpiod_line_config_add_line_settings(lineCfg, pins_.data(), pins_.size(), s) == 0 &&
+              gpiod_line_request_reconfigure_lines(req_, lineCfg) == 0;
+    if (!ok) logError("could not switch edge detection %s", on ? "on" : "off");
+    if (lineCfg) gpiod_line_config_free(lineCfg);
+    if (s) gpiod_line_settings_free(s);
     return ok;
 }
 

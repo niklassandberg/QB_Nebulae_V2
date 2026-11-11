@@ -9,6 +9,8 @@
 #   nebio_scan_hz=1200, nebio_digital_hz=400, nebio_adc_hz=400,
 #   nebio_fast_gpio=off    (by hand)
 #   csound_rt_priority=70  SCHED_FIFO 1-99, 0 = normal (by hand)
+#   gate_interrupts=off    off: gates polled with a Schmitt trigger hold-off; on: interrupts
+#   gate_holdoff_ms=5.0    0-100, only with gate_interrupts=off
 # A missing or invalid value keeps its default.
 
 import os
@@ -28,7 +30,9 @@ CMDLINE = "/boot/cmdline.txt"
 REQUEST_FILE = "/tmp/nebulae_config_request"
 
 POWER_REGULATOR = ("off", "yield", "shell", "nohlt")
-ON_OFF = ("no_pwm", "led_stagger", "services_quiet", "wifi")
+ON_OFF = ("no_pwm", "led_stagger", "services_quiet", "wifi", "gate_interrupts")
+GATE_HOLDOFF_DEFAULT_MS = 5.0
+GATE_HOLDOFF_MAX_MS = 100.0
 # nebio's limits (inputs.cpp); digital and adc at most the scan rate.
 SCAN_HZ_MIN, SCAN_HZ_MAX = 100, 2000
 NEBIO_RATES = ("nebio_scan_hz", "nebio_digital_hz", "nebio_adc_hz")
@@ -54,6 +58,9 @@ def checkedRequest(values):
             out[key] = min(SCAN_HZ_MAX, max(1, int(values[key])))
         except (KeyError, TypeError, ValueError):
             pass
+    holdoff = _holdoff(values.get("gate_holdoff_ms"))
+    if holdoff is not None:
+        out["gate_holdoff_ms"] = holdoff
     # Not a setting: save the instrument, then restart Nebulae.
     if values.get("restart") == "nebulae":
         out["restart"] = "nebulae"
@@ -96,6 +103,16 @@ def _kernelHasNohlt():
 LOG_LEVELS = ("DEBUG", "STATS", "INFO", "WARNING", "ERROR", "CRITICAL")
 
 
+def _holdoff(text):
+    try:
+        ms = float(text)
+    except (TypeError, ValueError):
+        return None
+    if not 0.0 <= ms <= GATE_HOLDOFF_MAX_MS:
+        return None
+    return round(ms, 1)
+
+
 def _rate(text, default):
     try:
         hz = int(text)
@@ -119,6 +136,8 @@ class ConfigSettings(object):
         self._nebioAdcHz = NEBIO_DEFAULTS["nebio_adc_hz"]
         self._nebioFastGpio = False
         self._csoundRtPriority = 70  # below jackd's 75
+        self._gateInterrupts = False
+        self._gateHoldoffMs = GATE_HOLDOFF_DEFAULT_MS
         self._lock = threading.Lock()
         self._jobs = None
         self.load()
@@ -164,6 +183,12 @@ class ConfigSettings(object):
             fast = values.get("nebio_fast_gpio")
             if fast in ("on", "off"):
                 self._nebioFastGpio = fast == "on"
+            gate = values.get("gate_interrupts")
+            if gate in ("on", "off"):
+                self._gateInterrupts = gate == "on"
+            holdoff = _holdoff(values.get("gate_holdoff_ms"))
+            if holdoff is not None:
+                self._gateHoldoffMs = holdoff
             try:
                 prio = int(values["csound_rt_priority"])
                 if 0 <= prio <= 99:
@@ -222,6 +247,14 @@ class ConfigSettings(object):
     @property
     def csoundRtPriority(self):
         return self._csoundRtPriority
+
+    @property
+    def gateInterrupts(self):
+        return self._gateInterrupts
+
+    @property
+    def gateHoldoffMs(self):
+        return self._gateHoldoffMs
 
     # The system boots with Quiet mode and Wi-Fi off. Called after the first
     # instrument load: start_wifi.sh mounts the stick.
@@ -296,6 +329,26 @@ class ConfigSettings(object):
             self._save()
         self._log().info("LED dim %.2f", value)
 
+    def setGateInterrupts(self, on):
+        on = bool(on)
+        with self._lock:
+            if on == self._gateInterrupts:
+                return
+            self._gateInterrupts = on
+            self._save()
+        self._log().info("Gate interrupts: %s", "on" if on else "off (polled, hold-off)")
+
+    def setGateHoldoffMs(self, ms):
+        ms = _holdoff(ms)
+        if ms is None:
+            raise ValueError("gate_holdoff_ms 0-%g" % GATE_HOLDOFF_MAX_MS)
+        with self._lock:
+            if ms == self._gateHoldoffMs:
+                return
+            self._gateHoldoffMs = ms
+            self._save()
+        self._log().info("Gate hold-off %.1f ms", ms)
+
     # Missing ones keep their value. Returns the saved (scan, digital, adc).
     def setNebioRates(self, scan=None, digital=None, adc=None):
         with self._lock:
@@ -324,7 +377,9 @@ class ConfigSettings(object):
                 + "nebio_digital_hz=%d\n" % self._nebioDigitalHz
                 + "nebio_adc_hz=%d\n" % self._nebioAdcHz
                 + "nebio_fast_gpio=%s\n" % ("on" if self._nebioFastGpio else "off")
-                + "csound_rt_priority=%d\n" % self._csoundRtPriority)
+                + "csound_rt_priority=%d\n" % self._csoundRtPriority
+                + "gate_interrupts=%s\n" % ("on" if self._gateInterrupts else "off")
+                + "gate_holdoff_ms=%.1f\n" % self._gateHoldoffMs)
         tmp = CONFIG_FILE + ".new"
         try:
             with open(tmp, "w") as f:
