@@ -11,6 +11,7 @@
 #                                          beside a playing granular looper
 #   noise_parts.py report [DIR]
 #   noise_parts.py compare DIR...
+#   noise_parts.py pulses DIR             pulses of a run's recordings again
 # Results in /home/alarm/noise_parts/.
 import glob
 import json
@@ -21,6 +22,7 @@ import sys
 import syslog
 import threading
 import time
+import wave
 
 import numpy as np
 
@@ -31,6 +33,8 @@ import noise_measure  # noqa: E402  (record, analyse)
 CODE = "/home/alarm/QB_Nebulae_V2/Code"
 NOISE_TEST = HERE + "/noise_test.sh"
 WIFI = HERE + "/wifi.sh"
+# Newer kernels: brcmfmac is held by brcmfmac_cyw, plain -r fails silently.
+WIFI_UNLOAD = "modprobe -r brcmfmac_cyw brcmfmac 2>/dev/null || modprobe -r brcmfmac"
 SPIN = HERE + "/spin.sh"
 RAM_DIR = "/tmp/noise_parts"
 KEEP_DIR = "/home/alarm/noise_parts"
@@ -210,14 +214,14 @@ def wifi_driver(on):
     if on:
         sh("bash %s driver" % WIFI)        # loaded, radio blocked
     else:
-        sh("bash %s off; modprobe -r brcmfmac" % WIFI)
+        sh("bash %s off; %s" % (WIFI, WIFI_UNLOAD))
 
 
 def wifi_ap(on):
     if on:
         sh("bash %s on" % WIFI)            # access point (USB off: no home profile)
     else:
-        sh("bash %s off; modprobe -r brcmfmac" % WIFI)
+        sh("bash %s off; %s" % (WIFI, WIFI_UNLOAD))
 
 
 def lan(on):
@@ -312,7 +316,9 @@ def remember():
                    "usb": os.path.exists(USB_DRV + "/" + USB_DEV),
                    "wifi": config_value("wifi", "off"),
                    "power": config_value("power_regulator", "off"),
-                   "quiet": config_value("services_quiet", "off")})
+                   "quiet": config_value("services_quiet", "off"),
+        "no_pwm": config_value("no_pwm", "off"),
+        "led_stagger": config_value("led_stagger", "on")})
 
 
 def back_pi_leds():
@@ -345,6 +351,44 @@ def back_journal():
     sh("journalctl --relinquish-var" if before["quiet"] == "on" else "journalctl --flush")
 
 
+def services_quiet(on):
+    sh("bash %s/quiet.sh services %s" % (HERE, "on" if on else "off"))
+
+
+def tap_wait(timeout):
+    """Until Csound writes the tap again (after a Nebulae restart)."""
+    end = time.time() + timeout
+    last = -1
+    while time.time() < end:
+        size = os.path.getsize(TAP) if os.path.exists(TAP) else -1
+        if 0 < last < size:
+            return True
+        last = size
+        time.sleep(2)
+    return False
+
+
+# Nebulae reads no_pwm and led_stagger only when it starts.
+def led_setting(key, value):
+    if config_value(key, None) != value:
+        with open(CONFIG) as f:
+            lines = [l for l in f.read().splitlines() if not l.startswith(key + "=")]
+        with open(CONFIG + ".new", "w") as f:
+            f.write("\n".join(lines + ["%s=%s" % (key, value)]) + "\n")
+        os.rename(CONFIG + ".new", CONFIG)
+    log("  %s=%s, restarting Nebulae" % (key, value))
+    sh("systemctl restart nebulae.service")
+    time.sleep(3)
+    if not tap_wait(120):
+        raise RuntimeError("no tap 2 minutes after the Nebulae restart")
+
+
+def back_leds():
+    for key in ("no_pwm", "led_stagger"):
+        if config_value(key, None) != before[key]:
+            led_setting(key, before[key])
+
+
 NEB_PARTS = [
     ("pi_leds", "off", lambda: pi_leds(False), "on", lambda: pi_leds(True), 3, back_pi_leds,
      "the Pi board's green (SD access) and red LEDs"),
@@ -364,6 +408,14 @@ NEB_PARTS = [
      "20 log lines/s, journal kept in RAM vs written to the SD card"),
     ("sd_write", "idle", lambda: sd_write(False), "write", lambda: sd_write(True), 3, sd_write_end,
      "64 KB written + fsync to the SD card every second vs nothing"),
+    ("services_quiet", "on", lambda: services_quiet(True), "off", lambda: services_quiet(False), 15,
+     lambda: services_quiet(before["quiet"] == "on"),
+     "Services no sounds on (Pi LEDs, USB, timers, time sync, netctl-auto off, log in RAM) vs off"),
+    ("led_no_pwm", "on", lambda: led_setting("no_pwm", "on"), "off", lambda: led_setting("no_pwm", "off"),
+     10, back_leds, "No PWM on vs off (setting + Nebulae restart; LEDs as the instrument shows them)"),
+    ("led_stagger", "on", lambda: led_setting("led_stagger", "on"), "off",
+     lambda: led_setting("led_stagger", "off"), 10, back_leds,
+     "LED stagger on vs off (setting + Nebulae restart; LEDs as the instrument shows them)"),
 ]
 
 
@@ -402,6 +454,10 @@ def nebulae_run(names):
             bg_stop(name)
         lan(True)
         sd_write_end()
+        try:
+            back_leds()
+        except RuntimeError as e:
+            log("restoring the LED settings: %s" % e)
         keep = KEEP_DIR + "/" + os.path.basename(OUT)
         os.makedirs(KEEP_DIR, exist_ok=True)
         shutil.copytree(OUT, keep)
@@ -468,17 +524,38 @@ def tap_record(seconds):
     return np.frombuffer(raw, dtype="<f4").astype(np.float64).reshape(-1, 2).T
 
 
+LISTEN_DB = 40   # the clips are raised this much: the noise is near -90 dBFS
+
+
+def save_wav(path, x):
+    y = np.clip(x * 10 ** (LISTEN_DB / 20.0), -1, 32767 / 32768.0)
+    w = wave.open(path, "wb")
+    w.setnchannels(2)
+    w.setsampwidth(2)
+    w.setframerate(noise_measure.RATE)
+    w.writeframes((y.T * 32768).astype("<i2").tobytes())
+    w.close()
+
+
 def recording(name, state, i):
     x = tap_record(opts["secs"]) if opts.get("tap") else noise_measure.record(opts["secs"])
-    np.save("%s/%s_%s_%d.npy" % (OUT, name, state, i), (x * 32768).astype(np.int16))
+    base = "%s/%s_%s_%d" % (OUT, name, state, i)
+    np.save(base + ".npy", x.astype(np.float32))
+    save_wav("%s_+%ddB.wav" % (base, LISTEN_DB), x)
     temp = int(open("/sys/class/thermal/thermal_zone0/temp").read()) / 1000.0
     ch = []
     for c in x:
         rms, floor, tones, at = noise_measure.analyse(c)
-        ch.append({"rms": rms, "floor": floor, "tones": [[f, lv] for lv, f in tones]})
+        ch.append({"rms": rms, "floor": floor, "tones": [[f, lv] for lv, f in tones],
+                   "pulse": noise_measure.pulses(c)})
+    p = ch[0]["pulse"]
     log("    %-12s %-8s #%d  rms L %.1f R %.1f  floor %.1f %.1f  %.0f C  tones L: %s" % (
         name, state, i, ch[0]["rms"], ch[1]["rms"], ch[0]["floor"], ch[1]["floor"], temp,
         ", ".join("%.0f Hz %.1f" % (f, lv) for f, lv in ch[0]["tones"][:4]) or "none"))
+    log("    %-12s %-8s     pulses L: >%d Hz peak %.1f p99.9 %.1f  %.1f/s +%.1f dB  "
+        "repeat %.1f ms (%.2f) sync %.1f +%.1f dB" % (
+            "", "", noise_measure.HP_HZ, p["hp_peak"], p["hp_p999"], p["per_s"], p["height"],
+            p["period_ms"], p["period_corr"], p["sync_db"], p["sync_height"]))
     return {"state": state, "i": i, "temp": temp, "ch": ch}
 
 
@@ -775,10 +852,51 @@ def report(folder=None):
         tones = ", ".join("%d %.0f" % (f, lv) for f, lv in sorted(new.items(), key=lambda t: -t[1])[:4])
         lines.append("%-12s %-7s %-7s %8.1f %8.1f %+8.1f %+8.1f %7.1f  %s" % (
             r["name"], r["a"], r["b"], ar, br, br - ar, bf - af, spread, tones or "-"))
+    lines += pulse_report(results)
     text = "\n".join(lines)
     with open(folder + "/report.txt", "w") as f:
         f.write(text + "\n")
     return text
+
+
+def pulse_report(results):
+    """Pulses (left channel, above noise_measure.HP_HZ), A -> B; runs without
+    pulse data (before pulses()) are left out."""
+    lines = ["", "Pulses (L, >%d Hz): p99.9 = level 0.1 %% of the time is over (dBFS); "
+             "pulses/s = 1 ms windows %d dB over the median; sync = the strongest repeat "
+             "(20 ms - 1 s), folded: its level and how far over the rest of its period." % (
+                 noise_measure.HP_HZ, noise_measure.OVER_DB),
+             "%-14s %-7s %-7s %15s %15s %13s %15s  %s" % (
+                 "part", "A", "B", "p99.9 A>B", "peak A>B", "pulses/s A>B", "sync dB A>B", "repeat in B")]
+    for r in results:
+        if r["a"] == r["b"]:
+            continue
+        a = [x["ch"][0]["pulse"] for x in r["runs"] if x["state"] == r["a"] and "pulse" in x["ch"][0]]
+        b = [x["ch"][0]["pulse"] for x in r["runs"] if x["state"] == r["b"] and "pulse" in x["ch"][0]]
+        if not a or not b:
+            continue
+
+        def m(runs, key):
+            return mean([p[key] for p in runs])
+        rep = max(b, key=lambda p: p["sync_height"])
+        lines.append("%-14s %-7s %-7s %7.1f>%-7.1f %7.1f>%-7.1f %6.1f>%-6.1f %7.1f>%-7.1f  %.1f ms +%.1f dB" % (
+            r["name"], r["a"], r["b"], m(a, "hp_p999"), m(b, "hp_p999"), m(a, "hp_peak"), m(b, "hp_peak"),
+            m(a, "per_s"), m(b, "per_s"), m(a, "sync_db"), m(b, "sync_db"),
+            rep["period_ms"], rep["sync_height"]))
+    return lines
+
+
+def pulses_again(folder):
+    """pulses() over a run's saved recordings (also older runs)."""
+    lines = []
+    for path in sorted(glob.glob(folder + "/*.npy")):
+        raw = np.load(path)
+        x = raw.astype(np.float64) / (32768.0 if raw.dtype.kind == "i" else 1.0)
+        p = noise_measure.pulses(x[0])
+        lines.append("%-28s p99.9 %6.1f peak %6.1f  %5.1f/s +%4.1f dB  repeat %6.1f ms (%.2f) sync %6.1f +%4.1f dB" % (
+            os.path.basename(path)[:-4], p["hp_p999"], p["hp_peak"], p["per_s"], p["height"],
+            p["period_ms"], p["period_corr"], p["sync_db"], p["sync_height"]))
+    return "\n".join(lines)
 
 
 def compare(folders):
@@ -835,9 +953,11 @@ def main():
         print(report(names[0] if names else None))
     elif cmd == "compare":
         print(compare(names))
+    elif cmd == "pulses":
+        print(pulses_again(names[0]))
     else:
         sys.exit("unknown command %s (run | nebulae | tap on|off | baseline LABEL | boot nohlt|hdmi"
-                 " | report [DIR] | compare DIR...)" % cmd)
+                 " | report [DIR] | compare DIR... | pulses DIR)" % cmd)
 
 
 if __name__ == "__main__":

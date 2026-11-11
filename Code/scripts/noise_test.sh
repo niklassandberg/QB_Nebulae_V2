@@ -106,7 +106,7 @@ start() {
     bash $CODE/scripts/wifi.sh off >/dev/null 2>&1
     echo "services, timers, journal"
     systemctl stop $SERVICES $TIMERS 2>/dev/null
-    modprobe -r brcmfmac 2>/dev/null
+    modprobe -r brcmfmac_cyw brcmfmac 2>/dev/null || modprobe -r brcmfmac 2>/dev/null
     journalctl --relinquish-var
     case "$mode" in
         silence|thru) ;;
