@@ -503,8 +503,10 @@ class UserInterface(object):
         else:
             pressed, since, clicked = self.pitch_click.state(), self.time_pressed_pitch, self.clicked_pitch()
         if self.controlhandler.cvAssignActive():
+            if inc != 0:
+                self.controlhandler.setCvOn(name, inc > 0)
             if clicked == 1:
-                self.controlhandler.stepCvTarget(name, 1)
+                self.controlhandler.nextPage(name)
             return
         if inc != 0 and not pressed:
             direction = 1 if inc > 0 else -1
@@ -527,17 +529,18 @@ class UserInterface(object):
 
     # The value as pitch shows it; the dark LED pulses in the page colour.
     def drawPageLeds(self, name, pages):
+        index = pages.current
         if self.controlhandler.cvAssignActive():
-            if pages.candidate is None:  # dim white
-                colour, bright = (4095, 4095, 4095), 0.1
+            # White: the CV goes to the page shown. Dark (page colour pulsing): not.
+            if pages.candidateShown():
+                colour, bright = (4095, 4095, 4095), encoderpages.CHOOSE_BRIGHT
+            elif pages.marked(index):
+                colour, bright = pages.colour(index), encoderpages.pulse(self.now)
             else:
-                index = pages.names().index(pages.candidate)
-                colour = pages.colour(index)
-                bright = encoderpages.CHOOSE_BRIGHT if index > 0 else 0.0
+                colour, bright = (0, 0, 0), 0.0
             self.set_rgb(name + "_neg", colour[0], colour[1], colour[2], bright)
             self.set_rgb(name + "_pos", colour[0], colour[1], colour[2], bright)
             return
-        index = pages.current
         value = pages.withCV(pages.page(), self.controlhandler.encoderCV(name))
         neg_color, neg_bright, pos_color, pos_bright = self.pitchLeds(round(value, 4))
         if pages.marked(index):

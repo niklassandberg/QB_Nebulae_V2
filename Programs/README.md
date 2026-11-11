@@ -13,10 +13,12 @@ what goes on the stick (the program and its `.prog`) and its source.
 ## The .prog file
 
 A text file next to the program, e.g. `miRings.prog`. Only the lines between
-`nebconfigbegin` and `nebconfigend` count; text around them is free.
+`nebconfigbegin` and `nebconfigend` count; text around them is free. Inside,
+a line starting with `#` is a comment (a whole line only, not after an entry).
 
 ```
 nebconfigbegin
+# miRings on the stick
 run,miRings
 oscport,3020
 kernel,normal
@@ -64,9 +66,10 @@ cv:pitch,note                                    the page the encoder's CV goes 
   pulsing dimly: 2 red, 3 blue, 4 green, 5 pink (page 1 none, as the plain
   encoder).
 - The encoder's CV input (speed CV, pitch CV) is added to one page. To choose
-  it: **hold file + reset, click pitch or speed**: each click steps to the
-  next page, then nowhere (both LEDs glow steadily in the chosen page's colour,
-  off for page 1, dim white = nowhere), **release both**.
+  it: **hold file + reset**, click pitch or speed to show the next page,
+  **turn clockwise = CV on that page** (both LEDs white), **counter-clockwise
+  = off** (dark, page 2+ pulsing in the page colour), **release both**. On
+  turned on another page moves the CV there; all off = the CV goes nowhere.
   While both are held, file and reset do nothing else.
 - The values and CV targets are saved per program
   next to the `.prog` (`/home/alarm/prog/<name>.pages`, 1 s after a change; a
@@ -103,8 +106,14 @@ max, curve, default, step). Buttons: `record file reset freeze source`.
   second with no encoder turned. Such a button reacts when it is released (a
   latching, triggered or incremental button gets the falling edge). A
   momentary button is also on while it is down.
+- A second layer on two buttons: `hold:record+file:<encoder>:<name>,...`.
+  While record is held, pressing file switches to that layer (the dark LED
+  pulses orange); releasing file goes back to record's layer, releasing
+  record goes back to the pages. During that, file's own press does nothing
+  (no tap, its LED stays dark) until it is released; file's gate still
+  works. So file can stay `momentary` and follow fast gates.
 - No CV on these values. Saved with the pages (`<name>.pages`, as
-  `record:speed`).
+  `record:speed` and `record+file:speed`).
 - Holding file + reset still chooses the CV targets.
 - Works the same in a SuperCollider `.scd`.
 

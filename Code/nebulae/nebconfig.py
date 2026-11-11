@@ -12,6 +12,7 @@
 #   cv:pitch,note                            .scd/.prog: page the CV goes to, or none
 #   hold:record:speed:echo_cutoff,/audrey/echo_cutoff,100,8000[,curve[,default[,step]]]
 #                                            .scd/.prog: the encoder while the button is held
+#   hold:record+file:pitch:echo_volume,...   while file is held during the record hold
 # Details: Programs/README.md.
 #
 # Where the entries are:
@@ -22,7 +23,8 @@
 #                                             */   (sclang never sees it)
 #   .pd     one comment box per entry, starting with "nebconfig":
 #           nebconfig kernel,rt
-# A key given twice: the last one counts.
+# A key given twice: the last one counts. A line starting with # is a comment
+# (a whole line only, not after an entry).
 
 import io
 import os
@@ -68,7 +70,7 @@ class NebConfig(object):
         self._dict = dict()
         for line in entries:
             line = line.rstrip()
-            if not line:
+            if not line or line.lstrip().startswith("#"):
                 continue
             values = line.split(",")
             self._dict[values.pop(0)] = values
@@ -198,19 +200,23 @@ class NebConfig(object):
                 errors.append("%s,%s: %s" % (key, ",".join(values), e))
         return pages, errors
 
-    # The encoders while a button is held: as encoderPages, by button.
-    # ({button: {encoder: [(name, path, min, max, curve, default, step)]}}, [error, ...])
+    # The encoders while a button is held ("record"), or while a second one is
+    # pressed during that hold ("record+file"): as encoderPages, by layer.
+    # ({layer: {encoder: [(name, path, min, max, curve, default, step)]}}, [error, ...])
     def holdPages(self):
         holds, errors = {}, []
-        usage = "hold:<%s>:<speed|pitch>:<name>,%s" % ("|".join(HOLD_BUTTONS), PAGE_FIELDS)
+        usage = "hold:<%s>[+<button>]:<speed|pitch>:<name>,%s" % ("|".join(HOLD_BUTTONS), PAGE_FIELDS)
         for key, values in self._dict.items():
             if not key.startswith("hold:"):
                 continue
             values = [v.strip() for v in values]
             try:
                 parts = key.split(":")
-                if len(parts) != 4 or parts[1] not in HOLD_BUTTONS or parts[2] not in ENCODERS \
-                        or not parts[3]:
+                if len(parts) != 4 or parts[2] not in ENCODERS or not parts[3]:
+                    raise ValueError(usage)
+                buttons = parts[1].split("+")
+                if len(buttons) > 2 or len(set(buttons)) != len(buttons) \
+                        or any(b not in HOLD_BUTTONS for b in buttons):
                     raise ValueError(usage)
                 holds.setdefault(parts[1], {}).setdefault(parts[2], []).append(
                     (parts[3],) + _pageFields(values, usage))

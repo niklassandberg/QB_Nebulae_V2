@@ -24,10 +24,12 @@ PAGE_PULSE_MS = 88
 CHOOSE_BRIGHT = 0.4
 
 # hold: lines: while the button is down the encoders change its layer, shown
-# by the dark LED pulsing in HOLD_COLOUR (also on page 1). Released sooner
-# than HOLD_MS with no encoder turned, it was a press.
+# by the dark LED pulsing in HOLD_COLOUR (also on page 1), a two-button layer
+# (record+file) in HOLD2_COLOUR. Released sooner than HOLD_MS with no encoder
+# turned, it was a press.
 HOLD_MS = 500
 HOLD_COLOUR = (0, 4095, 4095)   # cyan
+HOLD2_COLOUR = (4095, 2000, 0)  # orange
 
 
 def scale(value, lo, hi, curve):
@@ -53,13 +55,13 @@ class Page(object):
 
 
 class EncoderPages(object):
-    def __init__(self, encoder, pages, cv_target, hold=False):
+    def __init__(self, encoder, pages, cv_target, hold=None):
         self.encoder = encoder
         self.pages = pages
         self.current = 0
         self.cv_target = cv_target if cv_target in self.names() else None
         self.candidate = None  # CV target while choosing
-        self.hold = hold       # a hold: layer: no CV
+        self.hold = hold       # a hold: layer (its colour): no CV
 
     def names(self):
         return [p.name for p in self.pages]
@@ -80,11 +82,15 @@ class EncoderPages(object):
     def startChoosing(self):
         self.candidate = self.cv_target
 
-    # Cycles through every page, then none.
-    def stepCandidate(self, steps):
-        choices = self.names() + [None]
-        i = choices.index(self.candidate) if self.candidate in choices else len(choices) - 1
-        self.candidate = choices[(i + (1 if steps > 0 else -1)) % len(choices)]
+    # On: the CV goes to the page shown. Off: to no page, if it went to this one.
+    def setCandidate(self, on):
+        if on:
+            self.candidate = self.page().name
+        elif self.candidate == self.page().name:
+            self.candidate = None
+
+    def candidateShown(self):
+        return self.candidate == self.page().name
 
     def commitCandidate(self):
         changed = self.candidate != self.cv_target
@@ -100,7 +106,7 @@ class EncoderPages(object):
 
     def colour(self, index):
         if self.hold and index == 0:
-            return HOLD_COLOUR
+            return self.hold
         return PAGE_COLOURS[index % len(PAGE_COLOURS)]
 
     # The dark LED shows a colour (page 2 on, every page of a hold layer).

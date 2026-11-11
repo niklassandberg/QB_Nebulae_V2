@@ -14,9 +14,10 @@ Knobs and buttons (change the osc: lines to move them, no compile needed):
   source   on: the input is audrey's own left output (feedback); off: the input jack
   record   echo on/off, a short press (audrey's hidden stereo echo, not on the
            hardware); while down: the echo's filter and feedback, see below
-  file     tap tempo for the echo, a short press: the time between two taps
-           is the echo time (up to 4.9 s; starts at 1/4 s after each start);
-           while down: wow and flutter and the echo volume, see below
+  file     tap tempo for the echo: the time between two taps (button or
+           gate) is the echo time (up to 4.9 s; starts at 1/4 s after each
+           start); while record is down: wow and flutter and the echo
+           volume, see below
 
 Encoder pages (click = next page, turn = value; the LEDs show the value as
 pitch does, the LED that stays dark shows the page colour, dim; saved):
@@ -34,13 +35,15 @@ back unchanged when it is released):
   The echo switches on/off only on a short press (under half a second) with
   no encoder turned.
 
-While file is down, the same way:
+While record is down, also hold file (the dark LED pulses orange):
   speed    wow and flutter on the echo, as a worn tape machine: the repeats
            waver slowly (wow), tremble (flutter) and drift; higher is more
            unstable (half at first, 0 = a clean echo)
   pitch    echo volume: how much goes into the echo, 0..1 (half at first);
            the repeats follow it, the ones already in it fade out
-  A short press is a tap (counted when file is released).
+  Release file: back to the echo filter and feedback. Release record: back
+  to the pages. While record is down the file button taps nothing (its LED
+  stays dark); the file gate still taps.
 
 Example how pageEncoder has for settings in nebsettings:
 Field by field, page:speed:input,/audrey/input,0,1,lin,0.3,0.005 means:
@@ -70,19 +73,19 @@ Field by field, page:speed:input,/audrey/input,0,1,lin,0.3,0.005 means:
 └────────────────┴─────────┴───────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────────┘
 
 Where the pitch and speed CV go: hold file + reset, click pitch or speed to
-choose a page (its LEDs glow in that page's colour, dim white = nowhere),
-release both. Saved for this program.
+show a page, turn clockwise = CV on that page (LEDs white), counter-clockwise
+= off (dark), release both. Saved for this program.
 
 The OSC paths audrey knows are listed in source/main.cc.
 
 nebconfigbegin
 run,audrey
 oscport,3021
-kernel,normal
-blocksize,128
+kernel,rt
+blocksize,32
 reset,momentary,rising
 freeze,latching,rising
-file,triggered,falling
+file,momentary,rising
 osc:density,/audrey/feedback,0,1
 osc:blend,/audrey/reverb_mix,0,1
 osc:size,/audrey/reverb_size,0,1
@@ -100,8 +103,8 @@ page:speed:input,/audrey/input,0,1,lin,0.3
 page:speed:lfo,/audrey/lfo,0,2,int,0
 hold:record:speed:echo_cutoff,/audrey/echo_cutoff,100,8000,exp,0.4745
 hold:record:pitch:echo_feedback,/audrey/echo_feedback,0,1.5,lin,0.5
-hold:file:pitch:echo_volume,/audrey/echo_volume,0,1,lin,0.5
-hold:file:speed:echo_wownflutter,/audrey/echo_wownflutter,0,1,lin,0.5
+hold:record+file:pitch:echo_volume,/audrey/echo_volume,0,1,lin,0.5
+hold:record+file:speed:echo_wownflutter,/audrey/echo_wownflutter,0,1,lin,0.5
 cv:pitch,note
 cv:speed,none
 nebconfigend

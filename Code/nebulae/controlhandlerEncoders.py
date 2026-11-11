@@ -21,10 +21,11 @@ class EncoderControlHandler(ControlHandler):
         for name in ENCODERS:
             self.encoders[name] = {"hybrid": self.channeldict[name]}
         self.pages = {}
-        self.holds = {}            # button -> {encoder: EncoderPages}
+        self.holds = {}            # layer ("record", "record+file") -> {encoder: EncoderPages}
         self.hold_since = {}       # button -> ms it went down, while down
-        self.hold_active = None    # the button whose layer the encoders show
+        self.hold_active = None    # the layer the encoders show
         self.hold_used = False     # an encoder changed the layer: no press
+        self.hold_blocked = set()  # second buttons of a layer: no press until released
         self.pageState = None
         self.page_sent = {}
         self.cv_assign = False
@@ -53,7 +54,7 @@ class EncoderControlHandler(ControlHandler):
             if chn is None or config is None or len(config) < 2:
                 continue
             edge = config[1]
-            if ctrl in self.holds:
+            if ctrl in self.holdFirstButtons():
                 if config[0] in HOLD_EDGE_MODES:
                     edge = "falling"
                 else:
@@ -79,25 +80,38 @@ class EncoderControlHandler(ControlHandler):
         for error in errors:
             self.classlog.error("nebconfig: %s", error)
         self.holds = {}
-        for button, encoders in holds.items():
-            self.holds[button] = {
-                name: encoderpages.EncoderPages(name, [encoderpages.Page(*p) for p in pages], None, hold=True)
+        for layer, encoders in holds.items():
+            colour = encoderpages.HOLD2_COLOUR if "+" in layer else encoderpages.HOLD_COLOUR
+            self.holds[layer] = {
+                name: encoderpages.EncoderPages(name, [encoderpages.Page(*p) for p in pages], None, hold=colour)
                 for name, pages in encoders.items()}
         self.hold_since = {}
         self.hold_active = None
         self.hold_used = False
+        self.hold_blocked = set()
         self.pageState = encoderpages.PageState(pages_path)
         self.pageState.load(self.allPages())
         self.page_sent = {}
         self.cv_assign = False
 
-    # Saved and sent: the encoder pages, and the hold layers as "<button>:<encoder>".
+    # Saved and sent: the encoder pages, and the hold layers as "<layer>:<encoder>".
     def allPages(self):
         out = dict(self.pages)
-        for button, encoders in self.holds.items():
+        for layer, encoders in self.holds.items():
             for name, pages in encoders.items():
-                out["%s:%s" % (button, name)] = pages
+                out["%s:%s" % (layer, name)] = pages
         return out
+
+    # The buttons that start a layer ("record" of "record+file" too).
+    def holdFirstButtons(self):
+        return set(layer.split("+")[0] for layer in self.holds)
+
+    def holdButtons(self):
+        return set(b for layer in self.holds for b in layer.split("+"))
+
+    # A second button's own press is held back; its gate still works.
+    def buttonBlocked(self, name):
+        return name in self.hold_blocked
 
     def saveInstrument(self):
         super(EncoderControlHandler, self).saveInstrument()
@@ -110,7 +124,7 @@ class EncoderControlHandler(ControlHandler):
     # What the encoder turns now: the held button's layer, else its pages.
     def encoderPages(self, encoder):
         if self.hold_active is not None:
-            layer = self.holds[self.hold_active].get(encoder)
+            layer = self.holds.get(self.hold_active, {}).get(encoder)
             if layer is not None:
                 return layer
         return self.pages.get(encoder)
@@ -132,8 +146,8 @@ class EncoderControlHandler(ControlHandler):
             self.hold_used = True
         return pages
 
-    def stepCvTarget(self, encoder, steps):
-        self.pages[encoder].stepCandidate(steps)
+    def setCvOn(self, encoder, on):
+        self.pages[encoder].setCandidate(on)
 
     def cvAssignActive(self):
         return self.cv_assign
@@ -162,25 +176,48 @@ class EncoderControlHandler(ControlHandler):
 
     # While the button is down the encoders show and change its layer. Its
     # release is a press only when short (HOLD_MS) and no encoder was used.
-    # Runs before the channels read the button, so that release is dropped.
+    # A second button pressed during the hold (a "record+file" layer) switches
+    # to that layer until it is released; its own press is dropped, its gate
+    # still works. Releasing the first button ends both.
+    # Runs before the channels read the buttons, so those presses are dropped.
     # Not while choosing CV targets (file + reset).
     def updateHolds(self):
-        for button in self.holds:
+        first = self.holdFirstButtons()
+        for button in self.holdButtons():
             if self.shiftReg.state(HOLD_PINS[button]):
-                if button not in self.hold_since:
-                    self.hold_since[button] = self.now
-                    if self.hold_active is None and not self.cv_assign:
+                if button in self.hold_since:
+                    continue
+                self.hold_since[button] = self.now
+                if self.cv_assign:
+                    continue
+                if self.hold_active is None:
+                    if button in first:
                         self.hold_active = button
                         self.hold_used = False
+                elif "+" not in self.hold_active:
+                    layer = self.hold_active + "+" + button
+                    if layer in self.holds:
+                        self.hold_active = layer
+                        self.hold_used = True
+                        self.hold_blocked.add(button)
                 continue
             since = self.hold_since.pop(button, None)
-            if self.hold_active == button:
+            if button in self.hold_blocked:
+                self.hold_blocked.discard(button)
+                self.channeldict[button].setIgnoreNextButton()
+                if self.hold_active is not None and self.hold_active.endswith("+" + button):
+                    self.logHold(self.hold_active)
+                    self.hold_active = self.hold_active.split("+")[0]
+            elif self.hold_active is not None and self.hold_active.split("+")[0] == button:
+                self.logHold(self.hold_active)
                 self.hold_active = None
                 held = since is None or self.now - since >= encoderpages.HOLD_MS
                 if self.hold_used or held:
                     self.channeldict[button].setIgnoreNextButton()
-                    self.classlog.info("hold %s: %s", button, ", ".join(
-                        "%s %s" % (e, p.page().name) for e, p in self.holds[button].items()))
+
+    def logHold(self, layer):
+        self.classlog.info("hold %s: %s", layer, ", ".join(
+            "%s %s" % (e, p.page().name) for e, p in self.holds.get(layer, {}).items()))
 
     def sendsControl(self, name):
         if name in self.pages:

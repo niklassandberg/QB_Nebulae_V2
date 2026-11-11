@@ -85,6 +85,6 @@ class ProgControlHandler(EncoderControlHandler):
             self.updateHolds()
             for chn in self.channels:
                 if chn.name != "sourcegate":
-                    chn.setIgnoreHID(False)
+                    chn.setIgnoreHID(self.buttonBlocked(chn.name))
                 chn.update()
             self.sendProgMessages(self.channels)

@@ -110,7 +110,7 @@ class SCControlHandler(EncoderControlHandler):
                 if chn.source == "rawencoder":
                     continue # nebio and sclang handle it
                 if chn.name != "sourcegate":
-                    chn.setIgnoreHID(False)
+                    chn.setIgnoreHID(self.buttonBlocked(chn.name))
                 chn.update() #update all control values
                 if self.sendsControl(chn.name):
                     self.scSock.send(chn.name, chn.getValue()) ##for each channel I send a OSC message

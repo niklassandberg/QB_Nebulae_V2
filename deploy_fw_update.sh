@@ -64,6 +64,14 @@ neb true || { echo "can't log in to $NEB_HOST"; exit 1; }
 scp $SSH_OPTS neb_update.zip "$NEB_HOST:/tmp/neb_update.zip" < /dev/null || { echo "copy failed"; exit 1; }
 
 echo "=== 3/4 Putting it on the USB stick"
+# TODO (possible): the stick can drop off the USB bus (seen during this copy
+# and at idle) and come back as /dev/sdb1 while the dead sda is still mounted,
+# so everything looking for /dev/sda1 fails until a reboot. Find the stick as
+# "the USB disk" (lsblk TRAN=usb) in one shared lookup, and clear a dead
+# /mnt/memory mount (umount -l) before mounting. /dev/sda1 is hard-coded here,
+# in Code/scripts (update.sh, startup.sh, start_wifi.sh, usb_power.sh,
+# usb_detection.sh, testrun.sh, engines_build.sh, eeprom_update.sh), in
+# Code/nebulae (fileloader.py, logger.py) and Code/web/NebFile/file_operations.py.
 neb "echo '$NEB_ROOT_PW' | sudo -S -p '' bash -c '
     set -e
     [ -b /dev/sda1 ] || { echo \"no USB stick (/dev/sda1) in the Nebulae\"; exit 1; }
