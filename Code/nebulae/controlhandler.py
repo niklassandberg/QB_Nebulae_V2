@@ -261,11 +261,16 @@ class ControlHandler(object):
             self.channeldict[self.modeChangeControl].setIgnoreNextButton()
         if self.control_mode == "secondary controls":
             self.resistSecondarySettings()
-        self.settings.update(self.now)
-        self.settings.write()
+        self.saveInstrument()
         self.altchanneldict["source_alt"].setValue(0)
         self.prev_control_mode = self.control_mode
         self.control_mode = "normal"
+
+    # Everything of the instrument, at every mode change and before a
+    # restart: subclasses add theirs (pages, the engine's own values).
+    def saveInstrument(self):
+        self.settings.update(self.now)
+        self.settings.write()
 
     def enterSecondaryMode(self):
         #self.modeChangeControl = "pitch"
@@ -278,8 +283,7 @@ class ControlHandler(object):
             self.control_mode = "secondary controls"
         for chn in self.channels:
             chn.setIgnoreHID(True)
-        self.settings.update(self.now)
-        self.settings.write()
+        self.saveInstrument()
 
     def enterInstrSelMode(self):
         #self.modeChangeControl = "speed"
@@ -287,8 +291,7 @@ class ControlHandler(object):
         if self.control_mode in ("normal", "puredata", "supercollider", "programs"):
             self.classlog.info("entering instr selector")
             self.control_mode = "instr selector"
-        self.settings.update(self.now)
-        self.settings.write()
+        self.saveInstrument()
         for chn in self.channels:
             chn.muteCSound(True)
 

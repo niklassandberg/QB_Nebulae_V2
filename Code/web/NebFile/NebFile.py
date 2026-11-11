@@ -7,6 +7,8 @@ import glob
 import json
 import urllib
 import socket
+import subprocess
+import threading
 from cherrypy.lib import static
 import sys
 
@@ -156,8 +158,44 @@ class Root():
             cherrypy.response.status = 405
             return b'{"ok": false}'
         request = configsettings.writeRequest(data)
+        if request.get('restart') == 'nebulae':
+            threading.Thread(target=restart_if_jammed, daemon=True).start()
         return json.dumps({'ok': True, 'saved': sorted(request)}).encode('utf-8')
     config_save.exposed = True
+
+    # started: changes with every start of Nebulae (a restart can take under
+    # a second). forced: Nebulae did not take the restart itself, nothing was saved.
+    def config_restart_status(self):
+        cherrypy.response.headers['Content-Type'] = "application/json"
+        cherrypy.response.headers['Cache-Control'] = "no-cache, no-store, must-revalidate"
+        out = subprocess.run(['systemctl', 'show', 'nebulae.service', '-p', 'ActiveState',
+                              '-p', 'ActiveEnterTimestampMonotonic'],
+                             stdout=subprocess.PIPE, text=True).stdout
+        props = dict(line.split('=', 1) for line in out.splitlines() if '=' in line)
+        return json.dumps({'nebulae': props.get('ActiveState', ''),
+                           'started': props.get('ActiveEnterTimestampMonotonic', ''),
+                           'forced': restart_forced[0]}).encode('utf-8')
+    config_restart_status.exposed = True
+
+
+RESTART_WAIT_S = 5
+restart_forced = [False]
+
+
+# A jammed instrument can stop Nebulae's main loop, which then never takes
+# the request: restart it from here, without saving.
+def restart_if_jammed():
+    restart_forced[0] = False
+    time.sleep(RESTART_WAIT_S)
+    if not os.path.exists(configsettings.REQUEST_FILE):
+        return
+    try:
+        os.remove(configsettings.REQUEST_FILE)
+    except OSError:
+        return
+    restart_forced[0] = True
+    cherrypy.log("Nebulae did not take the restart in %d s: restarting it without saving" % RESTART_WAIT_S)
+    subprocess.run(['systemctl', '--no-block', 'restart', 'nebulae.service'])
 
 cherrypy.config.update({
     'server.socket_host': '0.0.0.0',

@@ -741,6 +741,8 @@ class UserInterface(object):
                             self.power_select_mode = True
                             self.power_select = POWER_ORDER.index(configSettings.powerRegulator)
                             self.power_select_acc = 0
+                        elif ui_mode == "restart_nebulae":
+                            self.restartNebulae("the configsettings page")
                         else:
                             self.script_fhandle.run(idx)
                             self.controlhandler.enterNormalMode()
@@ -800,7 +802,17 @@ class UserInterface(object):
             self.script_fhandle.refresh()
         if restart:
             self.log.info("Power regulator %s: restarting the Pi (nohlt)", request["power_regulator"])
+            self.controlhandler.saveInstrument()
             subprocess.Popen(["systemctl", "reboot"])
+        elif request.get("restart") == "nebulae":
+            self.restartNebulae("the web page")
+
+    # For a jammed instrument: it comes back after the restart (bootinstr.txt).
+    def restartNebulae(self, source):
+        self.log.info("Restart from %s: saving the instrument, restarting Nebulae", source)
+        self.controlhandler.saveInstrument()
+        # --no-block: systemctl is in Nebulae's own cgroup and is stopped with it.
+        subprocess.Popen(["systemctl", "--no-block", "restart", "nebulae.service"])
 
     # Speed click sets it, pitch click cancels.
     def updatePowerSelect(self):
@@ -826,9 +838,10 @@ class UserInterface(object):
             restart = set_it and configSettings.setPowerRegulator(level)
             self.clearAllLEDs()
             self.led_draw_time = -LED_DRAW_MS
-            self.controlhandler.enterNormalMode()  # saves settings before a reboot
+            self.controlhandler.enterNormalMode()
             if restart:
                 self.log.info("Power regulator %s: restarting the Pi (nohlt)", level)
+                self.controlhandler.saveInstrument()
                 subprocess.Popen(["systemctl", "reboot"])
 
     # Each bank gets back the slot it had when it was left.

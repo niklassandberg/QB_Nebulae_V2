@@ -19,9 +19,14 @@ class ProgControlHandler(EncoderControlHandler):
         self.prog_resend_time = 0
 
     def closeSockets(self):
-        self.savePages()
+        self.saveInstrument()
         super(ProgControlHandler, self).closeSockets()
         nebio.osc_close()
+
+    # Nebulae saves what it sends; /neb/save is for a program's own values.
+    def saveInstrument(self):
+        super(ProgControlHandler, self).saveInstrument()
+        nebio.osc_send("/neb/save", 1)
 
     def sendControl(self, name, value):
         for path, lo, hi, curve in self.bindings.get(name, []):
@@ -42,6 +47,7 @@ class ProgControlHandler(EncoderControlHandler):
             chn.muteCSound(True)
         nebio.osc_open(self.oscPort)
         self.control_mode = "programs"
+        self.saveInstrument()
 
     def enterNormalMode(self):
         self.enterProgramsMode()

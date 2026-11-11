@@ -72,6 +72,10 @@ cv:pitch,note                                    the page the encoder's CV goes 
   next to the `.prog` (`/home/alarm/prog/<name>.pages`, 1 s after a change; a
   firmware update and the USB stick leave it) and come back at the next
   load. The page always starts at page 1.
+- Before Nebulae restarts (Restart on the settings page) the program gets
+  `/neb/save 1` on its port. Nebulae already saves everything it sends; a
+  program that keeps values of its own can save them then, quickly: it is
+  stopped right after.
 - A pitch page over 60 semitones keeps the pitch CV at 1V/oct.
 - An encoder with pages is not sent as the control `speed`/`pitch`.
 - The same `page:`/`cv:` lines work in a SuperCollider `.scd` (read with

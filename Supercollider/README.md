@@ -38,7 +38,7 @@ OSC used underneath:
 
 ## Saved values
 
-Each patch has its own file, `/home/alarm/sc/<patch>.state`, next to its `.scd`. It is written 1 s after the last change. A newer copy on the USB stick replaces it.
+Each patch has its own file, `/home/alarm/sc/<patch>.state`, next to its `.scd`. It is written 1 s after the last change, and at once on `/neb/save` (Nebulae sends it before a restart). A newer copy on the USB stick replaces it.
 
 ```supercollider
 ~cutoff = NebInterface.stateAt(\cutoff, 1000);   // saved value, or the default

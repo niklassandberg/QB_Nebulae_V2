@@ -31,6 +31,7 @@ class PDControlHandler(ControlHandler):
             self.classlog.info("def enterPureDataMode: Connecting to PD Socket")
             self.pdSock.connect()
         self.control_mode = "puredata"
+        self.saveInstrument()
 
     def enterNormalMode(self):
         self.enterPureDataMode()

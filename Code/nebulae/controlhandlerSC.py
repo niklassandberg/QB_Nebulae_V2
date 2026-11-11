@@ -16,10 +16,17 @@ class SCControlHandler(EncoderControlHandler):
 
     def closeSockets(self):
         self.setRawActive(False)
-        self.savePages()
+        self.saveInstrument()
         super(SCControlHandler, self).closeSockets()
         if self.scSock.is_connected():
             self.scSock.close()
+
+    # sclang writes the patch's own values (<patch>.state) 1 s after a change:
+    # /neb/save writes them now.
+    def saveInstrument(self):
+        super(SCControlHandler, self).saveInstrument()
+        if self.scSock.is_connected():
+            self.scSock.send("save", 1)
 
     def sendControl(self, name, value):
         self.scSock.send(name, value)
@@ -60,8 +67,7 @@ class SCControlHandler(EncoderControlHandler):
         if self.control_mode == "secondary controls":
             self.resistSecondarySettings()
         self.control_mode = "supercollider"
-        self.settings.update(self.now)
-        self.settings.write()
+        self.saveInstrument()
         self.altchanneldict["source_alt"].setValue(0)
         #TODO: HERE ADD ALL SUPERCOLLIDER INITS!!!
         if not self.scSock.is_connected():

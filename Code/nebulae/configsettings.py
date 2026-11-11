@@ -54,6 +54,9 @@ def checkedRequest(values):
             out[key] = min(SCAN_HZ_MAX, max(1, int(values[key])))
         except (KeyError, TypeError, ValueError):
             pass
+    # Not a setting: save the instrument, then restart Nebulae.
+    if values.get("restart") == "nebulae":
+        out["restart"] = "nebulae"
     return out
 
 

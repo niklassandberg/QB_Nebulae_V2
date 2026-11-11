@@ -85,7 +85,7 @@ input[type=number]:invalid { border-color: var(--warn); }
 .value.rate { min-width: 8.5em; font-size: 14px; }
 .value.rate small { color: var(--muted); }
 .card-foot { justify-content: flex-end; padding-top: 10px; padding-bottom: 10px; }
-.card-foot .b { padding: 6px 14px; font-size: 14px; }
+.card-foot .b, .b.small { padding: 6px 14px; font-size: 14px; }
 #status { min-height: 1.4em; margin-top: 12px; color: var(--muted); }
 #status.warn { color: var(--warn); }
 @media (max-width: 420px) { input[type=range] { width: 110px; } }
@@ -180,6 +180,17 @@ input[type=number]:invalid { border-color: var(--warn); }
         </div>
         <div class="row card-foot">
             <button type="button" class="b" id="defaults">Default values</button>
+        </div>
+    </div>
+
+    <h2>Nebulae</h2>
+    <div class="card">
+        <div class="row" data-key="restart">
+            <div class="name">Restart Nebulae <button type="button" class="info" aria-label="About">i</button></div>
+            <div class="control"><button type="button" class="b small" id="restart">Restart</button></div>
+            <div class="tip">For when an instrument has jammed. Saves the instrument (knob values and encoder
+                pages), then restarts Nebulae, which loads the same instrument again. The sound stops for a while.
+                If Nebulae does not answer, it is restarted without saving.</div>
         </div>
     </div>
 </form>
@@ -393,6 +404,60 @@ input[type=number]:invalid { border-color: var(--warn); }
     cancelBtn.addEventListener("click", function () {
         if (loaded) show(loaded);
         setStatus("");
+    });
+
+    var restartBtn = document.getElementById("restart");
+    var RESTART_POLL_MS = 1000;
+    var RESTART_GIVE_UP_MS = 180000;
+
+    function restartStatus() {
+        return fetch("/config_restart_status", { cache: "no-store" }).then(function (r) { return r.json(); });
+    }
+
+    // Done when Nebulae is active with a newer start than before the restart.
+    function followRestart(t0, before) {
+        restartStatus()
+            .then(function (s) {
+                if (s.nebulae === "active" && s.started !== before) {
+                    restartBtn.disabled = false;
+                    setStatus(s.forced ? "Nebulae did not answer: it was restarted without saving the instrument."
+                                       : "Nebulae restarted, the instrument was saved.", s.forced);
+                    load();
+                    return;
+                }
+                if (Date.now() - t0 > RESTART_GIVE_UP_MS) {
+                    restartBtn.disabled = false;
+                    setStatus("Nebulae has not come back yet (" + s.nebulae + ").", true);
+                    return;
+                }
+                setStatus(s.started !== before ? "Nebulae is starting..." : "Saving the instrument, restarting Nebulae...");
+                setTimeout(function () { followRestart(t0, before); }, RESTART_POLL_MS);
+            })
+            .catch(function () { setTimeout(function () { followRestart(t0, before); }, RESTART_POLL_MS); });
+    }
+
+    restartBtn.addEventListener("click", function () {
+        var unsaved = Object.keys(changes()).length > 0;
+        if (!confirm("Save the instrument and restart Nebulae?" +
+                     (unsaved ? "\nYour unsaved changes on this page are not used." : ""))) return;
+        restartBtn.disabled = true;
+        setStatus("Restarting Nebulae...");
+        var before;
+        restartStatus()
+            .then(function (s) {
+                before = s.started;
+                return fetch("/config_save", {
+                    method: "POST",
+                    headers: { "Content-Type": "application/x-www-form-urlencoded" },
+                    body: "restart=nebulae"
+                });
+            })
+            .then(function (r) { return r.json(); })
+            .then(function (res) {
+                if (!res.ok) throw new Error();
+                followRestart(Date.now(), before);
+            })
+            .catch(function () { restartBtn.disabled = false; setStatus("Could not restart.", true); });
     });
 
     defaultsBtn.addEventListener("click", function () {

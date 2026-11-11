@@ -113,6 +113,9 @@ NebInterface {
 			func.value;
         }, '/neb/quit');
 
+		// Before Nebulae restarts: the values now, not after saveDelay.
+		OSCdef.new(\save_n, { this.prSaveState }, '/neb/save');
+
 		^patch
     }
 

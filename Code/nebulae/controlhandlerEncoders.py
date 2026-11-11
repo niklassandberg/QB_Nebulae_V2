@@ -66,6 +66,10 @@ class EncoderControlHandler(ControlHandler):
         self.page_sent = {}
         self.cv_assign = False
 
+    def saveInstrument(self):
+        super(EncoderControlHandler, self).saveInstrument()
+        self.savePages()
+
     def savePages(self):
         if self.pageState is not None and self.pageState.dirty_time is not None:
             self.pageState.save(self.pages)
