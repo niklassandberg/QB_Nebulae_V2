@@ -34,6 +34,7 @@ nebconfigend
 | `oscport,<port>` | The UDP port the program listens on (127.0.0.1), default 3020. |
 | `osc:<control>,<path>,<min>,<max>[,<curve>]` | Control `<control>` is sent to `<path>` as one float, scaled from 0..1 to min..max. Curve `lin` (default), `exp` (min and max > 0) or `int` (rounded). min > max turns the control around. One line per control; no comment after an entry. |
 | `kernel`, `blocksize`, `-n`, `-r` | As for .scd/.pd: kernel, JACK period, periods, sample rate. |
+| `speedleds,playback` | The `osc:speed` value is a playback speed (1 = normal, negative = backward): the speed LEDs show it as the granular looper shows its speed (right = forward, left = backward; white 1/8, orange 1/4, yellow 1/2, blue 1, green 2, purple 4, bright on those speeds). Without it the speed LEDs stay dark (unless speed has pages). |
 
 Controls: `pitch speed start size blend density overlap window` (0..1, knob and
 CV), `reset freeze record source file` (buttons and gates, 0/1; `file` counts
@@ -143,6 +144,7 @@ holds exactly the stick's programs.
 |---|---|---|---|
 | `miRings/` | `miRings`, `miRings.prog` | `source/`: Mutable Instruments Rings DSP (vendored, MIT) | `sh Programs/miRings/source/build.sh` |
 | `audrey/` | `audrey`, `audrey.prog` | `source/`: AudreyTouch's engine (Infrasonic Audio / Synthux Academy, MIT); DaisySP (MIT); ReverbSc and Tone from DaisySP-LGPL (LGPL-2.1) | `sh Programs/audrey/source/build.sh` |
+| `TheLaboratory/` | `thelaboratory`, `thelaboratory.prog` | `source/`: The Laboratory, a 2-minute stereo record buffer looped like the granular looper's (record, reset, file + reset clears, start, speed -1..1), at 96 kHz / 128. The sound is in `looper.h` | `sh Programs/TheLaboratory/source/build.sh` |
 | `Proxy/` | `proxy`, `proxy.prog` | `source/main.cc`: the template for your own C/C++ program: input to output, one OSC value (`/proxy/level` on blend). Copy the folder, rename, put your sound in `process()` | `sh Programs/Proxy/source/build.sh` |
 
 The build puts the binary next to its `.prog`. The binaries are built on the Pi

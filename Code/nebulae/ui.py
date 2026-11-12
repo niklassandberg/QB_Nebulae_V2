@@ -559,79 +559,20 @@ class UserInterface(object):
         if pages is not None:
             self.drawPageLeds("speed", pages)
         elif mode == "programs":
-            self.set_rgb("speed_neg", 0, 0, 0, 0.0)
-            self.set_rgb("speed_pos", 0, 0, 0, 0.0)
+            get = getattr(self.controlhandler, "playbackSpeed", None)
+            speed = get() if get is not None else None
+            if speed is None:
+                self.set_rgb("speed_neg", 0, 0, 0, 0.0)
+                self.set_rgb("speed_pos", 0, 0, 0, 0.0)
+            else:
+                color_neg, speed_neg_bright, color_pos, speed_pos_bright = self.speedFactorLeds(speed)
+                self.set_rgb("speed_neg", color_neg.red(), color_neg.green(), color_neg.blue(), speed_neg_bright)
+                self.set_rgb("speed_pos", color_pos.red(), color_pos.green(), color_pos.blue(), speed_pos_bright)
         elif mode in ("normal", "puredata", "supercollider"):
-            pink = libDriver.Color(3037, 200, 3825)
-            white = libDriver.Color(4095,4095,4095)
             red = libDriver.Color(4095, 0, 0) #octave 0 / record
-            orange = libDriver.Color(4095, 1100, 0) #octave 1 (1V)
-            yellow = libDriver.Color(4095, 3395, 0) #octave 2 (2V)
-            blue = libDriver.Color(0,0,4095) #octave 3 (3V original pitch)
-            green = libDriver.Color(0, 4095, 0) # octave 4 (4V)
-            purple = libDriver.Color(511, 0, 4095) # octave 5 (5V)
-            colororder = [ white, orange, yellow, blue, green, purple]
             speed_amt = self.controlhandler.channeldict["speed"].curVal
             translated_speed = speed_amt * 8.0 - 4.0
-            factors = [0.125, 0.25, 0.5, 1.0, 2.0, 4.0]
-            color_pos = white
-            color_neg = white
-            #speed_pos_bright = (speed_amt - 0.5) * 2.0
-            #speed_neg_bright = ((1.0 - speed_amt) - 0.5) * 2.0
-            if translated_speed > 0:
-                speed_pos_bright = 1.0
-                speed_neg_bright = 0.0
-            else:
-                speed_pos_bright = 0.0
-                speed_neg_bright = 1.0
-            speed_pos_bright *= 0.33
-            speed_neg_bright *= 0.33
-            blink = (self.now & 150) > 75
-            highest_factor = 0
-            abs_speed = abs(translated_speed)
-            if abs_speed < factors[0]:
-                highest_factor = 0
-            elif abs_speed < factors[1]:
-                highest_factor = 1
-            elif abs_speed < factors[2]:
-                highest_factor = 2
-            elif abs_speed < factors[3]:
-                highest_factor = 3
-            elif abs_speed < factors[4]:
-                highest_factor = 4
-            elif abs_speed < factors[5]:
-                highest_factor = 5
-
-            if highest_factor < 1: 
-                scalar = (abs_speed / factors[0])
-                newcolor = colororder[0]
-                color_pos = newcolor
-                color_neg = newcolor
-                if translated_speed < 0:
-                    speed_neg_bright = scalar * 0.33
-                else:
-                    speed_pos_bright = scalar * 0.33
-            else:
-                scalarRange = factors[highest_factor] / 2.0
-                scalar = (abs_speed - factors[highest_factor - 1]) / scalarRange
-                newcolor = self.blendColor(colororder[highest_factor-1], colororder[highest_factor], scalar)
-                color_pos = newcolor
-                color_neg = newcolor
-            for idx, factor in enumerate(factors): 
-                if (abs(translated_speed) > factor - 0.0075) and abs(translated_speed) < factor + 0.0075:  
-                    if translated_speed > 0:
-                        color_pos = colororder[idx]
-                        speed_pos_bright = 1.0
-                    else:
-                        color_neg = colororder[idx]
-                        speed_neg_bright = 1.0
-            if translated_speed == 0:
-                speed_pos_bright = 0
-                speed_neg_bright = 0
-            if speed_pos_bright < 0:
-                speed_pos_bright = 0
-            if speed_neg_bright < 0:
-                speed_neg_bright = 0
+            color_neg, speed_neg_bright, color_pos, speed_pos_bright = self.speedFactorLeds(translated_speed)
             if self.currentInstr == "a_granularlooper":
                 if self.controlhandler.channeldict["record"].curVal == 1 and self.controlhandler.altchanneldict["record_alt"].curVal == 0:
                     color_neg = red
@@ -1024,6 +965,76 @@ class UserInterface(object):
             pass
 
     # Returns neg_color, neg_bright, pos_color, pos_bright.
+    # A playback speed as the granular looper shows it: right LED forward,
+    # left backward; white 1/8, orange 1/4, yellow 1/2, blue 1, green 2,
+    # purple 4, full on those speeds, blended between them.
+    # Returns (neg color, neg brightness, pos color, pos brightness).
+    def speedFactorLeds(self, translated_speed):
+        white = libDriver.Color(4095,4095,4095)
+        orange = libDriver.Color(4095, 1100, 0) #octave 1 (1V)
+        yellow = libDriver.Color(4095, 3395, 0) #octave 2 (2V)
+        blue = libDriver.Color(0,0,4095) #octave 3 (3V original pitch)
+        green = libDriver.Color(0, 4095, 0) # octave 4 (4V)
+        purple = libDriver.Color(511, 0, 4095) # octave 5 (5V)
+        colororder = [ white, orange, yellow, blue, green, purple]
+        factors = [0.125, 0.25, 0.5, 1.0, 2.0, 4.0]
+        color_pos = white
+        color_neg = white
+        if translated_speed > 0:
+            speed_pos_bright = 1.0
+            speed_neg_bright = 0.0
+        else:
+            speed_pos_bright = 0.0
+            speed_neg_bright = 1.0
+        speed_pos_bright *= 0.33
+        speed_neg_bright *= 0.33
+        highest_factor = 0
+        abs_speed = abs(translated_speed)
+        if abs_speed < factors[0]:
+            highest_factor = 0
+        elif abs_speed < factors[1]:
+            highest_factor = 1
+        elif abs_speed < factors[2]:
+            highest_factor = 2
+        elif abs_speed < factors[3]:
+            highest_factor = 3
+        elif abs_speed < factors[4]:
+            highest_factor = 4
+        elif abs_speed < factors[5]:
+            highest_factor = 5
+
+        if highest_factor < 1:
+            scalar = (abs_speed / factors[0])
+            newcolor = colororder[0]
+            color_pos = newcolor
+            color_neg = newcolor
+            if translated_speed < 0:
+                speed_neg_bright = scalar * 0.33
+            else:
+                speed_pos_bright = scalar * 0.33
+        else:
+            scalarRange = factors[highest_factor] / 2.0
+            scalar = (abs_speed - factors[highest_factor - 1]) / scalarRange
+            newcolor = self.blendColor(colororder[highest_factor-1], colororder[highest_factor], scalar)
+            color_pos = newcolor
+            color_neg = newcolor
+        for idx, factor in enumerate(factors):
+            if (abs(translated_speed) > factor - 0.0075) and abs(translated_speed) < factor + 0.0075:
+                if translated_speed > 0:
+                    color_pos = colororder[idx]
+                    speed_pos_bright = 1.0
+                else:
+                    color_neg = colororder[idx]
+                    speed_neg_bright = 1.0
+        if translated_speed == 0:
+            speed_pos_bright = 0
+            speed_neg_bright = 0
+        if speed_pos_bright < 0:
+            speed_pos_bright = 0
+        if speed_neg_bright < 0:
+            speed_neg_bright = 0
+        return color_neg, speed_neg_bright, color_pos, speed_pos_bright
+
     def pitchLeds(self, pitch_amt):
         # Pitch input 0-1.0 neg | 1.0-4.0 pos
         white = libDriver.Color(4095,4095,4095)

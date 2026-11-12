@@ -7,6 +7,7 @@
 #   run,miRings                              .prog: binary or .sh/.py script
 #   oscport,3020                             .prog
 #   osc:blend,/rings/structure,0,1[,lin|exp|int]
+#   speedleds,playback                       .prog: osc:speed is a playback speed, shown on the LEDs
 #   speed,pages                              .scd/.prog (implied by page: lines)
 #   page:pitch:note,/audrey/note,16,76[,curve[,default[,step]]]
 #   cv:pitch,note                            .scd/.prog: page the CV goes to, or none
@@ -108,6 +109,13 @@ class NebConfig(object):
         if any(key.startswith(prefix) for key in self._dict):
             return "pages"
         return "hybrid"
+
+    # "playback": the speed control's osc: value is a playback speed (1 =
+    # normal, negative = backward), shown on the speed LEDs as the granular
+    # looper shows its speed.
+    def speedLeds(self):
+        value = (self.value("speedleds") or "").strip().lower()
+        return value if value == "playback" else None
 
     def outputPeriod(self):
         ksmps = int(self.value("ksmps", "128"))

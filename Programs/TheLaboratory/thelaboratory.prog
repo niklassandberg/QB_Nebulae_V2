@@ -1,0 +1,39 @@
+The Laboratory: a 2-minute stereo record buffer played as a loop, recorded
+and reset like the granular looper's. Runs at 96 kHz (the sound chip's
+highest rate) with a JACK block of 128. Source: source/ (looper.h is the
+sound). Only the lines between nebconfigbegin and nebconfigend are read.
+
+  record   on: a new take from the beginning of the buffer, heard live while
+           it records. Off: the take ends, the loop plays from start. Past
+           2 minutes it records on circularly: the take is the last 2 minutes.
+  reset    (button or gate) the playhead jumps to start.
+  file + reset   hold file, press reset: the buffer is cleared (as on the
+           granular looper). While recording, the take starts again.
+  start    where the loop starts, 0..1 of the take (knob + CV). The loop
+           runs from start to the end of the take.
+  speed    max = normal speed forward, min = normal speed backward, middle
+           = stopped (snaps to exactly normal speed near the ends). The speed
+           LEDs show it as the granular looper does: right = forward, left =
+           backward, bright blue = normal speed, bright yellow = half, orange
+           = 1/4, white = 1/8 (speedleds,playback).
+  blend    dry/wet: left = the input, right = the loop.
+
+Jumps (reset, the loop's end) fade over 5 ms, so they do not click.
+
+nebconfigbegin
+run,thelaboratory
+oscport,3023
+kernel,any
+blocksize,128
+-r,96000
+record,latching,rising
+reset,triggered,rising
+filestate,momentary,rising
+osc:record,/lab/record,0,1
+osc:reset,/lab/reset,0,1
+osc:filestate,/lab/file_held,0,1
+osc:start,/lab/start,0,1
+osc:speed,/lab/speed,-1,1
+speedleds,playback
+osc:blend,/lab/mix,0,1
+nebconfigend

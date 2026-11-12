@@ -17,6 +17,18 @@ class ProgControlHandler(EncoderControlHandler):
             self.bindings.setdefault(control, []).append((path, lo, hi, curve))
         self.prog_sent = {}
         self.prog_resend_time = 0
+        self.speed_leds = False
+
+    def setConfig(self, config, pages_path):
+        super(ProgControlHandler, self).setConfig(config, pages_path)
+        self.speed_leds = config.speedLeds() == "playback" and "speed" in self.bindings
+
+    # The playback speed sent for speed (speedleds,playback), else None.
+    def playbackSpeed(self):
+        if not self.speed_leds or "speed" in self.pages:
+            return None
+        path, lo, hi, curve = self.bindings["speed"][0]
+        return encoderpages.scale(self.channeldict["speed"].getValue(), lo, hi, curve)
 
     def closeSockets(self):
         self.saveInstrument()
