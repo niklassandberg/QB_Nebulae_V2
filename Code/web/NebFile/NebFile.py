@@ -143,6 +143,7 @@ class Root():
             'nebio_scan_hz': s.nebioScanHz,
             'nebio_digital_hz': s.nebioDigitalHz,
             'nebio_adc_hz': s.nebioAdcHz,
+            'nebio_fast_gpio': 'on' if s.nebioFastGpio else 'off',
             'gate_interrupts': 'on' if s.gateInterrupts else 'off',
             'gate_holdoff_ms': s.gateHoldoffMs,
             'gate_holdoff_default': configsettings.GATE_HOLDOFF_DEFAULT_MS,
