@@ -1,7 +1,0 @@
-# Restart Nebulae, on the configsettings page of the instr selector.
-# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
-# mode = the name after the number, here "restart_nebulae").
-# Speed click on it: the instrument is saved (knob values, encoder pages, the
-# engine's own values over OSC) and Nebulae restarts with the same
-# instrument. For an instrument that has jammed. Also on the settings web
-# page (Restart), which restarts Nebulae even when it does not answer.
