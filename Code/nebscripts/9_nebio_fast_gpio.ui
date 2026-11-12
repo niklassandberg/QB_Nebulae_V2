@@ -1,0 +1,10 @@
+# nebio fast GPIO, on the configsettings page of the instr selector.
+# A .ui entry is not run as a program: Nebulae itself handles it (ui.py,
+# mode = the name after the number, here "nebio_fast_gpio").
+# Speed click on it: on/off, and back to the instrument. On: nebio reads the
+# buttons, encoders and polled gates straight from the GPIO registers
+# (/dev/gpiomem, Pi 1-4) instead of through libgpiod's system calls: a little
+# less CPU (about 2 % of one core on a Pi 4). Checked against libgpiod first;
+# if the check fails it stays off. Off (default): libgpiod. Saved
+# (configsettings.py).
+# Slot LED bright = on (nebulae-status).

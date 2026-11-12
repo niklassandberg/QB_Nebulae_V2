@@ -32,3 +32,9 @@ cat /sys/class/thermal/thermal_zone0/temp | sed 's/\(..\)\(...\)/\1.\2°C/'
 sudo mkdir -p /tmp/stick && sudo mount /dev/sda1 /tmp/stick
 sudo nano /tmp/stick/2_wave_tables.scd   # make your changes and save
 sudo umount /tmp/stick
+
+--See buffer under run in jack
+sudo journalctl -u 'jack@*' -f -n 0 | grep --line-buffered XRun
+#Count xruns in the last 10 minutes:
+sudo journalctl -u 'jack@*' --since "10 min ago" | grep -c XRun
+--

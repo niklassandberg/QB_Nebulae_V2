@@ -147,7 +147,7 @@ int Inputs::setRates(int scanHz, int digitalHz, int adcHz) {
         scanPeriodUs_.store(periodUs, std::memory_order_relaxed);
         digitalEveryNth_.store(digitalNth, std::memory_order_relaxed);
         adcEveryNth_.store(adcNth, std::memory_order_relaxed);
-        applyDebounce();
+        applyDebounce(periodUs, digitalNth);
     }
     logInfo("input rates: scan (encoders) %d Hz, digital %d Hz, adc %d Hz", this->scanHz(),
             this->digitalHz(), this->adcHz());
@@ -168,10 +168,9 @@ int Inputs::adcHz() const {
 
 // Debounce counts are in digital reads; keep the button debounce time at
 // kButtonDebounceUs whatever the rates are. Caller holds mutex_.
-void Inputs::applyDebounce() {
-    const int periodUs = scanPeriodUs_.load(std::memory_order_relaxed) *
-                         digitalEveryNth_.load(std::memory_order_relaxed);
-    int need = (kButtonDebounceUs + periodUs / 2) / periodUs;
+void Inputs::applyDebounce(int scanPeriodUs, int digitalNth) {
+    const int readUs = scanPeriodUs * digitalNth;
+    int need = (kButtonDebounceUs + readUs / 2) / readUs;
     if (need < 1) need = 1;
     for (int i = 0; i < 8; ++i) srDebounce_[i].need = i == kSrGateBit ? 0 : need;
     for (int s = 0; s < slotCount_; ++s)
@@ -229,7 +228,8 @@ int Inputs::init() {
     for (int i = 0; i < 8; ++i) srDebounce_[i] = Debounce();
     {
         std::lock_guard<std::mutex> lock(mutex_);
-        applyDebounce();
+        applyDebounce(scanPeriodUs_.load(std::memory_order_relaxed),
+                      digitalEveryNth_.load(std::memory_order_relaxed));
     }
 
     // Real levels: a button held at boot is seen at once.
@@ -329,10 +329,12 @@ bool Inputs::readShiftRegisterFast(uint8_t &bits) {
     return true;
 }
 
-void Inputs::readPolledFast(const std::vector<unsigned> &pins, std::vector<int> &levels) {
+// Returns the whole level register (GPIO 0-31), the gates are in it too.
+uint32_t Inputs::readPolledFast(const std::vector<unsigned> &pins, std::vector<int> &levels) {
     uint32_t lev = GpioMem::instance().levels();
     levels.resize(pins.size());
     for (size_t i = 0; i < pins.size(); ++i) levels[i] = (lev >> pins[i]) & 1;
+    return lev;
 }
 
 // Runs in the input thread (so nothing else clocks the shift register).
@@ -425,8 +427,9 @@ void Inputs::run() {
         bool srOk = digitalScan && (fast ? readShiftRegisterFast(sr) : readShiftRegister(sr));
         // One read for all polled pins (encoders and clicks share the request).
         bool polledOk = true;
+        uint32_t gpioWord = 0;  // all GPIO 0-31, fast mode only
         if (fast)
-            readPolledFast(polledPins, levels);
+            gpioWord = readPolledFast(polledPins, levels);
         else
             polledOk = polled_.getAll(levels);
         uint16_t codes[2][8] = {};  // channels not read (see kPotChannels) stay 0
@@ -439,7 +442,8 @@ void Inputs::run() {
         // Polled gates are read on every scan, not only the digital ones:
         // a short trigger is missed only when shorter than one scan.
         int gateLevel[4];
-        const bool gatesRead = !gateInterrupts() && readGates(polledPins, levels, gateLevel);
+        const bool gatesRead = !gateInterrupts() &&
+                               readGates(fast ? &gpioWord : nullptr, polledPins, levels, gateLevel);
         const int64_t holdNs = gateHoldoffUs_.load(std::memory_order_relaxed) * 1000LL;
 
         {
@@ -518,10 +522,15 @@ void Inputs::run() {
     }
 }
 
-// Gate levels in kGates order: from the polled request when there are no
-// edge events, else from the edge request with its edge detection off.
-bool Inputs::readGates(const std::vector<unsigned> &polledPins, const std::vector<int> &levels,
-                       int out[]) {
+// Gate levels in kGates order: from the fast read's register word (no extra
+// read), else from the edge request with its edge detection off, else (no
+// edge events at all) from the polled request.
+bool Inputs::readGates(const uint32_t *gpioWord, const std::vector<unsigned> &polledPins,
+                       const std::vector<int> &levels, int out[]) {
+    if (gpioWord) {
+        for (size_t g = 0; g < kGates.size(); ++g) out[g] = (*gpioWord >> kGates[g]) & 1;
+        return true;
+    }
     if (!gatesPolled_) {
         std::vector<int> v;
         if (!edges_.getAll(v) || v.size() != kGates.size()) return false;

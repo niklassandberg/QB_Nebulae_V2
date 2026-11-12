@@ -743,6 +743,11 @@ class UserInterface(object):
                             self.applyGates()
                             self.script_fhandle.refresh()
                             self.controlhandler.enterNormalMode()
+                        elif ui_mode == "nebio_fast_gpio":
+                            configSettings.setNebioFastGpio(not configSettings.nebioFastGpio)
+                            self.applyFastGpio()
+                            self.script_fhandle.refresh()
+                            self.controlhandler.enterNormalMode()
                         elif ui_mode == "led_dim":
                             self.led_dim_mode = True
                         elif ui_mode == "power_regulator":
@@ -785,6 +790,11 @@ class UserInterface(object):
     def applyGates(self):
         libDriver.set_gate_interrupts(configSettings.gateInterrupts, configSettings.gateHoldoffMs)
 
+    def applyFastGpio(self):
+        on = libDriver.set_fast_gpio(configSettings.nebioFastGpio)
+        if configSettings.nebioFastGpio and not on:
+            self.log.warning("nebio fast GPIO refused (self-check), using libgpiod")
+
     def applyWebRequest(self):
         request = configsettings.takeRequest()
         if not request:
@@ -811,6 +821,9 @@ class UserInterface(object):
             if "gate_holdoff_ms" in request:
                 configSettings.setGateHoldoffMs(request["gate_holdoff_ms"])
             self.applyGates()
+        if "nebio_fast_gpio" in request:
+            configSettings.setNebioFastGpio(request["nebio_fast_gpio"])
+            self.applyFastGpio()
         restart ="power_regulator" in request and configSettings.setPowerRegulator(request["power_regulator"])
         # Last: off cuts the page's own connection.
         if "wifi" in request:

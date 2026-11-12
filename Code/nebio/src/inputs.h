@@ -102,15 +102,15 @@ private:
     void runEdges();
     bool readShiftRegister(uint8_t &bits);
     bool readShiftRegisterFast(uint8_t &bits);
-    void readPolledFast(const std::vector<unsigned> &pins, std::vector<int> &levels);
+    uint32_t readPolledFast(const std::vector<unsigned> &pins, std::vector<int> &levels);
     bool fastSelfCheck();
     int pinSlot(int pin) const;
-    void applyDebounce();
+    void applyDebounce(int scanPeriodUs, int digitalNth);
     bool clickPressed(int id) const;
     void sendRawEncoders(const int clickLevel[2]);
     void routeChanged(int id, bool clickBefore);
-    bool readGates(const std::vector<unsigned> &polledPins, const std::vector<int> &levels,
-                   int out[]);
+    bool readGates(const uint32_t *gpioWord, const std::vector<unsigned> &polledPins,
+                   const std::vector<int> &levels, int out[]);
 
     // Hardware
     GpioLines srOut_;    // clock, latch

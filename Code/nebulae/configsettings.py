@@ -7,7 +7,7 @@
 #   led_dim=0.50
 #   log_level=INFO         DEBUG, STATS, INFO .. CRITICAL (by hand)
 #   nebio_scan_hz=1200, nebio_digital_hz=400, nebio_adc_hz=400,
-#   nebio_fast_gpio=off    (by hand)
+#   nebio_fast_gpio=off    on: /dev/gpiomem instead of libgpiod (Pi 1-4)
 #   csound_rt_priority=70  SCHED_FIFO 1-99, 0 = normal (by hand)
 #   gate_interrupts=off    off: gates polled with a Schmitt trigger hold-off; on: interrupts
 #   gate_holdoff_ms=5.0    0-100, only with gate_interrupts=off
@@ -30,7 +30,7 @@ CMDLINE = "/boot/cmdline.txt"
 REQUEST_FILE = "/tmp/nebulae_config_request"
 
 POWER_REGULATOR = ("off", "yield", "shell", "nohlt")
-ON_OFF = ("no_pwm", "led_stagger", "services_quiet", "wifi", "gate_interrupts")
+ON_OFF = ("no_pwm", "led_stagger", "services_quiet", "wifi", "gate_interrupts", "nebio_fast_gpio")
 GATE_HOLDOFF_DEFAULT_MS = 5.0
 GATE_HOLDOFF_MAX_MS = 100.0
 # nebio's limits (inputs.cpp); digital and adc at most the scan rate.
@@ -328,6 +328,15 @@ class ConfigSettings(object):
             self._ledDim = value
             self._save()
         self._log().info("LED dim %.2f", value)
+
+    def setNebioFastGpio(self, on):
+        on = bool(on)
+        with self._lock:
+            if on == self._nebioFastGpio:
+                return
+            self._nebioFastGpio = on
+            self._save()
+        self._log().info("nebio fast GPIO: %s", "on" if on else "off")
 
     def setGateInterrupts(self, on):
         on = bool(on)

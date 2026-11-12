@@ -148,7 +148,7 @@ input[type=number]:invalid { border-color: var(--warn); }
     </div>
 </div>
 
-    <h2>nebio input rates</h2>
+    <h2>nebio inputs</h2>
     <div class="card">
         <div class="row" data-key="nebio_scan_hz">
             <div class="name">Encoders (scan) <button type="button" class="info" aria-label="About">i</button></div>
@@ -178,8 +178,16 @@ input[type=number]:invalid { border-color: var(--warn); }
                 value reaches the instrument. Read inside the encoder scan, on every nth scan, so only these
                 rates are possible. Default 400 Hz.</div>
         </div>
+        <div class="row" data-key="nebio_fast_gpio">
+            <div class="name">Fast GPIO <button type="button" class="info" aria-label="About">i</button></div>
+            <div class="control"><label class="switch"><input type="checkbox" name="nebio_fast_gpio"><span class="slider-knob"></span></label></div>
+            <div class="tip">On: the buttons, encoders and polled gates are read straight from the GPIO registers
+                (/dev/gpiomem, Pi 1&ndash;4) instead of through libgpiod's system calls: a little less CPU (about 2 %
+                of one core on a Pi 4). Checked against libgpiod when switched on; if the check fails it stays on
+                libgpiod. Default off.</div>
+        </div>
         <div class="row card-foot">
-            <button type="button" class="b" id="defaults">Default values</button>
+            <button type="button" class="b" id="defaults">Default input rates</button>
         </div>
     </div>
 
@@ -233,7 +241,7 @@ input[type=number]:invalid { border-color: var(--warn); }
 (function () {
     var RATES = ["nebio_scan_hz", "nebio_digital_hz", "nebio_adc_hz"];
     var KEYS = ["wifi", "power_regulator", "no_pwm", "led_stagger", "services_quiet", "led_dim",
-                "gate_interrupts", "gate_holdoff_ms"].concat(RATES);
+                "gate_interrupts", "gate_holdoff_ms", "nebio_fast_gpio"].concat(RATES);
     var form = document.getElementById("form");
     var saveBtn = document.getElementById("save");
     var cancelBtn = document.getElementById("cancel");

@@ -18,7 +18,8 @@ UI_STATES = {"wifi": lambda: configSettings.wifiOn,
              "no_pwm": lambda: configSettings.noPwm,
              "led_stagger": lambda: configSettings.ledStagger,
              "services_quiet": lambda: configSettings.servicesQuiet,
-             "gate_interrupts": lambda: configSettings.gateInterrupts}
+             "gate_interrupts": lambda: configSettings.gateInterrupts,
+             "nebio_fast_gpio": lambda: configSettings.nebioFastGpio}
 STATUS_TIMEOUT_S = 2.0
 STATUS_MARKER = b"nebulae-status"
 
@@ -40,8 +41,15 @@ class ScriptHandler(object):
         files = []
         for ext in extensions:
             files.extend(glob.glob(directory + '*' + ext))
-        files.sort(key=lambda v: (v.upper(), v[0].islower()))
+        files.sort(key=self.order)
         return files
+
+    # By the number in front (10_ after 9_), then by name.
+    @staticmethod
+    def order(path):
+        name = os.path.basename(path)
+        number = name.split("_", 1)[0]
+        return (int(number) if number.isdigit() else float("inf"), name.upper(), name[0].islower())
 
     def hasStatus(self, path):
         try:
