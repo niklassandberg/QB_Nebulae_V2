@@ -130,7 +130,7 @@ NEBIO_API void nebio_sc_clear_cache(void);
 
 /* Set by "/sc/up" from sclang. */
 NEBIO_API int  nebio_sc_synth_is_up(void);
-NEBIO_API void nebio_sc_set_synth_down(void);   /* also clears the cache */
+NEBIO_API void nebio_sc_set_synth_down(void);   /* also clears the cache and the bus table */
 /* Set by "/neb/ready" from sclang. */
 NEBIO_API int  nebio_sc_handshake(void);
 NEBIO_API void nebio_sc_zero_handshake(void);

@@ -123,13 +123,14 @@ NebInterface {
 		busCallbacks[name] = action;
 	}
 
+	// nebio sets the bus on scsynth itself (see *ready); sclang only keeps
+	// the value for busValue and calls onBusChange.
     *addBus { |name, path, def = 0.0|
         var b = Bus.control(server, 1);
         b.set(def);
         buses[name] = b;
-        OSCdef(name, { |msg| 
+        OSCdef(name, { |msg|
 			var val = msg[1];
-			b.set(val);
 			busValues[name] = val;
 			busCallbacks[name].value(val);
 		}, path);
@@ -231,7 +232,6 @@ NebInterface {
 		if (bus.isNil) {
 			bus = Bus.control(server, 1);
 			pageBuses[name] = bus;
-			OSCdef(("page_" ++ name).asSymbol, { |msg| bus.set(msg[1]) }, "/neb/page/" ++ name);
 		};
 		^bus
 	}
@@ -336,7 +336,20 @@ NebInterface {
         OSCdef.new(\hasBeenLoaded, { |msg|
             remote.sendMsg("/sc/up", 0);
         }, '/neb/hasbeenloaded');
+		this.prSendBuses;
     }
+
+	/* The buses to nebio, once everything exists on scsynth: nebio sets them
+	   there itself (/c_set), without a hop through sclang, and sets the values
+	   sent while the patch loaded. sclang still gets every /neb/<name> value
+	   for busValue and onBusChange, pages only scsynth.
+	   /sc/buses <scsynth port> [<path> <bus index>]... */
+	*prSendBuses {
+		var args = [server.addr.port];
+		buses.keysValuesDo { |name, b| args = args ++ ["/neb/%".format(name), b.index] };
+		pageBuses.keysValuesDo { |name, b| args = args ++ ["/neb/page/%".format(name), b.index] };
+		remote.sendMsg("/sc/buses", *args);
+	}
 	
     *synthDef { |name, defFunc|
         synthDefs.add(name);

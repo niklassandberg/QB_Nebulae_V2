@@ -91,6 +91,33 @@ int ScLink::onLed(const char *path, const char *types, lo_arg **argv, int argc, 
     return 0;
 }
 
+// /sc/buses <scsynth port> [<path> <bus>]..., from NebInterface.ready.
+int ScLink::onBuses(const char *, const char *types, lo_arg **argv, int argc, lo_message,
+                    void *) {
+    ScLink &link = instance();
+    std::lock_guard<std::mutex> lock(link.mutex_);
+    link.forgetBuses();
+    double port, bus;
+    if (!argNumber(types, argv, argc, 0, port)) return 0;
+    for (int i = 1; i + 1 < argc && types[i] == 's' && argNumber(types, argv, argc, i + 1, bus); i += 2)
+        link.buses_[&argv[i]->s] = static_cast<int>(bus);
+    link.synth_ = lo_address_new(kScHost, std::to_string(static_cast<int>(port)).c_str());
+    // Values sent while the patch loaded.
+    for (const auto &kv : link.busLast_) {
+        auto it = link.buses_.find(kv.first);
+        if (it != link.buses_.end())
+            lo_send(link.synth_, "/c_set", "if", it->second, static_cast<float>(kv.second));
+    }
+    logInfo("SC: %zu buses straight to scsynth", link.buses_.size());
+    return 0;
+}
+
+void ScLink::forgetBuses() {
+    buses_.clear();
+    if (synth_) lo_address_free(synth_);
+    synth_ = nullptr;
+}
+
 int ScLink::onOther(const char *path, const char *, lo_arg **, int, lo_message, void *) {
     logError("OSC message not handled: %s", path ? path : "?");
     return 0;
@@ -106,6 +133,7 @@ bool ScLink::startListener() {
     }
     lo_server_thread_add_method(server_, "/sc/up", nullptr, &ScLink::onSynthUp, nullptr);
     lo_server_thread_add_method(server_, "/neb/ready", nullptr, &ScLink::onReady, nullptr);
+    lo_server_thread_add_method(server_, "/sc/buses", nullptr, &ScLink::onBuses, nullptr);
     for (intptr_t id = 0; id < 4; ++id)
         lo_server_thread_add_method(server_, kLedPath[id], nullptr, &ScLink::onLed,
                                     reinterpret_cast<void *>(id));
@@ -147,6 +175,15 @@ void ScLink::send(const char *name, lo_message msg) {
     lo_message_free(msg);
 }
 
+bool ScLink::setBus(const std::string &path, double value) {
+    busLast_[path] = value;
+    auto it = buses_.find(path);
+    if (!synth_ || it == buses_.end()) return false;
+    if (lo_send(synth_, "/c_set", "if", it->second, static_cast<float>(value)) < 0)
+        logError("could not send /c_set for %s: %s", path.c_str(), lo_address_errstr(synth_));
+    return true;
+}
+
 void ScLink::sendInt(const char *name, int value) {
     std::lock_guard<std::mutex> lock(mutex_);
     Last v;
@@ -154,6 +191,7 @@ void ScLink::sendInt(const char *name, int value) {
     if (!changed(name, v)) return;
     lo_message m = lo_message_new();
     lo_message_add_int32(m, value);
+    setBus(std::string("/neb/") + name, v.number);
     send(name, m);
 }
 
@@ -164,6 +202,7 @@ void ScLink::sendFloat(const char *name, double value) {
     if (!changed(name, v)) return;
     lo_message m = lo_message_new();
     lo_message_add_float(m, static_cast<float>(value));
+    setBus(std::string("/neb/") + name, v.number);
     send(name, m);
 }
 
@@ -177,6 +216,7 @@ void ScLink::sendBool(const char *name, bool value) {
         lo_message_add_true(m);
     else
         lo_message_add_false(m);
+    setBus(std::string("/neb/") + name, v.number);
     send(name, m);
 }
 
@@ -200,7 +240,7 @@ void ScLink::sendPathInt(const char *path, int value) {
 
 void ScLink::sendPathFloat(const char *path, double value) {
     std::lock_guard<std::mutex> lock(mutex_);
-    if (!target_) return;
+    if (setBus(path, value) || !target_) return;
     if (lo_send(target_, path, "f", static_cast<float>(value)) < 0)
         logError("could not send %s: %s", path, lo_address_errstr(target_));
 }
@@ -208,6 +248,8 @@ void ScLink::sendPathFloat(const char *path, double value) {
 void ScLink::clearCache() {
     std::lock_guard<std::mutex> lock(mutex_);
     last_.clear();
+    busLast_.clear();
+    forgetBuses();
 }
 
 // ---- Programs bank -------------------------------------------------------

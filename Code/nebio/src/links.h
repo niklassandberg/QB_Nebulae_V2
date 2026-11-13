@@ -29,7 +29,7 @@ public:
     void sendString(const char *name, const char *value);
     void sendPathInt(const char *path, int value);
     void sendPathFloat(const char *path, double value);
-    void clearCache();
+    void clearCache();  // also the bus table: none until the next /sc/buses
 
     std::atomic<bool> synthIsUp{false};
     std::atomic<bool> handshake{false};
@@ -44,10 +44,14 @@ private:
     // True if the value differs from the last one (and remembers it).
     bool changed(const char *name, const Last &value);
     void send(const char *name, lo_message msg);
+    // Caller holds mutex_.
+    void forgetBuses();
+    bool setBus(const std::string &path, double value);  // false: path has no bus
 
     static int onSynthUp(const char *, const char *, lo_arg **, int, lo_message, void *);
     static int onReady(const char *, const char *, lo_arg **, int, lo_message, void *);
     static int onLed(const char *, const char *, lo_arg **, int, lo_message, void *);
+    static int onBuses(const char *, const char *, lo_arg **, int, lo_message, void *);
     static int onOther(const char *, const char *, lo_arg **, int, lo_message, void *);
     static void onError(int num, const char *msg, const char *where);
 
@@ -55,6 +59,10 @@ private:
     lo_address target_ = nullptr;
     lo_server_thread server_ = nullptr;
     std::map<std::string, Last> last_;
+    // From sclang's /sc/buses: path -> control bus on scsynth, and scsynth's address.
+    lo_address synth_ = nullptr;
+    std::map<std::string, int> buses_;
+    std::map<std::string, double> busLast_;  // last number per path, set again at /sc/buses
 };
 
 // A program of the "programs" bank (controlhandlerProg.py): OSC to a port of
