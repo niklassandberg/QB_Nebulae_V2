@@ -1,0 +1,47 @@
+L2 i:2
+L3 i:3
+L4 i:3
+L5 i:4
+L6 i:6
+L7 i:7
+L8 i:7
+L9 i:7
+L10 i:2
+L11 s:<6>INFO [control.py:42]: hello
+L12 s:<3>ERROR [control.py:7]: first\n<3>second\n<3>third
+L13 s:<7>STATS [c.py:1]: stats line
+L14 s:WARNING [ui.py:3]: not\njournal
+L15 s:<6>Level 25 [ui.py:3]: odd level
+L16 s:<2>CRITICAL [ui.py:3]: trailing
+L19 f:0.33
+L22 s:0.25
+L23 s:0.25
+L24 s:0.5
+L25 s:0.9\ncontinued
+L26 s:0.25
+L27 s:50%
+L28 i:7
+L29 i:8
+L30 s:
+L31 s:yes
+L32 f:1.5
+L33 f:0.33
+L34 s:1
+L35 s:yes
+L37 E:MissingSectionHeaderError
+L39 E:DuplicateOptionError
+L41 E:DuplicateSectionError
+L43 E:ParsingError
+L45 E:ParsingError
+L50 i:1
+L52 i:0
+L53 f:0.75
+L54 f:0.75
+L56 i:0
+L57 f:0.2
+L59 f:0.5
+L60 f:0.6949
+L61 f:1.0049
+L62 E:ValueError
+L65 i:0
+L66 f:0.33

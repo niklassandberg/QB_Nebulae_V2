@@ -1,0 +1,93 @@
+# wavewriter.py and nebmixer.py
+mkdir memory
+wav.new w
+file.read buffer_cnt.txt
+usb.calls
+wav.write w i:300 300 tri
+file.hex memory/neb_buffer_0.wav
+file.read buffer_cnt.txt
+usb.calls
+wav.write w f:1000.9 1000 ramp
+file.hex memory/neb_buffer_1.wav
+wav.write w i:0 10 tri
+wav.write w i:-5 10 tri
+wav.write w s:20 20 tri
+wav.write w s:2.5 20 tri
+file.hex memory/neb_buffer_2.wav
+# length longer than the data: only the data
+wav.write w i:500 120 zero
+file.hex memory/neb_buffer_2.wav
+# left and right of different length
+wav.write w i:100 100 tri 50
+file.read memory/neb_buffer_3.wav
+# disk full
+disk 4096 1
+wav.write w i:2000 2000 tri
+disk 1 4000
+wav.write w i:1000 1000 tri
+disk 1 4001
+wav.write w i:1000 1000 tri
+disk real
+usb.mounted 0
+wav.write w i:100 100 tri
+usb.mounted 1
+usb.calls
+file.read buffer_cnt.txt
+# an existing counter
+file.write buffer_cnt.txt \_|42\_|
+wav.new w2
+wav.write w2 i:10 10 tri
+file.read buffer_cnt.txt
+file.write buffer_cnt.txt \_\_|\_
+wav.new w3
+wav.write w3 i:10 10 tri
+file.write buffer_cnt.txt 1.5
+wav.new w4
+# no folder for the files
+file.write buffer_cnt.txt 7
+wav.new w5
+file.rm memory/neb_buffer_7.wav
+rmdir memory
+wav.write w5 i:10 10 tri
+file.read buffer_cnt.txt
+usb.calls
+# nebmixer
+mx.reset lib
+mx.inputLevel i:20
+mx.inputLevel f:40.7
+mx.inputLevel i:-3
+mx.inputLevel s:12
+mx.init
+mx.disable
+mx.enable
+mx.disable
+mx.inputLevel i:5
+mx.enable
+mx.remove
+mx.remove
+mx.inputLevel i:31
+mx.reset lib
+mx.nohandle hifi
+mx.init
+mx.enable
+mx.inputLevel i:10
+mx.reset lib
+mx.nohandle capture
+mx.init
+mx.init
+mx.inputLevel i:10
+mx.reset lib
+mx.fail snd_mixer_open
+mx.init
+mx.reset lib
+mx.fail snd_mixer_attach
+mx.init
+mx.reset lib
+mx.fail snd_mixer_selem_register
+mx.init
+mx.reset lib
+mx.fail snd_mixer_load
+mx.init
+mx.reset lib
+mx.fail snd_mixer_selem_set_capture_volume
+mx.inputLevel i:3

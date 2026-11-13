@@ -1,0 +1,2560 @@
+# random encoder page use
+pg.new p0 n0 /neb/page/n0 i:-5 i:5 lin f:0.7661137558476894 f:0.01
+pg.new p1 n1 /neb/page/n1 f:20.0 f:20000.0 exp f:-0.358
+pg.new p2 n2 /neb/page/n2 f:20.0 f:20000.0 exp f:1.05046107848 f:0.01
+pg.new p3 n3 /neb/page/n3 i:1 i:16 int i:1 f:0.01
+pg.new p4 n4 /neb/page/n4 i:-5 i:5 lin f:-0.2472531 f:0.01
+pg.new p5 n5 /neb/page/n5 i:1 i:16 int i:1 i:1
+pg.new p6 n6 /neb/page/n6 f:0.5 f:4.0 exp i:5 f:0.01
+ep.new e0 speed p0,p1,p2 n1
+ep.new e1 pitch p3,p4,p5,p6 None
+ep.new e2 speed p0 n0 4095,2000,0
+ps.new st pages/fuzz.pages
+ep.commitCandidate e2
+ep.setCandidate e1 b:True
+ep.nextPage e2
+ep.move e1 f:-0.045387673005
+ep.step e2 i:-2
+ep.setCandidate e2 b:True
+ep.nextPage e2
+ep.step e1 i:7
+ep.startChoosing e1
+ep.state e2
+ps.changed st i:1678
+ep.step e1 i:-24
+ep.step e2 i:25
+ep.state e0
+ep.commitCandidate e2
+ep.setCandidate e2 b:False
+ep.step e2 i:1
+ep.candidateShown e0
+ep.state e2
+ep.move e1 f:0.45459
+ep.nextPage e1
+ep.step e2 i:-5
+ep.outputs e0 f:0.44818761
+ep.outputs e1 i:1
+ep.step e1 i:21
+ep.move e0 i:0
+ep.state e1
+ep.setCandidate e0 b:False
+ep.setCandidate e2 b:True
+ep.setCandidate e2 b:True
+ep.state e0
+ep.state e1
+ep.step e0 i:-7
+ep.move e1 f:0.77
+ep.marked e1 i:1
+ep.startChoosing e0
+ep.step e2 i:11
+ep.candidateShown e1
+ep.outputs e0 i:1
+ep.nextPage e0
+ep.step e0 i:11
+ep.setCandidate e0 b:False
+ep.step e0 i:-23
+ep.outputs e2 i:-2
+ep.step e1 i:30
+ep.candidateShown e0
+ep.step e0 i:-16
+ep.step e1 i:14
+ep.step e1 i:5
+ep.step e1 i:-29
+ep.commitCandidate e0
+ep.state e1
+ep.outputs e1 f:0.10204641529
+ep.step e0 i:-25
+ep.step e2 i:-27
+ep.setCandidate e1 b:True
+ep.setCandidate e1 b:False
+ep.step e0 i:-9
+ep.candidateShown e1
+ep.step e2 i:-6
+ep.step e2 i:-10
+ep.nextPage e1
+ep.state e1
+ps.changed st i:12155
+ep.state e1
+ep.step e1 i:28
+ep.step e0 i:2
+ep.state e1
+ep.step e1 i:-30
+ep.setCandidate e2 b:True
+ep.nextPage e0
+ep.outputs e1 f:0.9606282182089025
+ep.setCandidate e1 b:True
+ep.step e0 i:-9
+ep.colour e2 i:3
+ep.step e1 i:-1
+ep.state e0
+ep.colour e0 i:6
+ep.commitCandidate e0
+ep.commitCandidate e1
+ep.step e0 i:-3
+ep.step e2 i:11
+ep.state e1
+ep.commitCandidate e0
+ep.step e0 i:-8
+ep.move e2 f:1.04662
+ep.commitCandidate e0
+ps.changed st i:17035
+ep.step e1 i:-2
+ep.move e0 f:-0.0
+ep.candidateShown e0
+ep.step e0 i:15
+ep.step e0 i:22
+ep.outputs e1 i:-3
+ep.outputs e0 f:0.132342168516
+ps.changed st i:18366
+ep.step e0 i:-5
+ep.colour e0 i:5
+ep.startChoosing e0
+ep.nextPage e0
+ep.nextPage e1
+ep.nextPage e2
+ps.changed st i:19809
+ep.step e0 i:-9
+ep.nextPage e0
+ps.changed st i:20474
+ep.step e0 i:-7
+ep.move e2 f:0.567399
+ep.move e0 f:0.66
+ep.state e2
+ep.candidateShown e1
+ep.marked e2 i:2
+ep.outputs e0 f:0.125
+ep.step e0 i:23
+ep.nextPage e2
+ps.changed st i:23018
+ep.step e1 i:28
+ps.changed st i:23548
+ep.outputs e0 f:1.4
+ep.step e1 i:-7
+ep.state e2
+ep.step e1 i:-27
+ep.step e0 i:22
+ep.step e1 i:-2
+ep.candidateShown e0
+ep.step e1 i:-9
+ep.step e1 i:-7
+ep.marked e1 i:7
+ep.state e1
+ep.step e2 i:-8
+ep.move e2 f:0.139441
+ep.move e2 f:1.13385233359237
+ep.setCandidate e1 b:False
+ep.step e1 i:-23
+ep.step e2 i:24
+ep.nextPage e2
+ep.step e2 i:-25
+ep.move e2 f:1.16903
+ep.step e1 i:-29
+ep.startChoosing e2
+ep.outputs e1 f:0.647
+ep.candidateShown e2
+ep.step e2 i:-19
+ep.step e1 i:23
+ep.startChoosing e0
+ep.outputs e0 f:1.23545286489
+ep.state e1
+ep.state e2
+ep.candidateShown e2
+ep.move e2 f:0.5160213249244
+ep.outputs e0 f:-0.32428624
+ep.state e1
+ps.changed st i:32512
+ep.step e1 i:14
+ep.step e2 i:28
+ps.changed st i:32967
+ep.step e0 i:7
+ep.outputs e1 f:-0.3866296740439414
+ep.step e1 i:8
+ep.state e2
+ep.step e2 i:16
+ep.outputs e2 i:0
+ep.state e0
+ep.startChoosing e1
+ep.state e1
+ep.candidateShown e0
+ep.candidateShown e1
+ps.changed st i:35705
+ep.outputs e1 f:1.332
+ep.step e1 i:6
+ep.setCandidate e0 b:False
+ep.outputs e1 i:4
+ep.step e2 i:11
+ps.changed st i:36613
+ep.step e0 i:10
+ep.step e1 i:-22
+ep.nextPage e1
+ep.marked e0 i:4
+ep.state e2
+ep.colour e2 i:-2
+ep.step e1 i:-16
+ep.outputs e0 f:0.2
+ep.step e0 i:1
+ep.step e2 i:-16
+ep.outputs e1 f:0.4750865045121206
+ep.state e2
+ep.step e1 i:-9
+ep.commitCandidate e0
+ep.startChoosing e2
+ep.move e2 f:-0.03942681563
+ep.nextPage e0
+ep.nextPage e1
+ep.state e2
+ep.step e2 i:-19
+ep.outputs e1 f:1.0
+ep.step e0 i:-7
+ep.state e1
+ep.outputs e0 f:-0.40514879350059
+ep.nextPage e1
+ep.step e2 i:10
+ep.step e1 i:-24
+ep.step e1 i:-26
+ep.move e0 f:-0.15431
+ep.commitCandidate e1
+ep.state e1
+ep.outputs e1 i:4
+ep.step e0 i:2
+ep.move e1 f:0.9217341
+ep.step e0 i:-20
+ep.nextPage e2
+ep.colour e0 i:1
+ep.colour e1 i:0
+ep.candidateShown e2
+ep.nextPage e0
+ps.saveIfDue st i:44888 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e2 i:21
+ep.step e1 i:-8
+ep.outputs e2 f:0.6307929
+ep.move e2 f:0.87838809
+ep.step e2 i:18
+ep.nextPage e2
+ep.step e0 i:21
+ep.step e2 i:-3
+ep.setCandidate e0 b:False
+ep.move e2 f:1.395609
+ep.setCandidate e1 b:True
+ep.colour e2 i:2
+ep.step e1 i:-13
+ep.outputs e1 f:0.4
+ep.step e1 i:22
+ep.outputs e0 f:0.7301909
+ep.setCandidate e0 b:False
+ep.candidateShown e0
+ep.step e1 i:1
+ep.state e0
+ep.step e0 i:-21
+ep.step e2 i:3
+ps.changed st i:49331
+ep.move e1 f:0.5
+ep.outputs e0 f:0.01361
+ep.step e0 i:11
+ep.nextPage e2
+ep.step e0 i:-3
+ep.startChoosing e1
+ep.setCandidate e2 b:True
+ep.step e2 i:11
+ep.state e0
+ep.step e1 i:2
+ep.outputs e1 f:2.675
+ep.state e2
+ep.outputs e0 f:0.0451532056
+ep.step e1 i:-25
+ep.step e2 i:29
+ep.startChoosing e1
+ep.move e0 i:0
+ep.move e1 f:0.699567534178
+ep.state e1
+ep.step e1 i:-20
+ep.candidateShown e1
+ep.startChoosing e2
+ep.step e0 i:16
+ep.step e2 i:8
+ep.step e2 i:-24
+ep.nextPage e1
+ep.state e2
+ep.setCandidate e1 b:True
+ep.step e1 i:23
+ep.nextPage e0
+ep.outputs e2 f:-0.14547861131408
+ep.candidateShown e0
+ep.move e2 f:0.475142865
+ep.outputs e2 i:-1
+ep.setCandidate e0 b:False
+ep.nextPage e2
+ep.step e0 i:-16
+ep.nextPage e1
+ep.outputs e1 f:0.4277483885630546
+ep.state e1
+ep.nextPage e2
+ep.state e1
+ep.step e2 i:-26
+ps.changed st i:58532
+ep.state e2
+ps.saveIfDue st i:58912 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.move e2 f:1.49137411
+ep.step e2 i:3
+ep.move e2 f:0.167795138598489
+ep.step e2 i:-2
+ep.outputs e2 f:1.48316
+ps.changed st i:60288
+ep.move e1 f:0.866
+ep.move e0 f:1.40433829101173
+ep.nextPage e0
+ep.candidateShown e2
+ep.step e2 i:7
+ep.move e1 f:0.4333
+ep.outputs e1 f:1.45208581041285
+ep.nextPage e0
+ep.setCandidate e2 b:True
+ep.step e2 i:-30
+ep.outputs e0 f:0.06865
+ep.startChoosing e0
+ep.outputs e0 f:1.028313787
+ep.step e0 i:8
+ep.nextPage e0
+ep.outputs e2 f:0.89329
+ep.colour e0 i:6
+ep.colour e0 i:1
+ep.outputs e1 f:-0.349793008097
+ep.nextPage e0
+ep.startChoosing e0
+ep.step e1 i:21
+ep.candidateShown e1
+ep.step e1 i:-10
+ep.outputs e0 f:0.6247372
+ep.outputs e0 f:1.291270443
+ep.step e2 i:-19
+ps.changed st i:65357
+ep.marked e1 i:1
+ep.outputs e1 f:-0.4
+ep.state e2
+ep.marked e2 i:2
+ep.state e0
+ep.step e1 i:23
+ep.marked e1 i:6
+ep.state e2
+ep.commitCandidate e2
+ep.commitCandidate e0
+ep.step e2 i:17
+ep.setCandidate e2 b:True
+ep.step e2 i:5
+ep.step e2 i:23
+ep.setCandidate e1 b:True
+ep.nextPage e1
+ep.move e0 i:-2
+ep.state e1
+ep.outputs e1 f:0.9919328
+ps.changed st i:68666
+ep.step e0 i:-15
+ep.step e0 i:-17
+ep.state e2
+ep.setCandidate e2 b:True
+ep.step e2 i:24
+ep.step e2 i:-20
+ep.step e2 i:-30
+ep.commitCandidate e0
+ep.state e0
+ep.setCandidate e1 b:True
+ep.nextPage e1
+ep.outputs e0 f:0.3516855715
+ep.step e2 i:-8
+ep.commitCandidate e0
+ep.state e1
+ep.step e0 i:29
+ep.step e0 i:25
+ep.move e2 f:-0.380340346891
+ep.state e1
+ep.step e1 i:19
+ep.move e0 i:-1
+ep.step e0 i:-15
+ep.marked e2 i:6
+ps.changed st i:74918
+ep.step e2 i:-16
+ep.state e0
+ep.outputs e0 f:0.9575274
+ep.step e0 i:20
+ep.step e2 i:-25
+ep.outputs e0 f:1.1506331569
+ep.step e1 i:4
+ep.startChoosing e0
+ep.step e0 i:27
+ps.changed st i:77219
+ep.state e1
+ep.nextPage e2
+ep.outputs e2 f:-0.0573589398283
+ep.outputs e1 f:0.33051278927226
+ep.step e2 i:-18
+ep.outputs e0 f:0.0
+ep.step e0 i:-15
+ep.nextPage e1
+ep.colour e2 i:3
+ps.changed st i:78877
+ep.state e2
+ep.step e1 i:-20
+ep.outputs e0 f:0.858551107317642
+ep.candidateShown e1
+ep.setCandidate e2 b:True
+ep.setCandidate e2 b:False
+ep.nextPage e1
+ep.startChoosing e0
+ep.step e2 i:29
+ep.setCandidate e0 b:False
+ep.state e2
+ep.outputs e1 f:0.378
+ep.state e0
+ep.state e0
+ps.changed st i:81392
+ep.setCandidate e1 b:False
+ep.nextPage e2
+ep.nextPage e1
+ep.outputs e1 f:0.182414528
+ep.outputs e1 f:0.6966888538803
+ep.step e2 i:21
+ep.step e0 i:-3
+ep.commitCandidate e1
+ep.step e1 i:21
+ep.step e1 i:-3
+ep.outputs e0 f:1.189232
+ep.outputs e0 f:1e-05
+ep.step e0 i:-15
+ep.outputs e1 f:0.125
+ep.step e2 i:3
+ep.outputs e0 f:0.0
+ep.state e1
+ep.outputs e1 f:0.80163031
+ep.candidateShown e0
+ep.step e1 i:-4
+ep.colour e2 i:-2
+ep.outputs e0 f:0.25
+ep.nextPage e2
+ps.saveIfDue st i:85776 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.outputs e0 f:1.0
+ep.outputs e2 f:0.74165638777876
+ep.state e1
+ep.step e2 i:9
+ep.move e2 i:3
+ep.step e1 i:15
+ps.changed st i:87212
+ep.step e2 i:9
+ep.state e2
+ep.setCandidate e1 b:False
+ep.candidateShown e1
+ep.state e1
+ep.colour e2 i:6
+ep.step e0 i:17
+ep.marked e0 i:7
+ep.step e1 i:-4
+ep.step e1 i:1
+ep.nextPage e0
+ep.step e0 i:30
+ep.step e0 i:-9
+ep.commitCandidate e1
+ep.step e0 i:14
+ep.step e0 i:-26
+ep.step e1 i:-4
+ep.setCandidate e1 b:False
+ep.startChoosing e0
+ps.saveIfDue st i:91198 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.outputs e1 f:0.684804464
+ep.step e0 i:-5
+ep.outputs e2 f:-0.0234429386
+ep.step e2 i:2
+ps.changed st i:92217
+ep.nextPage e0
+ps.saveIfDue st i:92382 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.outputs e2 f:0.81156
+ep.startChoosing e0
+ep.step e1 i:24
+ep.step e2 i:-16
+ep.outputs e0 f:0.584
+ep.step e1 i:-4
+ep.step e2 i:-26
+ep.setCandidate e2 b:True
+ep.nextPage e0
+ep.setCandidate e1 b:True
+ep.step e1 i:-3
+ep.outputs e1 f:0.5384152584382
+ep.outputs e1 f:0.3
+ep.move e0 f:0.427391
+ep.step e2 i:12
+ep.outputs e2 f:0.3333333333333333
+ep.outputs e0 f:0.3154225096
+ep.step e1 i:26
+ep.step e2 i:23
+ps.changed st i:96792
+ep.step e2 i:29
+ep.step e0 i:9
+ep.nextPage e2
+ep.marked e2 i:0
+ps.changed st i:97864
+ep.outputs e1 f:0.821586927
+ep.step e0 i:-21
+ep.candidateShown e0
+ep.marked e2 i:4
+ep.step e1 i:-9
+ep.step e0 i:24
+ep.setCandidate e0 b:True
+ep.commitCandidate e2
+ep.nextPage e0
+ep.setCandidate e2 b:True
+ep.startChoosing e1
+ep.nextPage e0
+ep.step e0 i:-17
+ep.step e2 i:-28
+ep.outputs e0 f:-0.33090716328736813
+ep.step e2 i:-3
+ep.commitCandidate e2
+ep.startChoosing e0
+ep.step e2 i:-7
+ep.step e1 i:-23
+ps.changed st i:102418
+ep.step e2 i:3
+ep.candidateShown e2
+ep.step e0 i:-17
+ep.candidateShown e2
+ep.outputs e0 f:1.014347312475753
+ep.outputs e0 f:1.00691577757
+ep.state e0
+ep.startChoosing e2
+ep.commitCandidate e0
+ep.outputs e2 f:-0.1
+ep.candidateShown e1
+ep.move e0 f:1.391391
+ep.step e1 i:-2
+ep.setCandidate e0 b:False
+ep.step e2 i:-21
+ep.step e2 i:-12
+ep.step e0 i:-6
+ep.step e0 i:-21
+ep.step e0 i:12
+ep.step e2 i:-8
+ep.step e1 i:-24
+ep.outputs e2 i:5
+ep.step e2 i:19
+ep.nextPage e0
+ep.outputs e2 f:1.104428
+ep.nextPage e2
+ep.step e1 i:-23
+ep.step e0 i:22
+ep.step e0 i:-16
+ep.commitCandidate e0
+ep.step e2 i:2
+ep.setCandidate e0 b:True
+ep.outputs e1 i:-3
+ep.state e0
+ep.step e2 i:-27
+ep.step e1 i:19
+ep.commitCandidate e2
+ep.state e2
+ep.step e2 i:13
+ep.move e1 f:0.60373
+ep.state e2
+ep.outputs e2 f:-0.113523729561947
+ep.nextPage e1
+ep.nextPage e1
+ep.state e2
+ep.nextPage e1
+ep.step e1 i:-25
+ep.startChoosing e0
+ep.candidateShown e0
+ep.step e0 i:4
+ep.move e0 f:1e-05
+ep.state e0
+ep.outputs e0 f:0.9575579895363904
+ep.outputs e1 f:0.83526251460398
+ep.startChoosing e0
+ep.step e0 i:6
+ep.setCandidate e0 b:True
+ep.startChoosing e1
+ep.nextPage e1
+ep.step e1 i:22
+ep.marked e0 i:4
+ps.changed st i:114919
+ep.step e2 i:-5
+ep.outputs e0 i:-3
+ep.nextPage e1
+ep.step e0 i:-6
+ep.step e0 i:-20
+ep.step e2 i:-13
+ep.step e2 i:-6
+ep.outputs e2 f:0.3333333333333333
+ep.step e2 i:16
+ep.step e0 i:25
+ep.move e0 f:-0.4836020016345814
+ep.outputs e1 f:0.81282315822
+ep.nextPage e1
+ep.step e1 i:15
+ps.changed st i:118049
+ep.step e2 i:-23
+ep.step e2 i:19
+ep.move e0 f:-0.374
+ep.setCandidate e2 b:True
+ep.step e1 i:-21
+ep.setCandidate e0 b:True
+ep.outputs e0 f:0.0
+ep.startChoosing e2
+ep.state e1
+ep.nextPage e1
+ep.step e0 i:12
+ep.step e1 i:0
+ep.outputs e0 f:1.203
+ep.step e1 i:-19
+ep.state e0
+ep.outputs e1 f:-0.33079673118
+ep.step e0 i:-24
+ps.changed st i:122676
+ep.setCandidate e2 b:False
+ep.state e1
+ep.setCandidate e1 b:False
+ep.outputs e0 f:1.07
+ep.step e1 i:-20
+ps.changed st i:123936
+ep.commitCandidate e0
+ep.move e0 f:0.2
+ep.state e2
+ep.step e0 i:-20
+ep.setCandidate e0 b:True
+ep.state e0
+ep.step e1 i:8
+ep.step e0 i:-30
+ep.move e1 i:-3
+ep.outputs e2 f:1.1573975581
+ep.outputs e0 f:0.3333333333333333
+ep.outputs e0 f:0.0
+ep.state e0
+ep.step e1 i:7
+ep.step e2 i:-14
+ep.state e1
+ep.outputs e1 f:1.37591272
+ep.move e2 f:0.0729190772441
+ep.step e1 i:-28
+ep.outputs e2 f:0.5
+ep.candidateShown e1
+ep.outputs e0 f:0.2249403750433914
+ep.step e1 i:19
+ep.outputs e0 f:0.0
+ep.candidateShown e2
+ep.commitCandidate e1
+ep.move e0 f:1.0419806702290666
+ep.nextPage e2
+ep.marked e2 i:1
+ep.move e1 f:0.7571123346480657
+ep.step e2 i:3
+ep.move e2 f:0.3027785678039603
+ep.candidateShown e2
+ep.candidateShown e0
+ep.nextPage e1
+ep.state e1
+ep.step e0 i:-10
+ep.step e2 i:-22
+ep.move e0 f:1.0136898
+ep.nextPage e0
+ep.outputs e2 f:2.675
+ep.move e0 f:0.0
+ep.state e2
+ep.outputs e0 f:-0.0410865998338
+ep.nextPage e0
+ep.step e2 i:30
+ep.move e1 f:0.0
+ep.step e2 i:-18
+ep.move e0 f:0.964071
+ep.state e2
+ep.startChoosing e2
+ep.step e2 i:-3
+ep.step e0 i:5
+ep.step e0 i:-19
+ep.step e2 i:-8
+ep.move e1 f:1.25116256395
+ep.outputs e1 f:0.4057416477132
+ep.outputs e2 f:-0.4730344883919613
+ep.step e0 i:0
+ep.startChoosing e1
+ep.state e1
+ps.changed st i:136240
+ep.step e0 i:-9
+ep.move e0 f:1.246
+ep.step e1 i:4
+ep.nextPage e2
+ep.outputs e1 f:0.7497680164
+ep.step e1 i:1
+ep.move e1 f:1.07622981756
+ep.state e2
+ep.state e1
+ep.candidateShown e0
+ep.outputs e2 i:4
+ep.step e2 i:2
+ep.outputs e0 f:0.0
+ep.state e0
+ep.step e0 i:-25
+ep.move e0 f:0.5
+ep.step e2 i:19
+ep.state e2
+ep.nextPage e2
+ep.step e0 i:-18
+ep.state e0
+ep.candidateShown e2
+ep.nextPage e0
+ep.state e1
+ep.state e0
+ep.commitCandidate e1
+ep.state e1
+ep.move e1 f:0.5589003132756447
+ep.setCandidate e2 b:False
+ep.step e0 i:24
+ep.colour e1 i:-2
+ep.state e2
+ep.move e2 f:-0.24619001646366
+ep.outputs e1 f:0.66756986
+ep.setCandidate e0 b:False
+ep.setCandidate e1 b:False
+ep.outputs e2 f:1.171262102797
+ep.commitCandidate e0
+ep.setCandidate e1 b:False
+ep.move e2 i:4
+ep.setCandidate e0 b:True
+ep.step e0 i:-26
+ep.step e1 i:27
+ep.step e2 i:0
+ep.step e2 i:-17
+ep.step e2 i:20
+ps.changed st i:144846
+ep.step e2 i:-2
+ep.state e2
+ps.saveIfDue st i:145104 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.move e2 f:-0.478147
+ep.setCandidate e1 b:True
+ep.step e2 i:-9
+ep.state e2
+ep.step e0 i:29
+ep.step e1 i:-29
+ep.step e0 i:12
+ep.marked e1 i:-2
+ep.setCandidate e0 b:False
+ep.step e1 i:4
+ep.outputs e2 f:1.219345673
+ep.state e1
+ep.startChoosing e1
+ep.move e1 f:-0.40753454
+ep.step e1 i:15
+ep.startChoosing e2
+ep.move e1 f:-0.251812
+ep.state e2
+ep.candidateShown e1
+ep.step e2 i:-22
+ep.state e2
+ep.move e0 f:0.05827
+ep.setCandidate e1 b:True
+ep.state e1
+ep.startChoosing e0
+ep.candidateShown e0
+ep.step e1 i:19
+ep.commitCandidate e1
+ep.outputs e1 f:-0.476
+ep.nextPage e2
+ep.move e2 f:0.6
+ep.move e2 f:1.34051129529
+ep.outputs e1 f:0.448749818641
+ep.step e1 i:29
+ep.step e1 i:6
+ep.state e0
+ep.step e1 i:-19
+ep.step e1 i:-24
+ep.step e0 i:-19
+ep.step e0 i:-18
+ep.move e2 f:0.640787
+ep.step e2 i:-30
+ep.step e0 i:-6
+ep.nextPage e2
+ep.setCandidate e2 b:True
+ep.move e1 f:0.3501
+ep.step e2 i:-26
+ep.state e1
+ep.step e1 i:10
+ep.outputs e2 f:1.051758461939
+ep.step e0 i:-17
+ep.nextPage e2
+ep.outputs e0 f:1.281
+ep.move e0 f:0.97094084023
+ep.commitCandidate e0
+ep.nextPage e0
+ep.commitCandidate e1
+ep.step e2 i:4
+ep.marked e1 i:3
+ep.step e2 i:-7
+ep.candidateShown e1
+ep.outputs e0 f:1.0
+ep.outputs e0 f:1.3667341862501503
+ep.nextPage e2
+ep.setCandidate e2 b:True
+ep.colour e2 i:-2
+ep.state e0
+ep.outputs e2 f:-0.3
+ep.state e1
+ep.nextPage e1
+ep.state e0
+ps.changed st i:159469
+ep.marked e0 i:2
+ep.marked e0 i:-1
+ep.state e1
+ep.step e2 i:-21
+ep.step e1 i:-16
+ep.step e0 i:-3
+ep.step e1 i:21
+ep.step e1 i:-17
+ep.step e0 i:3
+ep.step e1 i:-7
+ep.step e0 i:-21
+ep.commitCandidate e0
+ep.outputs e0 f:0.125
+ep.candidateShown e0
+ep.colour e2 i:1
+ep.step e0 i:29
+ep.step e2 i:22
+ep.candidateShown e1
+ep.step e2 i:4
+ep.step e1 i:18
+ep.step e2 i:2
+ep.state e2
+ep.commitCandidate e0
+ep.startChoosing e1
+ep.step e1 i:-4
+ep.move e0 f:1.3943633117885355
+ep.candidateShown e2
+ep.candidateShown e1
+ep.step e2 i:-24
+ep.candidateShown e1
+ep.outputs e0 f:1.374908646612
+ep.move e1 f:0.22
+ep.state e0
+ep.setCandidate e1 b:False
+ep.setCandidate e1 b:True
+ep.step e1 i:21
+ep.nextPage e1
+ep.step e0 i:5
+ep.state e1
+ep.outputs e0 f:-0.144230207951
+ep.colour e1 i:-1
+ep.marked e1 i:0
+ep.marked e1 i:0
+ep.step e1 i:14
+ep.step e1 i:-30
+ep.step e0 i:13
+ep.outputs e0 f:-0.468214
+ep.step e0 i:-2
+ep.outputs e0 i:0
+ps.saveIfDue st i:169244 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.state e2
+ep.step e0 i:0
+ep.step e0 i:16
+ep.candidateShown e2
+ep.marked e0 i:2
+ep.outputs e1 f:0.815
+ep.nextPage e0
+ep.step e2 i:-30
+ep.state e0
+ep.step e2 i:18
+ep.move e2 f:0.564
+ep.move e2 i:-2
+ep.startChoosing e1
+ep.step e2 i:12
+ep.state e2
+ep.step e0 i:14
+ep.step e2 i:20
+ep.step e1 i:-8
+ep.candidateShown e1
+ep.step e0 i:-1
+ep.outputs e0 f:0.087699398621
+ep.startChoosing e2
+ep.step e0 i:20
+ep.move e0 f:1.0731777208
+ep.outputs e0 f:-0.393185482529
+ep.step e0 i:-14
+ep.colour e2 i:2
+ep.nextPage e1
+ep.step e2 i:-9
+ep.state e1
+ep.step e2 i:0
+ep.candidateShown e0
+ep.marked e2 i:4
+ep.step e0 i:-23
+ep.step e2 i:-9
+ep.nextPage e2
+ep.move e1 f:0.369073
+ep.candidateShown e0
+ep.step e2 i:-5
+ep.nextPage e1
+ep.outputs e0 i:3
+ep.move e1 f:-0.4135066943
+ep.candidateShown e0
+ep.step e2 i:21
+ep.step e1 i:-2
+ep.nextPage e2
+ep.nextPage e0
+ep.outputs e0 f:1.19947006178
+ep.step e0 i:25
+ep.step e0 i:0
+ep.nextPage e1
+ep.outputs e2 f:0.5950989787579
+ep.step e1 i:-11
+ep.step e0 i:-1
+ep.move e1 f:-0.3724891209695
+ep.step e1 i:-8
+ep.nextPage e0
+ep.step e1 i:-27
+ep.step e1 i:6
+ep.outputs e2 i:-3
+ep.step e1 i:9
+ep.state e0
+ep.step e2 i:8
+ep.outputs e0 i:-1
+ep.move e1 i:3
+ep.setCandidate e0 b:False
+ep.setCandidate e2 b:True
+ep.outputs e2 i:-3
+ep.step e2 i:-29
+ep.step e0 i:28
+ep.step e2 i:-13
+ep.step e1 i:2
+ep.candidateShown e2
+ep.move e1 f:1.4671
+ep.step e0 i:-26
+ep.outputs e1 f:1.41585908
+ep.step e2 i:-29
+ep.outputs e2 f:1.3924038
+ep.setCandidate e1 b:False
+ep.outputs e2 f:0.2212263237262986
+ep.nextPage e2
+ep.state e1
+ep.step e1 i:1
+ep.step e1 i:-8
+ep.outputs e2 f:0.625516068417939
+ep.outputs e1 f:0.248991133179
+ep.candidateShown e0
+ep.move e1 f:0.9128278195260848
+ep.outputs e2 f:0.3333333333333333
+ep.step e0 i:-4
+ep.colour e1 i:-2
+ps.changed st i:187854
+ep.move e0 f:0.47
+ep.state e1
+ep.candidateShown e0
+ep.step e1 i:-3
+ep.step e1 i:12
+ep.step e0 i:21
+ep.step e1 i:-15
+ep.setCandidate e0 b:True
+ep.move e1 i:2
+ep.state e1
+ep.step e2 i:17
+ps.changed st i:190723
+ep.setCandidate e2 b:False
+ep.step e0 i:-19
+ep.commitCandidate e0
+ep.startChoosing e1
+ep.step e2 i:23
+ep.step e0 i:27
+ep.outputs e0 f:-0.2511880104212316
+ep.marked e1 i:-2
+ep.nextPage e1
+ep.step e2 i:26
+ep.nextPage e1
+ps.saveIfDue st i:194081 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.setCandidate e1 b:False
+ep.outputs e2 f:0.566651825
+ep.step e2 i:14
+ep.step e0 i:11
+ep.step e1 i:-1
+ep.step e0 i:24
+ep.setCandidate e2 b:True
+ep.step e2 i:5
+ep.setCandidate e0 b:False
+ep.outputs e0 i:2
+ep.outputs e0 f:0.31985244
+ps.changed st i:196238
+ep.commitCandidate e2
+ep.step e0 i:16
+ep.setCandidate e2 b:False
+ep.step e2 i:26
+ep.nextPage e0
+ep.candidateShown e2
+ep.step e1 i:27
+ps.changed st i:197823
+ep.step e1 i:2
+ep.step e0 i:-16
+ep.outputs e0 i:0
+ep.nextPage e2
+ep.step e0 i:-29
+ep.step e0 i:17
+ep.candidateShown e1
+ep.colour e0 i:7
+ep.move e2 f:0.7335821
+ep.move e1 f:-0.25194134203
+ep.candidateShown e2
+ep.setCandidate e2 b:False
+ps.saveIfDue st i:200786 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.colour e1 i:-1
+ep.outputs e2 i:1
+ep.state e2
+ep.startChoosing e2
+ep.nextPage e1
+ep.startChoosing e1
+ep.state e2
+ep.outputs e1 f:1.190908377
+ep.commitCandidate e0
+ep.nextPage e2
+ep.commitCandidate e2
+ep.nextPage e2
+ep.step e1 i:25
+ep.step e1 i:9
+ep.outputs e2 f:0.8492234624584998
+ep.step e2 i:-29
+ep.marked e2 i:7
+ep.setCandidate e0 b:True
+ep.outputs e1 f:0.20725942107
+ep.commitCandidate e0
+ep.commitCandidate e1
+ep.colour e2 i:0
+ep.startChoosing e1
+ep.step e0 i:-4
+ep.step e0 i:13
+ep.colour e0 i:2
+ep.marked e0 i:1
+ep.marked e2 i:2
+ep.step e1 i:-6
+ep.step e1 i:5
+ep.startChoosing e0
+ep.step e1 i:-15
+ep.setCandidate e0 b:False
+ep.nextPage e0
+ps.saveIfDue st i:208733 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.candidateShown e1
+ps.changed st i:208994
+ep.nextPage e0
+ep.step e1 i:26
+ps.changed st i:209502
+ep.step e0 i:-8
+ep.candidateShown e0
+ep.setCandidate e0 b:False
+ep.nextPage e0
+ep.step e0 i:-16
+ep.move e0 f:0.3333333333333333
+ep.nextPage e1
+ep.nextPage e2
+ep.setCandidate e1 b:True
+ps.changed st i:212171
+ep.state e1
+ep.state e2
+ep.nextPage e1
+ep.step e2 i:-13
+ep.outputs e0 f:-0.336837279181553
+ep.move e1 f:1.40967
+ep.state e0
+ep.commitCandidate e1
+ep.step e1 i:-17
+ep.state e1
+ep.nextPage e0
+ps.changed st i:214434
+ep.startChoosing e2
+ep.step e0 i:0
+ps.changed st i:214987
+ps.changed st i:215376
+ep.outputs e2 f:1.4467
+ep.state e0
+ep.commitCandidate e2
+ep.nextPage e2
+ep.setCandidate e0 b:False
+ep.step e0 i:-22
+ep.step e0 i:18
+ep.nextPage e1
+ep.outputs e2 f:0.929689
+ep.step e1 i:23
+ep.move e0 f:0.13543911750119264
+ep.marked e1 i:1
+ep.move e0 f:-0.475365432843354
+ep.step e1 i:7
+ep.step e1 i:12
+ep.outputs e0 f:-0.22465914935
+ep.candidateShown e1
+ps.saveIfDue st i:218181 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.setCandidate e1 b:False
+ep.step e1 i:20
+ep.outputs e1 f:0.94603589895586
+ep.state e1
+ep.state e2
+ep.step e0 i:2
+ep.step e2 i:6
+ep.nextPage e1
+ep.outputs e0 f:-0.23143743641014192
+ep.step e0 i:-11
+ep.outputs e1 f:1.1795168
+ps.changed st i:220219
+ps.changed st i:220427
+ep.step e2 i:-2
+ep.nextPage e1
+ep.nextPage e0
+ep.step e1 i:30
+ep.state e1
+ep.outputs e1 f:0.54864256180417
+ep.step e0 i:4
+ep.move e1 f:-0.07
+ep.marked e0 i:7
+ep.outputs e2 f:-0.049861
+ep.step e0 i:14
+ep.move e0 f:0.0204816
+ps.changed st i:223108
+ep.nextPage e0
+ps.changed st i:223333
+ep.step e0 i:-23
+ep.nextPage e0
+ps.saveIfDue st i:223757 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ps.saveIfDue st i:223980 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.outputs e0 f:0.975699526
+ep.candidateShown e2
+ep.setCandidate e2 b:False
+ep.step e2 i:5
+ep.step e1 i:-11
+ep.state e0
+ep.nextPage e2
+ep.step e2 i:15
+ep.step e2 i:-10
+ep.step e0 i:-26
+ep.colour e1 i:-2
+ep.step e1 i:-27
+ep.outputs e1 f:1.2750602284389
+ep.state e1
+ep.step e2 i:-26
+ep.step e2 i:5
+ep.outputs e1 f:0.185
+ep.nextPage e2
+ep.step e2 i:-28
+ep.move e2 f:-0.40535324
+ep.step e0 i:-3
+ep.startChoosing e2
+ep.step e0 i:-11
+ep.setCandidate e1 b:True
+ep.colour e1 i:4
+ep.commitCandidate e2
+ep.step e2 i:-18
+ep.step e2 i:-13
+ep.state e1
+ep.outputs e0 f:2.675
+ep.step e0 i:-28
+ep.nextPage e2
+ep.outputs e2 f:-0.0
+ep.step e2 i:-11
+ep.step e1 i:23
+ep.marked e2 i:2
+ep.outputs e2 f:2.675
+ep.setCandidate e0 b:True
+ps.saveIfDue st i:231830 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e1 i:25
+ps.changed st i:232417
+ps.saveIfDue st i:232685 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.outputs e2 i:3
+ep.nextPage e2
+ep.step e2 i:-21
+ep.nextPage e1
+ep.nextPage e0
+ep.state e2
+ep.outputs e0 f:0.557
+ep.step e0 i:-4
+ep.candidateShown e1
+ep.outputs e2 f:0.842315133
+ep.outputs e0 f:1.275177
+ep.move e0 f:0.70907716576
+ep.move e2 f:-0.2697519126356847
+ep.candidateShown e2
+ep.startChoosing e2
+ep.step e0 i:14
+ep.startChoosing e2
+ep.setCandidate e0 b:False
+ep.step e1 i:25
+ep.outputs e1 f:0.125
+ep.step e2 i:-3
+ep.outputs e1 f:0.072201
+ep.step e2 i:29
+ep.outputs e0 f:0.4
+ps.saveIfDue st i:238671 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.commitCandidate e0
+ep.setCandidate e1 b:True
+ep.step e0 i:29
+ep.state e1
+ep.state e2
+ep.step e2 i:15
+ep.step e2 i:-16
+ep.step e2 i:6
+ep.step e2 i:-29
+ep.step e1 i:-5
+ep.nextPage e2
+ep.candidateShown e2
+ep.setCandidate e1 b:True
+ep.state e1
+ep.nextPage e1
+ep.step e2 i:28
+ep.move e1 f:-0.466512
+ep.setCandidate e1 b:False
+ep.marked e1 i:2
+ep.step e1 i:-12
+ep.step e0 i:23
+ep.startChoosing e1
+ep.state e0
+ep.move e0 f:-0.25467991
+ps.saveIfDue st i:243546 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.state e2
+ep.move e0 f:-0.0541255481768381
+ep.move e0 f:1.319
+ep.step e1 i:-24
+ep.step e2 i:15
+ep.step e1 i:26
+ep.colour e1 i:4
+ep.candidateShown e1
+ep.startChoosing e0
+ep.move e0 f:0.6
+ep.step e2 i:30
+ep.state e1
+ep.outputs e1 f:1.0
+ep.step e2 i:-1
+ep.outputs e1 f:-0.31083127686
+ep.commitCandidate e0
+ep.outputs e1 i:1
+ep.nextPage e0
+ep.startChoosing e0
+ps.changed st i:247833
+ep.outputs e1 i:4
+ep.candidateShown e0
+ep.nextPage e0
+ep.step e1 i:23
+ep.step e0 i:-8
+ep.setCandidate e2 b:True
+ep.nextPage e2
+ep.move e0 f:-0.12673
+ep.nextPage e1
+ep.nextPage e1
+ep.nextPage e0
+ep.step e2 i:7
+ep.outputs e0 f:-0.1
+ep.outputs e2 i:2
+ep.step e1 i:-1
+ep.step e2 i:3
+ep.step e0 i:-5
+ep.move e1 f:0.11600125655152849
+ep.state e1
+ps.changed st i:251852
+ep.move e2 f:1.138816112290139
+ep.outputs e1 f:0.7
+ep.candidateShown e1
+ep.step e0 i:-22
+ep.state e1
+ep.step e2 i:-28
+ep.nextPage e1
+ep.state e0
+ep.colour e2 i:6
+ep.startChoosing e2
+ep.step e2 i:-13
+ep.step e0 i:18
+ep.move e0 f:0.873126577
+ep.outputs e2 i:2
+ep.state e0
+ep.step e2 i:21
+ep.step e2 i:-25
+ep.setCandidate e0 b:False
+ep.outputs e2 f:1.05518166
+ep.step e0 i:8
+ep.setCandidate e0 b:True
+ep.commitCandidate e1
+ep.step e1 i:16
+ep.step e1 i:22
+ep.move e2 i:2
+ep.colour e0 i:4
+ep.outputs e2 f:-0.443081683
+ep.colour e2 i:3
+ep.move e2 f:0.72527428787
+ep.move e2 f:1.4253427665391618
+ep.nextPage e0
+ep.move e1 f:-0.35476540339494
+ps.saveIfDue st i:258607 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.state e2
+ep.step e0 i:29
+ep.step e2 i:-30
+ep.outputs e0 f:0.34159351688
+ep.state e0
+ep.candidateShown e0
+ep.marked e0 i:3
+ep.step e1 i:9
+ep.outputs e0 f:-0.259602977
+ep.outputs e2 i:5
+ep.setCandidate e1 b:True
+ep.state e1
+ep.commitCandidate e2
+ep.move e0 f:1.06127
+ep.step e1 i:24
+ep.candidateShown e2
+ep.outputs e1 f:0.06217207016799131
+ep.move e0 f:-0.20477
+ep.move e2 f:-0.477902058
+ep.step e1 i:1
+ep.outputs e1 f:1e-05
+ep.nextPage e0
+ps.saveIfDue st i:262873 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.setCandidate e0 b:True
+ep.candidateShown e1
+ep.state e1
+ep.setCandidate e0 b:False
+ep.move e2 f:0.48682861
+ep.commitCandidate e0
+ep.candidateShown e1
+ep.state e1
+ep.step e2 i:29
+ep.outputs e2 f:1.2021870538572392
+ep.step e0 i:-20
+ep.step e0 i:6
+ep.state e0
+ep.step e1 i:7
+ep.colour e0 i:4
+ep.outputs e0 f:0.50793553118
+ep.outputs e2 f:0.7077256612724
+ep.move e2 f:0.030179080230288
+ep.step e0 i:16
+ep.step e0 i:16
+ep.nextPage e1
+ep.step e1 i:-17
+ep.marked e0 i:3
+ep.step e2 i:29
+ep.startChoosing e1
+ep.commitCandidate e1
+ep.outputs e0 i:-1
+ep.step e2 i:-29
+ep.step e2 i:8
+ep.state e2
+ep.step e2 i:30
+ep.candidateShown e1
+ep.state e2
+ep.setCandidate e0 b:False
+ep.step e0 i:18
+ep.move e2 i:-2
+ep.state e1
+ep.outputs e0 f:0.3
+ep.candidateShown e0
+ep.commitCandidate e0
+ep.outputs e1 f:1.4560609321249
+ep.setCandidate e2 b:False
+ep.step e1 i:-7
+ep.outputs e2 i:2
+ep.step e1 i:1
+ep.state e1
+ep.outputs e1 f:0.19583888186
+ep.outputs e2 i:-3
+ep.move e2 i:3
+ep.outputs e0 i:0
+ep.step e2 i:-6
+ep.step e1 i:-7
+ep.state e2
+ep.step e0 i:-30
+ep.step e0 i:2
+ep.outputs e2 f:0.742232059222425
+ep.outputs e0 f:-0.4
+ep.marked e1 i:-2
+ep.state e1
+ep.outputs e1 f:-0.14
+ep.step e2 i:-20
+ep.step e1 i:-19
+ep.nextPage e2
+ep.outputs e2 f:0.0276812
+ps.saveIfDue st i:275149 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.outputs e0 f:0.71
+ep.step e2 i:4
+ep.nextPage e0
+ep.move e1 f:0.0
+ep.marked e1 i:0
+ep.step e2 i:-11
+ep.step e1 i:30
+ps.changed st i:276876
+ep.step e0 i:-18
+ep.move e0 f:0.895
+ep.step e1 i:-15
+ep.step e0 i:22
+ep.step e1 i:13
+ep.outputs e0 f:0.029
+ep.candidateShown e1
+ep.step e2 i:-8
+ep.nextPage e1
+ep.move e2 f:0.614
+ps.changed st i:278584
+ep.step e0 i:22
+ep.move e0 f:0.971092169725
+ep.state e2
+ep.outputs e2 f:0.315
+ep.move e2 f:-0.2660821065684096
+ep.marked e2 i:3
+ep.outputs e1 f:1.41727845358
+ep.setCandidate e2 b:False
+ps.changed st i:280411
+ep.step e0 i:-3
+ep.step e1 i:-10
+ep.outputs e0 f:0.648007288725399
+ep.step e0 i:-15
+ep.setCandidate e1 b:True
+ep.startChoosing e0
+ep.outputs e2 f:-0.21287229866
+ep.step e0 i:-23
+ep.step e0 i:-16
+ep.nextPage e2
+ep.outputs e1 f:-0.5
+ep.outputs e2 f:1.156773463475126
+ep.setCandidate e2 b:False
+ep.outputs e1 f:-0.380465307
+ep.step e1 i:-20
+ep.startChoosing e1
+ep.move e2 f:-0.0527714414083078
+ep.state e2
+ep.setCandidate e0 b:False
+ep.state e2
+ep.move e1 f:0.72
+ep.step e1 i:-30
+ep.outputs e0 i:1
+ep.marked e1 i:5
+ep.outputs e2 f:-0.3
+ep.outputs e0 f:2.675
+ep.step e1 i:12
+ep.step e0 i:23
+ep.outputs e1 f:-0.0
+ep.move e1 i:4
+ep.commitCandidate e2
+ps.changed st i:286263
+ps.changed st i:286568
+ep.move e0 f:-0.3
+ep.startChoosing e0
+ep.move e2 f:0.66085496407968
+ps.saveIfDue st i:287051 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.setCandidate e1 b:True
+ep.setCandidate e2 b:False
+ep.state e1
+ep.nextPage e1
+ep.state e2
+ep.setCandidate e1 b:True
+ep.step e2 i:-9
+ep.step e0 i:-18
+ep.step e1 i:-18
+ep.step e0 i:8
+ep.step e2 i:-6
+ep.move e1 f:0.5854650237965346
+ep.startChoosing e0
+ep.state e0
+ep.step e2 i:-7
+ep.outputs e1 f:1.449878161661638
+ep.step e1 i:-16
+ep.startChoosing e0
+ep.setCandidate e2 b:False
+ep.step e1 i:-22
+ep.colour e1 i:1
+ep.outputs e2 f:0.7334
+ep.step e0 i:-28
+ep.state e0
+ep.colour e1 i:1
+ep.commitCandidate e2
+ep.step e2 i:-16
+ep.step e1 i:20
+ep.step e2 i:21
+ep.step e1 i:28
+ps.saveIfDue st i:291780 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.startChoosing e2
+ep.outputs e1 f:0.5848
+ep.step e2 i:20
+ep.nextPage e2
+ep.step e0 i:-4
+ep.outputs e1 f:0.73175
+ep.nextPage e0
+ep.step e1 i:-25
+ep.marked e2 i:-1
+ep.setCandidate e0 b:True
+ep.step e2 i:22
+ep.nextPage e0
+ep.marked e1 i:0
+ep.outputs e1 f:1.38378120467286
+ep.step e2 i:-2
+ep.setCandidate e2 b:True
+ep.outputs e1 f:0.06793
+ep.step e1 i:12
+ps.changed st i:294704
+ep.move e0 f:1.3233
+ep.step e2 i:11
+ep.step e1 i:-6
+ep.step e0 i:20
+ep.nextPage e1
+ps.saveIfDue st i:295698 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e0 i:-22
+ep.step e1 i:-4
+ep.step e0 i:25
+ep.outputs e2 f:1.4673
+ep.nextPage e0
+ep.nextPage e0
+ep.nextPage e0
+ep.nextPage e2
+ep.state e2
+ep.commitCandidate e1
+ep.outputs e1 f:1.0
+ep.candidateShown e2
+ep.step e1 i:5
+ep.candidateShown e2
+ep.step e2 i:-3
+ep.startChoosing e1
+ep.move e0 f:1.43
+ps.changed st i:299911
+ep.move e2 f:1.314617710516395
+ep.step e1 i:-15
+ep.outputs e0 f:0.24824206
+ep.step e2 i:5
+ep.setCandidate e2 b:False
+ep.step e0 i:7
+ep.candidateShown e0
+ep.move e2 f:0.935206944
+ep.colour e0 i:6
+ps.saveIfDue st i:301632 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e0 i:7
+ep.outputs e0 f:0.8694486491149
+ep.step e2 i:-6
+ep.step e2 i:-1
+ep.setCandidate e2 b:False
+ep.setCandidate e1 b:True
+ps.changed st i:303347
+ps.changed st i:303648
+ep.step e1 i:6
+ep.step e2 i:-29
+ep.setCandidate e2 b:True
+ep.step e1 i:16
+ep.step e0 i:1
+ep.step e2 i:5
+ep.step e2 i:11
+ep.nextPage e1
+ep.outputs e1 f:-0.0
+ps.changed st i:305768
+ep.move e2 f:0.0358318
+ep.state e2
+ep.step e1 i:25
+ep.move e0 f:0.225193826384602
+ep.setCandidate e2 b:False
+ps.changed st i:307239
+ps.saveIfDue st i:307438 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.state e0
+ps.saveIfDue st i:307874 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.nextPage e1
+ps.changed st i:307988
+ep.outputs e2 f:0.5
+ep.nextPage e0
+ep.outputs e1 f:1.09210472879
+ep.step e0 i:-6
+ep.nextPage e1
+ep.setCandidate e0 b:True
+ps.saveIfDue st i:309173 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e1 i:3
+ep.candidateShown e1
+ep.outputs e1 f:0.0631237813096066
+ep.outputs e1 f:0.81021
+ep.step e1 i:12
+ep.move e2 f:-0.33522974139322037
+ep.move e2 f:1e-05
+ep.state e1
+ep.move e0 f:0.51595830260246
+ep.outputs e2 i:4
+ep.setCandidate e2 b:True
+ep.marked e0 i:7
+ep.nextPage e2
+ep.step e0 i:-13
+ep.colour e1 i:1
+ep.step e0 i:6
+ep.colour e1 i:-1
+ep.outputs e2 f:0.590672656
+ep.state e1
+ps.changed st i:312210
+ep.marked e2 i:-2
+ep.step e1 i:-9
+ep.outputs e1 i:2
+ep.nextPage e0
+ep.marked e2 i:0
+ep.outputs e1 f:0.8206305
+ep.nextPage e1
+ep.setCandidate e2 b:True
+ep.step e2 i:-22
+ep.state e0
+ep.step e0 i:-16
+ep.setCandidate e0 b:False
+ep.setCandidate e0 b:False
+ep.candidateShown e1
+ep.outputs e2 f:-0.431500154
+ep.outputs e2 f:2.498598828e-05
+ep.state e2
+ep.step e1 i:18
+ep.setCandidate e1 b:True
+ep.outputs e2 f:0.33189417458955783
+ep.step e2 i:1
+ep.step e2 i:-25
+ep.nextPage e0
+ep.setCandidate e1 b:True
+ep.candidateShown e1
+ep.move e1 f:0.0
+ep.nextPage e2
+ep.setCandidate e0 b:True
+ep.setCandidate e0 b:False
+ep.move e2 f:1.080557685
+ep.colour e2 i:4
+ps.changed st i:318228
+ep.startChoosing e2
+ep.candidateShown e2
+ep.step e2 i:-18
+ep.state e2
+ep.colour e0 i:3
+ep.step e2 i:-14
+ep.move e0 f:-0.11966
+ep.setCandidate e2 b:True
+ep.step e2 i:-3
+ep.state e2
+ep.step e1 i:8
+ep.step e2 i:-22
+ep.step e2 i:18
+ep.move e2 f:0.05218623017649
+ep.nextPage e0
+ep.outputs e0 f:-0.1269
+ep.candidateShown e0
+ep.nextPage e2
+ep.state e2
+ep.commitCandidate e0
+ep.nextPage e2
+ep.state e0
+ep.outputs e0 f:0.4
+ep.nextPage e2
+ep.step e0 i:-9
+ep.state e2
+ep.move e0 f:-0.0
+ep.step e0 i:26
+ep.startChoosing e1
+ep.state e0
+ep.state e0
+ep.step e2 i:9
+ep.nextPage e2
+ep.state e0
+ep.move e1 f:1e-05
+ep.setCandidate e0 b:False
+ps.changed st i:324957
+ep.step e2 i:8
+ps.changed st i:325552
+ep.commitCandidate e2
+ep.setCandidate e2 b:False
+ep.step e0 i:13
+ep.state e0
+ps.saveIfDue st i:326610 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e0 i:25
+ep.nextPage e2
+ep.startChoosing e1
+ps.saveIfDue st i:327157 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e0 i:-27
+ep.outputs e2 f:-0.008559635
+ep.step e2 i:-27
+ep.outputs e0 f:0.3162
+ep.candidateShown e0
+ep.commitCandidate e1
+ep.setCandidate e0 b:True
+ep.marked e2 i:4
+ep.nextPage e0
+ep.step e2 i:24
+ep.outputs e0 f:0.67487227477
+ep.step e1 i:-5
+ep.step e0 i:-21
+ep.move e2 f:-0.37088
+ep.nextPage e1
+ep.candidateShown e1
+ep.outputs e1 f:-0.1
+ep.step e2 i:19
+ps.changed st i:330353
+ep.nextPage e1
+ep.step e1 i:-17
+ep.startChoosing e2
+ep.step e2 i:-8
+ep.move e1 f:1.0
+ep.state e0
+ep.candidateShown e0
+ep.step e0 i:22
+ep.outputs e2 f:0.70325784354038
+ps.changed st i:332941
+ep.setCandidate e2 b:True
+ep.step e2 i:0
+ep.step e2 i:11
+ep.state e2
+ep.step e1 i:11
+ep.move e0 f:-0.40622019637728135
+ep.nextPage e1
+ep.state e1
+ep.step e0 i:25
+ep.step e0 i:-30
+ep.outputs e0 f:-0.0
+ps.changed st i:334848
+ep.colour e2 i:5
+ep.state e0
+ep.state e1
+ep.step e2 i:11
+ep.setCandidate e2 b:True
+ep.commitCandidate e2
+ep.startChoosing e2
+ep.move e0 f:1.3784671066411
+ep.nextPage e2
+ep.nextPage e1
+ep.outputs e0 f:-0.4250379770978
+ep.step e2 i:-21
+ep.step e2 i:-9
+ep.nextPage e0
+ep.state e1
+ep.colour e1 i:1
+ep.state e2
+ep.step e1 i:12
+ep.nextPage e0
+ep.setCandidate e1 b:True
+ep.step e0 i:-28
+ep.step e2 i:30
+ep.step e0 i:-17
+ep.nextPage e0
+ep.outputs e1 f:-0.378869354438559
+ep.step e0 i:-26
+ep.nextPage e2
+ep.step e0 i:10
+ep.startChoosing e2
+ep.state e0
+ep.step e1 i:13
+ep.step e0 i:10
+ep.outputs e0 f:-0.12085920866063
+ep.state e0
+ep.step e2 i:7
+ep.outputs e0 i:0
+ep.step e0 i:9
+ps.saveIfDue st i:341664 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.setCandidate e1 b:False
+ep.step e1 i:-5
+ep.outputs e0 f:0.043551798101
+ep.step e0 i:11
+ep.step e2 i:-30
+ep.step e2 i:-1
+ep.commitCandidate e0
+ep.outputs e2 i:5
+ep.setCandidate e1 b:True
+ep.setCandidate e2 b:False
+ep.step e0 i:-17
+ep.state e0
+ep.marked e0 i:1
+ps.saveIfDue st i:344455 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.outputs e1 f:-0.1129743
+ep.move e1 f:1.13249728480258
+ep.step e1 i:-13
+ep.step e0 i:15
+ep.move e0 i:-1
+ep.outputs e0 i:0
+ep.outputs e2 f:1.0
+ep.step e1 i:-3
+ep.startChoosing e2
+ep.move e2 i:-2
+ep.move e0 i:3
+ep.step e1 i:14
+ep.marked e0 i:-2
+ep.step e1 i:-12
+ep.candidateShown e2
+ep.step e2 i:29
+ep.outputs e2 f:1.3893060839
+ep.outputs e1 f:0.8435
+ep.step e1 i:20
+ep.candidateShown e2
+ep.state e0
+ep.nextPage e2
+ep.state e0
+ep.move e1 f:1.0
+ep.step e0 i:-18
+ep.move e0 f:0.746133886541053
+ep.colour e1 i:-1
+ep.step e0 i:-19
+ep.startChoosing e0
+ps.changed st i:350242
+ep.step e1 i:-5
+ep.nextPage e2
+ep.step e1 i:-11
+ep.setCandidate e1 b:True
+ep.colour e1 i:2
+ep.startChoosing e1
+ep.outputs e0 i:2
+ep.outputs e1 i:4
+ep.nextPage e2
+ep.outputs e0 i:0
+ep.nextPage e2
+ep.candidateShown e2
+ep.outputs e0 f:0.44518472948392
+ep.candidateShown e2
+ps.changed st i:354125
+ep.state e1
+ep.move e2 f:-0.0
+ep.outputs e2 f:-0.00046174730591
+ep.step e1 i:-23
+ep.nextPage e2
+ep.step e0 i:-6
+ep.state e1
+ep.nextPage e0
+ep.step e1 i:-18
+ep.step e0 i:-29
+ep.step e1 i:30
+ps.saveIfDue st i:356757 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.marked e1 i:5
+ep.step e0 i:-11
+ep.step e1 i:11
+ep.setCandidate e2 b:True
+ep.step e0 i:5
+ep.nextPage e1
+ep.outputs e0 f:-0.0374
+ep.move e0 f:0.326367571
+ep.step e2 i:-20
+ep.step e1 i:5
+ep.step e2 i:-17
+ep.outputs e0 f:0.4
+ep.outputs e2 f:-0.067982
+ep.step e1 i:-24
+ep.nextPage e2
+ep.outputs e0 f:0.83
+ep.nextPage e1
+ep.outputs e0 f:1.2453
+ep.step e0 i:-9
+ep.step e2 i:27
+ep.step e0 i:16
+ep.step e2 i:-22
+ps.changed st i:360785
+ep.step e1 i:-18
+ep.step e1 i:25
+ep.step e1 i:-25
+ep.setCandidate e1 b:False
+ep.outputs e0 f:-0.4508
+ep.step e2 i:-27
+ep.outputs e2 f:1.07290564452
+ep.outputs e0 f:-0.5
+ep.step e2 i:4
+ep.step e1 i:17
+ep.step e0 i:11
+ep.step e0 i:-25
+ep.step e2 i:-6
+ep.step e1 i:-16
+ep.commitCandidate e2
+ep.outputs e1 f:1.2
+ep.state e1
+ep.outputs e0 f:0.5
+ep.step e2 i:5
+ep.outputs e1 f:0.9557
+ep.marked e2 i:2
+ep.step e0 i:1
+ep.nextPage e2
+ep.state e1
+ep.commitCandidate e2
+ep.step e2 i:17
+ep.outputs e1 f:0.3543338594
+ep.outputs e1 f:0.68800805
+ep.step e0 i:-9
+ep.step e1 i:3
+ep.move e0 f:0.67346226255618
+ps.saveIfDue st i:368246 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.colour e1 i:5
+ep.step e1 i:0
+ep.candidateShown e1
+ep.step e2 i:6
+ep.candidateShown e1
+ep.startChoosing e2
+ep.outputs e0 i:3
+ep.candidateShown e0
+ep.startChoosing e2
+ep.step e1 i:24
+ep.setCandidate e0 b:False
+ep.outputs e0 f:1.123438086938677
+ep.step e0 i:21
+ep.marked e0 i:-2
+ep.commitCandidate e1
+ep.state e2
+ep.step e0 i:23
+ep.nextPage e1
+ep.outputs e2 i:3
+ep.startChoosing e2
+ep.state e0
+ep.startChoosing e0
+ep.step e2 i:2
+ep.state e1
+ep.step e0 i:8
+ep.state e1
+ep.marked e2 i:6
+ep.outputs e1 f:-0.0
+ep.outputs e1 f:0.5916848840071585
+ps.saveIfDue st i:374324 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e0 i:27
+ep.outputs e0 i:1
+ep.step e2 i:-20
+ep.step e2 i:3
+ep.step e2 i:1
+ep.step e2 i:-5
+ep.startChoosing e0
+ep.step e2 i:14
+ep.outputs e1 f:0.08
+ep.state e2
+ep.step e2 i:10
+ep.step e1 i:-2
+ep.step e1 i:12
+ep.step e1 i:24
+ep.step e1 i:-26
+ep.nextPage e0
+ep.startChoosing e2
+ep.state e2
+ep.outputs e1 f:-0.0
+ep.startChoosing e2
+ps.saveIfDue st i:377412 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.colour e0 i:6
+ep.move e0 f:0.3333333333333333
+ep.outputs e1 f:1.280181348865
+ep.nextPage e1
+ep.state e2
+ep.step e1 i:26
+ep.nextPage e0
+ep.step e1 i:-2
+ps.saveIfDue st i:378274 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.outputs e0 i:4
+ep.step e1 i:-13
+ep.nextPage e0
+ep.nextPage e2
+ep.move e2 f:-0.179841634324
+ep.step e0 i:0
+ep.startChoosing e0
+ps.changed st i:379623
+ep.step e1 i:26
+ep.outputs e2 f:-0.0
+ep.setCandidate e2 b:True
+ep.marked e2 i:6
+ep.state e0
+ep.marked e0 i:6
+ep.step e2 i:23
+ep.setCandidate e2 b:False
+ep.marked e2 i:6
+ep.step e0 i:2
+ep.step e1 i:15
+ep.move e0 f:1.3844
+ep.colour e1 i:6
+ep.move e2 i:3
+ep.step e0 i:-5
+ep.outputs e2 i:3
+ep.step e0 i:-20
+ep.colour e2 i:6
+ep.step e2 i:24
+ep.step e2 i:-14
+ep.step e0 i:14
+ep.move e2 i:1
+ep.setCandidate e2 b:False
+ep.step e2 i:-13
+ep.step e0 i:-10
+ep.setCandidate e2 b:True
+ep.outputs e2 f:1.2724906373
+ep.outputs e0 f:0.444408334096
+ep.candidateShown e0
+ep.commitCandidate e2
+ep.move e1 f:1.5
+ep.colour e0 i:1
+ep.step e1 i:-26
+ep.setCandidate e0 b:True
+ep.outputs e2 f:0.88
+ep.step e1 i:30
+ep.step e1 i:-12
+ep.outputs e2 f:0.98
+ep.step e0 i:20
+ep.step e2 i:16
+ep.step e0 i:-16
+ep.nextPage e1
+ep.marked e0 i:5
+ep.step e2 i:-1
+ep.outputs e0 i:2
+ep.state e0
+ep.setCandidate e2 b:True
+ep.candidateShown e2
+ep.nextPage e0
+ep.setCandidate e0 b:True
+ep.step e1 i:-25
+ep.step e0 i:28
+ep.outputs e1 f:-0.1246612198681
+ep.outputs e1 i:2
+ep.startChoosing e1
+ep.outputs e2 f:1.2016642021938
+ep.move e0 f:0.983478730763
+ep.state e2
+ep.startChoosing e2
+ep.step e1 i:21
+ep.step e1 i:-15
+ep.outputs e1 f:0.750514251888922
+ep.move e1 f:-0.17833511994071682
+ep.step e2 i:-7
+ep.outputs e0 f:1.21277772198041
+ep.setCandidate e0 b:False
+ep.step e2 i:3
+ep.nextPage e1
+ep.startChoosing e1
+ep.step e2 i:-21
+ep.outputs e1 f:-0.0177
+ep.outputs e1 f:1.297287
+ep.commitCandidate e2
+ep.outputs e0 i:5
+ep.startChoosing e1
+ep.step e1 i:13
+ep.nextPage e2
+ep.step e0 i:13
+ep.step e1 i:-13
+ep.candidateShown e0
+ep.setCandidate e1 b:False
+ps.changed st i:397216
+ep.outputs e1 f:0.097
+ep.nextPage e0
+ep.startChoosing e1
+ep.move e1 f:1.101
+ep.candidateShown e1
+ep.step e2 i:29
+ep.outputs e1 f:0.09962089391161
+ps.changed st i:399000
+ep.move e0 f:0.011127045794
+ep.setCandidate e2 b:False
+ep.step e0 i:-14
+ep.move e0 i:4
+ep.setCandidate e1 b:True
+ep.step e0 i:-26
+ep.nextPage e1
+ep.move e1 f:1.286
+ep.setCandidate e1 b:False
+ep.step e1 i:22
+ep.outputs e1 f:0.0012594152947671
+ep.move e1 f:1.2560090662737882
+ep.state e2
+ps.changed st i:401935
+ep.outputs e1 i:-2
+ep.move e0 f:0.6598226
+ep.startChoosing e2
+ep.nextPage e0
+ep.state e0
+ep.outputs e0 f:1.276712898153
+ep.startChoosing e1
+ep.step e2 i:0
+ep.outputs e0 f:1.0276823622186544
+ep.step e2 i:-30
+ep.step e1 i:-22
+ep.state e0
+ep.step e2 i:22
+ep.outputs e1 f:0.99665004353
+ep.state e1
+ep.step e0 i:-19
+ep.step e0 i:22
+ep.move e2 i:5
+ep.step e2 i:3
+ep.step e1 i:-14
+ep.step e2 i:-11
+ep.step e2 i:-1
+ep.nextPage e2
+ep.outputs e2 f:1.3
+ep.startChoosing e0
+ep.move e2 i:5
+ep.startChoosing e2
+ep.outputs e0 f:0.61
+ep.state e2
+ep.step e1 i:8
+ep.step e0 i:-11
+ep.move e1 f:1.25474
+ep.outputs e1 f:1.10365824953
+ep.candidateShown e1
+ep.state e0
+ep.move e2 f:1.124705
+ep.step e0 i:23
+ep.state e1
+ep.step e0 i:-21
+ep.candidateShown e2
+ep.step e0 i:-20
+ep.move e0 f:1.333639122450744
+ep.step e0 i:-18
+ep.outputs e2 f:0.57297750818051
+ep.marked e2 i:6
+ep.step e1 i:-13
+ep.step e1 i:21
+ep.marked e0 i:4
+ep.outputs e0 i:3
+ep.step e0 i:16
+ep.outputs e1 f:0.6385
+ep.outputs e2 i:2
+ep.step e1 i:-22
+ep.setCandidate e1 b:True
+ep.outputs e2 i:2
+ep.candidateShown e0
+ps.changed st i:412988
+ep.outputs e1 f:-0.053
+ep.step e0 i:18
+ep.outputs e1 f:1.37570125
+ps.changed st i:413803
+ep.state e1
+ep.step e1 i:2
+ep.setCandidate e2 b:False
+ep.step e1 i:-23
+ep.outputs e2 f:-0.135680192
+ps.saveIfDue st i:415269 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e0 i:18
+ep.marked e2 i:5
+ep.step e2 i:0
+ep.step e0 i:12
+ep.colour e1 i:4
+ep.step e1 i:22
+ep.state e0
+ep.step e2 i:-21
+ep.step e1 i:-28
+ep.step e2 i:-27
+ep.commitCandidate e2
+ep.startChoosing e1
+ep.nextPage e2
+ep.step e1 i:10
+ps.changed st i:418660
+ep.step e2 i:25
+ep.marked e2 i:3
+ep.move e0 f:1.17348534119032
+ep.outputs e2 f:-0.30435846117
+ep.move e1 f:2.675
+ep.move e2 f:1.0
+ep.colour e2 i:0
+ep.state e0
+ep.setCandidate e1 b:False
+ep.move e1 f:0.636953255006
+ep.setCandidate e0 b:True
+ep.step e0 i:0
+ep.nextPage e2
+ep.setCandidate e0 b:True
+ep.move e1 f:-0.281625364
+ep.setCandidate e0 b:False
+ep.state e1
+ep.nextPage e1
+ep.step e0 i:13
+ep.step e2 i:10
+ep.candidateShown e1
+ep.step e2 i:-3
+ep.setCandidate e2 b:False
+ps.changed st i:423578
+ep.outputs e1 f:0.84341967021
+ep.setCandidate e2 b:False
+ep.outputs e0 f:1.359
+ep.candidateShown e1
+ep.setCandidate e0 b:False
+ep.outputs e2 f:0.3473943783727147
+ep.setCandidate e1 b:True
+ep.outputs e1 f:0.5486721613591725
+ep.nextPage e0
+ep.step e1 i:-4
+ep.step e0 i:-7
+ep.step e1 i:15
+ps.changed st i:425883
+ep.outputs e0 i:-1
+ep.outputs e0 f:1.48247
+ep.step e2 i:-25
+ep.step e0 i:5
+ep.setCandidate e1 b:True
+ep.setCandidate e2 b:False
+ep.step e0 i:-29
+ep.marked e2 i:5
+ep.state e2
+ep.step e1 i:-20
+ep.marked e1 i:0
+ep.step e1 i:-21
+ep.candidateShown e0
+ep.marked e2 i:-1
+ep.state e1
+ep.step e2 i:-16
+ep.step e1 i:24
+ep.step e2 i:-2
+ep.step e0 i:30
+ep.nextPage e1
+ep.nextPage e1
+ep.step e1 i:2
+ep.state e2
+ps.changed st i:431950
+ep.state e1
+ep.outputs e1 f:1.0
+ep.step e1 i:-4
+ep.step e0 i:-27
+ps.saveIfDue st i:432689 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.nextPage e1
+ep.state e2
+ep.setCandidate e1 b:False
+ep.outputs e0 f:0.88
+ep.outputs e2 f:0.3678145896
+ep.state e2
+ep.step e2 i:9
+ep.state e2
+ep.step e0 i:3
+ep.outputs e2 f:1.050386798757
+ep.setCandidate e2 b:False
+ep.step e0 i:17
+ep.outputs e1 f:-0.22
+ep.state e2
+ep.state e2
+ep.outputs e0 f:0.027495535
+ep.state e0
+ep.nextPage e2
+ep.setCandidate e2 b:False
+ep.step e1 i:-18
+ep.outputs e2 f:1.4948158
+ep.setCandidate e2 b:True
+ep.step e0 i:4
+ep.step e0 i:-25
+ep.move e2 i:-3
+ep.step e1 i:30
+ep.step e0 i:13
+ps.saveIfDue st i:438392 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.nextPage e2
+ep.outputs e1 f:1.35
+ep.setCandidate e1 b:True
+ep.step e0 i:-4
+ps.saveIfDue st i:439566 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.colour e1 i:4
+ep.nextPage e1
+ep.candidateShown e2
+ep.step e2 i:5
+ep.outputs e1 f:1.24446
+ep.state e2
+ep.step e1 i:-23
+ep.setCandidate e0 b:True
+ep.step e1 i:6
+ep.step e0 i:14
+ep.outputs e1 f:0.57836
+ep.marked e1 i:-2
+ps.changed st i:442291
+ep.move e2 i:0
+ep.step e0 i:9
+ep.step e2 i:2
+ep.step e1 i:-4
+ep.candidateShown e0
+ep.marked e1 i:2
+ep.step e0 i:-9
+ep.nextPage e0
+ep.setCandidate e1 b:False
+ep.step e1 i:-16
+ep.nextPage e0
+ep.startChoosing e1
+ep.step e0 i:-17
+ep.step e0 i:19
+ep.setCandidate e1 b:False
+ep.step e2 i:-19
+ps.changed st i:446117
+ep.move e0 i:-2
+ep.move e2 f:-0.43
+ep.outputs e1 f:0.98158227977807
+ep.commitCandidate e0
+ep.state e0
+ep.step e2 i:29
+ep.startChoosing e0
+ep.candidateShown e0
+ep.step e0 i:18
+ep.state e1
+ep.state e1
+ep.outputs e0 f:0.7339158
+ep.commitCandidate e2
+ep.step e0 i:-10
+ep.candidateShown e0
+ep.step e2 i:-17
+ep.outputs e2 i:-2
+ps.changed st i:449503
+ep.startChoosing e2
+ep.nextPage e2
+ep.step e2 i:-21
+ps.changed st i:450693
+ep.nextPage e1
+ep.nextPage e1
+ep.outputs e2 f:0.726372544179
+ep.outputs e1 f:0.01
+ep.outputs e2 f:0.728172
+ep.move e0 f:0.31415646228632
+ep.step e0 i:-1
+ep.step e1 i:13
+ep.step e1 i:-2
+ep.move e2 f:0.9700494
+ep.nextPage e1
+ep.step e2 i:-23
+ep.step e0 i:-29
+ep.commitCandidate e2
+ep.outputs e0 f:-0.3336
+ep.step e0 i:-3
+ep.step e1 i:13
+ep.outputs e0 f:0.5478614833141
+ep.step e2 i:-29
+ep.outputs e0 f:0.17566790928864
+ep.state e1
+ep.step e0 i:-30
+ep.state e1
+ep.outputs e1 f:0.953
+ep.commitCandidate e0
+ep.step e1 i:13
+ep.outputs e2 f:-0.4360116124248072
+ep.marked e0 i:2
+ep.move e0 f:-0.047198235
+ep.step e1 i:3
+ep.nextPage e0
+ep.step e2 i:16
+ep.setCandidate e2 b:True
+ep.startChoosing e1
+ep.colour e0 i:6
+ep.nextPage e0
+ep.outputs e1 f:0.85
+ep.outputs e0 f:0.139902
+ep.step e2 i:-23
+ep.startChoosing e1
+ep.outputs e2 f:-0.38
+ep.step e1 i:-3
+ep.step e2 i:-9
+ep.outputs e0 f:1.0
+ep.step e1 i:14
+ep.nextPage e1
+ep.nextPage e2
+ep.step e2 i:6
+ep.move e2 f:0.4183
+ep.nextPage e0
+ep.nextPage e1
+ep.step e2 i:23
+ep.step e0 i:-9
+ep.setCandidate e2 b:False
+ep.setCandidate e2 b:True
+ep.outputs e0 f:0.183614
+ps.changed st i:460754
+ep.commitCandidate e0
+ep.move e0 i:2
+ep.marked e0 i:7
+ps.changed st i:461508
+ps.changed st i:461595
+ep.step e0 i:-29
+ep.nextPage e1
+ep.nextPage e2
+ep.outputs e0 f:1.07889581839938
+ps.changed st i:462328
+ep.startChoosing e0
+ep.nextPage e2
+ep.step e0 i:20
+ep.step e0 i:-5
+ep.nextPage e2
+ep.step e2 i:12
+ep.step e1 i:-28
+ep.step e2 i:-2
+ep.nextPage e2
+ep.startChoosing e2
+ep.step e2 i:22
+ep.state e2
+ps.changed st i:464430
+ep.outputs e0 f:0.5
+ep.colour e1 i:6
+ep.step e0 i:-28
+ep.outputs e2 f:1.0
+ps.changed st i:465263
+ps.changed st i:465471
+ep.step e2 i:-25
+ep.nextPage e0
+ep.state e1
+ep.nextPage e2
+ep.state e0
+ep.step e0 i:1
+ep.step e0 i:16
+ep.state e2
+ep.colour e1 i:-1
+ep.step e1 i:12
+ep.outputs e0 i:2
+ep.outputs e1 i:-2
+ep.state e0
+ep.step e0 i:11
+ep.nextPage e0
+ep.move e2 f:0.516
+ep.outputs e2 i:1
+ep.nextPage e0
+ep.outputs e1 f:1.42051287
+ep.move e1 i:1
+ep.nextPage e1
+ep.step e0 i:18
+ep.move e0 f:-0.468829
+ep.outputs e0 i:5
+ep.state e1
+ep.outputs e1 f:1.25674399679
+ep.step e1 i:17
+ep.candidateShown e0
+ep.step e2 i:-6
+ep.state e2
+ep.setCandidate e0 b:False
+ep.candidateShown e0
+ep.setCandidate e0 b:False
+ep.step e1 i:18
+ep.step e0 i:5
+ep.step e0 i:23
+ep.outputs e1 f:0.489329556395
+ep.step e2 i:19
+ep.step e2 i:-4
+ep.step e2 i:-8
+ep.step e1 i:-6
+ep.step e0 i:25
+ep.step e0 i:-2
+ep.setCandidate e1 b:True
+ep.step e2 i:-29
+ep.outputs e1 f:0.81178322239012
+ep.commitCandidate e2
+ep.move e1 f:1.307592483113
+ep.step e2 i:-13
+ep.move e1 f:-0.225
+ep.setCandidate e1 b:True
+ep.step e2 i:14
+ep.step e2 i:-7
+ep.step e1 i:-6
+ps.changed st i:475594
+ep.step e1 i:30
+ep.marked e1 i:-1
+ep.nextPage e0
+ep.candidateShown e1
+ep.outputs e1 f:0.38
+ep.outputs e1 f:0.125
+ps.changed st i:477013
+ep.outputs e0 f:1.325843429
+ep.state e0
+ep.step e0 i:5
+ep.step e0 i:-14
+ep.step e0 i:1
+ep.move e1 f:0.57635783370305
+ep.step e2 i:-25
+ep.state e1
+ep.step e2 i:21
+ep.commitCandidate e0
+ep.state e1
+ep.setCandidate e1 b:True
+ep.candidateShown e1
+ep.step e1 i:-6
+ep.nextPage e0
+ep.outputs e1 i:0
+ep.nextPage e1
+ep.move e2 f:-0.3356270887
+ep.outputs e2 f:-0.127366396868
+ep.nextPage e0
+ep.step e2 i:-22
+ep.commitCandidate e2
+ep.nextPage e0
+ep.setCandidate e0 b:True
+ep.step e0 i:-6
+ep.marked e1 i:4
+ep.step e2 i:2
+ep.step e1 i:-19
+ep.nextPage e0
+ep.setCandidate e2 b:True
+ps.saveIfDue st i:484200 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.step e0 i:-6
+ep.outputs e2 f:1.0
+ep.step e2 i:3
+ep.outputs e0 f:1.4782294674
+ep.step e0 i:-11
+ep.step e0 i:-15
+ep.step e1 i:-10
+ep.step e1 i:-18
+ep.nextPage e1
+ep.setCandidate e1 b:True
+ep.outputs e1 f:-0.233353
+ep.state e0
+ep.outputs e1 i:2
+ep.nextPage e0
+ep.state e2
+ep.outputs e1 f:1.1653194088579075
+ep.nextPage e1
+ep.step e0 i:-17
+ep.step e2 i:0
+ep.outputs e2 f:1.0551758106777251
+ep.state e1
+ep.candidateShown e0
+ep.outputs e0 i:-3
+ep.candidateShown e1
+ep.startChoosing e1
+ep.nextPage e1
+ep.commitCandidate e0
+ps.saveIfDue st i:489429 speed=e0,pitch=e1
+file.read pages/fuzz.pages
+ep.outputs e0 i:4
+ep.colour e2 i:7
+ep.setCandidate e0 b:False
+ps.changed st i:490430
+ep.step e0 i:-13
+ep.outputs e2 f:0.5
+ep.outputs e2 f:-0.4383889
+ep.state e2
+ep.nextPage e0
+ep.move e0 f:0.305432603935
+ep.outputs e0 f:0.2455191
+ep.outputs e2 f:0.2087938140683736
+ep.step e0 i:10
+ep.setCandidate e0 b:True
+ep.move e2 f:0.185238013141968
+ep.nextPage e2
+ep.startChoosing e0
+ps.changed st i:492921
+ep.outputs e1 f:0.9
+ep.nextPage e0
+ep.step e1 i:2
+ep.commitCandidate e1
+ep.state e1
+ep.step e1 i:-23
+ep.commitCandidate e2
+ep.step e2 i:-5
+ep.state e2
+ep.colour e1 i:1
+ps.changed st i:495076
+ep.nextPage e0
+ep.state e1
+ep.nextPage e0
+ep.move e2 f:1.117
+ep.step e0 i:15
+ep.step e0 i:-5
+ep.step e1 i:10
+ep.step e1 i:28
+ep.outputs e0 f:1.485002796
+ep.candidateShown e0
+ep.state e0
+ep.setCandidate e2 b:False
+ep.marked e2 i:6
+ep.step e0 i:15
+ep.colour e0 i:4
+ps.save st speed=e0,pitch=e1
+pg.new l0 n1 x f:0.0 f:1.0 lin f:0.0
+pg.new l1 n2 x f:0.0 f:1.0 lin f:0.0
+ep.new le speed l0,l1 None
+ps.load st speed=le
+ep.state le

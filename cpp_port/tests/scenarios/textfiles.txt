@@ -1,0 +1,166 @@
+# textfile.py and fatal.py: UTF-8 with or without a BOM, any line end; any
+# other encoding stops Nebulae (fatal on) or raises BadTextFile (fatal off,
+# as in NebFile).
+# --- textfile: what is read ---------------------------------------------------
+file.bytes bom.txt efbbbf 613d310a 623d32
+tf.read bom.txt
+tf.lines bom.txt
+file.bytes ends.txt 610d0a 620d 630a 64
+tf.read ends.txt
+tf.lines ends.txt
+file.bytes ends2.txt 0d0d0a0a0d
+tf.lines ends2.txt
+file.bytes utf8.txt c3a5 20 f09f8eb9 20 e280a8 20 610062 0a
+tf.read utf8.txt
+tf.lines utf8.txt
+file.bytes empty.txt
+tf.read empty.txt
+tf.lines empty.txt
+file.bytes onlybom.txt efbbbf
+tf.read onlybom.txt
+tf.lines onlybom.txt
+file.bytes twobom.txt efbbbf efbbbf 61
+tf.read twobom.txt
+tf.read nosuch.txt
+mkdir adir
+tf.read adir
+# --- textfile: not UTF-8, fatal off --------------------------------------------
+file.bytes latin1.txt 61e562
+tf.read latin1.txt
+tf.lines latin1.txt
+file.bytes overlong.txt c080
+tf.read overlong.txt
+file.bytes overlong3.txt e08080
+tf.read overlong3.txt
+file.bytes surrogate.txt eda080
+tf.read surrogate.txt
+file.bytes toobig.txt f4908080
+tf.read toobig.txt
+file.bytes f5.txt f5808080
+tf.read f5.txt
+file.bytes cut.txt 61e282
+tf.read cut.txt
+file.bytes cont.txt 6180
+tf.read cont.txt
+file.bytes ff.txt ff
+tf.read ff.txt
+file.bytes max.txt f48fbfbf
+tf.read max.txt
+# --- the classes with a BOM, \r\n and Unicode spaces ----------------------------
+file.bytes configsettings.txt efbbbf 776966693d6f6e0a 6c65645f64696d3d c2a0 302e3335 e28083 0d0a 6e6f5f70776d3d6f6e0d
+cfg.new c
+cfg.props c
+file.bytes defaultnebsettings.txt efbbbf 73706565642c302e3632350a 6e616d652c6772616e756c6172c2a00d0a 7069746368c2a02c302e350a
+cfgdata None
+set.new s
+set.read s
+set.dicts s
+file.bytes nebulae.opt efbbbf 5b615d0a 62203d2031 e38080 0a 63203d c2a0 320a
+ini.new i
+ini.get i a b None
+ini.get i a c None
+pg.new q1 rev /neb/page/rev f:0.0 f:1.0 lin f:0.0
+pg.new q2 mix /neb/page/mix f:0.0 f:1.0 lin f:0.0
+ep.new pi pitch q1,q2 None
+file.bytes bom.pages efbbbf 76616c75652c70697463682c7265762c302e37350d0a 63762c70697463682c726576 e280a8 76616c75652c70697463682c6d69782c302e3235
+ps.new pb bom.pages
+ps.load pb pitch=pi
+ep.state pi
+# --- fatal off (NebFile): a bad file is like an unreadable one ------------------
+file.bytes configsettings.txt 776966693d6f6e0a e5
+cfg.new cn
+cfg.props cn
+file.bytes bad.pages 76616c75652c70697463682c7265762c302e3135e50a
+ps.new pn bad.pages
+ps.load pn pitch=pi
+ep.state pi
+ls .
+# --- fatal on: a system file, no stick ------------------------------------------
+fatal.on
+stick.mountable 0
+cfg.new c2
+ls .
+file.read configsettings.txt
+# a BOM counts in the byte position
+file.rm nebulae-fatal
+file.bytes cmdline.txt efbbbf 61e5
+cfg.syncCmdline c
+# --- fatal on: a system file, the stick mounts ----------------------------------
+file.rm nebulae-fatal
+mkdir stick
+stick.mountable 1
+file.bytes defaultnebsettings.txt 73706565642c30e5
+set.new s2
+set.read s2
+ls stick
+file.read stick/neb_error.txt
+file.read defaultnebsettings.txt
+# --- which files belong to an instrument ----------------------------------------
+mkdir sc
+mkdir prog
+mkdir instr
+mkdir pd
+file.write sc/x.scd s
+file.write stick/y.prog p
+tf.instrument sc/x.scd
+tf.instrument sc/x.pages
+tf.instrument sc/x.state
+tf.instrument sc/new.scd
+tf.instrument sc/x.txt
+tf.instrument sc/.pages
+tf.instrument instr/z.instr
+tf.instrument instr/z.pages
+tf.instrument pd/p.pd
+tf.instrument prog/r.prog
+tf.instrument sc/../sc/x.scd
+tf.instrument stick/x.scd
+tf.instrument stick/y.pages
+tf.instrument stick/q.pages
+tf.instrument stick/y.scd
+tf.instrument stick/y.txt
+tf.instrument configsettings.txt
+tf.instrument stick/sub/x.scd
+# --- fatal on: an instrument's .pages on the Pi, stick already mounted ----------
+file.rm nebulae-fatal
+file.write sc/foo.scd //\_synth
+file.write sc/foo.state 1
+file.bytes sc/foo.pages 76616c75652c7069746368e5
+file.write sc/bar.scd //\_other
+file.write sc/bar.pages value,pitch,rev,0.5
+file.write stick/foo.scd //\_synth
+file.write stick/foo.pages value
+file.write stick/bar.scd //\_other
+stick.mounted 1
+ps.new pf sc/foo.pages
+ps.load pf pitch=pi
+ls sc
+ls stick
+ls .
+file.read stick/neb_error.txt
+# --- fatal on: an instrument's main file on the stick -----------------------------
+file.rm nebulae-fatal
+file.write prog/baz.prog run,baz
+file.write prog/baz.pages cv,pitch,none
+file.bytes stick/baz.prog 72756e2c62617ae5
+file.write stick/baz.pages cv,pitch,none
+file.write stick/baz baz
+stick.mounted 1
+tf.read stick/baz.prog
+ls prog
+ls stick
+file.read stick/neb_error.txt
+# --- fatal on: an instrument, no stick: deleted on the Pi only --------------------
+file.rm nebulae-fatal
+stick.mounted 0
+stick.mountable 0
+file.write instr/i1.instr ok
+file.bytes instr/i1.pages ff
+tf.lines instr/i1.pages
+ls instr
+# --- WaveWriter's counter with a BOM and \r\n --------------------------------------
+file.bytes buffer_cnt.txt efbbbf 34320d0a
+mkdir memory
+wav.new w
+wav.write w i:10 10 tri
+file.read buffer_cnt.txt
+fatal.off

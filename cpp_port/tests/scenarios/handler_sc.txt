@@ -1,0 +1,213 @@
+# controlhandlerSC.py on controlhandlerEncoders.py and controlhandler.py:
+# encoder sources, pages, hold layers, CV assign, the modes, sclang handshakes
+cs.none
+mx.reset lib
+file.write defaultnebsettings.txt speed,0.625|pitch,0.6|start,0|size,0|blend,0|density,0|overlap,0|window,0|reset,0|freeze,0|source,0|record,0|file,0|speed_alt,23|pitch_alt,0|start_alt,0|size_alt,0|blend_alt,0|density_alt,0|overlap_alt,0|window_alt,0.0|reset_alt,0|freeze_alt,0|source_alt,0|record_alt,0|file_alt,0
+file.write p.scd /*|nebconfigbegin|speed,pages|page:speed:cut,/p/cut,100,8000,exp,0.5|page:speed:res,/p/res,0,1,lin,0.2,0.05|cv:speed,cut|hold:record:pitch:echo,/p/echo,0,1,lin,0.3|hold:record:speed:fb,/p/fb,0,2|hold:record+file:pitch:vol,/p/vol,0,10,int,0.5|freeze,triggered,rising|record,momentary,rising|reset,toggle,rising|output_period,50|nebconfigend|*/|SynthDef(\p)
+nc.new c p.scd
+adc 1 1 2000
+adc 1 0 1000
+adc 0 1 2048
+adc 0 4 2048
+h.new h sc 5 p supercollider c
+calls
+h.state h
+h.enc h
+h.chans h
+h.isRaw h s:speed
+h.setConfig h c p.pages
+calls
+h.enc h
+h.pages h
+h.chans h
+h.isRaw h s:pitch
+h.rawChannels h
+h.startScOscServer h
+h.enterSuperColliderMode h
+h.startRawEncoders h
+h.state h
+calls
+# passes: knobs, CV, encoder steps
+time 2000
+h.updateAll h
+calls
+adc 0 1 1000
+ret encoder_steps 2
+advance 0.002
+h.updateAll h
+advance 0.002
+h.updateAll h
+calls
+ret encoder_steps 0
+h.encoderCV h s:speed
+h.pageStep h s:speed i:5
+h.pageJump h s:speed i:-1
+h.nextPage h s:speed
+h.pageStep h s:speed f:2.5
+h.pages h
+advance 0.002
+h.updateAll h
+calls
+h.enc h
+# record held: its layer on the encoders, page steps, a short release
+sr 8
+advance 0.002
+h.updateAll h
+h.enc h
+h.pageStep h s:pitch i:3
+h.pageStep h s:speed i:1
+h.pages h
+advance 0.002
+h.updateAll h
+calls
+sr 0
+advance 0.1
+h.updateAll h
+h.enc h
+calls
+# record held long without turning: no press either
+sr 8
+advance 0.002
+h.updateAll h
+advance 0.6
+h.updateAll h
+sr 0
+advance 0.002
+h.updateAll h
+h.enc h
+calls
+# record, then file: the record+file layer, file's press held back
+sr 8
+advance 0.002
+h.updateAll h
+sr 136
+advance 0.002
+h.updateAll h
+h.enc h
+h.buttonBlocked h s:file
+h.pageStep h s:pitch i:4
+h.pages h
+sr 8
+advance 0.002
+h.updateAll h
+h.enc h
+sr 0
+advance 0.002
+h.updateAll h
+h.enc h
+calls
+# file + reset: choose CV targets, speed's CV to the page shown
+sr 128
+advance 0.002
+h.updateAll h
+sr 129
+advance 0.002
+h.updateAll h
+h.enc h
+h.cvAssignActive h
+h.sendsControl h s:file
+h.sendsControl h s:reset
+h.sendsControl h s:speed
+h.sendsControl h s:size
+h.pageStep h s:speed i:1
+h.nextPage h s:speed
+h.setCvOn h s:speed b:True
+h.setCvOn h s:pitch b:True
+h.pages h
+calls
+sr 1
+advance 0.002
+h.updateAll h
+sr 0
+advance 0.002
+h.updateAll h
+h.enc h
+h.pages h
+calls
+# page state saved after a second
+advance 1.5
+h.updateAll h
+file.read p.pages
+# source held: secondary controls, every channel and alt channel to sclang
+sr 32
+advance 0.002
+h.updateAll h
+advance 0.2
+h.updateAll h
+h.state h
+calls
+adc 1 1 3000
+advance 0.002
+h.updateAll h
+calls
+sr 0
+advance 0.002
+h.updateAll h
+h.state h
+calls
+# instrument selector
+h.enterInstrSelMode h
+h.setInstrSelOffset h i:0
+h.setInstrSelNumFiles h i:3
+sr 128
+advance 0.002
+h.updateAll h
+sr 0
+advance 0.002
+h.updateAll h
+h.getInstrSelIdx h
+h.state h
+calls
+h.enterNormalMode h
+h.state h
+calls
+# sclang handshakes
+ret sc_handshake 1
+h.waitOnScLang h
+calls
+ret sc_handshake 0
+h.waitOnScLang h
+calls
+ret sc_sender_open 1
+ret sc_synth_is_up 1
+h.synthIsUpStatus h
+calls
+# sclang's UDP port
+h.waitForSclangPort h f:0.35
+file.write proc_udp \_sl\_local_address\_rem_address|\_0:\_0100007F:1F90\_00000000:0000|\_1:\_0100007F:0BC2\_00000000:0000
+h.waitForSclangPort h
+file.write proc_udp header|\_0:\_0100007F:1F90|\_|\_1:\_0100007F:0BC2
+file.write proc_udp6 header|\_0:\_00000000000000000000000000000000:0BC2\_x
+h.waitForSclangPort h
+file.write proc_udp
+h.waitForSclangPort h f:0.25
+time 3000
+h.loadScSynth h s:/home/alarm/sc/p.scd
+calls
+h.closeScSynthProcess h
+h.saveInstrument h
+file.read nebsettings.txt
+file.read p.pages
+calls
+# a second instrument: rawencoder, no pages, the old pages saved first
+file.write r.scd nebconfigbegin|speed,rawencoder|pitch,hybrid|freeze,toggle|record,latching,rising|nebconfigend
+nc.new r r.scd
+h.setConfig h r r.pages
+h.chans h
+h.enc h
+h.pages h
+h.isRaw h s:speed
+h.rawChannels h
+h.startRawEncoders h
+h.enterSuperColliderMode h
+h.updateAll h
+calls
+h.closeSockets h
+calls
+# no such encoder source: hybrid
+file.write u.scd nebconfigbegin|speed,granular|nebconfigend
+nc.new u u.scd
+h.setConfig h u u.pages
+h.chans h
+h.pageStep h s:speed i:1
+h.setCvOn h s:speed b:True

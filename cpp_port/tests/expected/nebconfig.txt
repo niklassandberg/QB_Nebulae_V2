@@ -1,0 +1,23 @@
+L4 [[s:speed,[s:pages]],[s:pitch,[s: RawEncoder]],[s:ksmps,[s:64]],[s:sr,[s:48000]],[s:freeze,[s:latching,s:falling]],[s:empty,[]],[s:page:speed:cut,[s:/x/cut,s:100,s:8000,s:exp,s:0.5,s:0.02]],[s:page:speed:res,[s: /x/res ,s:0,s:1]],[s:page:pitch:bad,[s:/x/b,s:a,s:1]],[s:page:speed:dup,[s:/x/d2,s:0,s:2,s:INT,s:2.5,s:1]],[s:cv:speed,[s: res]],[s:cv:pitch,[s:none]],[s:hold:record:speed:echo,[s:/e/v,s:0,s:1,s:lin,s:0.3]],[s:hold:record+file:pitch:vol,[s:/e/vol,s:0,s:1,s:,s:-1]],[s:hold:record+record:pitch:x,[s:/e/x,s:0,s:1]],[s:hold:play:speed:x,[s:/e/x,s:0,s:1]],[s:hold:file+reset+freeze:speed:x,[s:/e/x,s:0,s:1]],[s:hold:reset:pitch:,[s:/e/x,s:0,s:1]],[s:page:speed:st,[s:/x/st,s:0,s:1,s:lin,s:0,s:0]],[s:page:speed:st2,[s:/x/st,s:0,s:1,s:lin,s:0,s:1.5]],[s:page:pitch:c,[s:/x/c,s:0,s:1,s:cubic]],[s:page:pitch:e,[s:/x/e,s:0,s:1,s:exp]],[s:page:pitch:e2,[s:/x/e,s:1,s:10,s:exp,s:nan]],[s:page:pitch:p,[s:x/nopath,s:0,s:1]],[s:page:speed,[]],[s:page:volume:x,[s:/x,s:0,s:1]],[s:page:speed:a:b,[s:/x,s:0,s:1]],[s:hold:record:pitch:bad,[s:/e/b,s:0,s:1,s:lin,s:0,s:1e-9]]]
+L5 [[s:speed,[[s:cut,s:/x/cut,f:100.0,f:8000.0,s:exp,f:0.5,f:0.02],[s:res,s:/x/res,f:0.0,f:1.0,s:lin,f:0.0,f:0.01],[s:dup,s:/x/d2,f:0.0,f:2.0,s:int,f:1.0,f:1.0]]],[s:pitch,[[s:e2,s:/x/e,f:1.0,f:10.0,s:exp,f:0.0,f:0.01]]]]
+L5 [s:page:pitch:bad,/x/b,a,1: could not convert string to float: 'a',s:page:speed:st,/x/st,0,1,lin,0,0: step: a part of the range per click, 0 < step <= 1,s:page:speed:st2,/x/st,0,1,lin,0,1.5: step: a part of the range per click, 0 < step <= 1,s:page:pitch:c,/x/c,0,1,cubic: curve one of ('lin', 'exp', 'int'),s:page:pitch:e,/x/e,0,1,exp: exp needs min and max > 0,s:page:pitch:p,x/nopath,0,1: page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]],s:page:speed,: page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]],s:page:volume:x,/x,0,1: page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]],s:page:speed:a:b,/x,0,1: page:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]]]
+L6 [[s:record,[[s:speed,[[s:echo,s:/e/v,f:0.0,f:1.0,s:lin,f:0.3,f:0.01]]],[s:pitch,[[s:bad,s:/e/b,f:0.0,f:1.0,s:lin,f:0.0,f:1e-09]]]]],[s:record+file,[[s:pitch,[[s:vol,s:/e/vol,f:0.0,f:1.0,s:lin,f:0.0,f:0.01]]]]]]
+L6 [s:hold:record+record:pitch:x,/e/x,0,1: hold:<record|file|reset|freeze|source>[+<button>]:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]],s:hold:play:speed:x,/e/x,0,1: hold:<record|file|reset|freeze|source>[+<button>]:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]],s:hold:file+reset+freeze:speed:x,/e/x,0,1: hold:<record|file|reset|freeze|source>[+<button>]:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]],s:hold:reset:pitch:,/e/x,0,1: hold:<record|file|reset|freeze|source>[+<button>]:<speed|pitch>:<name>,<path>,<min>,<max>[,curve[,default[,step]]]]
+L7 [[s:speed,s:res],[s:pitch,None]]
+L8 [s:latching,s:falling]
+L9 []
+L10 None
+L11 s:pages
+L12 s:rawencoder
+L13 s:64
+L14 None
+L15 f:100.0
+L19 [[s:page:pitch:x,[s:/x,s:0,s:1]],[s:cv:speed,[]],[s:cv:pitch,[s:]],[s:ksmps,[s:256]],[s:sr,[s:44100]]]
+L20 s:hybrid
+L21 s:pages
+L22 [[s:pitch,None]]
+L23 f:435.3741496598639
+L26 E:ValueError
+L29 E:ZeroDivisionError
+L32 f:100.0
+L33 E:FileNotFoundError

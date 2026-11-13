@@ -1,0 +1,248 @@
+# control.py: ControlChannel with Csound channels or without, every source,
+# the calibration file, mute; CommChannel
+time 1000
+gpio 23 1
+gpio 24 1
+sr 0
+adc 1 1 2048
+adc 0 1 2048
+adc 0 3 2048
+adc 1 6 3000
+adc 0 6 2048
+n.snapshot
+calib speed,0.010|speed_alt,0.020|blend,x|size,0.003|pitch,0.05,9|window
+cs.new
+ctl.new sp speed f:0.5 hybrid data_channel=i:1
+ctl.gatherOffset sp s:speed
+ctl.gatherOffset sp s:blend
+ctl.gatherOffset sp s:size
+ctl.gatherOffset sp s:pitch
+ctl.gatherOffset sp s:window
+ctl.gatherOffset sp s:nothing
+ctl.getValue sp
+ctl.chan sp
+ctl.getCVValue sp
+ctl.update sp
+ctl.update sp
+ctl.update sp
+ctl.getValue sp
+ctl.getPrevValue sp
+ctl.hasChanged sp
+ctl.chan sp
+ctl.getStaticVal sp
+ctl.setValue sp f:0.75
+ctl.getValue sp
+ctl.chan sp
+ctl.getRawCVValue sp
+ctl.getPotValue sp
+ctl.isResisting sp
+ctl.getTrigSource sp
+ctl.getLEDValue sp
+ctl.setCVOffset sp f:0.0
+ctl.update sp
+ctl.update sp
+ctl.getValue sp
+# analog with its own CV channel, and mute
+ctl.new bl blend i:0 analog data_channel=i:1 cvchn=i:3
+ctl.getValue bl
+ctl.chan bl
+ctl.update bl
+ctl.update bl
+ctl.update bl
+ctl.update bl
+ctl.getValue bl
+ctl.chan bl
+ctl.getPotValue bl
+ctl.getRawCVValue bl
+ctl.getCVValue bl
+ctl.muteCSound bl b:True
+ctl.isCSoundMuted bl
+adc 1 1 4095
+n.snapshot
+ctl.update bl
+ctl.update bl
+ctl.update bl
+ctl.update bl
+ctl.update bl
+ctl.update bl
+ctl.update bl
+ctl.update bl
+ctl.getValue bl
+ctl.chan bl
+ctl.muteCSound bl b:False
+ctl.update bl
+ctl.chan bl
+ctl.setModeChangeValue bl f:0.4
+ctl.isResisting bl
+ctl.update bl
+ctl.getValue bl
+ctl.clearResistVal bl
+ctl.isResisting bl
+ctl.setIgnoreHID bl b:True
+ctl.update bl
+ctl.getValue bl
+ctl.setValue bl f:0.1
+ctl.getValue bl
+ctl.getStaticVal bl
+# analog without CV (cvchn=-1), as the _alt ones
+ctl.new sz size_alt f:0.3 analog data_channel=i:6 cvchn=i:-1
+ctl.update sz
+ctl.update sz
+ctl.update sz
+ctl.getValue sz
+ctl.getCVValue sz
+# static and rawencoder
+ctl.new st volume f:0.25
+ctl.getValue st
+ctl.update st
+ctl.setValue st i:1
+ctl.getValue st
+ctl.chan st
+ctl.hasChanged st
+ctl.getTrigSource st
+ctl.getLEDValue st
+ctl.setIgnoreHID st b:True
+ctl.setIgnoreNextButton st
+ctl.setOutputPeriod st i:5
+ctl.setMode st s:momentary s:rising
+ctl.new rw pitch i:0 rawencoder
+ctl.update rw
+ctl.getValue rw
+ctl.setValue rw f:0.4
+ctl.getValue rw
+# digital from the shift register and a gate
+sr.new srg
+sr.update srg
+ctl.new rs reset i:0 digital data_channel=i:1 sr=srg gate_pin=i:25 button_pin=i:0 config=triggered,rising
+ctl.new fr freeze f:1.0 digital data_channel=i:1 sr=srg gate_pin=i:4 button_pin=i:4
+ctl.new fl file f:3.0 digital data_channel=i:1 sr=srg gate_pin=i:23 button_pin=i:7 config=incremental,falling maximum=i:4
+gpio 25 1
+gpio 4 1
+ctl.update rs
+ctl.update fr
+ctl.update fl
+ctl.getValue fr
+ctl.getValue fl
+ctl.getLEDValue fl
+sr 1
+sr.update srg
+ctl.update rs
+ctl.getValue rs
+ctl.chan rs
+ctl.getTrigSource rs
+ctl.getLEDValue rs
+advance 0.011
+sr.update srg
+ctl.update rs
+ctl.getValue rs
+sr 0
+sr.update srg
+ctl.update rs
+ctl.getValue rs
+# freeze: latching on falling edge, so the first press is ignored
+sr 16
+sr.update srg
+ctl.update fr
+ctl.getValue fr
+sr 0
+sr.update srg
+ctl.update fr
+ctl.getValue fr
+sr 16
+sr.update srg
+ctl.update fr
+sr 0
+sr.update srg
+ctl.update fr
+ctl.getValue fr
+ctl.getLEDValue fr
+ctl.setIgnoreGate fr b:True
+ctl.setIgnoreHID fr b:True
+ctl.setOutputPeriod fr i:20
+ctl.setMode fr s:momentary s:rising
+ctl.getValue fr
+ctl.setIgnoreNextButton fr
+# gate on file (GPIO 23, pulled up: 0 = high)
+gpio 23 0
+advance 0.3
+ctl.update fl
+ctl.getValue fl
+ctl.getTrigSource fl
+ctl.getLEDValue fl
+gpio 23 1
+advance 0.3
+ctl.update fl
+ctl.getValue fl
+# digital without a shift register: no input
+ctl.new nod record i:0 digital data_channel=i:1
+ctl.getValue nod
+ctl.update nod
+ctl.setIgnoreHID nod b:True
+ctl.getTrigSource nod
+ctl.new unk thing i:0 nosuchsource
+ctl.update unk
+ctl.getLEDValue unk
+# no Csound: the dummy channel keeps the Python type
+cs.none
+ctl.new nc speed i:1 hybrid data_channel=i:1
+ctl.chan nc
+ctl.update nc
+ctl.chan nc
+ctl.new nst volume i:2
+ctl.chan nst
+ctl.setValue nst s:text
+ctl.chan nst
+cs.new
+ctl.new tx volume i:2
+ctl.setValue tx s:text
+ctl.new nn volume None static
+ctl.new nn2 blend None analog data_channel=i:1
+cs.none
+ctl.new nn3 blend None analog data_channel=i:1
+cs.new
+# no calibration file
+calib.none
+ctl.new p2 pitch f:0.5 hybrid data_channel=i:4
+ctl.getCVValue p2
+ctl.update p2
+ctl.getCVValue p2
+cs.calls
+# CommChannel
+cs.chan eol f:0.0
+comm.new e eol
+comm.getState e
+comm.update e
+comm.getState e
+comm.risingEdge e
+comm.flag e
+cs.chan eol f:1.0
+comm.update e
+comm.getState e
+comm.risingEdge e
+comm.fallingEdge e
+comm.flag e
+comm.update e
+comm.risingEdge e
+comm.flag e
+comm.clearState e
+comm.getState e
+cs.read eol
+comm.update e
+comm.getState e
+cs.chan eol f:0.5
+comm.update e
+comm.flag e
+comm.clearState e
+cs.chan eol f:1.0
+comm.update e
+comm.update e
+comm.clearState e
+cs.read eol
+cs.calls
+cs.none
+comm.new n eol
+comm.update n
+comm.getState n
+comm.clearState n
+comm.risingEdge n
+calls

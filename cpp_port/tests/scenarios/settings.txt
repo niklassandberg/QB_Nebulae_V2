@@ -1,0 +1,86 @@
+# settings.py: defaults, saved values, the instrument's _alt values
+file.write defaultnebsettings.txt speed,0.625|pitch,0.5|start,0.0|file,0|speed_alt,1.0|pitch_alt,0.0|reset_alt,0|name,granular,extra|blend,1
+cfgdata None
+set.new s
+set.read s
+set.dicts s
+set.load s s:speed
+set.load s s:name
+set.load s s:nosuch
+set.getDefault s s:blend
+set.getDefault s s:name
+set.getDefault s s:nosuch
+set.hasSetting s s:speed
+set.hasSetting s s:nosuch
+set.save s s:speed f:0.75
+set.save s s:file i:3
+set.save s s:newkey f:0.1
+set.load s s:speed
+set.update s i:12345
+set.lines s
+set.getLastUpdate s
+set.write s
+file.read nebsettings.txt
+# a saved file: missing keys come from the defaults
+file.write nebsettings.txt speed,0.5|\_\_|start,0.25,9|file,2|older,1
+set.new s2
+set.read s2
+set.dicts s2
+set.load s2 s:start
+set.load s2 s:file
+set.update s2 f:1.5
+set.lines s2
+set.save s2 s:speed b:True
+set.save s2 s:file None
+set.save s2 s:start s:abc
+set.update s2 i:2
+set.lines s2
+set.load s2 s:speed
+set.write s2
+file.read nebsettings.txt
+# configData sets the _alt defaults
+cfgdata speed_alt=L:2.5 pitch_alt=s:0.25 reset_alt=L:x file_alt=L:1 speed=L:9
+file.rm nebsettings.txt
+set.new s3
+set.read s3
+set.dicts s3
+set.getDefault s3 s:speed_alt
+set.getDefault s3 s:pitch_alt
+set.getDefault s3 s:reset_alt
+# a non-number before any number: new_val is unbound
+file.write defaultnebsettings.txt reset_alt,0|speed_alt,1.0
+cfgdata reset_alt=L:x
+set.new s4
+set.read s4
+set.dicts s4
+cfgdata speed_alt=i:3
+set.new s5
+set.read s5
+cfgdata speed_alt=L:
+set.new s6
+set.read s6
+# blank line and a line without comma in the defaults
+cfgdata None
+file.write defaultnebsettings.txt speed,1||pitch,2
+set.new s7
+set.read s7
+set.dicts s7
+file.write defaultnebsettings.txt speed,1|pitch
+set.new s8
+set.read s8
+file.rm defaultnebsettings.txt
+set.new s9
+set.read s9
+# empty saved file: the defaults
+file.write defaultnebsettings.txt a,1|b,2
+file.write nebsettings.txt \_
+set.new s10
+set.read s10
+set.dicts s10
+file.write nebsettings.txt a,5\r\nb,6\r\n
+set.new s11
+set.read s11
+set.dicts s11
+set.lines s11
+set.update s11 i:0
+set.lines s11

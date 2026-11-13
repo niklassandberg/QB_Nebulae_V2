@@ -1,0 +1,223 @@
+L3 [i:3010,i:3011,i:3000]
+L5 b:False
+L6 b:False
+L7 call pd_is_connected()
+L7 call pd_is_connected()
+L9 b:True
+L11 b:False
+L13 s:speed 0.5
+L14 s:file 3
+L15 s:x False
+L16 E:TypeError
+L17 None
+L18 b:True
+L19 None
+L21 None
+L22 b:False
+L23 b:False
+L24 b:False
+L25 call pd_is_connected()
+L25 call pd_send(s:speed 0.5;0.25;3;True;None;['a', 'b'];,i:38)
+L25 call pd_is_connected()
+L25 call pd_send(s:x;,i:2)
+L25 call pd_connect()
+L25 call pd_is_connected()
+L25 call pd_is_connected()
+L25 call pd_close()
+L25 call pd_is_connected()
+L25 call pd_close()
+L25 call pd_is_connected()
+L25 call pd_is_connected()
+L25 call pd_is_connected()
+L28 b:False
+L29 b:False
+L29 f:50.05999999999999
+L31 b:True
+L31 f:50.05999999999999
+L33 b:False
+L33 f:50.05999999999999
+L34 call sc_synth_is_up()
+L34 call sc_synth_is_up()
+L34 call sc_synth_is_up()
+L34 call sc_synth_is_up()
+L34 call sc_synth_is_up()
+L34 call sc_synth_is_up()
+L34 call sc_synth_is_up()
+L34 call sc_synth_is_up()
+L34 call sc_synth_is_up()
+L34 call sc_synth_is_up()
+L35 None
+L36 None
+L38 None
+L39 None
+L41 None
+L43 None
+L44 b:False
+L46 b:True
+L47 None
+L48 b:True
+L50 b:False
+L52 b:True
+L53 None
+L54 None
+L55 b:True
+L56 None
+L58 b:True
+L59 None
+L60 call sc_set_synth_down()
+L60 call sc_sender_open()
+L60 call sc_sender_open()
+L60 call sc_send_path_int(s:/neb/hasbeenloaded,i:0)
+L60 call sc_sender_open()
+L60 call sc_sender_open()
+L60 call sc_open_sender()
+L60 call sc_sender_open()
+L60 call sc_open_sender()
+L60 call sc_handshake()
+L60 call sc_handshake()
+L60 call sc_zero_handshake()
+L60 call sc_listener_running()
+L60 call sc_start_listener()
+L60 call sc_listener_running()
+L60 call sc_start_listener()
+L60 call sc_listener_running()
+L60 call sc_sender_open()
+L60 call sc_listener_running()
+L60 call sc_sender_open()
+L60 call sc_listener_running()
+L60 call sc_stop_listener()
+L60 call sc_sender_open()
+L60 call sc_sender_open()
+L60 call sc_close_sender()
+L60 call sc_listener_running()
+L60 call sc_stop_listener()
+L62 None
+L63 None
+L64 None
+L65 None
+L66 None
+L67 None
+L68 None
+L69 None
+L70 None
+L71 None
+L72 None
+L73 None
+L74 None
+L75 None
+L76 None
+L77 call sc_send_float(s:speed,f:0.5)
+L77 call sc_send_float(s:speed,f:0.25)
+L77 call sc_send_int(s:file,i:1)
+L77 call sc_send_int(s:file,i:2)
+L77 call sc_send_bool(s:freeze,i:1)
+L77 call sc_send_bool(s:freeze,i:0)
+L77 call sc_send_string(s:name,s:granular)
+L77 call sc_send_string(s:name,s:None)
+L77 call sc_send_string(s:name,s:['a', 'b'])
+L77 call sc_send_string(s:num,s:1)
+L77 call sc_send_int(s:num,i:1)
+L78 None
+L79 None
+L80 None
+L81 None
+L82 None
+L83 None
+L84 call sc_clear_cache()
+L84 call sc_send_float(s:speed,f:0.25)
+L84 call sc_set_synth_down()
+L84 call sc_send_float(s:speed,f:0.25)
+L84 call sc_send_float(s:speed,f:0.25)
+L86 None
+L87 None
+L88 b:True
+L90 b:False
+L91 None
+L92 None
+L93 None
+L94 i:0
+L96 i:-1
+L97 s:fake stats
+L98 s:fake error
+L99 None
+L100 call sc_send_path_float(s:/neb/page/x,f:0.5)
+L100 call sc_send_path_float(s:/neb/page/x,f:1.0)
+L100 call osc_open(i:3023)
+L100 call osc_open(i:3023)
+L100 call osc_send_float(s:/lab/speed,f:1.0)
+L100 call osc_send_float(s:/lab/speed,f:-0.5)
+L100 call osc_close()
+L100 call card_clip_count()
+L100 call card_clip_count()
+L100 call led_clear_sc()
+L101 None
+L102 None
+L103 E:KeyError
+L104 b:False
+L106 b:True
+L107 None
+L108 i:0
+L109 i:0
+L110 None
+L111 None
+L112 call inputs_init()
+L112 call encoder_set_raw(i:1,i:1)
+L112 call encoder_set_raw(i:0,i:0)
+L112 call encoder_raw(i:0)
+L112 call encoder_raw(i:1)
+L112 call encoder_set_click(i:1,i:1)
+L112 call encoder_id(i:5,i:6)
+L112 call encoder_steps(i:0)
+L112 call set_eol(i:1)
+L112 call set_eol(i:0)
+L113 [i:0,i:0,i:0]
+L117 [i:1200,i:400,i:400]
+L119 [i:1200,i:400,i:400]
+L120 E:ValueError
+L121 None
+L122 None
+L123 None
+L124 None
+L125 b:False
+L127 b:True
+L129 b:True
+L130 b:False
+L131 b:False
+L132 b:False
+L133 b:False
+L136 b:True
+L137 call set_input_rates(i:1200,i:400,i:400)
+L137 call input_scan_hz()
+L137 call input_digital_hz()
+L137 call input_adc_hz()
+L137 call input_scan_hz()
+L137 call input_digital_hz()
+L137 call input_adc_hz()
+L137 call set_input_rates(i:1000,i:500,i:250)
+L137 call input_scan_hz()
+L137 call input_digital_hz()
+L137 call input_adc_hz()
+L137 call set_scan_jitter(f:0.1)
+L137 call set_scan_jitter(f:0.0)
+L137 call set_scan_trigger(i:1)
+L137 call scan_trigger()
+L137 call set_fast_gpio(i:1)
+L137 call fast_gpio()
+L137 call fast_gpio()
+L137 call set_fast_gpio(i:0)
+L137 call fast_gpio()
+L137 call set_gate_holdoff_us(i:5000)
+L137 call set_gate_interrupts(i:0)
+L137 call gate_interrupts()
+L137 call set_gate_holdoff_us(i:0)
+L137 call set_gate_interrupts(i:1)
+L137 call gate_interrupts()
+L137 call set_gate_holdoff_us(i:2)
+L137 call set_gate_interrupts(i:1)
+L137 call gate_interrupts()
+L137 call set_gate_holdoff_us(i:2)
+L137 call set_gate_interrupts(i:1)
+L137 call gate_interrupts()
+L137 call set_gate_holdoff_us(i:12000)
+L137 call set_gate_interrupts(i:1)
+L137 call gate_interrupts()

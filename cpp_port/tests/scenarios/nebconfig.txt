@@ -1,0 +1,33 @@
+# nebconfig.py: the block, the keys the handlers read, page:/hold:/cv: lines
+file.write a.scd /*|nebconfigbegin|speed,pages|pitch,\_RawEncoder\_|#\_a\_comment|ksmps,64|sr,48000|freeze,triggered,rising|freeze,latching,falling|empty|page:speed:cut,/x/cut,100,8000,exp,0.5,0.02|page:speed:res,\_/x/res\_,0,1|page:pitch:bad,/x/b,a,1|page:speed:dup,/x/d,0,1|page:speed:dup,/x/d2,0,2,INT,2.5,1|cv:speed,\_res\_|cv:pitch,none|hold:record:speed:echo,/e/v,0,1,lin,0.3|hold:record+file:pitch:vol,/e/vol,0,1,,-1|hold:record+record:pitch:x,/e/x,0,1|hold:play:speed:x,/e/x,0,1|hold:file+reset+freeze:speed:x,/e/x,0,1|hold:reset:pitch:,/e/x,0,1|page:speed:st,/x/st,0,1,lin,0,0|page:speed:st2,/x/st,0,1,lin,0,1.5|page:pitch:c,/x/c,0,1,cubic|page:pitch:e,/x/e,0,1,exp|page:pitch:e2,/x/e,1,10,exp,nan|page:pitch:p,x/nopath,0,1|page:speed|page:volume:x,/x,0,1|page:speed:a:b,/x,0,1|hold:record:pitch:bad,/e/b,0,1,lin,0,1e-9|nebconfigend|*/|SynthDef(\pad)
+nc.new c a.scd
+nc.entries c
+nc.pages c
+nc.holds c
+nc.cv c
+nc.entry c freeze
+nc.entry c empty
+nc.entry c nosuch
+nc.encoderType c s:speed
+nc.encoderType c s:pitch
+nc.value c s:ksmps
+nc.value c s:empty
+nc.outputPeriod c
+# defaults: no block, page: lines imply pages, cv: without a value
+file.write b.scd SynthDef(\b)|nebconfigbegin|page:pitch:x,/x,0,1|cv:speed|cv:pitch,|ksmps,256|sr,44100|nebconfigend
+nc.new b b.scd
+nc.entries b
+nc.encoderType b s:speed
+nc.encoderType b s:pitch
+nc.cv b
+nc.outputPeriod b
+file.write d.scd nebconfigbegin|ksmps,abc|nebconfigend
+nc.new d d.scd
+nc.outputPeriod d
+file.write e.scd nebconfigbegin|sr,0|nebconfigend
+nc.new e e.scd
+nc.outputPeriod e
+file.write f.scd nebconfigbegin|ksmps,\_32\_|sr,96000
+nc.new f f.scd
+nc.outputPeriod f
+nc.new g nosuch.scd

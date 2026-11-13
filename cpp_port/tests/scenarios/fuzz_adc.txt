@@ -1,0 +1,7747 @@
+# random knob and CV values through AdcData / HybridData
+n.snapshot
+adc.new a0 1 1 blend i:0 i:1 f:0.5
+adc.new a1 0 -1 start f:0.0 f:1.0 i:0
+adc.new a2 6 -1 size_alt i:0 i:1 f:0.3
+adc.new a3 -1 4 x f:-1.0 f:2.0 i:1
+adc.new a4 7 7 overlap i:0 i:3 i:2
+hyb.new h0 1 speed f:0.0 f:1.0 f:0.625
+hyb.new h1 4 pitch i:0 i:1 f:0.4
+hyb.new h2 2 other i:0 i:2 i:1
+hyb.new h3 -1 speed_alt i:0 i:32 i:5
+adc.getCVValue a2
+hyb.getValue h1
+hyb.getValue h1
+adc.clearResistVal a3
+adc 0 2 2048
+adc 0 1 2059
+adc 0 0 2046
+n.snapshot
+adc.setValue a0 f:-0.2148090078801732
+hyb.getValue h1
+adc.getCV a1
+hyb.getValue h1
+hyb.getValue h2
+adc 0 2 2047
+adc 1 1 1369
+adc 0 7 2048
+n.snapshot
+hyb.getValue h2
+hyb.getValue h2
+adc.getValue a3
+hyb.getValue h1
+adc.setIgnoreHID a4 b:False
+hyb.getValue h1
+adc 0 2 2792
+adc 0 3 2048
+n.snapshot
+hyb.getValue h3
+adc.getValue a3
+adc 1 6 1118
+adc 0 0 2035
+n.snapshot
+adc.getValue a0
+adc 1 4 4094
+adc 1 7 2041
+adc 1 4 4094
+adc 0 2 2135
+n.snapshot
+adc.getValue a4
+hyb.setValue h3 i:4
+adc.getPot a0
+adc 0 4 349
+n.snapshot
+hyb.getValue h2
+hyb.getCVValue h1
+adc 0 2 3664
+adc 1 4 4088
+adc 0 4 4094
+adc 0 4 4095
+n.snapshot
+adc.setValue a3 f:0.4297057472455
+adc.getRawPotValue a2
+adc 0 1 3095
+adc 0 1 3980
+adc 1 6 1110
+adc 0 4 4094
+n.snapshot
+hyb.setIgnoreHID h3 b:True
+adc.getValue a0
+adc.getRawCVValue a3
+adc.getValue a4
+adc 0 6 1
+adc 0 4 1
+adc 0 4 1
+adc 1 3 1997
+n.snapshot
+adc.getPot a0
+hyb.getValue h0
+adc.getValue a4
+hyb.getValue h3
+hyb.getValue h2
+adc 1 1 1369
+n.snapshot
+adc.setIgnoreHID a2 b:False
+hyb.getValue h2
+adc.getValue a4
+adc 1 5 2040
+adc 0 6 0
+n.snapshot
+hyb.getValue h3
+adc.getRawPotValue a3
+adc.getValue a0
+hyb.getValue h0
+adc.getValue a3
+adc.getValue a0
+adc 1 0 2052
+adc 1 1 1379
+n.snapshot
+hyb.getValue h2
+adc 0 3 1103
+adc 0 7 2048
+adc 1 4 4088
+n.snapshot
+hyb.getValue h3
+hyb.getValue h1
+adc.getPot a2
+adc 1 3 4095
+n.snapshot
+hyb.getValue h3
+adc 1 4 4088
+n.snapshot
+adc.getValue a4
+adc.clipControl a2 f:0.911489
+hyb.getValue h3
+hyb.getValue h3
+adc.getCV a3
+adc 1 2 1
+adc 1 3 4095
+n.snapshot
+adc.clipControl a1 f:0.125
+adc.getValue a2
+adc.getValue a3
+adc.getValue a1
+hyb.setValue h3 f:0.4505926166137
+hyb.getValue h1
+adc 0 5 2048
+adc 0 7 2048
+adc 1 3 4095
+n.snapshot
+hyb.getCVValue h1
+adc.getRawCVValue a0
+adc 0 0 4094
+adc 0 6 2464
+n.snapshot
+hyb.getValue h0
+adc 1 4 4092
+adc 0 1 1639
+n.snapshot
+hyb.setValue h0 f:0.19991455722
+hyb.setIgnoreHID h1 b:False
+adc.getRawCVValue a2
+hyb.setIgnoreHID h3 b:True
+hyb.getRawCVValue h2
+adc 1 1 314
+adc 1 6 1110
+n.snapshot
+hyb.setValue h0 f:0.421486013
+adc.getValue a4
+adc.getValue a1
+adc.getValue a1
+adc.getValue a0
+adc.getValue a0
+adc.getValue a2
+adc.getRawPotValue a2
+adc.getValue a4
+hyb.getValue h3
+hyb.getValue h3
+adc.getCVValue a0
+adc.getValue a0
+hyb.getValue h3
+hyb.setIgnoreHID h3 b:False
+adc.getValue a2
+adc.getValue a2
+adc.getValue a3
+hyb.getStaticVal h3
+hyb.getValue h2
+adc 0 2 2249
+n.snapshot
+adc.getPotValue a1
+adc.getValue a2
+adc.setIgnoreHID a3 b:True
+hyb.setValue h1 f:-0.0
+adc.getRawCVValue a1
+adc.getValue a0
+adc 1 6 2440
+adc 1 6 2452
+adc 0 5 2059
+adc 1 3 4095
+n.snapshot
+hyb.getValue h2
+hyb.getValue h2
+adc.setValue a1 f:1e-05
+hyb.getValue h3
+adc.isResisting a0
+hyb.getValue h0
+hyb.setCVOffset h3 f:0.0434
+adc.getValue a1
+adc.setValue a3 f:-0.0794
+adc 1 0 1768
+adc 0 6 2464
+n.snapshot
+adc.clipControl a1 f:0.125
+adc.getValue a1
+hyb.getValue h2
+adc.getValue a1
+adc.getValue a1
+hyb.getValue h2
+adc 0 2 2249
+n.snapshot
+hyb.getValue h2
+adc.getValue a4
+adc 1 7 2041
+adc 1 3 4095
+n.snapshot
+hyb.getValue h1
+adc.getValue a3
+adc.getPot a1
+hyb.getValue h2
+adc 0 5 1464
+adc 0 3 1302
+adc 1 5 2030
+n.snapshot
+adc.setResistVal a2 f:1.367824977652586
+adc.getValue a3
+hyb.setValue h3 i:4
+adc 0 2 2249
+n.snapshot
+hyb.getRawCVValue h1
+hyb.getCVValue h0
+adc.getPotValue a4
+adc.getValue a1
+hyb.getValue h2
+adc 0 0 3787
+adc 0 5 1464
+adc 0 1 4084
+n.snapshot
+hyb.getValue h0
+hyb.getCVValue h0
+hyb.getValue h1
+adc.getValue a2
+adc 0 3 1291
+adc 0 7 2048
+adc 0 5 1464
+adc 1 6 2445
+n.snapshot
+adc.clipControl a0 f:-0.203340643937
+adc 1 3 1075
+adc 0 1 3808
+n.snapshot
+adc.getValue a3
+hyb.getValue h0
+adc.getValue a0
+hyb.setValue h0 f:-0.01844451120206
+adc 1 2 1
+adc 0 0 2047
+adc 1 6 2048
+adc 1 1 322
+n.snapshot
+adc.setIgnoreHID a2 b:True
+hyb.getValue h1
+adc.getValue a0
+adc.getValue a1
+adc.setResistVal a4 f:0.827
+hyb.getValue h0
+adc.getValue a3
+adc.isResisting a0
+adc.getValue a2
+adc 0 1 2658
+n.snapshot
+adc.getValue a1
+hyb.getValue h1
+adc.getValue a0
+adc.setIgnoreHID a2 b:False
+hyb.getValue h2
+hyb.getValue h3
+adc.getValue a0
+adc.getValue a2
+hyb.getStaticVal h0
+adc.isResisting a0
+hyb.getValue h2
+adc.getValue a4
+adc.clipControl a3 f:1.02239078
+adc 1 4 4085
+adc 1 7 2048
+adc 0 5 1464
+adc 1 1 334
+n.snapshot
+adc.clipControl a0 f:0.93
+adc.clipControl a0 f:-0.1621836931825569
+adc.clearResistVal a3
+adc.setResistVal a2 f:0.2
+hyb.setValue h0 f:0.8429
+hyb.getValue h2
+adc 0 7 4094
+adc 1 2 66
+adc 1 5 2790
+n.snapshot
+hyb.getValue h3
+adc 1 6 1275
+adc 1 6 2047
+n.snapshot
+adc.isResisting a4
+adc 1 6 2047
+adc 1 7 2047
+adc 0 3 1291
+adc 1 5 995
+n.snapshot
+adc.setCVOffset a1 f:-0.0176
+hyb.setValue h3 f:-0.137693353075564
+adc.clipControl a0 f:0.92
+hyb.getValue h0
+hyb.getValue h2
+hyb.getValue h3
+adc.clearResistVal a0
+adc 0 3 1292
+adc 1 2 72
+adc 0 3 1292
+adc 0 4 1
+n.snapshot
+hyb.setIgnoreHID h1 b:False
+adc.getValue a1
+adc.getValue a1
+adc.getCVValue a4
+hyb.getValue h2
+adc.getValue a0
+adc 0 5 1464
+adc 0 3 3671
+adc 0 6 1
+n.snapshot
+hyb.getValue h2
+adc.getValue a4
+adc.getValue a2
+adc.setIgnoreHID a1 b:False
+hyb.getValue h2
+hyb.getValue h1
+hyb.getValue h2
+adc.getPotValue a3
+adc 1 4 4093
+n.snapshot
+adc.getValue a4
+adc 1 4 2048
+adc 0 1 757
+adc 1 3 4095
+adc 0 2 1
+n.snapshot
+adc.clipControl a2 i:0
+adc.setValue a1 f:-0.186417969426375
+hyb.setCVOffset h3 f:0.0167
+adc.getValue a3
+hyb.getValue h0
+hyb.getValue h2
+adc.clipControl a2 f:0.0179559
+hyb.getValue h1
+adc 1 1 334
+adc 1 5 1909
+adc 0 6 0
+n.snapshot
+hyb.getValue h1
+adc.getValue a2
+adc.getCV a4
+adc.getValue a4
+adc.getCVValue a4
+hyb.getValue h2
+adc.getValue a2
+adc.getValue a2
+adc 0 3 3673
+n.snapshot
+hyb.setValue h3 i:3
+hyb.setValue h1 f:0.36464
+hyb.getValue h3
+adc.getValue a3
+adc.getValue a2
+adc 1 4 985
+adc 0 4 13
+n.snapshot
+adc.setValue a2 f:0.91752971
+adc 1 7 667
+adc 1 2 2047
+adc 0 6 0
+n.snapshot
+adc.getRawCVValue a2
+hyb.getValue h0
+hyb.setIgnoreHID h2 b:False
+adc.getPot a1
+adc.getCV a2
+hyb.getValue h0
+adc.getValue a2
+adc.getCV a4
+adc 1 2 2047
+n.snapshot
+hyb.getValue h1
+adc.getPotValue a4
+adc 0 1 757
+adc 0 7 3733
+adc 1 3 4095
+n.snapshot
+hyb.getValue h3
+hyb.getValue h0
+adc 1 2 2056
+adc 1 5 1909
+n.snapshot
+adc.getValue a3
+hyb.getValue h3
+adc.setValue a4 f:1.26692667881321
+hyb.setValue h2 f:0.0
+adc 0 7 3741
+adc 1 7 671
+adc 1 3 2064
+n.snapshot
+hyb.getValue h2
+hyb.setIgnoreHID h3 b:False
+adc 1 1 1
+n.snapshot
+hyb.getValue h0
+hyb.getValue h2
+adc.getValue a1
+adc.clearResistVal a3
+adc 0 6 2511
+adc 1 6 2047
+n.snapshot
+hyb.getRawCVValue h3
+adc 1 1 0
+adc 1 0 1768
+adc 1 6 2047
+adc 1 3 2070
+n.snapshot
+adc.getRawCVValue a0
+adc 0 3 3673
+n.snapshot
+adc.getValue a0
+adc.getValue a0
+adc.getValue a4
+adc 1 2 3317
+adc 0 7 3741
+n.snapshot
+hyb.getValue h1
+hyb.setValue h3 f:0.5
+hyb.getValue h1
+adc 0 5 1464
+adc 1 5 1909
+adc 0 0 2047
+n.snapshot
+adc.getRawCVValue a4
+hyb.getValue h2
+hyb.getValue h0
+adc 0 0 2052
+adc 1 5 1909
+n.snapshot
+adc.getValue a4
+adc.getCV a1
+hyb.getValue h3
+adc.getCV a4
+hyb.getValue h3
+adc 0 7 3744
+n.snapshot
+adc.getValue a4
+adc.setResistVal a3 f:0.390854816923981
+adc.getValue a2
+adc 0 7 2927
+adc 1 0 3188
+n.snapshot
+adc.getPot a3
+hyb.getValue h1
+hyb.getValue h2
+adc.getValue a3
+adc.getValue a2
+adc.getCV a4
+adc.setValue a1 f:1.246474051145
+adc 1 1 0
+adc 0 3 1
+adc 0 2 4094
+adc 1 4 3272
+n.snapshot
+hyb.setValue h2 f:-0.4720292
+adc 0 6 2511
+n.snapshot
+adc.getPot a2
+adc.getValue a1
+adc.getValue a3
+hyb.getValue h0
+hyb.getValue h3
+hyb.setValue h2 f:0.5433626688
+adc.getValue a4
+adc.getCV a4
+adc 0 1 757
+adc 0 6 2503
+adc 1 2 2682
+adc 1 3 2070
+n.snapshot
+adc.clipControl a1 f:0.5611553257579722
+adc.getPot a3
+adc.getValue a4
+adc 1 7 660
+adc 1 7 660
+adc 0 4 5
+adc 0 3 0
+n.snapshot
+adc.getPot a2
+adc.clipControl a0 f:0.8617481596
+hyb.getValue h2
+hyb.getValue h1
+hyb.getValue h3
+hyb.getValue h3
+adc.getCV a3
+hyb.getRawCVValue h2
+hyb.setIgnoreHID h3 b:False
+adc 0 1 757
+adc 1 6 2048
+adc 0 7 1174
+n.snapshot
+adc.getValue a0
+adc.getValue a2
+adc.getValue a1
+adc.getCV a3
+hyb.getValue h1
+adc.getValue a4
+adc 1 3 3217
+adc 1 3 23
+adc 0 0 2052
+adc 1 3 33
+n.snapshot
+adc.getValue a2
+hyb.getValue h3
+hyb.setIgnoreHID h2 b:True
+hyb.getValue h2
+hyb.getValue h3
+hyb.setCVOffset h2 f:0.012
+adc.clipControl a3 i:0
+adc 1 1 0
+n.snapshot
+adc.getValue a0
+adc 0 4 5
+adc 0 2 4002
+adc 1 0 3188
+adc 1 0 3184
+n.snapshot
+adc.getValue a0
+hyb.getValue h0
+hyb.getStaticVal h1
+adc.getValue a1
+adc 1 0 266
+adc 1 3 25
+adc 1 0 266
+n.snapshot
+hyb.getValue h3
+adc.getValue a3
+adc 0 0 2041
+n.snapshot
+hyb.getValue h1
+adc.setResistVal a3 f:1.347505645632025
+adc.getRawPotValue a0
+adc 0 2 0
+adc 1 4 3272
+n.snapshot
+adc.getValue a0
+adc.getValue a4
+adc.getValue a0
+adc.setValue a3 i:5
+hyb.getValue h2
+adc.getCV a1
+hyb.setValue h2 f:-0.13990436452535726
+hyb.getRawCVValue h1
+adc.getValue a2
+hyb.getValue h1
+adc 0 0 2041
+adc 0 6 2495
+adc 0 7 1174
+adc 0 4 2048
+n.snapshot
+adc.getValue a3
+hyb.getValue h1
+adc 0 4 2048
+adc 0 7 1174
+n.snapshot
+adc.clipControl a0 f:0.29
+adc 0 1 754
+adc 1 0 3313
+adc 1 3 1498
+adc 1 2 2694
+n.snapshot
+adc.getValue a4
+hyb.getCVValue h0
+adc.getValue a1
+adc.setValue a1 f:0.153759658416
+adc 0 6 2047
+n.snapshot
+hyb.getValue h3
+adc.getValue a0
+adc 0 6 3963
+adc 0 2 1
+adc 1 7 236
+n.snapshot
+hyb.getValue h3
+adc.getRawPotValue a2
+adc 0 3 0
+adc 0 1 754
+adc 0 0 1791
+adc 1 6 2060
+n.snapshot
+hyb.getValue h2
+adc.isResisting a3
+adc 0 0 1791
+adc 0 3 11
+adc 1 6 2068
+adc 1 4 1242
+n.snapshot
+adc.getPotValue a2
+adc.getValue a0
+hyb.getValue h1
+hyb.getValue h0
+adc.getRawPotValue a2
+hyb.getValue h2
+adc 1 4 4094
+adc 0 2 4095
+adc 0 1 754
+n.snapshot
+hyb.getValue h2
+adc.getCV a4
+adc.getPot a4
+adc.getValue a4
+adc.setValue a3 f:0.87481285191
+adc.setValue a1 i:3
+adc 0 1 0
+n.snapshot
+adc.getCV a1
+adc.getCV a1
+adc.getValue a3
+hyb.getValue h1
+adc.getCV a0
+adc.getValue a2
+adc.getCVValue a2
+adc.getValue a0
+adc 0 7 1174
+adc 1 3 1498
+adc 0 4 2048
+n.snapshot
+hyb.setIgnoreHID h0 b:True
+hyb.getValue h2
+hyb.getValue h2
+adc.getValue a1
+hyb.getValue h0
+adc.getValue a0
+adc.getValue a0
+hyb.getValue h2
+hyb.getValue h1
+hyb.getValue h2
+adc.clipControl a4 i:5
+adc.getValue a1
+adc 1 7 4094
+adc 1 4 4094
+n.snapshot
+hyb.getValue h1
+adc 1 5 1905
+adc 0 6 3963
+n.snapshot
+adc.getValue a0
+hyb.getValue h2
+adc.getPot a0
+adc 1 3 14
+adc 0 6 3971
+adc 1 4 4094
+n.snapshot
+adc.getValue a3
+hyb.getValue h2
+hyb.getValue h3
+adc.clearResistVal a1
+adc 1 0 1
+adc 1 4 2047
+adc 0 6 3967
+n.snapshot
+adc.getValue a0
+hyb.getValue h2
+hyb.setIgnoreHID h3 b:True
+hyb.getValue h2
+adc.getValue a1
+adc.clipControl a3 f:1.33755
+adc 0 4 2048
+adc 0 3 826
+n.snapshot
+hyb.getValue h2
+adc.getValue a3
+adc.getValue a3
+hyb.getValue h3
+hyb.getValue h3
+hyb.getValue h0
+adc.getValue a3
+adc.getValue a1
+adc 1 5 2047
+adc 0 0 143
+adc 0 1 1526
+adc 1 1 2047
+n.snapshot
+adc.setValue a4 f:-0.064445805668
+adc.getValue a3
+adc.getPot a3
+hyb.getValue h0
+hyb.getValue h0
+adc 0 3 826
+n.snapshot
+hyb.getValue h0
+adc.getValue a2
+hyb.setValue h0 f:0.68287
+adc 1 7 4094
+adc 1 0 1
+adc 0 2 398
+adc 0 4 1
+n.snapshot
+adc.getValue a1
+adc.setValue a1 f:1.366096643
+adc.getPot a1
+adc 1 7 1
+adc 0 4 12
+adc 1 5 4095
+n.snapshot
+adc.getPotValue a0
+adc.getValue a0
+adc 1 7 2048
+n.snapshot
+adc.getValue a1
+hyb.getValue h1
+adc.clearResistVal a3
+adc.getValue a0
+hyb.setValue h2 f:-0.073588
+hyb.getValue h0
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h0
+hyb.getValue h0
+adc.getValue a1
+adc.setValue a1 f:0.906
+adc.getValue a2
+adc.getValue a2
+adc 0 7 1174
+n.snapshot
+hyb.setValue h3 f:0.300243
+adc 0 6 3975
+n.snapshot
+adc.getValue a1
+adc.getRawPotValue a3
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h0
+adc 0 4 12
+n.snapshot
+hyb.setValue h2 f:0.125
+adc 0 3 826
+adc 1 4 2047
+adc 0 3 826
+adc 1 2 2838
+n.snapshot
+adc.getValue a4
+hyb.getCVValue h2
+adc.getCV a2
+adc.getValue a3
+adc.getValue a1
+adc.getRawPotValue a4
+adc.getValue a0
+adc.setIgnoreHID a4 b:False
+adc.setIgnoreHID a0 b:False
+adc 0 7 1164
+adc 1 2 850
+n.snapshot
+hyb.getValue h1
+adc.getValue a4
+adc.getPotValue a0
+hyb.getValue h3
+hyb.getValue h3
+adc.getValue a4
+hyb.getValue h3
+adc 0 5 1475
+adc 0 5 1466
+n.snapshot
+hyb.getValue h1
+adc.getValue a4
+adc 1 2 850
+adc 1 4 2047
+adc 1 2 853
+adc 0 0 146
+n.snapshot
+adc.getValue a3
+adc 1 4 2058
+adc 1 1 2038
+n.snapshot
+adc.getPot a1
+adc 1 4 2056
+adc 0 6 3977
+n.snapshot
+adc.getValue a2
+adc 0 2 398
+n.snapshot
+adc.getPot a2
+hyb.getValue h1
+adc 0 5 1472
+adc 1 0 1
+n.snapshot
+adc.getPot a0
+hyb.setValue h2 f:0.70073490172
+adc.getCV a0
+adc.getPot a2
+hyb.getValue h2
+adc 1 1 0
+adc 0 6 3977
+adc 1 5 1324
+adc 0 3 689
+n.snapshot
+adc.setValue a4 f:0.343791
+adc 0 2 395
+adc 1 1 0
+n.snapshot
+hyb.getValue h0
+adc 0 0 138
+adc 0 1 0
+n.snapshot
+hyb.getCVValue h1
+hyb.getValue h0
+hyb.getRawCVValue h3
+hyb.getValue h2
+adc.getValue a3
+adc 0 1 0
+adc 1 2 4095
+adc 0 4 1
+adc 0 6 3903
+n.snapshot
+adc.getPot a4
+adc.clipControl a0 f:0.5444282724054
+hyb.setIgnoreHID h0 b:False
+hyb.getValue h3
+adc 0 7 2047
+adc 0 5 2048
+n.snapshot
+adc.getValue a3
+adc.getValue a1
+adc.setValue a1 f:1.00904229146
+adc.setIgnoreHID a0 b:True
+adc 1 7 2048
+n.snapshot
+adc.setIgnoreHID a2 b:True
+hyb.getValue h3
+adc.getValue a1
+hyb.getValue h3
+adc.getRawPotValue a2
+adc.getValue a1
+adc.setValue a0 f:0.41327980764
+adc 0 0 4094
+adc 0 5 2400
+n.snapshot
+adc.clipControl a2 f:0.1803
+adc 0 4 5
+adc 0 2 2721
+adc 0 0 4094
+n.snapshot
+hyb.getValue h0
+adc.getValue a0
+adc 0 0 4094
+n.snapshot
+adc.getValue a4
+hyb.getValue h0
+hyb.getValue h3
+hyb.getValue h1
+adc.setIgnoreHID a1 b:False
+adc 1 6 4095
+adc 0 7 4030
+adc 1 3 3100
+n.snapshot
+adc.getRawCVValue a0
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h2
+adc 1 5 1324
+adc 1 7 1879
+n.snapshot
+adc.getCV a1
+hyb.getValue h0
+hyb.getValue h3
+adc.getValue a0
+hyb.getValue h1
+hyb.setIgnoreHID h3 b:False
+adc.getValue a0
+adc 0 5 2400
+adc 1 4 2047
+n.snapshot
+adc.getPot a0
+adc.getPot a3
+hyb.getValue h3
+adc 0 6 2646
+n.snapshot
+hyb.setValue h3 f:-0.46501052
+adc 0 6 2490
+adc 1 7 1879
+adc 1 3 1162
+adc 0 5 2394
+n.snapshot
+hyb.getCVValue h1
+hyb.getValue h0
+hyb.getValue h0
+adc.clipControl a3 f:1.104398360554
+hyb.getValue h1
+hyb.getValue h3
+hyb.getCVValue h1
+adc.getPot a3
+adc.getValue a0
+adc.getValue a1
+hyb.getValue h2
+hyb.getStaticVal h1
+hyb.getValue h0
+adc.getValue a2
+hyb.getRawCVValue h0
+adc 0 0 4095
+adc 0 4 5
+adc 1 1 10
+n.snapshot
+adc.getValue a3
+adc 1 6 4095
+n.snapshot
+hyb.setIgnoreHID h3 b:False
+adc.setValue a4 f:-0.261
+hyb.getValue h3
+adc.getValue a0
+adc.getCVValue a2
+adc 1 2 1
+n.snapshot
+hyb.getValue h3
+hyb.getValue h3
+hyb.setValue h3 f:-0.42431135962
+hyb.getValue h2
+adc.getValue a3
+hyb.getValue h3
+hyb.setValue h3 f:0.61146
+adc.getValue a2
+hyb.setValue h0 f:0.125
+hyb.getStaticVal h2
+adc.getCV a0
+hyb.getValue h3
+adc.getValue a4
+adc.setCVOffset a2 f:-0.0494
+adc.getValue a2
+adc 1 6 4095
+adc 0 6 2490
+n.snapshot
+adc.setIgnoreHID a3 b:True
+adc 0 0 4093
+adc 0 0 4093
+adc 1 7 1
+n.snapshot
+adc.getValue a2
+hyb.getValue h2
+hyb.getValue h2
+adc.getValue a2
+hyb.getRawCVValue h2
+adc.getValue a0
+adc.getValue a3
+hyb.getValue h2
+adc 1 6 4095
+n.snapshot
+adc.getValue a1
+adc 1 4 2046
+adc 1 7 215
+adc 0 1 0
+adc 0 1 0
+n.snapshot
+hyb.getValue h3
+adc 1 1 16
+adc 0 3 689
+adc 1 5 4094
+n.snapshot
+hyb.getValue h1
+adc.getValue a2
+hyb.getRawCVValue h2
+adc.getValue a2
+hyb.getRawCVValue h1
+adc.clipControl a1 f:0.7
+hyb.getValue h1
+adc.getValue a0
+adc 1 3 1153
+adc 0 3 689
+adc 1 3 1153
+n.snapshot
+hyb.setIgnoreHID h1 b:False
+adc.isResisting a2
+adc.getValue a2
+adc.isResisting a1
+adc.getValue a3
+adc.setValue a3 f:0.835179928932138
+hyb.getValue h0
+hyb.getValue h0
+adc.getValue a0
+adc 0 7 2047
+adc 1 1 26
+n.snapshot
+hyb.setValue h2 i:2
+hyb.getValue h3
+hyb.setCVOffset h3 f:-0.0305
+adc 0 5 4095
+adc 1 0 0
+n.snapshot
+hyb.getValue h2
+adc.getRawPotValue a0
+adc 1 7 4095
+n.snapshot
+adc.setIgnoreHID a4 b:False
+adc.clipControl a1 f:0.4555032220095749
+adc.getValue a4
+adc.getValue a4
+adc.getValue a3
+hyb.getValue h2
+hyb.getCVValue h2
+hyb.getValue h0
+adc.clipControl a2 f:1.2815
+adc.getPot a3
+hyb.getRawCVValue h2
+hyb.getRawCVValue h0
+hyb.getValue h0
+adc 1 1 2970
+adc 1 6 4089
+n.snapshot
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h0
+hyb.getValue h0
+hyb.getStaticVal h0
+adc.getValue a4
+adc 1 7 2048
+n.snapshot
+hyb.setIgnoreHID h3 b:True
+hyb.setCVOffset h3 f:-0.036
+adc.getValue a0
+adc.getPot a3
+adc.getValue a2
+adc.getValue a3
+adc.getValue a0
+hyb.getValue h0
+adc 1 4 3193
+n.snapshot
+adc.getValue a0
+adc.getValue a4
+hyb.getValue h2
+adc 0 7 0
+adc 1 3 1159
+adc 1 7 2050
+adc 1 2 2048
+n.snapshot
+hyb.getValue h0
+adc.setResistVal a2 f:1.1993549856696628
+hyb.getValue h1
+adc 0 7 0
+n.snapshot
+adc.getValue a1
+hyb.getRawCVValue h1
+adc.getValue a0
+adc.getValue a4
+adc 0 2 4042
+adc 1 0 0
+adc 0 6 2484
+adc 1 5 4095
+n.snapshot
+hyb.getStaticVal h0
+hyb.getValue h1
+adc 1 1 2970
+adc 0 4 5
+adc 1 6 4089
+n.snapshot
+hyb.getValue h0
+adc 0 4 2048
+n.snapshot
+adc.getValue a3
+hyb.getValue h1
+adc.isResisting a1
+adc.getValue a0
+adc 1 1 2970
+adc 1 5 4095
+n.snapshot
+adc.getValue a2
+adc 1 4 3193
+adc 0 6 4095
+adc 1 5 4095
+adc 1 1 4094
+n.snapshot
+hyb.getValue h2
+adc.getValue a3
+adc.setIgnoreHID a0 b:False
+adc.setIgnoreHID a2 b:True
+hyb.getCVValue h3
+hyb.setValue h1 f:0.3333333333333333
+hyb.setIgnoreHID h3 b:False
+adc.getCV a4
+adc 1 0 0
+n.snapshot
+adc.getValue a2
+hyb.getValue h3
+hyb.setValue h0 f:0.9941725544714508
+adc.getValue a1
+hyb.getValue h0
+adc.getValue a1
+adc.getValue a4
+hyb.getValue h1
+adc 1 1 4087
+adc 1 7 2050
+n.snapshot
+adc.getCV a1
+adc.getValue a0
+adc.setValue a1 i:1
+adc.getValue a4
+adc.getValue a0
+adc.setIgnoreHID a2 b:False
+adc.getCV a1
+adc 1 7 2062
+adc 0 4 2048
+n.snapshot
+hyb.getValue h1
+adc.getValue a3
+adc.clipControl a0 i:2
+hyb.getValue h1
+hyb.getValue h0
+adc.getValue a3
+adc.clipControl a0 f:0.09909133939
+adc 1 7 2056
+n.snapshot
+hyb.getValue h0
+adc.getValue a0
+adc.getValue a2
+hyb.getValue h3
+adc 0 2 4052
+adc 0 3 773
+adc 1 2 2048
+n.snapshot
+hyb.getValue h1
+hyb.getValue h0
+adc 0 5 4085
+adc 0 6 4095
+adc 0 0 4093
+n.snapshot
+hyb.getCVValue h3
+adc.setResistVal a3 f:0.125
+adc.setValue a1 f:0.524665703
+hyb.setIgnoreHID h3 b:True
+hyb.getValue h1
+hyb.setValue h3 f:-0.011512886251327
+adc.getValue a4
+adc.setIgnoreHID a1 b:False
+adc.isResisting a0
+adc 1 6 4087
+n.snapshot
+adc.getValue a3
+adc 1 1 4087
+n.snapshot
+adc.getValue a0
+hyb.getValue h3
+adc.getValue a3
+adc 1 1 4087
+adc 0 2 4052
+adc 1 2 3835
+adc 0 2 4052
+n.snapshot
+adc.getPot a3
+hyb.getValue h2
+adc.setCVOffset a3 f:0.0242
+hyb.getValue h3
+adc 1 3 1159
+adc 1 4 3187
+adc 1 6 764
+adc 0 4 2048
+n.snapshot
+adc.getCV a0
+adc.getValue a1
+adc.getValue a4
+adc 0 0 4093
+adc 1 6 770
+n.snapshot
+hyb.getStaticVal h2
+adc.setCVOffset a4 f:-0.0487
+hyb.getValue h0
+adc.getCV a1
+adc.getValue a0
+adc.getCV a2
+adc 1 0 0
+adc 0 4 4095
+adc 0 0 4092
+adc 1 6 770
+n.snapshot
+adc.getPot a0
+adc 1 6 2048
+adc 0 0 1908
+adc 1 1 4087
+adc 1 5 4095
+n.snapshot
+adc.clipControl a0 f:0.5
+adc 1 2 3009
+adc 1 0 2048
+adc 0 4 4095
+n.snapshot
+hyb.getCVValue h0
+adc.getValue a4
+adc.clearResistVal a4
+hyb.getValue h3
+adc 0 3 773
+n.snapshot
+hyb.setValue h0 f:-0.073132175986147
+adc 0 3 775
+adc 0 5 4073
+n.snapshot
+adc.getCV a0
+adc.getValue a2
+hyb.getValue h1
+adc 0 2 4052
+adc 1 3 1161
+adc 0 0 2048
+adc 0 5 2457
+n.snapshot
+hyb.getValue h2
+adc 1 6 1039
+adc 0 6 4095
+adc 0 6 4095
+adc 1 2 4095
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+adc.getValue a3
+hyb.getValue h1
+adc.getValue a0
+adc 1 1 3451
+adc 1 5 4095
+adc 0 0 2057
+n.snapshot
+hyb.getRawCVValue h3
+adc.getValue a3
+adc 1 7 577
+n.snapshot
+adc.getValue a1
+adc 1 4 2048
+n.snapshot
+hyb.getValue h0
+adc 0 5 2457
+adc 0 6 4095
+adc 0 3 780
+adc 1 4 2048
+n.snapshot
+hyb.getValue h1
+hyb.getValue h2
+adc.getValue a3
+adc 0 6 2821
+adc 0 2 4052
+adc 1 1 1558
+adc 1 4 2052
+n.snapshot
+hyb.getCVValue h1
+hyb.getValue h1
+adc 0 5 2460
+n.snapshot
+hyb.setValue h0 f:-0.37435
+hyb.setValue h1 f:-0.4541
+adc.isResisting a2
+adc 0 7 3227
+adc 1 0 1648
+adc 1 6 1048
+n.snapshot
+hyb.getValue h3
+hyb.getValue h0
+adc.getValue a4
+hyb.getValue h0
+hyb.getValue h3
+adc.getPot a0
+adc.clipControl a3 f:1.1
+adc.getPot a3
+adc 1 6 1053
+adc 1 0 4095
+adc 1 0 4095
+n.snapshot
+hyb.getValue h1
+adc.getValue a2
+hyb.setValue h1 i:5
+adc.getValue a0
+adc.getValue a3
+adc 0 6 2810
+adc 1 0 1540
+n.snapshot
+hyb.getRawCVValue h3
+hyb.getValue h3
+adc.getCV a2
+adc 0 2 4052
+n.snapshot
+adc.getRawCVValue a0
+adc 0 1 0
+adc 1 3 3504
+n.snapshot
+adc.getPot a0
+adc.getRawPotValue a1
+adc.clearResistVal a4
+adc.getValue a3
+hyb.getValue h0
+adc 1 0 1538
+adc 1 5 0
+adc 1 2 4095
+adc 0 0 2047
+n.snapshot
+hyb.getValue h2
+adc.getValue a2
+adc 1 7 2048
+adc 0 1 9
+n.snapshot
+adc.getValue a3
+adc.setValue a0 f:0.12
+hyb.getValue h1
+hyb.getValue h0
+adc.getValue a4
+hyb.getValue h1
+adc.getValue a1
+adc.getValue a2
+hyb.getValue h3
+hyb.getValue h3
+adc 0 4 0
+adc 1 6 1060
+adc 1 5 0
+n.snapshot
+adc.getRawPotValue a1
+adc.getValue a4
+adc 1 1 3499
+adc 1 0 2047
+n.snapshot
+hyb.setValue h1 f:0.9783204783788
+hyb.getValue h2
+hyb.getValue h1
+hyb.getValue h3
+adc.getValue a4
+hyb.getValue h1
+hyb.getValue h3
+adc.getValue a0
+adc 0 1 15
+n.snapshot
+hyb.getValue h3
+adc.getCV a2
+adc.getCV a0
+adc 1 3 939
+adc 0 0 492
+adc 0 5 2460
+adc 0 5 2466
+n.snapshot
+hyb.getRawCVValue h1
+hyb.getValue h1
+adc 1 1 585
+adc 1 6 1
+n.snapshot
+adc.getValue a1
+adc.getValue a1
+adc.setIgnoreHID a4 b:True
+adc.getValue a2
+hyb.getValue h2
+adc 0 5 2172
+n.snapshot
+hyb.getRawCVValue h1
+hyb.getValue h3
+adc 0 0 492
+adc 0 0 482
+adc 1 0 1540
+n.snapshot
+adc.getValue a0
+adc.getPot a4
+hyb.getValue h1
+adc.getValue a1
+hyb.getValue h3
+adc.getValue a1
+adc.getCV a4
+adc.getRawPotValue a3
+adc 1 6 1
+adc 1 6 2912
+adc 1 2 4095
+adc 1 7 2048
+n.snapshot
+hyb.getValue h3
+adc.getCV a0
+hyb.getValue h1
+hyb.setValue h0 i:4
+adc.setIgnoreHID a2 b:True
+adc 0 3 2048
+adc 0 7 967
+adc 1 7 2048
+adc 1 5 4095
+n.snapshot
+hyb.setValue h0 f:-0.340681
+hyb.getValue h2
+hyb.getValue h2
+adc.getPot a3
+hyb.getValue h3
+hyb.getRawCVValue h2
+hyb.setValue h0 f:0.352831164834071
+adc.getValue a0
+adc.getValue a2
+hyb.getValue h2
+adc.clearResistVal a4
+adc.setValue a1 f:0.5995181693886025
+adc.getPot a3
+hyb.setValue h3 f:0.91357
+hyb.getValue h3
+hyb.setCVOffset h1 f:0.0295
+adc 1 5 4095
+adc 1 1 602
+n.snapshot
+hyb.getValue h3
+adc.setResistVal a3 f:-0.284047780264
+adc.getValue a2
+hyb.getValue h0
+adc.getValue a3
+adc 1 5 2047
+adc 1 7 2042
+n.snapshot
+hyb.getValue h2
+adc 1 7 2050
+adc 0 3 2047
+n.snapshot
+hyb.getValue h0
+adc.getCV a2
+adc 1 0 1540
+n.snapshot
+adc.getValue a1
+adc 1 3 3330
+adc 0 4 4095
+adc 0 0 482
+n.snapshot
+adc.getValue a3
+adc 1 6 2901
+n.snapshot
+hyb.setValue h0 f:-0.02036
+adc 0 7 2048
+n.snapshot
+adc.getValue a2
+adc.getValue a4
+adc.getValue a3
+hyb.getValue h3
+adc 0 0 493
+adc 0 1 18
+n.snapshot
+adc.clearResistVal a2
+hyb.setValue h1 f:-0.0
+adc.getValue a1
+adc 1 2 4095
+adc 1 4 2047
+adc 0 4 4095
+adc 0 3 2048
+n.snapshot
+hyb.getCVValue h3
+adc.getValue a2
+hyb.setCVOffset h1 f:0.007
+adc 1 3 3330
+adc 0 2 4051
+adc 1 0 1540
+adc 0 6 2810
+n.snapshot
+adc.getValue a0
+adc 1 6 3823
+adc 0 0 493
+n.snapshot
+adc.getCV a4
+adc.setValue a4 f:0.0006468252
+adc 1 3 3330
+adc 1 3 2048
+adc 0 1 28
+n.snapshot
+adc.getValue a3
+adc 1 0 1540
+adc 0 5 771
+adc 1 0 767
+n.snapshot
+adc.getValue a3
+adc 0 6 2048
+adc 1 6 3823
+n.snapshot
+hyb.getValue h1
+adc.getValue a3
+adc.setValue a2 f:0.3067306181
+adc.getValue a4
+hyb.getValue h0
+hyb.getValue h3
+hyb.getValue h0
+adc 1 6 3823
+adc 1 7 2048
+adc 0 1 2047
+n.snapshot
+adc.getValue a2
+adc.getPot a2
+adc.getValue a3
+adc 1 0 2048
+adc 1 2 4095
+adc 1 0 1672
+n.snapshot
+adc.getValue a0
+adc.getRawCVValue a4
+hyb.getValue h1
+adc 1 5 3210
+adc 0 4 1
+adc 0 0 493
+n.snapshot
+adc.setResistVal a0 f:-0.03596434434242646
+adc.getValue a3
+adc.getValue a2
+adc 0 1 2047
+adc 1 7 2047
+n.snapshot
+hyb.setValue h2 f:0.847
+hyb.getValue h3
+adc 0 4 0
+adc 0 2 4094
+adc 1 6 1
+adc 0 4 0
+n.snapshot
+adc.getValue a2
+adc.getValue a4
+adc.getValue a0
+hyb.getCVValue h2
+hyb.getValue h1
+adc.getRawPotValue a0
+adc 1 6 3667
+adc 0 4 0
+n.snapshot
+hyb.getValue h3
+adc.clipControl a1 f:-0.093254206464649
+hyb.getValue h3
+adc 0 5 767
+adc 1 7 2040
+n.snapshot
+hyb.getValue h3
+hyb.getValue h2
+adc.getValue a0
+hyb.getValue h2
+adc 1 6 3669
+adc 1 4 2049
+adc 0 3 2048
+adc 1 6 3669
+n.snapshot
+adc.getValue a4
+hyb.getValue h2
+hyb.getValue h3
+adc.setIgnoreHID a4 b:True
+adc 1 7 2051
+n.snapshot
+adc.getValue a4
+adc 0 7 2048
+adc 1 0 2047
+n.snapshot
+hyb.getValue h3
+hyb.getValue h3
+hyb.setValue h1 f:0.125
+adc 1 5 4094
+adc 0 2 3557
+n.snapshot
+adc.getValue a1
+adc.getValue a2
+hyb.setValue h2 f:-0.2740981
+adc.getValue a1
+adc.getPotValue a2
+hyb.setValue h2 f:0.03708429456984
+hyb.getValue h1
+hyb.getValue h2
+adc.getCV a3
+adc.getValue a0
+adc 1 0 2038
+n.snapshot
+adc.getValue a3
+adc 0 2 771
+adc 1 1 591
+n.snapshot
+hyb.setValue h0 f:1.0
+adc.getValue a2
+hyb.getValue h3
+hyb.getValue h2
+adc.isResisting a0
+hyb.getValue h3
+adc.getValue a1
+adc.getValue a1
+adc.getPot a2
+hyb.getValue h3
+hyb.getValue h1
+hyb.getValue h1
+adc.getValue a2
+hyb.getCVValue h1
+adc.getValue a4
+hyb.getValue h1
+adc.getValue a1
+adc 0 6 2048
+adc 1 6 2048
+adc 1 4 0
+adc 1 0 3382
+n.snapshot
+adc.getPot a4
+hyb.setIgnoreHID h0 b:False
+adc.getValue a0
+adc 0 1 2047
+adc 0 7 4095
+adc 0 3 2048
+n.snapshot
+hyb.getValue h3
+adc.getValue a3
+adc.getValue a2
+adc.setValue a3 f:1.06168812
+adc.setIgnoreHID a2 b:True
+hyb.getRawCVValue h0
+adc.getValue a0
+adc 0 6 2045
+n.snapshot
+adc.getValue a3
+hyb.getValue h0
+adc 1 2 2047
+adc 1 6 2047
+adc 0 3 2037
+adc 0 5 2048
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+adc.getValue a1
+adc.clipControl a3 f:1.070305939
+adc 1 3 4094
+adc 0 3 3181
+adc 0 1 4095
+n.snapshot
+hyb.getValue h0
+adc.getValue a1
+hyb.setValue h0 i:1
+adc 0 7 2622
+adc 0 4 0
+n.snapshot
+adc.getValue a1
+adc.getValue a0
+adc 0 5 2048
+adc 0 3 20
+adc 1 0 0
+n.snapshot
+hyb.getValue h0
+adc.clipControl a2 f:0.30616956773522364
+hyb.getValue h1
+hyb.getValue h0
+adc 0 2 628
+n.snapshot
+hyb.getCVValue h2
+adc 1 7 4055
+adc 1 3 857
+adc 0 0 498
+n.snapshot
+hyb.getValue h3
+adc.getCV a3
+adc.setValue a4 f:1.37449431
+hyb.getValue h1
+hyb.getValue h0
+hyb.setValue h0 f:0.125
+hyb.setCVOffset h3 f:0.0453
+hyb.getCVValue h1
+adc 0 6 2038
+n.snapshot
+adc.getValue a2
+adc 1 6 2047
+adc 1 0 8
+adc 1 1 591
+adc 1 3 4095
+n.snapshot
+hyb.getValue h2
+adc.getValue a2
+adc.getValue a3
+adc 0 3 20
+adc 1 3 2822
+n.snapshot
+hyb.getValue h1
+hyb.getValue h2
+hyb.getValue h0
+hyb.getValue h2
+adc 1 3 0
+adc 0 2 2048
+adc 1 5 2954
+adc 1 1 1
+n.snapshot
+hyb.getValue h0
+hyb.getValue h0
+adc 0 5 2047
+n.snapshot
+hyb.getValue h0
+adc.getCV a0
+hyb.getValue h0
+adc 0 1 1
+adc 1 2 2047
+n.snapshot
+hyb.getValue h1
+adc.getValue a1
+hyb.getValue h3
+hyb.getValue h0
+adc.getValue a2
+adc.getValue a0
+hyb.getValue h2
+hyb.getValue h2
+adc 1 1 4094
+adc 0 6 2047
+adc 1 4 4095
+adc 0 1 4094
+n.snapshot
+hyb.getValue h2
+adc.getCVValue a2
+adc.setResistVal a3 f:1.288021
+hyb.setIgnoreHID h2 b:False
+adc.getValue a1
+adc.getRawCVValue a0
+adc.getValue a0
+hyb.getValue h2
+adc.clearResistVal a2
+adc.clearResistVal a0
+adc.getValue a0
+adc.getValue a1
+adc.getValue a2
+adc.getPotValue a3
+hyb.getValue h2
+adc.getValue a1
+adc.getValue a2
+hyb.getCVValue h1
+adc 1 0 2047
+adc 0 0 498
+n.snapshot
+adc.getValue a1
+hyb.getValue h0
+hyb.setCVOffset h0 f:0.0353
+adc.getValue a1
+adc.getValue a4
+hyb.getValue h0
+hyb.setValue h2 f:0.88668981
+adc.getValue a3
+hyb.getValue h1
+hyb.getValue h3
+hyb.getStaticVal h3
+adc 1 0 2047
+n.snapshot
+hyb.getValue h3
+adc.clipControl a2 f:1.0799902
+adc.getValue a3
+adc 1 7 4048
+adc 0 1 4095
+adc 1 3 0
+n.snapshot
+hyb.setIgnoreHID h1 b:False
+adc 1 7 4037
+adc 0 3 8
+n.snapshot
+hyb.setValue h2 f:0.0361095
+adc 1 5 2954
+adc 0 7 2622
+adc 0 2 2048
+adc 1 1 3606
+n.snapshot
+adc.setValue a4 f:0.1522595965334907
+adc.getValue a3
+adc.getPot a3
+adc.getPotValue a4
+adc.getPot a3
+adc 0 2 2048
+n.snapshot
+hyb.getValue h3
+adc.setIgnoreHID a0 b:True
+adc.getValue a3
+adc 0 6 2047
+adc 0 3 1
+adc 1 0 1752
+n.snapshot
+adc.getPot a2
+adc.getValue a4
+hyb.setCVOffset h0 f:-0.0203
+adc 0 1 4095
+adc 0 0 498
+adc 0 7 0
+n.snapshot
+adc.setValue a3 f:0.208848443797104
+adc.getValue a4
+adc.getValue a2
+hyb.getValue h2
+adc 1 7 4037
+adc 0 0 2047
+adc 0 1 4095
+n.snapshot
+adc.getCV a1
+adc.getRawCVValue a2
+adc.getValue a4
+hyb.getValue h0
+adc.getValue a1
+hyb.getValue h0
+adc 1 1 1
+n.snapshot
+adc.getValue a0
+adc 0 4 0
+n.snapshot
+adc.getValue a4
+adc.getValue a4
+hyb.setValue h3 f:1.22919866085457
+hyb.getValue h3
+hyb.getValue h2
+hyb.getValue h2
+adc 1 7 4035
+adc 0 4 1048
+adc 0 2 2036
+n.snapshot
+hyb.getValue h0
+hyb.getValue h3
+hyb.getValue h0
+adc 0 1 1
+adc 0 4 1048
+adc 1 3 895
+adc 1 3 1084
+n.snapshot
+hyb.getRawCVValue h2
+adc.getValue a4
+hyb.getValue h2
+adc 0 0 2055
+adc 0 1 1
+n.snapshot
+adc.getValue a2
+adc.isResisting a0
+adc.getValue a4
+hyb.getRawCVValue h1
+adc.getValue a1
+adc 0 7 1990
+adc 1 6 2047
+n.snapshot
+hyb.getValue h3
+adc.getValue a2
+adc 0 0 247
+adc 0 0 4095
+n.snapshot
+adc.getValue a4
+adc.getValue a1
+adc.getPotValue a2
+hyb.getValue h0
+adc.getValue a0
+adc.getPotValue a3
+adc.getValue a0
+adc 0 5 2040
+n.snapshot
+adc.clipControl a2 f:1.1132536765579375
+adc.getValue a1
+hyb.getValue h0
+hyb.getValue h1
+hyb.getValue h0
+hyb.getValue h3
+adc 0 2 2036
+adc 0 1 1
+n.snapshot
+adc.getPot a2
+hyb.getValue h3
+adc.getValue a2
+adc.getValue a2
+adc 0 2 2036
+adc 1 2 1991
+n.snapshot
+adc.getPot a4
+adc 1 6 4094
+n.snapshot
+adc.getCV a0
+adc 1 1 718
+n.snapshot
+adc.getValue a0
+hyb.getValue h3
+adc.getCV a3
+adc.isResisting a1
+adc 0 2 2036
+adc 1 1 2047
+n.snapshot
+hyb.getValue h1
+hyb.setIgnoreHID h3 b:True
+hyb.getValue h3
+hyb.getValue h3
+hyb.getValue h2
+adc.getValue a3
+adc.getPot a4
+adc 1 0 1748
+adc 1 2 3107
+adc 1 5 559
+n.snapshot
+hyb.getValue h2
+adc.getPot a4
+hyb.getValue h0
+adc.getValue a4
+adc.setIgnoreHID a4 b:False
+hyb.getValue h1
+adc.getValue a3
+hyb.setIgnoreHID h3 b:True
+adc.setIgnoreHID a3 b:True
+adc 0 2 2036
+n.snapshot
+adc.getPotValue a1
+adc.getValue a1
+adc.clipControl a3 f:0.6850290758439
+adc.getValue a1
+adc 0 3 1
+n.snapshot
+hyb.getValue h0
+hyb.getValue h0
+adc 0 5 4094
+adc 1 7 4035
+adc 0 1 1
+adc 0 0 4095
+n.snapshot
+hyb.getValue h1
+hyb.getValue h3
+adc.getPot a0
+adc.getValue a1
+adc 1 4 4095
+adc 0 0 3155
+adc 1 5 554
+adc 0 6 2049
+n.snapshot
+adc.getValue a3
+adc.setIgnoreHID a2 b:True
+adc.getCVValue a1
+adc 0 5 4082
+n.snapshot
+hyb.getValue h1
+hyb.setValue h1 f:0.55686757372352
+adc 1 7 1088
+adc 0 4 1048
+adc 1 1 2044
+adc 0 6 2049
+n.snapshot
+adc.getCV a1
+adc 1 5 564
+adc 0 6 2049
+adc 1 2 3110
+adc 1 5 564
+n.snapshot
+hyb.getValue h3
+hyb.getValue h1
+adc.getValue a0
+adc 1 5 564
+adc 1 7 1088
+n.snapshot
+adc.setValue a2 f:-0.5
+adc 1 2 3110
+adc 1 0 1748
+adc 0 0 3155
+adc 1 7 1095
+n.snapshot
+hyb.getRawCVValue h2
+adc 0 1 1
+n.snapshot
+adc.getValue a2
+adc.getValue a4
+adc.getValue a1
+adc 0 7 1
+adc 0 0 3155
+adc 1 5 564
+adc 0 2 1
+n.snapshot
+hyb.getValue h0
+hyb.getValue h3
+adc.getValue a0
+adc 1 4 4095
+adc 0 4 346
+n.snapshot
+hyb.getValue h0
+adc 0 5 4082
+adc 1 3 2760
+adc 0 1 0
+n.snapshot
+hyb.getStaticVal h0
+adc 0 1 0
+adc 1 7 2494
+adc 1 4 1
+n.snapshot
+hyb.getValue h2
+adc 0 5 4082
+adc 1 5 622
+n.snapshot
+adc.setIgnoreHID a3 b:True
+hyb.setValue h1 f:0.105
+adc.setValue a0 f:0.877450510796
+adc.getValue a3
+hyb.getValue h0
+adc 0 7 1
+n.snapshot
+adc.getPot a1
+adc.setResistVal a0 f:0.2692118950115
+adc.getPot a2
+adc.setResistVal a1 f:1.43657646423636
+adc 0 7 528
+n.snapshot
+adc.getValue a2
+adc 1 1 827
+adc 1 4 1
+n.snapshot
+adc.getValue a1
+adc 0 3 7
+adc 1 6 4094
+adc 0 7 520
+n.snapshot
+adc.getCV a3
+adc.getValue a3
+hyb.setValue h2 f:0.3510599008504771
+adc.setResistVal a3 f:1.3223868974840727
+adc 1 3 2759
+adc 0 2 4
+n.snapshot
+hyb.getCVValue h1
+adc 0 6 2047
+adc 1 0 4095
+n.snapshot
+adc.setResistVal a0 f:1.475
+adc 0 5 4082
+adc 0 0 3155
+adc 1 4 1
+n.snapshot
+adc.getValue a4
+hyb.getCVValue h2
+adc 1 6 2223
+adc 1 3 2759
+adc 0 2 4095
+n.snapshot
+adc.getValue a3
+adc 1 6 2305
+adc 1 1 817
+n.snapshot
+adc.getValue a2
+adc 0 2 4091
+adc 1 3 2766
+n.snapshot
+adc.getCVValue a1
+adc.getValue a0
+adc.setValue a0 f:-0.0
+adc.setCVOffset a1 f:0.0321
+hyb.getValue h1
+hyb.getValue h0
+adc.getCV a3
+adc.getCV a2
+hyb.getValue h1
+adc.setValue a4 f:0.970241865734847
+adc.getValue a1
+hyb.getValue h2
+adc 1 7 2494
+adc 0 1 0
+adc 0 7 168
+adc 0 7 3493
+n.snapshot
+adc.getPotValue a1
+hyb.getValue h3
+adc.getPotValue a0
+adc 1 6 2542
+adc 1 0 1946
+n.snapshot
+adc.getPotValue a4
+hyb.setValue h3 f:-0.4
+hyb.getValue h1
+adc.setIgnoreHID a1 b:False
+adc 0 4 349
+adc 1 7 2494
+adc 0 1 0
+n.snapshot
+adc.getValue a2
+adc.getCV a1
+adc.getValue a4
+hyb.setIgnoreHID h2 b:True
+hyb.getValue h1
+adc 0 3 3
+adc 0 4 349
+adc 0 2 4091
+n.snapshot
+hyb.getValue h3
+adc 1 6 4095
+n.snapshot
+adc.getCV a4
+adc 0 2 2047
+n.snapshot
+adc.setValue a0 f:0.8352464
+hyb.getValue h2
+adc 0 0 3155
+adc 0 6 2048
+adc 0 0 3155
+n.snapshot
+hyb.getValue h1
+adc 1 0 1937
+n.snapshot
+adc.getCV a2
+adc.getPot a4
+adc.setValue a2 f:0.6009
+hyb.getValue h3
+hyb.getValue h3
+adc 1 5 622
+adc 0 0 3155
+n.snapshot
+adc.clipControl a2 f:0.6391458529456
+adc.getValue a4
+adc 1 7 2494
+adc 0 6 2041
+adc 0 2 2047
+n.snapshot
+hyb.getValue h1
+adc 0 0 3155
+adc 0 6 0
+adc 1 2 2139
+n.snapshot
+hyb.getValue h3
+hyb.getValue h1
+adc.getValue a4
+adc.setValue a1 f:0.1250123
+hyb.getValue h0
+adc 1 5 622
+adc 0 2 2054
+n.snapshot
+hyb.getValue h2
+adc.getValue a3
+adc 1 5 622
+adc 1 2 2151
+adc 0 4 349
+adc 0 5 2047
+n.snapshot
+adc.getValue a3
+hyb.getCVValue h0
+adc.getValue a2
+adc 0 7 3495
+n.snapshot
+adc.getCVValue a3
+hyb.getValue h2
+adc.getValue a2
+adc.getValue a4
+adc.getValue a0
+adc.getValue a1
+hyb.setValue h3 f:1.005066749556572
+adc.getValue a0
+hyb.getValue h3
+hyb.getValue h1
+adc 1 3 534
+adc 0 1 0
+n.snapshot
+hyb.getValue h2
+adc.getValue a0
+hyb.getValue h1
+adc 0 5 2047
+n.snapshot
+hyb.getValue h0
+adc 0 3 0
+n.snapshot
+adc.getValue a0
+adc 1 3 4094
+n.snapshot
+adc.getCV a0
+adc.setValue a2 i:4
+hyb.getValue h3
+adc.getRawCVValue a1
+adc 1 4 2048
+adc 1 2 2274
+adc 0 2 2049
+n.snapshot
+adc.getValue a2
+adc.clipControl a3 f:1.08555367
+hyb.setIgnoreHID h0 b:True
+adc.getValue a0
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h0
+adc.clearResistVal a2
+hyb.getValue h2
+hyb.getValue h0
+adc.setIgnoreHID a4 b:False
+adc.getValue a0
+adc 1 5 622
+adc 0 7 838
+n.snapshot
+hyb.getValue h0
+adc.setValue a2 f:-0.46578587241285
+hyb.getValue h2
+adc.getValue a3
+adc.getCV a1
+adc 0 5 2047
+adc 1 5 1
+n.snapshot
+adc.getValue a3
+hyb.getValue h2
+hyb.getValue h0
+adc.clipControl a2 f:1.0532495035
+adc.clipControl a2 i:0
+adc.clipControl a2 i:-2
+adc.getPotValue a3
+adc 0 6 11
+adc 1 6 4094
+adc 1 6 4094
+adc 1 7 2499
+n.snapshot
+hyb.getValue h0
+adc.getValue a1
+adc.getValue a4
+hyb.getValue h3
+adc 0 0 4094
+adc 1 7 2499
+adc 0 2 2049
+n.snapshot
+hyb.getValue h3
+adc.getValue a1
+hyb.getCVValue h3
+adc 1 2 2422
+adc 0 0 0
+n.snapshot
+adc.getCV a0
+adc.getValue a0
+hyb.getValue h1
+adc 1 4 2041
+adc 0 5 2054
+n.snapshot
+hyb.getValue h2
+hyb.getValue h1
+hyb.getValue h0
+adc 1 1 2047
+n.snapshot
+adc.setValue a3 f:-0.0944108840696
+adc.getValue a3
+adc.getValue a0
+hyb.setValue h0 f:1.0219
+adc 1 7 2499
+n.snapshot
+adc.getValue a0
+hyb.getValue h1
+adc.setValue a0 i:-3
+adc 1 2 2429
+adc 0 3 2047
+n.snapshot
+adc.getValue a0
+hyb.getValue h0
+adc.setCVOffset a0 f:0.0367
+adc.getValue a0
+adc.getValue a2
+hyb.getCVValue h1
+adc 0 4 358
+adc 1 7 2491
+adc 0 3 2047
+n.snapshot
+adc.getPotValue a4
+adc 1 7 2494
+n.snapshot
+adc.getValue a1
+hyb.getValue h3
+adc.getValue a4
+hyb.setIgnoreHID h3 b:True
+adc.getValue a0
+hyb.getValue h0
+adc 1 5 1
+n.snapshot
+adc.getValue a0
+adc 0 6 22
+adc 0 3 2045
+adc 0 4 358
+adc 0 7 838
+n.snapshot
+hyb.setValue h0 i:2
+adc 1 5 0
+adc 1 0 3756
+adc 1 4 3009
+adc 0 1 0
+n.snapshot
+hyb.getValue h0
+adc 0 0 0
+adc 0 4 363
+adc 0 7 838
+adc 1 2 2442
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+adc.getValue a3
+adc.getCV a0
+adc 1 3 1
+adc 1 3 1
+adc 0 6 191
+adc 0 7 835
+n.snapshot
+hyb.getValue h3
+adc 0 5 3027
+adc 0 3 2047
+n.snapshot
+hyb.getValue h3
+adc.getValue a1
+hyb.getValue h0
+adc.getValue a4
+hyb.getValue h0
+adc 1 5 4095
+adc 0 7 835
+n.snapshot
+hyb.getValue h1
+hyb.getValue h3
+adc.clearResistVal a1
+hyb.setIgnoreHID h3 b:True
+adc.getPot a4
+adc 0 4 363
+n.snapshot
+hyb.getValue h0
+adc 1 0 3985
+adc 0 2 2057
+n.snapshot
+hyb.setValue h0 f:0.851277632323
+adc.getValue a0
+adc.getRawPotValue a3
+adc.getValue a2
+hyb.getValue h3
+adc.getValue a0
+adc.getPot a1
+adc.clipControl a0 f:1.214047910272
+hyb.getCVValue h2
+hyb.getCVValue h1
+hyb.getValue h1
+hyb.getValue h1
+hyb.getValue h1
+hyb.getValue h2
+adc.setValue a0 f:1.11878859067298
+hyb.getValue h0
+hyb.getValue h3
+hyb.getValue h1
+adc 1 0 3985
+adc 0 4 363
+adc 1 3 1
+n.snapshot
+hyb.getValue h0
+adc.setIgnoreHID a2 b:True
+adc 1 2 0
+n.snapshot
+hyb.getValue h0
+adc.getPotValue a3
+adc.setCVOffset a4 f:0.0464
+adc.getPot a3
+adc.clearResistVal a1
+adc.setIgnoreHID a1 b:True
+hyb.getValue h3
+adc.setValue a2 f:0.378287
+adc 0 5 3027
+adc 1 7 2486
+adc 1 5 2047
+adc 0 7 835
+n.snapshot
+adc.setIgnoreHID a3 b:True
+hyb.getValue h0
+adc 0 7 1
+adc 0 7 2282
+n.snapshot
+adc.clipControl a1 f:0.401130613636697
+adc 1 3 3
+adc 0 2 4094
+n.snapshot
+hyb.getValue h2
+adc.getValue a2
+adc.getPot a1
+adc 1 5 2043
+adc 1 2 0
+adc 0 4 363
+adc 0 7 2280
+n.snapshot
+adc.getValue a2
+hyb.getValue h2
+adc.getPot a4
+adc 1 5 2053
+n.snapshot
+hyb.getValue h3
+adc.isResisting a2
+adc 0 7 0
+adc 1 4 3599
+adc 0 4 365
+adc 0 6 196
+n.snapshot
+hyb.getValue h0
+adc.getValue a1
+adc.getValue a0
+adc.getValue a3
+adc 0 5 2047
+adc 1 2 4095
+adc 0 2 4094
+adc 1 5 4094
+n.snapshot
+hyb.getCVValue h0
+adc 1 5 4083
+adc 1 7 2480
+n.snapshot
+adc.getValue a0
+adc.getPot a1
+adc.setValue a3 f:-0.091494829195042
+adc.getValue a4
+adc.getValue a3
+adc.isResisting a4
+hyb.getCVValue h2
+adc.getPotValue a3
+adc.getValue a4
+hyb.getValue h3
+adc 1 7 2471
+adc 0 2 4094
+adc 1 1 2047
+adc 1 2 4095
+n.snapshot
+adc.setIgnoreHID a1 b:False
+adc.getValue a3
+adc 1 7 3921
+adc 0 1 4094
+adc 0 4 365
+n.snapshot
+adc.getPot a4
+adc 0 3 0
+adc 0 7 3805
+n.snapshot
+adc.getValue a2
+adc 0 2 4094
+adc 1 3 1059
+adc 1 5 4087
+n.snapshot
+adc.getRawPotValue a1
+adc.getRawPotValue a2
+adc.setValue a4 f:-0.079027396567761
+adc 1 7 3915
+adc 1 7 3915
+adc 1 6 0
+adc 1 0 3985
+n.snapshot
+adc.getValue a3
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h1
+adc.getValue a3
+hyb.getValue h0
+adc 0 0 0
+adc 1 1 2047
+n.snapshot
+adc.getValue a4
+adc.getValue a3
+adc.setValue a3 f:0.3333333333333333
+adc.isResisting a1
+adc 0 5 2047
+adc 1 5 4087
+n.snapshot
+adc.getValue a4
+adc 1 6 0
+n.snapshot
+adc.getRawPotValue a2
+adc 0 7 3800
+adc 1 4 1377
+adc 0 3 0
+n.snapshot
+hyb.getValue h3
+hyb.getValue h2
+adc 1 2 4094
+adc 1 4 4095
+adc 1 1 4094
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+adc 0 0 97
+adc 1 0 3993
+adc 1 1 4094
+adc 0 5 2047
+n.snapshot
+adc.getValue a4
+adc 0 5 2047
+n.snapshot
+hyb.getValue h0
+adc.getPot a3
+adc 0 4 3422
+adc 1 5 2006
+n.snapshot
+hyb.getValue h3
+adc.getValue a1
+adc.getValue a4
+hyb.getValue h3
+hyb.getRawCVValue h0
+hyb.getValue h0
+hyb.getCVValue h2
+adc.getPot a2
+hyb.getValue h1
+adc.clearResistVal a3
+hyb.getValue h3
+hyb.setValue h2 f:0.125
+hyb.getValue h3
+adc.getPot a4
+adc.getValue a4
+hyb.getValue h2
+adc 1 7 3922
+n.snapshot
+adc.getRawPotValue a2
+adc 0 3 12
+adc 1 4 4095
+adc 1 1 4095
+adc 0 5 2047
+n.snapshot
+hyb.getCVValue h2
+hyb.getValue h1
+adc 0 0 97
+adc 0 4 2048
+adc 1 1 4094
+n.snapshot
+hyb.getValue h2
+hyb.setValue h2 f:-0.20863221426058
+adc.setValue a2 f:-0.2622248381144727
+hyb.getValue h0
+adc 0 2 4092
+adc 0 4 2048
+n.snapshot
+adc.getValue a4
+adc.getValue a0
+hyb.getValue h3
+adc.getValue a0
+adc 0 4 2056
+adc 1 7 2904
+n.snapshot
+hyb.getRawCVValue h3
+adc 0 4 2056
+adc 0 7 1466
+n.snapshot
+adc.getValue a4
+hyb.setIgnoreHID h0 b:True
+adc.getValue a4
+hyb.getValue h1
+hyb.getValue h1
+adc.getValue a3
+adc 1 2 4087
+adc 1 6 0
+adc 0 1 4086
+adc 0 4 1179
+n.snapshot
+adc.getPot a3
+adc.setIgnoreHID a3 b:False
+hyb.getValue h2
+hyb.getValue h3
+hyb.getValue h1
+adc.getValue a1
+adc 0 4 1184
+adc 0 0 97
+adc 1 5 1996
+adc 1 1 4094
+n.snapshot
+adc.getValue a1
+adc 1 5 1996
+adc 0 0 0
+n.snapshot
+hyb.getValue h0
+adc.setValue a3 f:0.3333333333333333
+adc.getPot a4
+hyb.getValue h3
+adc.getValue a2
+adc.getCV a0
+adc 0 3 10
+adc 0 5 2047
+adc 1 4 328
+adc 0 6 4094
+n.snapshot
+adc.setValue a0 f:0.09540246
+adc 1 7 4094
+adc 0 3 1
+adc 1 2 4087
+adc 1 7 4095
+n.snapshot
+hyb.getValue h2
+adc.getPot a2
+adc 0 2 1804
+adc 0 5 2043
+adc 0 1 2048
+n.snapshot
+adc.setIgnoreHID a1 b:False
+adc 1 5 2942
+adc 1 0 1
+adc 1 2 4095
+adc 1 0 1
+n.snapshot
+adc.getValue a4
+adc.getValue a0
+adc 0 1 2048
+adc 1 5 250
+adc 1 1 4095
+n.snapshot
+hyb.getValue h0
+adc.setValue a3 f:1.49986102458
+hyb.getCVValue h3
+adc.setIgnoreHID a4 b:False
+adc.setValue a0 i:-2
+hyb.getValue h0
+adc.isResisting a4
+adc.getValue a2
+adc 1 2 4091
+n.snapshot
+hyb.setValue h3 f:0.0979358670645309
+adc 1 0 0
+adc 0 5 2048
+adc 1 3 297
+adc 1 7 4095
+n.snapshot
+adc.setIgnoreHID a1 b:False
+adc 0 6 4094
+n.snapshot
+hyb.setIgnoreHID h2 b:True
+adc.getValue a4
+adc.getValue a0
+adc 0 1 2045
+n.snapshot
+adc.getValue a1
+hyb.getRawCVValue h0
+adc 1 7 2047
+adc 1 5 1
+adc 0 0 1
+adc 1 4 336
+n.snapshot
+hyb.getValue h2
+adc.getValue a0
+adc 1 7 2460
+n.snapshot
+adc.isResisting a4
+adc.getValue a2
+hyb.getStaticVal h0
+adc.getValue a3
+adc.getValue a4
+adc.getValue a4
+adc 0 4 2048
+adc 1 6 337
+adc 0 5 2048
+n.snapshot
+adc.getValue a1
+adc 0 2 1793
+adc 1 5 1212
+adc 1 4 4094
+n.snapshot
+adc.getValue a3
+adc.setValue a3 f:0.45
+hyb.getValue h0
+adc.clipControl a1 f:0.453
+adc 0 5 269
+n.snapshot
+hyb.getValue h1
+adc.getCVValue a3
+adc 1 4 4094
+n.snapshot
+hyb.getValue h0
+adc 1 3 2047
+n.snapshot
+adc.isResisting a1
+adc 0 0 2048
+adc 0 0 2048
+adc 0 5 2485
+adc 0 5 23
+n.snapshot
+adc.getPot a3
+hyb.getValue h0
+hyb.setValue h1 f:-0.463
+adc.getValue a1
+hyb.getValue h3
+hyb.setValue h2 f:0.73259938
+adc.setIgnoreHID a1 b:False
+adc.isResisting a1
+hyb.getValue h0
+hyb.getValue h1
+adc 1 2 4084
+adc 0 6 4091
+adc 1 2 4084
+n.snapshot
+hyb.getValue h1
+adc 0 6 1
+n.snapshot
+adc.getRawCVValue a4
+hyb.getValue h2
+adc.getPotValue a4
+hyb.getRawCVValue h1
+adc 0 0 3215
+n.snapshot
+hyb.getCVValue h2
+hyb.getValue h1
+adc 0 1 3275
+adc 0 2 0
+adc 0 1 4094
+adc 1 6 4094
+n.snapshot
+hyb.getValue h1
+adc.getValue a3
+adc.setCVOffset a3 f:0.0212
+hyb.getValue h2
+adc 0 5 3815
+adc 0 7 1454
+adc 0 6 0
+adc 0 4 2048
+n.snapshot
+hyb.getValue h0
+hyb.getCVValue h1
+adc.getValue a0
+adc.clipControl a0 f:1.021413551
+adc 0 4 2046
+adc 1 0 2
+n.snapshot
+adc.getValue a4
+hyb.setIgnoreHID h3 b:True
+adc.clearResistVal a1
+adc 1 5 1212
+adc 0 2 4095
+adc 0 3 956
+adc 0 7 4094
+n.snapshot
+adc.getPot a2
+adc.getValue a2
+hyb.getValue h3
+adc.setIgnoreHID a2 b:False
+adc.setValue a0 f:-0.43984
+adc 0 2 4095
+adc 0 3 956
+adc 0 2 4095
+n.snapshot
+adc.getValue a1
+adc.getCV a0
+adc.getPotValue a0
+hyb.setIgnoreHID h3 b:False
+hyb.setValue h1 i:-1
+adc 0 4 2094
+adc 1 7 2460
+adc 1 5 4094
+adc 0 0 3220
+n.snapshot
+hyb.setIgnoreHID h3 b:True
+hyb.getValue h0
+hyb.getValue h0
+adc 1 2 4084
+adc 1 0 2047
+adc 1 5 4094
+n.snapshot
+adc.clipControl a0 f:0.31486416005534035
+hyb.getValue h0
+adc.getValue a0
+adc 1 6 4094
+adc 1 0 2047
+adc 0 4 1880
+n.snapshot
+adc.getValue a1
+adc 0 0 4094
+n.snapshot
+hyb.setValue h3 f:1.23569873424
+adc 0 4 3956
+adc 1 6 4094
+adc 1 5 4094
+adc 0 4 3944
+n.snapshot
+adc.getValue a2
+adc.getValue a3
+hyb.setValue h3 f:1.0329188109
+adc.setValue a4 f:0.901833626
+adc.getValue a3
+hyb.setValue h0 f:0.5364403198564458
+hyb.getValue h3
+adc.setResistVal a1 i:2
+hyb.getRawCVValue h3
+hyb.getValue h3
+adc.getValue a4
+hyb.setValue h2 f:0.125
+hyb.getCVValue h2
+adc.setIgnoreHID a2 b:False
+adc.isResisting a4
+hyb.getValue h3
+hyb.getValue h0
+hyb.setValue h0 f:-0.236365779099595
+adc.getPot a3
+adc.getValue a3
+hyb.getValue h2
+adc.getValue a1
+adc 1 6 0
+adc 0 4 3944
+n.snapshot
+hyb.getValue h1
+hyb.getValue h0
+hyb.getValue h2
+adc 1 1 2450
+adc 1 3 2498
+n.snapshot
+adc.getPot a0
+adc.setResistVal a4 f:-0.0
+hyb.getValue h2
+adc.setValue a1 f:1e-05
+adc.isResisting a0
+adc.getValue a2
+adc 0 7 4094
+adc 0 5 3814
+adc 1 5 1657
+n.snapshot
+hyb.getRawCVValue h0
+adc 1 1 2438
+adc 1 0 3609
+adc 0 7 4090
+n.snapshot
+adc.getValue a3
+hyb.getValue h2
+adc 1 5 1657
+adc 0 0 4090
+adc 1 0 3619
+adc 1 7 2460
+n.snapshot
+adc.getValue a4
+adc 0 1 505
+adc 0 1 514
+adc 0 1 2635
+n.snapshot
+adc.getValue a3
+hyb.getValue h3
+adc.setValue a2 f:-0.0630724262648
+adc.getPot a2
+adc.setValue a1 f:-0.282
+adc.getPot a3
+adc 1 6 0
+adc 1 3 2498
+adc 1 3 2047
+adc 0 2 4086
+n.snapshot
+adc.getCVValue a4
+adc 0 3 952
+adc 1 1 31
+adc 0 4 3934
+adc 0 0 4095
+n.snapshot
+hyb.getValue h1
+adc.isResisting a0
+adc 0 2 4075
+adc 1 2 2048
+adc 0 4 3922
+n.snapshot
+hyb.setIgnoreHID h1 b:True
+adc.getCV a4
+adc 1 1 3072
+adc 0 3 2048
+adc 1 2 2056
+n.snapshot
+adc.getValue a2
+adc.getValue a1
+adc.getValue a3
+adc 0 6 1697
+adc 1 6 2047
+adc 0 3 2048
+n.snapshot
+adc.getValue a2
+hyb.setIgnoreHID h1 b:False
+hyb.getValue h1
+adc.isResisting a4
+adc.getRawCVValue a4
+adc 1 0 3619
+adc 0 5 2607
+adc 0 1 2635
+adc 0 6 671
+n.snapshot
+adc.setResistVal a0 f:1.151108482529085
+adc 0 5 2607
+adc 1 4 4094
+n.snapshot
+hyb.getValue h1
+adc.getPot a3
+hyb.getValue h3
+adc 1 7 2460
+adc 1 4 2260
+n.snapshot
+adc.getValue a3
+adc 0 1 2047
+adc 1 7 2452
+adc 0 3 2047
+adc 1 1 3072
+n.snapshot
+adc.getValue a1
+adc.getValue a2
+hyb.getValue h3
+adc 0 0 4095
+adc 0 0 4089
+adc 0 5 2607
+adc 1 2 2044
+n.snapshot
+hyb.getValue h1
+hyb.getValue h2
+hyb.getValue h2
+adc.setValue a0 f:1.09
+adc.getCV a4
+hyb.getValue h3
+adc 0 5 2604
+adc 0 7 2048
+adc 1 0 478
+adc 1 0 480
+n.snapshot
+adc.setCVOffset a4 f:0.0349
+hyb.getValue h2
+adc.setResistVal a0 f:0.1902469895
+adc 0 5 2607
+adc 1 5 3606
+adc 0 7 2049
+adc 1 3 2056
+n.snapshot
+hyb.getValue h2
+adc 1 4 2264
+adc 0 5 4095
+adc 1 7 2454
+adc 0 4 3931
+n.snapshot
+hyb.getValue h3
+hyb.getValue h2
+adc.setValue a3 f:1.379776087070323
+adc.getPot a0
+adc.getRawCVValue a0
+hyb.getValue h1
+adc.clearResistVal a4
+hyb.getValue h3
+adc.getValue a2
+hyb.getValue h3
+adc.getValue a4
+adc 1 4 2264
+n.snapshot
+adc.clipControl a2 f:-0.436408126
+adc 0 2 4094
+adc 1 1 3062
+adc 0 7 4095
+adc 1 6 2047
+n.snapshot
+adc.setValue a4 i:3
+adc 0 5 4095
+n.snapshot
+hyb.getValue h3
+hyb.getValue h2
+adc.setValue a3 f:0.4867828917412882
+adc.getValue a4
+hyb.getStaticVal h2
+adc.getValue a1
+adc 1 6 2035
+adc 0 6 0
+adc 1 4 2276
+n.snapshot
+adc.getValue a3
+hyb.getValue h3
+adc.isResisting a0
+adc.getRawCVValue a1
+adc.getRawCVValue a4
+hyb.setValue h1 f:0.611272335484
+adc 0 4 2048
+n.snapshot
+adc.getPot a1
+adc 0 0 0
+adc 1 3 4094
+n.snapshot
+adc.getValue a3
+adc.setValue a4 f:-0.100361859
+adc.getPot a0
+adc 1 3 4094
+adc 0 0 2048
+adc 1 4 2284
+adc 0 4 2048
+n.snapshot
+adc.setIgnoreHID a3 b:False
+hyb.getStaticVal h1
+adc 1 1 1
+adc 0 4 4094
+adc 0 6 2047
+n.snapshot
+adc.getValue a1
+hyb.getCVValue h0
+hyb.getStaticVal h3
+adc.getValue a0
+adc 1 7 2047
+adc 0 7 4085
+n.snapshot
+adc.getValue a1
+adc.getValue a2
+hyb.getRawCVValue h2
+hyb.getRawCVValue h0
+adc.getValue a0
+hyb.getValue h0
+adc.getPot a2
+hyb.getCVValue h2
+adc.getValue a1
+adc.clearResistVal a2
+hyb.getValue h0
+adc.setIgnoreHID a2 b:True
+adc.getRawPotValue a1
+hyb.getValue h0
+adc.getPot a3
+adc.getRawCVValue a1
+adc.isResisting a3
+adc 0 6 2037
+adc 0 7 3848
+n.snapshot
+hyb.getValue h3
+adc.clearResistVal a2
+hyb.getValue h3
+hyb.getValue h1
+adc.getValue a4
+adc.getValue a0
+adc 1 0 477
+adc 0 1 1
+adc 1 6 2035
+adc 0 4 1422
+n.snapshot
+hyb.setValue h2 i:-3
+hyb.getValue h0
+hyb.getValue h0
+adc.clearResistVal a4
+adc.getValue a3
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h0
+adc 1 5 3594
+adc 0 0 2047
+adc 1 2 2048
+n.snapshot
+adc.getPot a2
+adc.setValue a2 f:0.302545071728926
+hyb.getValue h1
+hyb.getValue h2
+adc 1 7 2047
+n.snapshot
+adc.getValue a2
+adc.getRawCVValue a2
+adc.getPot a4
+adc 0 3 2047
+adc 0 3 0
+adc 1 2 2060
+adc 1 5 3594
+n.snapshot
+adc.getValue a1
+adc 1 2 1
+adc 1 5 3594
+n.snapshot
+hyb.setValue h0 f:0.5273981
+hyb.getValue h3
+adc.getValue a4
+hyb.getValue h2
+adc 0 4 1422
+adc 1 5 3594
+adc 0 7 2048
+adc 0 0 2049
+n.snapshot
+adc.getPot a0
+adc.getValue a1
+adc 0 5 372
+adc 1 2 576
+adc 0 7 2047
+adc 1 2 575
+n.snapshot
+adc.clipControl a0 f:0.480033885759
+adc.setIgnoreHID a2 b:True
+hyb.getValue h0
+adc.clearResistVal a3
+adc.getValue a3
+adc.getValue a3
+adc.clearResistVal a0
+adc.getValue a1
+adc 1 6 2037
+adc 1 4 1202
+adc 1 3 2076
+n.snapshot
+hyb.getValue h0
+hyb.getValue h2
+adc.getValue a3
+hyb.setValue h3 f:1.1
+adc.getCV a4
+adc.clearResistVal a3
+adc.getValue a0
+adc.setCVOffset a2 f:-0.0376
+hyb.getRawCVValue h0
+adc.getRawPotValue a1
+adc.getValue a2
+adc 0 3 10
+adc 0 3 1515
+adc 0 0 2059
+n.snapshot
+adc.setIgnoreHID a0 b:False
+hyb.getValue h2
+hyb.getValue h2
+adc.getValue a4
+hyb.getValue h3
+adc.getValue a4
+adc 0 5 372
+adc 0 0 2059
+adc 1 1 0
+adc 1 4 3809
+n.snapshot
+adc.isResisting a0
+adc 1 2 575
+n.snapshot
+adc.getValue a2
+hyb.setValue h1 i:-3
+hyb.getValue h0
+adc 1 0 477
+n.snapshot
+adc.setIgnoreHID a2 b:True
+adc 1 0 723
+n.snapshot
+adc.getCVValue a3
+adc.getValue a2
+adc.getValue a2
+adc 0 2 4095
+adc 1 6 1002
+adc 1 6 1002
+n.snapshot
+adc.getValue a4
+hyb.getValue h2
+adc 1 1 2048
+adc 1 5 3592
+adc 1 2 571
+n.snapshot
+adc.getPot a4
+adc 1 7 3076
+adc 0 2 4095
+adc 1 7 3076
+adc 1 5 3601
+n.snapshot
+adc.setIgnoreHID a4 b:False
+adc.getValue a4
+adc 1 3 2085
+adc 1 1 2056
+adc 1 2 559
+adc 0 0 2059
+n.snapshot
+hyb.getStaticVal h2
+adc 1 4 1
+adc 0 4 1422
+adc 0 3 1522
+n.snapshot
+hyb.getValue h2
+adc.getValue a4
+adc.setValue a2 f:0.77287263
+hyb.getValue h0
+adc 0 7 2058
+n.snapshot
+adc.getValue a1
+adc.getValue a4
+hyb.getValue h3
+adc.getValue a3
+adc 1 3 299
+adc 1 7 1
+adc 1 0 731
+n.snapshot
+hyb.setCVOffset h3 f:0.0375
+adc 0 2 857
+n.snapshot
+adc.getPot a4
+hyb.getValue h1
+adc 1 5 3601
+adc 1 3 0
+adc 1 6 1002
+adc 0 1 0
+n.snapshot
+adc.getCV a0
+adc 1 5 3601
+n.snapshot
+adc.getValue a4
+adc.getValue a4
+adc.getRawCVValue a4
+adc.getValue a4
+adc.clipControl a3 f:0.806105
+adc 1 6 1002
+n.snapshot
+hyb.getCVValue h3
+adc.getCV a3
+hyb.getValue h3
+adc.getPotValue a3
+hyb.getValue h2
+adc.getValue a1
+hyb.getValue h2
+adc 1 3 2047
+adc 0 2 708
+adc 0 2 1481
+adc 1 4 6
+n.snapshot
+hyb.getCVValue h2
+adc.getValue a4
+hyb.getValue h1
+adc.getValue a4
+adc.getPot a4
+adc.getPot a4
+hyb.getValue h0
+adc.getValue a1
+adc.setValue a0 f:1.0053008
+adc.getValue a1
+adc.setIgnoreHID a4 b:True
+hyb.setValue h0 f:0.4097
+hyb.getValue h2
+adc 1 5 1017
+n.snapshot
+adc.getValue a0
+adc 1 7 2648
+adc 0 3 1
+n.snapshot
+hyb.getValue h2
+hyb.getValue h2
+hyb.getCVValue h1
+hyb.getValue h3
+adc.getCV a1
+adc.getRawCVValue a2
+adc 0 5 1
+adc 1 2 564
+adc 1 3 920
+adc 0 4 2047
+n.snapshot
+adc.getRawPotValue a4
+adc 1 1 2056
+adc 0 1 163
+adc 0 4 2059
+adc 1 1 2056
+n.snapshot
+hyb.getValue h3
+adc 1 7 2648
+adc 1 7 3673
+adc 0 7 1930
+adc 1 2 574
+n.snapshot
+hyb.getStaticVal h0
+adc.getPot a2
+hyb.getCVValue h1
+adc.setValue a0 f:1.11708313
+adc.setIgnoreHID a0 b:False
+adc.getValue a0
+adc.setValue a0 f:0.8339086
+adc.getValue a2
+adc.getPot a4
+adc.setValue a4 f:0.7035722334
+adc.setValue a2 f:0.8235454963
+hyb.getValue h2
+hyb.getValue h1
+adc.getValue a1
+adc.getValue a2
+adc 1 6 0
+adc 1 0 725
+adc 1 6 4038
+n.snapshot
+hyb.getValue h0
+adc.isResisting a0
+adc 0 7 1932
+adc 0 1 163
+adc 1 4 2047
+n.snapshot
+adc.clearResistVal a2
+adc.getPotValue a2
+adc 0 1 2048
+adc 0 1 2052
+adc 1 1 3484
+n.snapshot
+adc.getValue a4
+hyb.getValue h0
+hyb.getValue h0
+adc.getPot a3
+adc.getRawCVValue a0
+adc 1 5 4095
+adc 0 2 1492
+n.snapshot
+hyb.getValue h1
+hyb.getValue h2
+adc.getValue a2
+hyb.setValue h1 f:0.32
+hyb.setIgnoreHID h3 b:False
+adc 1 5 4095
+n.snapshot
+hyb.getValue h3
+hyb.getRawCVValue h1
+adc.getPot a1
+adc.setValue a4 f:0.68416769549703
+adc 1 0 2738
+adc 1 6 4094
+adc 1 0 2048
+adc 0 5 2048
+n.snapshot
+adc.getValue a3
+hyb.getStaticVal h3
+adc.getValue a3
+hyb.getValue h3
+hyb.getValue h0
+hyb.getValue h1
+adc.getValue a2
+adc 1 3 4022
+adc 1 0 1524
+adc 0 4 2070
+n.snapshot
+adc.setIgnoreHID a1 b:True
+hyb.setIgnoreHID h0 b:False
+hyb.getValue h3
+hyb.getValue h0
+adc 0 2 1492
+adc 0 2 2048
+n.snapshot
+adc.getValue a0
+hyb.getStaticVal h0
+adc 1 7 1
+adc 1 2 2380
+adc 1 2 681
+n.snapshot
+adc.getPot a2
+adc 1 6 4094
+adc 1 5 1
+adc 1 5 12
+adc 0 0 2059
+n.snapshot
+hyb.getValue h0
+adc 0 2 899
+adc 1 3 2047
+n.snapshot
+adc.setResistVal a1 f:1.26055871
+adc 1 0 1
+n.snapshot
+adc.getValue a4
+adc 1 3 2047
+adc 1 1 1
+adc 1 2 691
+n.snapshot
+adc.getCVValue a3
+adc 0 7 1932
+adc 0 5 2048
+adc 1 7 4094
+n.snapshot
+adc.getRawCVValue a2
+hyb.setValue h0 f:-0.3
+hyb.getValue h0
+hyb.getValue h2
+adc.isResisting a4
+hyb.getCVValue h1
+hyb.getValue h0
+adc.getValue a2
+adc.getRawCVValue a0
+adc.getValue a0
+adc.setValue a4 f:0.15663285323777
+adc.getValue a2
+adc.getPot a2
+hyb.getValue h2
+hyb.getValue h3
+hyb.setValue h2 f:-0.2633040721
+hyb.getValue h2
+adc.getValue a1
+hyb.getRawCVValue h1
+adc.getValue a4
+adc.getValue a2
+adc.getValue a4
+hyb.getValue h1
+hyb.setIgnoreHID h0 b:False
+adc.getValue a3
+hyb.getValue h1
+adc 0 0 2345
+n.snapshot
+hyb.setValue h2 f:1.002172623673
+adc 0 5 2048
+n.snapshot
+adc.getRawCVValue a0
+adc.getPot a1
+adc 1 3 1900
+adc 0 0 2343
+adc 1 3 2624
+adc 1 3 2545
+n.snapshot
+hyb.getValue h2
+adc.getValue a2
+adc 0 0 2343
+adc 1 2 691
+adc 0 4 2064
+adc 0 0 2343
+n.snapshot
+adc.getValue a3
+hyb.getValue h2
+adc 1 0 1
+adc 0 3 70
+n.snapshot
+hyb.getValue h1
+adc 0 2 1874
+adc 0 2 1886
+adc 0 3 78
+adc 0 3 78
+n.snapshot
+adc.getValue a4
+adc.setValue a2 f:-0.4360428
+adc.getValue a3
+adc.getCVValue a0
+adc 0 2 1
+n.snapshot
+hyb.getRawCVValue h1
+adc.getValue a2
+adc.getValue a0
+hyb.getValue h1
+hyb.getValue h2
+adc.setIgnoreHID a4 b:False
+adc 1 7 4090
+n.snapshot
+hyb.getValue h1
+hyb.getValue h2
+hyb.getStaticVal h1
+adc.getValue a2
+hyb.getValue h0
+adc 0 2 8
+adc 1 2 700
+n.snapshot
+adc.getValue a3
+hyb.getValue h2
+adc.getValue a0
+hyb.getValue h2
+hyb.setValue h2 f:-0.26262
+adc.getPot a2
+hyb.getValue h2
+hyb.getValue h1
+adc 0 0 2343
+n.snapshot
+hyb.getValue h0
+adc.getValue a3
+adc 1 2 4064
+adc 0 1 2052
+adc 1 1 0
+n.snapshot
+hyb.getValue h0
+hyb.getValue h0
+adc 0 3 2047
+adc 1 1 0
+adc 0 1 2319
+n.snapshot
+hyb.getValue h2
+adc 0 5 2041
+adc 0 6 2037
+n.snapshot
+hyb.getValue h2
+adc.getValue a1
+adc.getValue a1
+adc 0 3 2055
+adc 0 4 2507
+adc 0 4 1
+adc 1 3 4095
+n.snapshot
+adc.getCV a3
+hyb.getValue h2
+adc.getValue a0
+hyb.setValue h1 f:-0.03
+adc 0 4 1857
+adc 1 1 0
+adc 0 2 2047
+n.snapshot
+hyb.getValue h1
+hyb.setValue h2 f:-0.4508222
+hyb.setValue h0 f:0.659460714
+hyb.getCVValue h0
+adc 0 4 1863
+adc 0 6 4095
+adc 1 1 0
+adc 1 3 4083
+n.snapshot
+hyb.getValue h3
+adc 0 6 4095
+adc 1 0 1
+adc 1 5 9
+n.snapshot
+hyb.getValue h0
+hyb.getValue h2
+adc.getCV a1
+adc 1 5 115
+n.snapshot
+adc.getValue a4
+adc.setResistVal a4 f:-0.22095893711360182
+hyb.setValue h3 f:-0.463120169578
+adc 0 5 1943
+n.snapshot
+adc.isResisting a0
+adc.getValue a3
+hyb.getValue h2
+hyb.getValue h3
+hyb.getValue h2
+adc 1 0 1
+adc 0 7 1932
+adc 0 6 4095
+adc 0 3 2062
+n.snapshot
+adc.getValue a4
+hyb.setValue h3 f:0.880705871822
+hyb.getValue h2
+adc 1 6 2599
+adc 0 3 2071
+adc 1 4 2047
+n.snapshot
+adc.getRawCVValue a3
+hyb.getValue h3
+adc 1 6 2603
+adc 0 5 1943
+n.snapshot
+hyb.getValue h2
+hyb.getValue h1
+adc 0 6 4095
+adc 0 3 2047
+n.snapshot
+adc.getValue a3
+adc.setValue a3 f:0.3
+hyb.getCVValue h0
+adc.getPot a1
+adc 1 3 3392
+adc 1 5 115
+adc 0 5 1943
+n.snapshot
+hyb.getCVValue h0
+adc.getValue a2
+adc 0 1 2319
+adc 0 5 2047
+adc 1 5 120
+adc 1 1 3113
+n.snapshot
+hyb.setIgnoreHID h2 b:False
+adc.clipControl a4 f:2.675
+adc.setValue a2 f:0.793904907636404
+adc 0 1 606
+adc 0 3 3155
+adc 0 1 517
+adc 1 5 1373
+n.snapshot
+adc.getValue a3
+adc 0 4 1864
+adc 1 7 4090
+n.snapshot
+hyb.getValue h2
+hyb.getValue h3
+adc.setValue a2 f:0.0584033449
+adc 0 3 1126
+adc 0 4 1859
+n.snapshot
+hyb.getValue h1
+hyb.getStaticVal h2
+adc.setResistVal a0 f:1.41
+adc.getValue a0
+adc.getRawPotValue a1
+adc 1 0 1
+adc 0 6 4095
+adc 0 3 1142
+n.snapshot
+hyb.getValue h1
+adc.getPot a2
+adc 0 3 3157
+adc 0 2 2051
+adc 1 6 878
+n.snapshot
+adc.getValue a0
+hyb.getValue h1
+hyb.setIgnoreHID h1 b:False
+hyb.getValue h0
+adc 0 0 2343
+adc 0 4 1863
+adc 1 7 4093
+n.snapshot
+hyb.setIgnoreHID h3 b:True
+hyb.getValue h1
+hyb.setValue h3 f:0.95543
+hyb.getValue h2
+hyb.setIgnoreHID h2 b:False
+hyb.getValue h1
+adc 1 6 878
+adc 0 1 4094
+adc 0 7 1930
+n.snapshot
+adc.getValue a1
+hyb.getValue h0
+hyb.getValue h3
+adc.clipControl a2 i:-1
+adc 0 1 4094
+adc 1 6 1258
+adc 1 7 4093
+adc 1 5 1373
+n.snapshot
+hyb.getValue h1
+adc.getValue a1
+hyb.getValue h0
+adc.getValue a0
+adc 0 0 2343
+adc 1 3 3384
+adc 0 0 2337
+adc 0 5 2047
+n.snapshot
+hyb.getValue h1
+adc.getValue a1
+adc 0 7 1158
+adc 0 4 1862
+adc 0 0 2326
+adc 1 7 4086
+n.snapshot
+adc.setValue a2 f:0.717
+hyb.getValue h1
+hyb.getValue h3
+adc.clipControl a0 f:-0.30632802032287
+adc.getValue a3
+adc 0 5 2330
+n.snapshot
+hyb.getValue h3
+hyb.getValue h1
+adc.setResistVal a0 f:1.075315441787948
+adc 0 7 119
+adc 0 5 2330
+n.snapshot
+adc.getValue a4
+adc 1 3 4095
+adc 1 1 3113
+adc 1 2 4094
+n.snapshot
+hyb.getValue h3
+adc.setIgnoreHID a3 b:False
+adc.getValue a0
+adc 0 1 2216
+n.snapshot
+adc.setIgnoreHID a0 b:True
+adc 0 1 2216
+n.snapshot
+hyb.setValue h0 f:0.26182219899779047
+hyb.getValue h3
+adc.getRawCVValue a0
+hyb.getValue h3
+adc.setIgnoreHID a2 b:False
+adc.getCV a0
+adc.setValue a0 f:1.0723571587653806
+hyb.setValue h3 f:0.36066006
+adc.getValue a4
+hyb.getValue h1
+hyb.getValue h3
+adc.getValue a0
+adc.getCV a1
+hyb.getValue h2
+hyb.setValue h2 i:3
+adc 1 4 2047
+n.snapshot
+hyb.getStaticVal h2
+hyb.getValue h2
+hyb.setValue h3 f:1.0
+adc.getCVValue a4
+hyb.getValue h0
+adc 1 7 4086
+adc 0 3 3168
+adc 1 5 1368
+n.snapshot
+hyb.getStaticVal h3
+adc.getValue a4
+adc 1 4 2047
+adc 0 0 2334
+adc 0 0 2334
+adc 0 2 559
+n.snapshot
+hyb.getValue h3
+adc.getValue a3
+hyb.getValue h2
+adc.getValue a0
+adc.setIgnoreHID a0 b:False
+adc.getValue a1
+hyb.getRawCVValue h3
+hyb.setCVOffset h2 f:-0.014
+adc.getValue a1
+adc 1 6 1258
+adc 1 5 2017
+adc 0 1 2216
+n.snapshot
+adc.clearResistVal a1
+adc 0 7 119
+n.snapshot
+hyb.getValue h0
+adc.isResisting a1
+adc.getValue a0
+adc.setValue a2 f:0.34022482901713236
+adc.getValue a0
+adc 0 2 2047
+adc 0 0 2328
+adc 0 6 0
+n.snapshot
+adc.getValue a1
+adc 1 0 2048
+adc 0 0 1676
+n.snapshot
+adc.getValue a2
+hyb.setValue h1 f:0.2247246371487746
+hyb.setCVOffset h2 f:0.0072
+adc 0 4 1862
+adc 1 7 2048
+adc 0 2 4094
+n.snapshot
+hyb.getValue h0
+hyb.getStaticVal h2
+hyb.getValue h3
+adc.clipControl a0 f:0.0257695127
+hyb.getValue h2
+adc.getValue a0
+adc.getRawPotValue a1
+adc.getValue a4
+adc 1 1 1
+adc 0 3 3173
+adc 0 2 4094
+n.snapshot
+adc.setIgnoreHID a0 b:False
+hyb.setValue h1 f:1.259700205636
+adc.getValue a2
+adc.getRawCVValue a4
+adc.isResisting a1
+adc 1 6 1262
+adc 0 3 3173
+adc 0 1 2214
+adc 0 7 0
+n.snapshot
+adc.getValue a0
+adc.getRawCVValue a3
+adc 0 2 2723
+adc 1 2 4094
+adc 1 7 2055
+adc 0 6 5
+n.snapshot
+hyb.getValue h3
+adc 1 7 1002
+adc 0 7 0
+adc 1 2 4095
+n.snapshot
+adc.getValue a2
+adc.getValue a4
+hyb.setCVOffset h3 f:-0.0206
+adc 1 0 0
+adc 1 0 2150
+adc 1 2 4090
+adc 1 6 1258
+n.snapshot
+hyb.getValue h2
+hyb.getCVValue h2
+hyb.getValue h3
+adc 0 1 4095
+adc 1 6 1258
+adc 0 7 0
+adc 1 4 2055
+n.snapshot
+hyb.getValue h3
+adc.getPotValue a0
+adc 0 1 4095
+adc 0 3 3173
+n.snapshot
+hyb.setValue h3 f:0.1247567678017112
+adc.getValue a4
+adc.setIgnoreHID a0 b:True
+hyb.setValue h1 f:0.1053080670561
+hyb.getValue h0
+adc.getValue a0
+hyb.getCVValue h2
+adc 1 7 2048
+adc 0 1 1
+adc 1 2 4090
+n.snapshot
+hyb.getValue h0
+adc.getValue a1
+hyb.getValue h0
+hyb.setValue h0 f:-0.4072765361337718
+hyb.getValue h2
+adc 0 1 3830
+adc 0 5 2319
+adc 1 3 4095
+adc 1 2 4095
+n.snapshot
+adc.getValue a2
+hyb.setIgnoreHID h3 b:True
+adc 1 1 3
+adc 1 1 0
+adc 0 0 1676
+adc 0 4 4094
+n.snapshot
+adc.getValue a3
+adc.clipControl a3 f:1.0
+adc.getValue a2
+adc 0 3 2048
+adc 0 1 4095
+adc 0 7 1
+adc 1 3 4095
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+adc 1 2 4094
+adc 0 4 2047
+adc 1 3 4095
+adc 0 3 0
+n.snapshot
+adc.getCV a1
+adc.getValue a1
+hyb.setCVOffset h1 f:-0.0103
+adc.getValue a1
+adc 0 6 1
+adc 0 5 2319
+n.snapshot
+adc.setIgnoreHID a2 b:True
+adc 1 4 4094
+adc 1 7 2048
+adc 0 3 11
+n.snapshot
+adc.getValue a2
+adc.getValue a4
+adc.getCV a0
+adc 0 6 4094
+adc 0 3 2769
+n.snapshot
+adc.getValue a0
+hyb.getValue h2
+adc.getValue a1
+adc.getCV a3
+adc 0 7 1
+adc 0 0 1683
+adc 0 5 1498
+n.snapshot
+hyb.setValue h1 f:0.974020393
+adc.getValue a1
+adc 1 1 0
+adc 0 4 2047
+adc 0 7 1
+adc 1 4 4094
+n.snapshot
+adc.getValue a3
+adc.getValue a2
+adc.getValue a2
+adc 1 7 2048
+adc 0 1 1117
+adc 1 4 4094
+adc 1 6 927
+n.snapshot
+hyb.getValue h1
+adc.getCVValue a1
+adc.getCV a0
+adc.getValue a1
+adc.getValue a3
+hyb.getValue h1
+adc 0 7 2600
+adc 0 6 4094
+n.snapshot
+adc.getCV a3
+adc 0 7 2600
+adc 1 0 2150
+adc 1 2 4095
+n.snapshot
+hyb.getCVValue h0
+hyb.getValue h1
+hyb.getValue h1
+adc.getCV a2
+adc.getPot a4
+adc 1 1 0
+n.snapshot
+adc.getValue a0
+adc.getRawCVValue a0
+adc 1 7 4094
+n.snapshot
+adc.getValue a2
+adc.getValue a2
+adc 1 6 916
+adc 1 2 0
+adc 1 5 2009
+adc 1 6 916
+n.snapshot
+adc.getValue a4
+adc.getRawCVValue a4
+adc 1 7 4092
+adc 1 0 2154
+adc 0 5 2047
+n.snapshot
+adc.clipControl a0 f:-0.2774825412936037
+adc.setCVOffset a1 f:0.0176
+adc 1 0 2154
+adc 0 1 1650
+adc 0 1 4006
+adc 0 3 2147
+n.snapshot
+hyb.getValue h1
+adc 1 5 2009
+adc 0 4 1520
+adc 0 5 2047
+adc 0 4 2286
+n.snapshot
+adc.getValue a4
+hyb.getValue h3
+adc 1 3 4095
+adc 1 5 2009
+adc 1 2 11
+n.snapshot
+adc.getPot a3
+adc.getPot a2
+adc.getValue a2
+adc.getRawPotValue a3
+adc 0 1 2911
+adc 1 6 909
+adc 0 6 4095
+n.snapshot
+adc.getRawPotValue a2
+hyb.getValue h0
+hyb.setIgnoreHID h3 b:False
+adc.getCV a1
+hyb.getValue h2
+adc.getValue a0
+adc 1 1 0
+adc 0 7 2608
+n.snapshot
+hyb.getValue h3
+adc.getValue a3
+adc 1 5 2009
+adc 1 1 4095
+n.snapshot
+hyb.getValue h1
+adc.getValue a1
+adc 1 7 4084
+adc 0 5 2038
+n.snapshot
+adc.getValue a4
+adc 0 3 2157
+adc 0 0 1683
+adc 0 1 3519
+n.snapshot
+adc.getValue a2
+adc.getCVValue a1
+adc.getCVValue a2
+hyb.getValue h3
+hyb.getValue h1
+adc 1 5 2001
+n.snapshot
+hyb.setValue h0 i:5
+adc 0 7 2985
+adc 1 6 2047
+adc 1 0 2154
+n.snapshot
+hyb.getValue h3
+adc.getCV a1
+adc 1 5 2001
+adc 0 7 2988
+adc 1 2 11
+n.snapshot
+adc.getValue a1
+adc.getValue a1
+adc.getValue a2
+adc.clipControl a3 f:1.475054736761
+adc.getValue a0
+adc.getValue a3
+adc.isResisting a2
+hyb.getValue h0
+hyb.getValue h2
+adc.getValue a4
+hyb.getValue h1
+adc.getCVValue a0
+adc.getValue a4
+adc.getCV a2
+adc 1 1 80
+adc 1 5 1438
+adc 0 3 2347
+adc 1 5 4094
+n.snapshot
+adc.getValue a2
+adc.getValue a2
+adc.setValue a1 f:-0.159118049
+adc.getValue a4
+adc.getValue a2
+adc.setIgnoreHID a4 b:True
+adc 0 4 0
+adc 1 0 2154
+adc 0 2 2716
+n.snapshot
+adc.setIgnoreHID a1 b:False
+adc.getCVValue a0
+adc 0 7 0
+adc 0 3 2347
+n.snapshot
+adc.getValue a4
+hyb.getValue h2
+hyb.getValue h1
+hyb.getValue h3
+adc 1 7 1178
+adc 0 1 3402
+adc 0 0 0
+adc 1 7 1178
+n.snapshot
+hyb.getValue h3
+adc 0 3 2341
+n.snapshot
+adc.getValue a1
+adc 0 0 0
+n.snapshot
+adc.setValue a1 f:0.60542777
+adc.getValue a1
+adc.getCV a3
+adc 0 5 2048
+adc 1 6 2048
+n.snapshot
+adc.isResisting a2
+adc.getValue a2
+adc 0 0 5
+adc 1 1 82
+n.snapshot
+adc.isResisting a1
+adc.getCV a1
+adc.getValue a0
+adc 0 1 3394
+n.snapshot
+hyb.getValue h1
+adc 1 6 2048
+n.snapshot
+hyb.setValue h3 f:0.4656645425111663
+adc.clipControl a1 f:0.958
+hyb.getValue h0
+adc.getPot a0
+adc.getValue a4
+adc.getValue a4
+adc.getCV a3
+adc 1 5 4095
+adc 1 0 2150
+adc 1 3 0
+adc 1 7 1170
+n.snapshot
+adc.getCV a2
+adc.getValue a3
+adc.getValue a3
+adc 0 7 959
+adc 1 3 1
+n.snapshot
+hyb.setValue h2 f:-0.4743036
+adc 0 7 959
+n.snapshot
+hyb.setIgnoreHID h1 b:True
+adc 1 1 84
+adc 1 2 6
+adc 0 6 1
+adc 1 5 4095
+n.snapshot
+adc.getValue a2
+adc.getCV a2
+adc 0 0 5
+n.snapshot
+adc.isResisting a2
+adc 0 2 2716
+adc 0 1 0
+adc 1 5 4095
+adc 1 1 1491
+n.snapshot
+hyb.getValue h0
+adc 0 1 0
+adc 0 4 717
+n.snapshot
+adc.setResistVal a0 f:0.7
+hyb.getValue h1
+adc 0 3 2341
+n.snapshot
+adc.getRawPotValue a0
+adc 1 6 1
+adc 0 5 2048
+adc 0 3 2341
+n.snapshot
+hyb.getCVValue h2
+hyb.getValue h0
+adc.getValue a2
+hyb.getValue h3
+adc.clipControl a2 f:0.709501
+adc.getCVValue a1
+hyb.getValue h3
+hyb.getValue h3
+adc 0 5 1
+adc 1 5 4094
+adc 1 0 2141
+n.snapshot
+adc.getRawPotValue a2
+hyb.setValue h3 f:1.2575687575716126
+hyb.getValue h1
+adc.getValue a1
+adc.getValue a1
+adc 0 7 4094
+adc 0 4 717
+adc 1 7 3458
+adc 1 4 4094
+n.snapshot
+adc.clipControl a2 f:-0.46
+adc.getValue a4
+adc.getCV a4
+adc.clipControl a1 i:1
+adc.isResisting a2
+adc 1 4 4094
+adc 1 7 3454
+adc 1 3 2747
+adc 0 3 2349
+n.snapshot
+adc.getValue a2
+adc 0 5 1365
+adc 1 7 3442
+n.snapshot
+adc.getPot a4
+adc.setResistVal a1 f:0.5
+hyb.getValue h3
+adc.getValue a2
+adc 1 7 3442
+adc 0 2 2716
+adc 1 6 1
+n.snapshot
+adc.getValue a3
+adc.setValue a3 f:1.0490345737
+adc 1 5 4094
+adc 1 6 0
+adc 0 1 1533
+adc 1 3 2747
+n.snapshot
+adc.getValue a3
+adc 0 4 4095
+adc 0 0 5
+adc 0 4 4095
+n.snapshot
+adc.setResistVal a1 f:0.9906609396548116
+adc.getValue a3
+adc 0 1 4094
+adc 0 7 4094
+n.snapshot
+adc.getRawPotValue a3
+hyb.getValue h1
+adc 1 1 1
+adc 0 7 4094
+adc 1 7 3442
+n.snapshot
+hyb.getValue h2
+hyb.setValue h1 f:0.62378671647276
+adc.isResisting a3
+adc.isResisting a0
+adc.getValue a2
+adc 1 1 0
+adc 1 4 4093
+adc 1 0 2146
+adc 1 0 2149
+n.snapshot
+adc.setIgnoreHID a4 b:True
+adc.getValue a0
+adc 0 0 947
+n.snapshot
+adc.getValue a1
+adc.getValue a4
+adc.getValue a4
+adc.setValue a4 f:-0.235348299356976
+hyb.getValue h3
+adc.getPot a2
+adc 1 2 558
+adc 0 5 0
+adc 0 2 3765
+adc 0 6 1479
+n.snapshot
+hyb.getValue h3
+hyb.getValue h1
+hyb.getValue h2
+adc.getValue a1
+adc 1 4 4095
+n.snapshot
+adc.getValue a0
+hyb.getStaticVal h1
+adc.getValue a3
+adc 1 3 2382
+adc 1 5 3068
+adc 1 5 3065
+n.snapshot
+hyb.getValue h1
+adc 0 7 4083
+adc 1 5 1
+n.snapshot
+hyb.getValue h1
+hyb.getValue h3
+hyb.getValue h1
+adc.getCV a0
+adc 1 5 1500
+adc 1 7 1
+n.snapshot
+adc.getValue a0
+adc.setCVOffset a2 f:0.0436
+hyb.getValue h2
+hyb.getValue h3
+adc.getPot a1
+adc.getValue a0
+hyb.setValue h3 i:-2
+hyb.getValue h2
+adc 0 0 635
+adc 1 0 225
+adc 1 6 8
+n.snapshot
+hyb.getValue h1
+adc.getValue a1
+adc.clipControl a3 f:0.0
+adc.getValue a0
+adc 1 2 3776
+n.snapshot
+adc.getValue a4
+adc.getValue a4
+adc 0 7 4094
+adc 1 6 3580
+adc 1 5 1500
+n.snapshot
+adc.getValue a0
+hyb.getValue h1
+hyb.getValue h1
+adc.getCV a0
+hyb.getValue h0
+hyb.getValue h2
+adc.getValue a3
+adc 0 6 1058
+adc 0 7 4094
+n.snapshot
+adc.getCVValue a2
+adc.getValue a2
+adc.getValue a1
+adc.getValue a0
+hyb.getValue h3
+adc.getValue a3
+hyb.getValue h2
+adc.getValue a4
+adc.getCV a3
+adc.getValue a2
+adc 1 1 1
+adc 0 3 4095
+n.snapshot
+hyb.getRawCVValue h0
+hyb.getValue h2
+hyb.getValue h1
+adc 1 0 225
+n.snapshot
+hyb.getValue h3
+adc.getValue a2
+hyb.getValue h3
+hyb.getValue h3
+adc 1 3 2370
+adc 0 3 4095
+n.snapshot
+adc.setIgnoreHID a1 b:False
+adc.isResisting a3
+hyb.getValue h3
+adc 1 4 0
+adc 0 0 624
+n.snapshot
+hyb.getValue h1
+hyb.setValue h1 f:1.44976157490423
+adc.getValue a4
+adc 1 5 0
+adc 0 2 1641
+adc 1 4 0
+adc 1 0 215
+n.snapshot
+hyb.getValue h0
+adc.getValue a4
+hyb.setValue h3 f:0.448023417486757
+hyb.setValue h3 f:0.114157058732
+adc 0 6 1057
+adc 0 3 0
+adc 1 0 217
+n.snapshot
+adc.getCV a1
+hyb.getValue h1
+hyb.setValue h1 f:-0.24828038862315
+adc.getValue a0
+adc 1 4 0
+n.snapshot
+hyb.getValue h0
+adc 1 3 2370
+adc 1 4 0
+n.snapshot
+adc.getValue a2
+adc 0 3 12
+n.snapshot
+hyb.getValue h2
+hyb.getValue h3
+hyb.getValue h1
+adc.getValue a1
+adc 1 5 0
+adc 1 0 217
+adc 1 2 3767
+adc 0 6 2374
+n.snapshot
+hyb.getValue h1
+adc.getValue a0
+adc 0 1 4094
+adc 1 4 0
+adc 0 6 2372
+adc 1 2 3767
+n.snapshot
+adc.getValue a3
+adc.getPot a3
+adc 1 4 1
+adc 0 6 2372
+adc 1 0 192
+adc 1 4 2048
+n.snapshot
+adc.getValue a4
+adc 0 5 9
+adc 0 4 4095
+adc 0 4 4095
+n.snapshot
+adc.getValue a0
+adc.getValue a4
+hyb.getValue h2
+adc.getValue a2
+hyb.getValue h2
+adc 0 2 4094
+adc 1 0 194
+adc 1 6 3574
+adc 1 7 10
+n.snapshot
+adc.getValue a4
+adc 0 7 2402
+adc 0 6 2048
+adc 0 0 617
+adc 0 5 9
+n.snapshot
+hyb.getValue h1
+adc.getCV a1
+adc.clearResistVal a4
+adc.clearResistVal a1
+adc 1 6 3781
+adc 1 3 2158
+adc 0 6 3896
+n.snapshot
+hyb.getValue h2
+hyb.getValue h2
+adc 1 5 0
+n.snapshot
+adc.getValue a1
+adc.getValue a2
+adc 1 7 10
+n.snapshot
+adc.setIgnoreHID a0 b:False
+hyb.getValue h0
+adc 1 6 3781
+n.snapshot
+adc.getValue a3
+adc.getPot a2
+adc.setIgnoreHID a2 b:False
+adc.setCVOffset a4 f:-0.0038
+hyb.getValue h1
+adc 1 3 4095
+adc 0 6 2683
+adc 1 6 3782
+adc 0 0 3981
+n.snapshot
+adc.getCVValue a2
+hyb.getRawCVValue h1
+adc 1 4 0
+adc 0 3 12
+adc 0 4 0
+adc 1 2 1
+n.snapshot
+adc.getValue a0
+adc 1 1 1
+adc 1 2 1
+adc 0 0 3977
+adc 1 4 4
+n.snapshot
+hyb.getValue h2
+adc.setIgnoreHID a2 b:False
+adc 1 3 2048
+adc 1 1 1
+adc 1 2 4095
+adc 0 7 2043
+n.snapshot
+hyb.setValue h0 f:0.141824361297
+adc.getPot a3
+hyb.getValue h1
+adc.getCVValue a2
+hyb.getValue h1
+adc 1 4 5
+adc 0 5 9
+n.snapshot
+hyb.getValue h0
+hyb.getValue h0
+adc 0 3 13
+adc 0 2 4085
+adc 1 7 5
+adc 1 4 1954
+n.snapshot
+hyb.setValue h2 f:1.350246250129644
+hyb.getValue h1
+adc.getValue a3
+hyb.getValue h2
+adc 0 4 1
+adc 0 1 4095
+adc 0 0 3980
+n.snapshot
+hyb.getValue h0
+adc 0 2 4095
+adc 0 1 2048
+n.snapshot
+hyb.getRawCVValue h0
+hyb.getValue h2
+hyb.getStaticVal h0
+adc.getValue a0
+adc 0 3 1
+adc 0 0 3980
+adc 1 1 1
+n.snapshot
+adc.getValue a0
+adc.isResisting a0
+adc.getCV a0
+adc.getValue a3
+hyb.getValue h2
+adc.getValue a2
+hyb.getValue h1
+adc.getCV a2
+adc 1 5 0
+adc 1 0 2116
+adc 0 7 2043
+n.snapshot
+hyb.getValue h2
+adc.setIgnoreHID a1 b:False
+hyb.getValue h2
+adc.getValue a4
+adc 1 2 4095
+adc 0 7 1
+adc 1 5 1
+n.snapshot
+adc.getValue a1
+hyb.getRawCVValue h3
+adc 0 2 4095
+adc 0 6 2683
+adc 0 0 3979
+n.snapshot
+adc.getValue a4
+adc.getValue a3
+adc 1 2 4095
+n.snapshot
+hyb.getValue h2
+hyb.getRawCVValue h3
+adc.getValue a4
+hyb.getStaticVal h1
+hyb.getValue h3
+adc.getCV a4
+adc.getCV a4
+adc.getValue a2
+hyb.setValue h1 f:1.25563443736
+adc.clipControl a2 f:0.18658170007323
+adc.getValue a0
+adc 0 0 1
+adc 0 4 3221
+adc 1 4 1958
+n.snapshot
+hyb.getValue h2
+adc 1 4 1958
+adc 0 2 631
+adc 1 1 1
+adc 0 3 2047
+n.snapshot
+hyb.getValue h0
+adc.setResistVal a0 i:0
+hyb.setCVOffset h3 f:0.0485
+adc 0 2 2048
+adc 0 4 1
+n.snapshot
+adc.setResistVal a3 f:1.1735209
+adc 1 2 4095
+adc 0 5 21
+n.snapshot
+hyb.getValue h2
+adc.getValue a1
+adc 0 5 31
+adc 1 5 2879
+n.snapshot
+adc.getValue a2
+adc 1 1 4041
+adc 0 7 6
+n.snapshot
+adc.getPotValue a1
+hyb.getValue h3
+adc 0 5 29
+adc 1 7 5
+n.snapshot
+hyb.getValue h0
+hyb.setIgnoreHID h3 b:True
+adc 1 2 4095
+adc 0 4 1
+adc 1 2 4095
+adc 0 0 2047
+n.snapshot
+adc.getValue a4
+hyb.getValue h3
+adc.setIgnoreHID a0 b:False
+adc 1 0 820
+adc 1 0 1057
+n.snapshot
+adc.clipControl a1 f:1.389072496149
+adc.getValue a0
+hyb.getValue h3
+adc.getValue a0
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h2
+adc 0 4 10
+adc 0 5 4094
+adc 0 6 2692
+n.snapshot
+hyb.getValue h1
+adc.clipControl a3 f:1.33
+hyb.getValue h2
+adc.getRawCVValue a3
+adc.getValue a3
+hyb.setValue h3 f:1.04
+adc 0 5 2048
+adc 0 3 2058
+adc 0 2 4094
+adc 1 1 1926
+n.snapshot
+adc.setIgnoreHID a3 b:False
+hyb.getValue h1
+adc 1 2 3912
+adc 1 5 2879
+adc 0 3 434
+adc 0 1 2048
+n.snapshot
+hyb.getValue h0
+adc.getValue a0
+adc.clearResistVal a0
+adc 0 7 6
+adc 0 5 2048
+adc 0 1 3773
+n.snapshot
+adc.getCV a0
+adc 1 0 2993
+adc 1 1 1931
+adc 1 6 3782
+adc 0 2 2164
+n.snapshot
+hyb.getValue h3
+adc.getValue a1
+adc.getCVValue a2
+hyb.setCVOffset h3 f:-0.0149
+adc.getCV a1
+adc.setResistVal a3 f:0.5
+hyb.getCVValue h1
+adc 1 2 3912
+adc 0 6 2695
+n.snapshot
+hyb.getRawCVValue h2
+adc.getPot a4
+adc 1 1 1931
+adc 1 7 7
+adc 0 0 2058
+adc 1 5 2048
+n.snapshot
+hyb.getCVValue h1
+adc.getCV a2
+adc.getValue a1
+adc.getValue a3
+adc 1 7 2047
+n.snapshot
+hyb.getValue h2
+adc.getValue a1
+adc 1 0 3001
+adc 1 2 3924
+n.snapshot
+hyb.getValue h0
+hyb.getValue h1
+hyb.getValue h1
+adc 1 7 2056
+n.snapshot
+adc.getCV a1
+adc.setIgnoreHID a4 b:True
+adc.setIgnoreHID a1 b:True
+hyb.getValue h0
+adc.getRawCVValue a2
+hyb.getValue h2
+adc.getPot a2
+hyb.setIgnoreHID h2 b:True
+hyb.getValue h2
+adc 1 4 1952
+adc 0 2 2153
+n.snapshot
+adc.getValue a1
+hyb.getValue h1
+adc 1 5 2046
+n.snapshot
+hyb.setValue h0 f:0.8531282720227
+adc.getCV a0
+adc.getValue a1
+hyb.getRawCVValue h0
+hyb.getValue h2
+hyb.setIgnoreHID h1 b:True
+adc.getValue a0
+adc 0 1 3773
+adc 0 3 427
+adc 1 2 3913
+n.snapshot
+adc.getValue a1
+hyb.getStaticVal h3
+adc 1 6 3782
+n.snapshot
+adc.getPot a2
+hyb.getValue h2
+adc 1 7 2067
+adc 1 3 2545
+n.snapshot
+hyb.getValue h0
+adc.getValue a3
+adc.getPot a4
+adc.getCV a2
+hyb.setValue h3 f:0.455197
+adc 0 4 2629
+adc 1 2 4094
+n.snapshot
+hyb.setValue h3 f:-0.08338
+adc 1 2 4094
+adc 1 0 2776
+adc 1 4 1952
+adc 0 3 423
+n.snapshot
+adc.getValue a1
+hyb.getValue h0
+adc.getValue a2
+hyb.getValue h1
+hyb.getValue h3
+adc.getCV a0
+adc.getCVValue a1
+hyb.getValue h3
+adc.getPot a3
+adc 0 7 4095
+adc 1 6 3782
+adc 0 0 2058
+n.snapshot
+hyb.getValue h3
+hyb.getValue h3
+adc.getCV a1
+adc.getValue a4
+hyb.getRawCVValue h1
+hyb.getValue h1
+adc 1 6 0
+adc 1 4 1962
+n.snapshot
+adc.setIgnoreHID a3 b:False
+hyb.getValue h3
+hyb.setValue h3 f:0.95
+hyb.setValue h0 f:0.0618683260739
+hyb.setValue h3 f:0.36653072
+adc 1 3 2549
+adc 0 5 2051
+adc 0 5 2051
+adc 0 3 429
+n.snapshot
+adc.getValue a0
+adc.getValue a2
+adc 1 0 2772
+adc 0 6 2695
+adc 0 0 2314
+n.snapshot
+hyb.getValue h2
+adc 0 7 4091
+adc 1 2 1627
+adc 1 3 2543
+adc 1 6 0
+n.snapshot
+hyb.getValue h3
+adc.getValue a2
+adc.getPot a1
+adc.getValue a4
+adc.isResisting a4
+adc.setIgnoreHID a1 b:True
+adc.getPot a1
+hyb.getValue h2
+adc 1 1 3610
+adc 1 2 1653
+n.snapshot
+adc.getPot a4
+adc.getCVValue a2
+hyb.getValue h1
+hyb.getRawCVValue h2
+adc.getPotValue a2
+hyb.getValue h1
+adc.getValue a4
+adc 1 1 3610
+adc 1 5 2036
+adc 1 0 2772
+adc 1 0 2679
+n.snapshot
+hyb.getValue h1
+adc 1 4 1962
+adc 0 0 3545
+adc 0 4 2629
+adc 1 6 2470
+n.snapshot
+adc.getValue a4
+hyb.getValue h2
+adc.getPot a0
+adc 1 3 2542
+adc 0 2 0
+adc 1 3 2534
+n.snapshot
+hyb.getValue h0
+adc.isResisting a3
+adc 0 0 0
+adc 0 0 6
+n.snapshot
+adc.setValue a4 f:0.430085199
+adc.isResisting a4
+adc 0 2 0
+adc 0 7 2047
+adc 1 2 1653
+n.snapshot
+adc.setIgnoreHID a2 b:True
+adc.getValue a3
+hyb.getValue h3
+adc 0 0 6
+adc 0 1 2217
+adc 1 7 2056
+adc 1 7 2048
+n.snapshot
+adc.getPot a4
+hyb.getValue h2
+adc.getCV a3
+hyb.getValue h2
+hyb.getValue h2
+hyb.getValue h3
+hyb.getValue h0
+adc 0 0 6
+adc 0 0 17
+adc 1 3 2361
+n.snapshot
+hyb.getValue h2
+hyb.getValue h2
+adc.isResisting a1
+adc.getValue a4
+adc.getValue a3
+adc.getValue a3
+hyb.getValue h2
+hyb.getValue h0
+hyb.getValue h0
+adc.getValue a1
+adc 1 2 3923
+adc 1 5 2048
+adc 1 5 2048
+n.snapshot
+hyb.getValue h1
+adc.getValue a4
+hyb.setValue h0 f:0.016434832734
+hyb.getStaticVal h2
+adc 1 5 1
+adc 0 7 2047
+n.snapshot
+hyb.getValue h3
+hyb.getRawCVValue h2
+hyb.getValue h3
+adc 1 4 1957
+adc 1 1 192
+n.snapshot
+hyb.getValue h2
+adc 1 7 2043
+adc 0 7 2037
+n.snapshot
+hyb.getStaticVal h3
+hyb.setValue h1 f:0.5
+hyb.getValue h3
+adc 0 2 0
+n.snapshot
+adc.getValue a3
+adc 0 6 4094
+adc 1 5 1
+adc 1 7 932
+n.snapshot
+adc.getCV a4
+adc 0 6 4094
+adc 0 3 1591
+adc 0 4 2629
+adc 0 5 2051
+n.snapshot
+adc.getRawCVValue a0
+adc.getCV a4
+adc.getRawPotValue a4
+hyb.getValue h0
+hyb.getValue h2
+adc.getValue a2
+hyb.getValue h0
+adc.getCV a3
+hyb.getValue h3
+adc.setResistVal a3 f:1.2810341094185
+adc 0 1 2216
+n.snapshot
+adc.setValue a2 f:-0.42522
+adc 0 6 2968
+adc 0 7 2034
+adc 0 3 1591
+n.snapshot
+hyb.getValue h3
+hyb.getRawCVValue h0
+adc.getValue a1
+adc.getPotValue a0
+adc 0 1 4094
+adc 0 2 0
+adc 0 3 1591
+adc 0 4 742
+n.snapshot
+adc.setCVOffset a3 f:0.0343
+adc.getValue a4
+adc.getCV a3
+hyb.getStaticVal h1
+adc.getValue a2
+adc.getValue a3
+hyb.getValue h2
+adc.getValue a4
+hyb.getValue h1
+adc.getValue a1
+adc.getValue a1
+hyb.setValue h3 f:0.92
+hyb.getRawCVValue h2
+hyb.setIgnoreHID h1 b:False
+hyb.getValue h1
+adc 1 2 3923
+adc 0 0 17
+n.snapshot
+adc.getValue a4
+adc.isResisting a3
+adc.getValue a0
+hyb.getValue h3
+hyb.getValue h0
+adc 0 7 2034
+adc 0 4 742
+n.snapshot
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h1
+hyb.getValue h2
+adc.getCV a4
+hyb.getValue h2
+adc.getValue a1
+hyb.setCVOffset h0 f:-0.0268
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h1
+hyb.getValue h0
+hyb.getValue h1
+adc.setIgnoreHID a4 b:False
+adc.getValue a4
+hyb.getValue h1
+adc.getRawPotValue a3
+adc.getRawCVValue a4
+adc.getValue a1
+hyb.setValue h0 f:-0.358
+adc.getPot a1
+adc 1 1 192
+adc 0 5 2048
+n.snapshot
+adc.getRawCVValue a3
+adc 0 4 0
+n.snapshot
+hyb.setValue h0 f:-0.0
+adc.getPotValue a4
+hyb.getValue h1
+adc 0 4 0
+adc 1 6 1227
+adc 0 6 2047
+adc 1 0 2679
+n.snapshot
+adc.getCV a4
+hyb.getValue h2
+adc 1 6 3868
+adc 0 5 2042
+adc 0 6 2047
+adc 0 3 1593
+n.snapshot
+hyb.setIgnoreHID h3 b:True
+hyb.getValue h0
+adc.getValue a0
+hyb.getCVValue h0
+hyb.setCVOffset h0 f:-0.0298
+hyb.getValue h2
+adc.getCV a3
+hyb.getStaticVal h0
+adc.getValue a3
+adc.getCV a2
+adc.getValue a0
+adc.getValue a3
+hyb.setValue h2 f:1.015404314
+adc.setValue a0 f:0.0
+hyb.getValue h2
+adc.getValue a0
+hyb.getValue h1
+adc.getPotValue a2
+adc.getValue a4
+hyb.setValue h2 f:0.59
+adc.getValue a2
+adc 1 6 4094
+adc 1 7 932
+n.snapshot
+adc.getValue a4
+hyb.getValue h1
+adc 0 1 2047
+n.snapshot
+hyb.getValue h2
+adc.getValue a0
+hyb.setIgnoreHID h0 b:False
+adc.getValue a3
+adc.getValue a2
+adc 1 0 2047
+adc 1 4 1968
+adc 0 1 2047
+adc 1 0 802
+n.snapshot
+adc.getValue a0
+hyb.getValue h0
+adc 0 1 2047
+adc 1 7 938
+adc 0 6 1166
+adc 1 0 0
+n.snapshot
+adc.clearResistVal a4
+adc 0 7 2034
+adc 1 3 3701
+adc 1 5 11
+adc 1 2 2689
+n.snapshot
+hyb.getValue h3
+adc 0 1 2047
+adc 0 0 1
+adc 1 2 2689
+adc 0 3 1
+n.snapshot
+adc.getValue a0
+adc.getValue a0
+hyb.getValue h1
+adc 0 3 1
+adc 0 5 2042
+adc 0 5 2042
+adc 0 6 1166
+n.snapshot
+adc.getValue a3
+hyb.getRawCVValue h1
+adc 1 3 3693
+adc 1 3 3693
+n.snapshot
+hyb.getValue h3
+hyb.getCVValue h1
+adc.getValue a3
+hyb.getValue h2
+adc.setValue a0 f:0.358994727044
+hyb.getValue h2
+hyb.getValue h2
+hyb.getValue h2
+adc.getRawPotValue a3
+hyb.setValue h3 i:5
+adc 0 3 1
+adc 0 6 0
+adc 1 4 4095
+adc 0 2 0
+n.snapshot
+adc.getValue a1
+hyb.setValue h3 i:-2
+adc.getValue a3
+hyb.getValue h3
+adc 0 2 677
+adc 1 1 192
+adc 1 5 7
+adc 0 0 1
+n.snapshot
+adc.setIgnoreHID a3 b:True
+adc.setIgnoreHID a0 b:False
+adc.getValue a0
+adc.getValue a2
+adc.getCV a3
+hyb.setValue h0 f:0.4
+adc 1 3 1185
+adc 0 6 0
+adc 0 0 4094
+n.snapshot
+hyb.getValue h3
+hyb.getValue h2
+adc 1 4 4092
+adc 0 6 1968
+adc 0 3 6
+adc 0 3 3074
+n.snapshot
+adc.getValue a2
+adc.getValue a0
+adc.clearResistVal a2
+adc 0 7 2041
+adc 1 3 1854
+adc 1 3 1854
+n.snapshot
+adc.getCVValue a4
+adc.getValue a1
+hyb.getStaticVal h0
+adc 1 6 4094
+adc 0 0 2661
+adc 0 7 2041
+adc 0 7 2201
+n.snapshot
+hyb.setIgnoreHID h1 b:False
+adc.clipControl a3 f:0.0
+hyb.setValue h0 f:1.3517315605
+adc.getValue a4
+hyb.getValue h1
+adc 0 4 0
+adc 0 2 3294
+adc 1 0 106
+adc 0 1 4095
+n.snapshot
+adc.getCV a4
+adc 1 4 4092
+adc 0 2 3296
+adc 0 1 4095
+n.snapshot
+hyb.setIgnoreHID h2 b:True
+adc.getValue a1
+hyb.getValue h0
+adc.getValue a1
+hyb.getValue h2
+adc 1 6 4095
+adc 0 3 2439
+adc 0 5 1881
+adc 0 1 4095
+n.snapshot
+adc.getValue a4
+hyb.getCVValue h2
+hyb.getValue h0
+hyb.getValue h1
+hyb.setIgnoreHID h2 b:False
+adc.setCVOffset a3 f:0.029
+adc.getValue a0
+adc.setValue a2 f:0.5954626347781722
+hyb.getValue h0
+adc.setIgnoreHID a2 b:False
+adc.getValue a1
+adc.getValue a0
+hyb.getValue h2
+hyb.getValue h1
+adc.setIgnoreHID a4 b:False
+adc.getValue a4
+hyb.getRawCVValue h2
+hyb.getValue h1
+hyb.setValue h0 f:0.4723
+adc.getValue a0
+adc.getPot a3
+hyb.getRawCVValue h3
+adc.setValue a1 f:0.61451114038
+hyb.getCVValue h2
+adc 1 4 4087
+n.snapshot
+adc.getPot a1
+adc.getValue a0
+adc 1 2 2699
+adc 0 3 2432
+n.snapshot
+adc.getValue a0
+hyb.getValue h2
+hyb.getValue h0
+adc.getValue a3
+hyb.getValue h0
+adc.getValue a0
+adc.setCVOffset a2 f:0.0283
+adc.getValue a3
+hyb.getValue h2
+hyb.getValue h0
+adc.getValue a3
+hyb.getValue h3
+adc.getPot a0
+adc 1 3 3306
+n.snapshot
+adc.getValue a2
+hyb.getValue h2
+adc 0 1 1102
+adc 1 3 3306
+n.snapshot
+adc.getValue a2
+adc.getValue a4
+adc 1 2 2091
+adc 1 5 15
+adc 1 3 3306
+adc 0 5 1877
+n.snapshot
+adc.setCVOffset a1 f:0.0175
+adc.getValue a4
+adc 1 6 2048
+n.snapshot
+adc.getValue a3
+adc 0 6 1956
+adc 1 0 2628
+n.snapshot
+adc.getPot a4
+adc.isResisting a3
+adc 0 1 1102
+adc 1 3 1781
+n.snapshot
+hyb.setValue h1 f:-0.08448
+adc.getValue a3
+hyb.getValue h3
+adc.getValue a1
+hyb.getValue h3
+hyb.getCVValue h0
+adc.getValue a1
+adc.setIgnoreHID a3 b:True
+hyb.getValue h3
+adc.getPot a4
+adc.getValue a3
+adc.getValue a3
+adc 0 4 0
+adc 0 6 2047
+n.snapshot
+hyb.getValue h3
+adc.isResisting a1
+hyb.getValue h0
+adc.getValue a3
+adc.getPot a0
+adc 0 0 3527
+adc 1 5 2089
+n.snapshot
+adc.getValue a3
+adc 0 4 0
+adc 0 4 4094
+adc 0 4 4088
+adc 0 4 4088
+n.snapshot
+adc.getValue a0
+hyb.setValue h3 f:0.125
+hyb.getValue h3
+adc 0 2 3288
+adc 1 7 3317
+adc 0 2 3288
+n.snapshot
+hyb.getValue h3
+adc.clipControl a3 f:0.3270206993
+adc.getPot a4
+hyb.getValue h0
+adc 1 6 2048
+adc 1 4 4083
+adc 1 2 234
+n.snapshot
+adc.setIgnoreHID a3 b:True
+adc.setValue a4 f:1.4132
+adc.getValue a1
+adc.getValue a2
+hyb.getValue h0
+adc.getCV a3
+adc.getCVValue a1
+adc.getPotValue a2
+adc.getValue a0
+hyb.getValue h1
+hyb.setValue h3 f:-0.157
+adc.getValue a0
+hyb.setCVOffset h3 f:-0.0052
+adc.getValue a0
+adc 1 3 0
+adc 1 5 2089
+adc 0 6 2046
+adc 0 0 3612
+n.snapshot
+adc.setIgnoreHID a2 b:False
+adc.clearResistVal a2
+adc 1 6 2049
+adc 1 2 237
+adc 0 3 420
+adc 1 7 0
+n.snapshot
+hyb.getValue h0
+hyb.getValue h1
+adc.setCVOffset a4 f:0.0491
+hyb.getValue h1
+adc 1 1 4094
+n.snapshot
+adc.setIgnoreHID a0 b:True
+hyb.getValue h3
+hyb.setCVOffset h2 f:-0.0192
+hyb.getValue h1
+adc.getValue a1
+adc.clipControl a4 f:-0.3412809234458
+adc.getValue a3
+hyb.getCVValue h1
+hyb.getValue h0
+hyb.setValue h0 f:-0.00264098241
+adc 0 0 3043
+adc 1 1 4087
+adc 1 7 2048
+n.snapshot
+hyb.getValue h1
+adc 1 4 4088
+adc 1 7 3833
+n.snapshot
+adc.getPotValue a1
+adc.getCV a4
+adc 1 0 0
+adc 1 5 2089
+adc 1 4 4079
+adc 1 4 4088
+n.snapshot
+hyb.setCVOffset h0 f:-0.038
+adc 1 3 0
+adc 1 6 2037
+adc 1 3 1600
+adc 0 3 2048
+n.snapshot
+adc.getRawCVValue a3
+adc.getValue a3
+hyb.getValue h2
+adc 1 3 1600
+adc 1 2 225
+adc 1 0 2048
+n.snapshot
+adc.getValue a0
+adc 1 4 4076
+adc 1 1 4083
+adc 1 0 2047
+n.snapshot
+adc.getValue a4
+hyb.getValue h2
+adc 0 2 3296
+adc 1 2 225
+adc 1 4 4078
+adc 0 5 4095
+n.snapshot
+hyb.getValue h2
+hyb.getValue h2
+adc 1 0 2047
+adc 0 4 4088
+adc 0 5 846
+adc 1 0 2936
+n.snapshot
+hyb.getValue h2
+adc.getValue a0
+adc.setResistVal a1 i:-2
+adc 1 1 2005
+adc 0 7 2201
+n.snapshot
+adc.getPot a3
+adc 1 7 3840
+n.snapshot
+adc.getValue a0
+adc.setIgnoreHID a4 b:True
+hyb.getValue h0
+adc.getCV a0
+adc.getValue a3
+hyb.getValue h1
+adc.getValue a0
+hyb.setValue h2 i:5
+adc.getValue a4
+adc.getValue a3
+adc 1 4 1
+adc 1 6 3420
+adc 1 3 1600
+adc 1 2 225
+n.snapshot
+hyb.getValue h3
+hyb.getValue h3
+hyb.getValue h1
+adc.getValue a2
+hyb.getCVValue h1
+hyb.getCVValue h2
+adc.isResisting a4
+hyb.getValue h3
+adc.setValue a2 f:1.3
+adc 0 3 2048
+adc 1 3 758
+adc 0 3 2312
+n.snapshot
+hyb.getValue h0
+adc.getValue a3
+hyb.getCVValue h1
+adc.setValue a1 f:0.880136743
+hyb.getValue h1
+adc 0 2 2048
+adc 1 4 1
+adc 0 5 836
+adc 1 4 1
+n.snapshot
+hyb.getValue h3
+adc.getValue a0
+adc 0 0 1928
+adc 1 0 3178
+adc 1 0 3190
+n.snapshot
+adc.getValue a1
+hyb.getValue h0
+adc.clipControl a0 f:0.474565694614
+adc.getValue a2
+hyb.setIgnoreHID h2 b:True
+adc.getCV a0
+adc 0 0 1922
+adc 1 3 755
+adc 0 1 4094
+adc 0 5 840
+n.snapshot
+hyb.getValue h3
+hyb.getValue h1
+adc 0 0 3385
+adc 0 3 2310
+adc 1 3 755
+adc 1 0 3190
+n.snapshot
+hyb.getValue h1
+adc 0 3 0
+adc 0 0 3375
+adc 0 3 12
+n.snapshot
+adc.getValue a3
+adc 1 0 3190
+adc 0 1 4095
+n.snapshot
+adc.getValue a4
+hyb.getValue h3
+hyb.getValue h0
+adc.getValue a2
+adc.clipControl a0 i:1
+adc 0 7 2727
+adc 0 2 2048
+adc 1 7 3846
+n.snapshot
+hyb.getRawCVValue h3
+adc 0 5 2275
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+hyb.getValue h2
+adc 0 3 1
+adc 0 4 4088
+adc 1 5 0
+adc 1 3 338
+n.snapshot
+adc.getValue a1
+adc.getValue a1
+adc.getValue a1
+adc 1 3 338
+adc 1 4 3410
+n.snapshot
+adc.setCVOffset a4 f:0.0201
+adc 0 5 2275
+adc 0 0 2596
+adc 0 5 2271
+n.snapshot
+adc.getRawCVValue a4
+hyb.getValue h2
+hyb.getValue h3
+adc 0 5 2271
+adc 0 1 4095
+adc 1 3 348
+adc 1 0 3190
+n.snapshot
+adc.getValue a4
+hyb.getValue h1
+adc 1 2 1504
+adc 0 2 2048
+n.snapshot
+adc.setValue a0 f:0.78
+adc 1 7 0
+adc 1 1 2005
+n.snapshot
+adc.getValue a1
+adc.getCV a0
+hyb.getValue h1
+adc.isResisting a3
+adc 1 3 2048
+adc 1 4 3410
+adc 1 1 1995
+adc 1 5 0
+n.snapshot
+hyb.getValue h2
+adc 1 2 1512
+n.snapshot
+hyb.getValue h3
+adc 1 3 2048
+n.snapshot
+adc.getCV a2
+adc.getCV a1
+adc.getValue a0
+adc.getCV a1
+hyb.getValue h1
+adc 1 4 2048
+adc 0 7 2727
+adc 0 2 644
+adc 1 0 3197
+n.snapshot
+hyb.getValue h0
+adc.isResisting a3
+adc.getValue a1
+adc 1 3 2048
+adc 0 6 2046
+adc 1 2 0
+n.snapshot
+adc.setResistVal a4 f:-0.0
+adc 1 0 3190
+adc 0 6 2055
+adc 1 1 4095
+n.snapshot
+hyb.getValue h1
+adc 0 7 1203
+adc 0 1 4091
+adc 0 6 2050
+n.snapshot
+adc.getValue a4
+adc.setResistVal a0 f:1.41244
+adc.getValue a2
+adc 0 3 2947
+adc 0 3 2151
+n.snapshot
+adc.getValue a1
+adc.getValue a3
+adc.getValue a2
+adc 1 6 3427
+n.snapshot
+adc.getValue a3
+adc.getCV a2
+hyb.getCVValue h0
+hyb.getValue h1
+hyb.getValue h0
+adc.getPotValue a4
+adc.getValue a4
+adc.getValue a0
+adc 1 7 12
+adc 1 3 1
+adc 1 0 3190
+n.snapshot
+hyb.getValue h1
+adc.getValue a4
+adc.setIgnoreHID a3 b:True
+hyb.setValue h0 f:0.3130292699107473
+hyb.getValue h2
+hyb.setIgnoreHID h3 b:True
+hyb.getValue h0
+adc 0 2 632
+adc 1 3 651
+adc 1 2 0
+adc 1 0 1
+n.snapshot
+adc.getValue a1
+adc 1 5 8
+adc 1 2 0
+adc 0 3 1551
+adc 1 4 2048
+n.snapshot
+adc.getPot a0
+hyb.getValue h1
+hyb.getStaticVal h3
+adc 0 6 2053
+adc 1 7 6
+adc 1 1 4095
+n.snapshot
+hyb.getValue h1
+adc.getPot a3
+adc.getValue a3
+adc.getCV a0
+adc 0 1 4091
+adc 0 5 2047
+n.snapshot
+adc.getValue a3
+adc 1 0 1
+n.snapshot
+hyb.getValue h0
+adc 0 6 2053
+n.snapshot
+adc.getCV a4
+adc 1 2 1
+adc 1 6 1
+adc 0 5 2036
+n.snapshot
+adc.getValue a1
+hyb.setIgnoreHID h1 b:False
+adc 1 3 651
+adc 1 5 8
+adc 1 0 0
+adc 1 0 12
+n.snapshot
+hyb.getValue h0
+adc 0 4 4094
+adc 1 2 1
+adc 1 7 6
+adc 0 3 4094
+n.snapshot
+adc.getValue a4
+adc.setValue a3 f:1.11081025849968
+adc.isResisting a4
+adc.getValue a4
+adc.getValue a2
+adc 0 7 1206
+adc 1 7 6
+adc 1 0 23
+n.snapshot
+hyb.getValue h0
+adc.getValue a3
+hyb.getStaticVal h0
+hyb.getValue h3
+hyb.getValue h1
+hyb.setValue h0 f:0.1989879283
+hyb.getValue h0
+adc 0 1 164
+adc 1 1 4095
+adc 0 3 2047
+adc 0 0 2593
+n.snapshot
+adc.getValue a2
+hyb.getValue h3
+adc.getCV a0
+hyb.getRawCVValue h1
+adc.getValue a2
+hyb.getValue h1
+adc 1 4 2048
+n.snapshot
+hyb.setValue h2 f:1.0
+adc.getValue a2
+adc.getRawPotValue a0
+hyb.getStaticVal h3
+hyb.getValue h2
+adc.getValue a4
+adc 0 4 4094
+adc 0 4 4094
+adc 0 6 2048
+adc 1 1 4088
+n.snapshot
+hyb.getStaticVal h2
+hyb.setCVOffset h2 f:0.0322
+adc 1 4 2048
+adc 0 3 2053
+n.snapshot
+adc.getValue a0
+adc 0 7 1213
+adc 1 5 8
+n.snapshot
+hyb.getValue h1
+adc.isResisting a2
+hyb.getValue h2
+adc.getValue a4
+adc.getPot a0
+adc.isResisting a3
+adc.setValue a4 f:-0.14
+hyb.getValue h2
+adc 0 4 186
+adc 0 5 2041
+adc 1 1 1306
+adc 0 2 632
+n.snapshot
+hyb.getValue h3
+hyb.getStaticVal h3
+hyb.getValue h3
+adc 1 5 12
+adc 0 7 1224
+adc 1 5 1841
+adc 0 7 2047
+n.snapshot
+adc.setCVOffset a3 f:0.0228
+hyb.setValue h1 f:-0.3
+adc.setIgnoreHID a4 b:True
+adc.getValue a3
+adc.getPot a1
+adc 1 1 4094
+n.snapshot
+adc.getValue a3
+adc.getValue a4
+adc 0 2 632
+adc 1 0 1432
+n.snapshot
+adc.setIgnoreHID a4 b:False
+adc 1 4 2048
+adc 1 4 3044
+n.snapshot
+hyb.getValue h1
+adc 0 0 2588
+adc 0 0 3237
+n.snapshot
+adc.setIgnoreHID a4 b:False
+hyb.getValue h1
+hyb.getValue h0
+adc.getValue a2
+adc.setIgnoreHID a4 b:True
+hyb.getValue h1
+hyb.getValue h3
+adc 0 5 2049
+adc 1 4 3046
+adc 1 6 2
+n.snapshot
+adc.getPot a4
+adc 1 7 1
+adc 0 0 0
+adc 1 3 1440
+adc 1 2 5
+n.snapshot
+adc.getRawCVValue a3
+adc.getValue a0
+adc.getValue a3
+adc 1 1 4094
+adc 1 0 2047
+n.snapshot
+hyb.getCVValue h2
+adc.getValue a0
+adc.getCV a4
+adc.getValue a1
+adc 0 2 632
+adc 0 1 2047
+adc 1 0 1030
+adc 1 1 4094
+n.snapshot
+adc.getValue a2
+hyb.getValue h0
+adc.getValue a0
+adc 1 3 4095
+adc 1 4 2918
+adc 1 4 2917
+adc 1 5 1841
+n.snapshot
+hyb.getValue h0
+adc 1 7 1
+n.snapshot
+adc.clearResistVal a0
+adc.isResisting a2
+adc 1 1 0
+adc 0 7 2047
+adc 0 2 632
+adc 0 6 2059
+n.snapshot
+hyb.setValue h3 i:-2
+adc.getCV a1
+adc.getValue a2
+adc 1 1 1
+n.snapshot
+adc.getValue a4
+adc 0 4 2048
+adc 0 1 4095
+adc 1 4 2905
+n.snapshot
+hyb.getRawCVValue h3
+adc 0 4 1
+adc 0 6 4094
+n.snapshot
+adc.getCV a4
+adc.getValue a4
+hyb.getValue h0
+hyb.getValue h3
+adc 1 3 4095
+adc 0 3 2057
+adc 0 3 2057
+n.snapshot
+adc.getValue a3
+hyb.getCVValue h0
+adc.clipControl a2 f:2.675
+adc.getValue a3
+adc.getCVValue a1
+adc.setCVOffset a0 f:0.0405
+adc.clearResistVal a2
+hyb.getValue h2
+hyb.getValue h2
+adc 1 7 1646
+adc 1 5 2094
+adc 1 1 2047
+adc 0 6 4095
+n.snapshot
+hyb.getValue h0
+hyb.setValue h3 f:-0.01367239
+adc 0 3 0
+adc 0 2 765
+adc 1 5 2103
+adc 1 7 1638
+n.snapshot
+hyb.getValue h1
+hyb.setIgnoreHID h2 b:True
+hyb.getCVValue h1
+hyb.getValue h3
+adc.getValue a4
+hyb.getValue h3
+adc.getCV a2
+adc 0 7 2460
+n.snapshot
+adc.getCV a0
+adc.getValue a0
+adc.getValue a3
+adc.getValue a1
+hyb.getValue h1
+adc 1 5 2101
+adc 0 3 3
+adc 0 7 2460
+adc 1 3 4095
+n.snapshot
+hyb.getValue h2
+adc 1 1 2037
+adc 1 5 2103
+adc 0 4 396
+adc 0 1 1660
+n.snapshot
+adc.isResisting a0
+adc 1 5 2103
+adc 0 0 0
+adc 0 2 757
+adc 0 3 0
+n.snapshot
+adc.getValue a0
+hyb.getValue h1
+adc 1 4 2905
+adc 1 0 358
+n.snapshot
+adc.getValue a1
+adc.getValue a0
+adc.getValue a1
+adc.getPot a0
+adc.getValue a3
+hyb.setValue h0 i:-3
+hyb.setIgnoreHID h2 b:True
+adc.getRawPotValue a2
+adc.getValue a1
+adc.getRawPotValue a0
+adc.setIgnoreHID a0 b:False
+adc.setValue a0 f:0.694125383178666
+hyb.getValue h1
+adc.getValue a2
+hyb.getValue h0
+hyb.getStaticVal h3
+adc.getValue a2
+adc.getCV a0
+adc 1 6 0
+adc 1 3 4085
+adc 0 1 1662
+n.snapshot
+adc.getValue a1
+adc 0 5 2049
+adc 1 7 0
+n.snapshot
+hyb.getValue h0
+adc.getValue a0
+adc 0 3 959
+adc 1 1 2037
+adc 0 5 2049
+adc 0 3 953
+n.snapshot
+hyb.getValue h3
+hyb.getValue h1
+adc.getValue a3
+hyb.getValue h3
+adc.getValue a4
+hyb.getValue h1
+adc.setValue a0 f:0.23
+adc.getRawCVValue a2
+adc.getPot a0
+adc.getValue a2
+hyb.getValue h2
+adc 0 5 1
+n.snapshot
+adc.getValue a0
+hyb.getValue h2
+adc.isResisting a2
+adc 1 1 2031
+adc 1 5 2103
+adc 1 5 4095
+adc 0 4 1
+n.snapshot
+hyb.getValue h0
+hyb.getValue h2
+adc.getCV a4
+hyb.getValue h0
+hyb.getValue h2
+hyb.getValue h3
+adc.getValue a2
+hyb.getValue h3
+hyb.getValue h3
+adc.getValue a4
+adc 0 6 4083
+adc 0 1 1
+adc 1 4 2047
+n.snapshot
+adc.getValue a1
+hyb.getValue h1
+hyb.getValue h3
+adc.getValue a1
+adc.getCV a1
+adc 1 1 4094
+adc 0 7 2463
+n.snapshot
+adc.getValue a3
+adc.getPot a4
+hyb.getValue h2
+adc 1 0 356
+adc 0 0 2578
+n.snapshot
+adc.setResistVal a3 f:1.07355805756619
+adc 1 7 324
+adc 0 2 757
+adc 1 3 4078
+n.snapshot
+adc.setValue a2 f:0.9152283689205558
+hyb.getValue h2
+adc.getValue a3
+adc 1 7 313
+adc 0 0 2578
+adc 0 5 11
+n.snapshot
+adc.getValue a1
+adc 1 0 356
+adc 0 4 1
+n.snapshot
+adc.getValue a0
+adc.getValue a0
+adc.getValue a2
+adc.getRawPotValue a0
+adc 1 0 363
+n.snapshot
+adc.clipControl a3 i:1
+adc 1 1 4094
+adc 0 2 4095
+adc 0 4 2521
+n.snapshot
+hyb.getValue h3
+hyb.getValue h2
+adc.getPotValue a0
+adc.clipControl a2 f:1.053176972178959
+hyb.getStaticVal h0
+adc 1 1 2054
+adc 0 3 1226
+adc 0 5 1
+n.snapshot
+hyb.getValue h2
+adc 1 2 2048
+n.snapshot
+hyb.getValue h1
+adc.setIgnoreHID a3 b:True
+adc 0 3 0
+adc 0 0 307
+adc 1 3 4094
+n.snapshot
+hyb.getValue h2
+adc.setValue a2 i:2
+hyb.getValue h1
+hyb.setIgnoreHID h3 b:False
+adc 0 3 522
+adc 0 3 2048
+adc 1 5 2655
+adc 1 7 324
+n.snapshot
+adc.getValue a4
+adc.getValue a3
+hyb.getValue h0
+adc.getRawCVValue a2
+hyb.getValue h2
+adc 1 0 365
+n.snapshot
+adc.getValue a0
+adc.getValue a0
+hyb.getValue h0
+adc.getValue a0
+adc.setValue a2 f:1.22996
+hyb.getValue h1
+hyb.setValue h3 f:0.476451819056821
+hyb.getValue h0
+adc 0 2 2048
+adc 1 0 2047
+adc 1 0 2047
+adc 1 3 4095
+n.snapshot
+adc.getCVValue a1
+hyb.setIgnoreHID h0 b:True
+hyb.getValue h2
+adc.getValue a0
+adc.clearResistVal a3
+hyb.getValue h2
+hyb.getRawCVValue h0
+hyb.getCVValue h3
+adc.setIgnoreHID a2 b:False
+hyb.getValue h0
+adc.getPot a0
+hyb.getValue h1
+adc.getValue a0
+adc.getValue a2
+hyb.getValue h2
+adc.getCV a2
+adc 0 4 2523
+adc 0 4 2523
+n.snapshot
+adc.getValue a2
+adc.getValue a0
+hyb.getValue h0
+adc.clearResistVal a2
+adc.getValue a3
+hyb.getValue h2
+hyb.getValue h2
+adc.getValue a0
+adc.setValue a2 f:-0.4063750792279497
+adc 1 5 2655
+adc 1 0 2046
+n.snapshot
+hyb.getValue h1
+adc.setValue a4 f:0.334
+hyb.getValue h3
+adc.getValue a4
+adc.getCV a1
+adc.getValue a1
+adc.getValue a0
+adc.getValue a2
+adc.clipControl a0 f:-0.070856818816
+hyb.getValue h2
+adc.getValue a3
+hyb.getValue h3
+adc.getValue a0
+hyb.getRawCVValue h2
+adc.getValue a0
+hyb.getValue h0
+hyb.getValue h0
+adc 1 7 324
+adc 1 2 2048
+adc 0 5 1
+n.snapshot
+adc.getValue a0
+adc 1 2 0
+adc 0 4 1431
+n.snapshot
+hyb.getValue h1
+hyb.getRawCVValue h1
+hyb.setIgnoreHID h3 b:True
+adc.getValue a1
+hyb.getValue h1
+adc.getPot a2
+adc.setValue a4 f:-0.013142385045
+adc.clipControl a4 f:0.4862454864972108
+adc.setValue a1 i:0
+adc 0 7 3063
+adc 1 7 324
+adc 1 3 4056
+n.snapshot
+hyb.getValue h1
+adc.isResisting a4
+adc.getValue a3
+adc.getRawCVValue a3
+adc 1 0 2056
+adc 0 2 2045
+adc 1 2 0
+n.snapshot
+adc.getValue a1
+hyb.setValue h2 f:-0.0
+adc 1 2 396
+adc 0 0 1174
+adc 0 4 1431
+n.snapshot
+adc.getPot a3
+adc 1 3 633
+adc 1 2 402
+n.snapshot
+hyb.getValue h0
+hyb.setValue h1 f:0.2222854925707
+adc 0 6 4081
+adc 0 0 1162
+adc 1 0 940
+n.snapshot
+hyb.getValue h2
+adc.getValue a1
+hyb.getValue h3
+adc.setValue a2 f:1.1782649434050416
+adc 1 1 2054
+n.snapshot
+adc.getValue a1
+hyb.getValue h2
+adc.getCV a1
+hyb.getValue h1
+adc.getValue a2
+adc.getValue a1
+adc.getCV a0
+adc 0 3 2261
+adc 1 7 2641
+adc 0 5 1
+adc 0 1 1
+n.snapshot
+hyb.getValue h2
+adc.getValue a1
+adc.getValue a3
+adc.getRawCVValue a1
+hyb.getValue h3
+hyb.getValue h0
+adc 0 4 2048
+adc 0 3 2261
+adc 0 3 0
+adc 1 5 2655
+n.snapshot
+hyb.getStaticVal h1
+hyb.getCVValue h1
+hyb.getValue h1
+adc.getValue a4
+hyb.getCVValue h2
+adc 1 0 940
+adc 1 6 0
+adc 1 1 2051
+n.snapshot
+adc.isResisting a4
+adc 1 5 2655
+adc 1 6 0
+adc 0 2 2278
+adc 0 4 2094
+n.snapshot
+hyb.getValue h2
+adc.getValue a2
+hyb.getStaticVal h0
+hyb.getValue h0
+adc 1 4 2048
+adc 1 5 2649
+n.snapshot
+adc.isResisting a0
+adc.setIgnoreHID a2 b:False
+adc.setResistVal a1 f:1.18180565512486
+adc.getValue a3
+hyb.getValue h0
+hyb.getValue h0
+hyb.getValue h3
+hyb.getValue h1
+hyb.getCVValue h0
+adc 1 0 2406
+adc 1 4 2048
+adc 0 6 2048
+adc 0 7 3992
+n.snapshot
+adc.getValue a2
+hyb.getValue h0
+hyb.getValue h3
+adc.getCV a3
+adc.setResistVal a4 f:0.79323212
+hyb.getValue h3
+adc.getValue a1
+adc.getValue a3
+hyb.getValue h2
+hyb.setValue h0 i:-3
+hyb.getRawCVValue h1
+adc.getCVValue a4
+adc.getValue a1
+adc.getCV a3
+adc.getValue a0
+adc 1 2 414
+adc 1 5 2637
+adc 1 0 2406
+adc 0 4 2094
+n.snapshot
+hyb.getValue h1
+adc.getPotValue a1
+adc.getValue a4
+hyb.setIgnoreHID h3 b:True
+adc.getRawCVValue a1
+hyb.getValue h0
+adc.getValue a2
+hyb.setValue h3 i:4
+adc.getValue a4
+adc 0 6 2048
+adc 1 1 2368
+adc 0 3 0
+n.snapshot
+hyb.getValue h2
+hyb.getCVValue h3
+adc.getValue a1
+adc.getRawCVValue a1
+adc.getValue a1
+adc.getValue a4
+hyb.getValue h2
+hyb.getValue h1
+adc.getValue a3
+hyb.getValue h0
+adc 0 7 2047
+adc 1 4 4095
+n.snapshot
+hyb.getValue h3
+adc 0 2 2268
+adc 1 3 627
+adc 0 1 9
+n.snapshot
+hyb.getStaticVal h0
+adc.getRawCVValue a4
+adc 1 6 2047
+adc 0 5 1
+n.snapshot
+adc.getValue a0
+hyb.getValue h1
+adc.getCV a4
+adc 1 2 414
+n.snapshot
+hyb.getValue h2
+adc 0 1 9
+adc 1 1 4094
+n.snapshot
+adc.clipControl a2 f:0.009956037
+adc 0 5 2446
+adc 1 1 877
+adc 1 4 4095
+adc 0 6 610
+n.snapshot
+adc.getValue a3
+adc.getRawPotValue a0
+adc 1 6 2047
+n.snapshot
+hyb.getValue h1
+hyb.getValue h1
+adc 0 2 1361
+n.snapshot
+adc.getValue a1
+adc.setValue a0 f:1.2932796
+adc.getCV a2
+hyb.getCVValue h3
+adc.setValue a4 i:3
+hyb.getValue h3
+adc.getValue a0
+hyb.getValue h1
+adc.getValue a1
+adc.clipControl a3 f:0.2411062671
+hyb.getValue h1
+adc.getValue a0
+adc 1 7 4095
+adc 1 6 2055
+n.snapshot
+adc.getRawPotValue a1
+hyb.getValue h1
+adc.setValue a2 f:0.41494296855736623
+adc.getCVValue a1
+adc 1 1 882
+n.snapshot
+hyb.getValue h0
+hyb.getValue h3
+adc.getValue a3
+adc 1 0 2048
+n.snapshot
+adc.getPot a3
+adc.isResisting a1
+adc.getValue a1
+adc.getCV a3
+adc.getPot a4
+hyb.setIgnoreHID h0 b:False
+adc 0 0 1162
+adc 1 7 4095
+adc 1 4 4095
+n.snapshot
+hyb.getValue h2
+adc.getCV a4
+hyb.setValue h0 f:0.5
+adc.isResisting a1
+adc.getValue a2
+hyb.setIgnoreHID h1 b:False
+hyb.setIgnoreHID h2 b:False
+adc.getValue a3
+adc 0 7 293
+adc 1 6 2058
+n.snapshot
+adc.getValue a2
+adc.getRawPotValue a2
+adc.getPotValue a3
+adc.getValue a3
+hyb.getValue h0
+hyb.getStaticVal h0
+adc 0 3 0
+n.snapshot
+adc.getValue a0
+adc.getRawCVValue a0
+adc 0 6 4095
+adc 1 4 3453
+adc 1 6 2058
+n.snapshot
+adc.getPot a4
+hyb.getRawCVValue h3
+hyb.getCVValue h3
+adc.getValue a3
+hyb.getValue h2
+hyb.getValue h1
+adc 0 2 1361
+adc 0 4 2093
+adc 1 6 2435
+n.snapshot
+adc.getValue a1
+hyb.getValue h2
+adc.isResisting a0
+hyb.getRawCVValue h3
+adc 0 4 2818
+adc 0 0 2815
+adc 0 1 9
+n.snapshot
+adc.getValue a1
+adc 1 7 4095
+adc 0 4 2808
+adc 0 4 2808
+adc 1 1 1
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+adc.getValue a0
+adc.getValue a4
+adc.getValue a3
+adc.getCV a3
+adc.getValue a2
+adc 0 5 2446
+adc 0 7 293
+adc 0 4 2805
+adc 1 3 633
+n.snapshot
+hyb.getValue h1
+adc 0 5 2450
+adc 1 1 1
+adc 0 7 427
+adc 1 0 2048
+n.snapshot
+adc.setIgnoreHID a4 b:True
+hyb.getValue h3
+adc 0 0 2061
+adc 0 4 2805
+adc 0 1 2415
+n.snapshot
+hyb.getValue h3
+hyb.getValue h0
+adc 1 0 837
+adc 0 7 427
+n.snapshot
+hyb.getValue h3
+adc 0 1 2415
+adc 0 3 2048
+adc 0 0 2072
+n.snapshot
+adc.getValue a1
+adc 1 7 4095
+n.snapshot
+adc.getValue a2
+adc 1 2 1194
+n.snapshot
+adc.getValue a4
+adc.clipControl a3 f:0.5519886753527743
+adc 0 7 2048
+adc 1 3 4094
+adc 1 1 1
+adc 1 7 1957
+n.snapshot
+hyb.getValue h1
+hyb.getValue h0
+hyb.getValue h2
+adc 1 7 1959
+adc 1 6 2443
+adc 0 1 4094
+adc 1 5 2637
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+adc.getValue a0
+adc 0 2 3998
+adc 0 7 2117
+adc 0 2 4000
+n.snapshot
+adc.getValue a1
+hyb.setValue h2 i:5
+adc.getValue a2
+adc.clipControl a4 f:0.2246859828049883
+adc.getValue a3
+adc 1 0 2047
+adc 1 3 3366
+adc 1 0 288
+adc 0 2 3993
+n.snapshot
+hyb.setValue h3 f:1.07834863
+adc.getRawPotValue a0
+adc.getCV a2
+adc 1 0 276
+adc 0 3 2048
+adc 0 6 4095
+n.snapshot
+adc.getValue a3
+adc 1 0 270
+adc 1 2 0
+adc 1 3 3441
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+adc.clearResistVal a2
+hyb.getValue h3
+hyb.getValue h2
+hyb.getValue h3
+hyb.getValue h2
+adc 1 1 4
+adc 1 1 4
+adc 0 5 2445
+n.snapshot
+adc.getValue a2
+adc.getPotValue a0
+hyb.setValue h3 f:-0.08
+hyb.setValue h2 f:-0.254620585269216
+adc 0 4 0
+adc 0 2 3993
+n.snapshot
+adc.getPot a3
+adc 0 2 4002
+adc 1 1 4
+n.snapshot
+adc.clipControl a2 f:1.2297003347
+adc 0 6 4093
+adc 1 0 3272
+n.snapshot
+adc.getRawPotValue a1
+adc 0 7 2117
+adc 0 2 3159
+n.snapshot
+hyb.getCVValue h1
+adc.setCVOffset a2 f:0.0198
+hyb.setValue h1 f:1.0751018341
+adc 0 1 2048
+adc 1 7 1966
+n.snapshot
+adc.getRawCVValue a3
+adc 0 2 3157
+adc 0 7 2115
+n.snapshot
+adc.getValue a1
+adc 0 1 2048
+n.snapshot
+hyb.getValue h1
+adc 1 0 3272
+adc 0 3 2048
+n.snapshot
+adc.getValue a4
+adc 0 4 3164
+adc 1 4 4095
+n.snapshot
+adc.getValue a2
+adc 0 7 2111
+adc 0 0 2047
+adc 1 6 2455
+n.snapshot
+adc.getPotValue a3
+adc 1 3 3441
+adc 0 0 2035
+n.snapshot
+adc.setValue a3 f:2.675
+adc.setIgnoreHID a1 b:False
+hyb.getValue h0
+hyb.getValue h2
+hyb.getValue h0
+adc.clearResistVal a1
+adc 0 5 2445
+n.snapshot
+adc.getCV a0
+adc 0 0 1697
+adc 0 0 1692
+adc 1 7 1973
+adc 1 3 3185
+n.snapshot
+adc.getValue a2
+adc 1 2 0
+adc 0 2 1692
+adc 0 5 2443
+adc 0 3 2048
+n.snapshot
+adc.getPot a4
+adc 0 4 4094
+n.snapshot
+adc.getValue a1
+hyb.getValue h0
+adc.setValue a2 f:0.54839
+adc.getValue a0
+adc 1 5 1
+adc 1 6 2455
+adc 1 6 2465
+n.snapshot
+adc.getCVValue a2
+adc.getPot a4
+hyb.getValue h1
+adc 0 4 4095
+adc 0 0 1557
+adc 1 7 1962
+adc 0 1 2059
+n.snapshot
+adc.getValue a4
+hyb.getRawCVValue h2
+adc 1 1 4094
+adc 0 7 2111
+adc 1 4 4095
+n.snapshot
+hyb.getValue h0
+adc.getCVValue a4
+hyb.getValue h2
+adc.getValue a1
+hyb.setValue h2 f:0.3306839214628798
+adc 1 1 4092
+adc 1 6 1
+adc 1 0 3281
+adc 0 7 4095
+n.snapshot
+adc.getValue a2
+adc.getValue a0
+adc 0 4 3053
+adc 1 1 1815
+adc 0 1 4095
+n.snapshot
+adc.getPot a4
+adc.getPotValue a2
+hyb.getValue h2
+adc.getValue a1
+adc 1 3 3185
+adc 0 5 2443
+adc 1 3 3185
+n.snapshot
+hyb.getValue h0
+adc 1 0 3281
+adc 1 1 984
+adc 0 1 3493
+n.snapshot
+adc.setValue a1 f:-0.22499075
+adc.getValue a4
+adc.setIgnoreHID a4 b:False
+adc.getPot a4
+adc.getValue a2
+adc 1 6 12
+n.snapshot
+adc.getValue a4
+adc.getValue a2
+hyb.setValue h0 f:-0.4317445352913
+adc.getValue a0
+hyb.getValue h3
+adc.getValue a0
+adc.getCV a1
+adc 0 1 3492
+adc 1 2 1
+adc 1 3 4095
+n.snapshot
+adc.getCV a3
+adc 0 2 2047
+adc 0 1 3488
+adc 0 4 2048
+adc 1 1 985
+n.snapshot
+adc.clearResistVal a4
+adc 1 6 3026
+n.snapshot
+hyb.getValue h2
+adc 0 3 2540
+adc 1 7 1953
+n.snapshot
+adc.getValue a4
+hyb.getValue h1
+hyb.getValue h2
+adc.getValue a0
+adc.getRawCVValue a4
+adc 1 1 995
+adc 1 6 3029
+adc 1 3 4095
+n.snapshot
+adc.isResisting a1
+hyb.setIgnoreHID h0 b:False
+adc.getPot a3
+adc 0 3 2545
+n.snapshot
+adc.getValue a4
+adc 1 3 4095
+adc 1 6 2047
+n.snapshot
+hyb.getStaticVal h2
+adc.getValue a2
+hyb.getValue h2
+adc.clipControl a3 f:0.59949126
+adc.setValue a2 f:0.5801243819733837
+adc 0 0 1557
+adc 1 5 509
+adc 1 7 4095
+adc 0 5 2440
+n.snapshot
+hyb.getValue h3
+adc 1 7 1740
+adc 0 2 2054
+n.snapshot
+hyb.getCVValue h1
+adc.getValue a4
+adc.clipControl a3 i:3
+adc.getCVValue a1
+adc 0 1 2048
+adc 1 1 995
+n.snapshot
+adc.getValue a0
+adc.getValue a4
+hyb.getValue h2
+adc.getValue a1
+adc.getValue a3
+adc 0 6 4095
+adc 0 2 1655
+adc 0 0 1557
+adc 0 2 39
+n.snapshot
+hyb.getRawCVValue h1
+adc 1 0 2047
+adc 0 5 2440
+adc 1 4 4095
+n.snapshot
+hyb.setValue h2 f:0.5473
+adc.getValue a1
+adc 0 4 2048
+adc 0 3 2728
+n.snapshot
+hyb.getValue h3
+adc.getPot a4
+adc.getValue a0
+hyb.getValue h1
+hyb.getValue h2
+adc 0 3 1924
+adc 1 7 1740
+adc 0 1 2048
+n.snapshot
+hyb.getValue h1
+hyb.getRawCVValue h2
+adc.getCV a3
+adc.getValue a4
+hyb.getValue h3
+adc 0 1 2048
+adc 1 1 0
+n.snapshot
+hyb.getStaticVal h0
+hyb.getRawCVValue h1
+adc 1 0 2058
+n.snapshot
+hyb.getValue h3
+adc 0 1 1
+adc 0 6 2270
+adc 1 5 514
+adc 0 0 1606
+n.snapshot
+hyb.getCVValue h1
+hyb.getValue h0
+adc.getPot a3
+hyb.getValue h3
+adc 0 7 4095
+adc 0 6 2260
+adc 1 2 0
+n.snapshot
+hyb.getValue h3
+adc 0 4 2047
+adc 0 3 1800
+adc 0 3 1796
+adc 0 5 2450
+n.snapshot
+hyb.getStaticVal h0
+hyb.getValue h3
+adc.getValue a2
+adc.getValue a0
+adc.getValue a1
+adc 1 5 1197
+adc 1 3 4095
+adc 0 4 2047
+adc 1 3 4095
+n.snapshot
+adc.getCVValue a4
+adc.getValue a2
+adc 1 4 4085
+adc 1 1 2981
+adc 0 4 310
+adc 0 1 3571
+n.snapshot
+hyb.setValue h1 f:0.9938
+hyb.getValue h1
+adc.getValue a3
+hyb.getValue h2
+hyb.getValue h3
+adc 0 2 39
+n.snapshot
+adc.getValue a3
+adc 0 5 2450
+adc 0 3 1787
+adc 1 5 1209
+adc 1 0 2049
+n.snapshot
+hyb.getValue h2
+adc.getCVValue a4
+adc.getRawPotValue a2
+adc.clearResistVal a3
+adc.getValue a4
+adc 1 0 2049
+n.snapshot
+adc.getValue a1
+adc 0 0 4094
+adc 0 7 1
+adc 0 4 301
+adc 1 3 4095
+n.snapshot
+hyb.getValue h2
+adc.getCV a0
+adc 1 1 2289
+adc 0 4 301
+adc 0 2 48
+n.snapshot
+hyb.getCVValue h0
+adc.getPot a3
+hyb.getValue h3
+adc.getValue a3
+adc.getCV a0
+hyb.getValue h2
+adc 0 0 4094
+adc 1 7 1738
+adc 0 0 4095
+n.snapshot
+adc.getValue a3
+hyb.getCVValue h1
+adc.clipControl a0 f:1.08719603999437
+adc 1 0 2060
+n.snapshot
+hyb.getValue h3
+adc 1 4 4091
+adc 1 1 2289
+adc 1 3 763
+n.snapshot
+adc.setIgnoreHID a4 b:True
+adc 1 5 1209
+adc 0 5 2450
+adc 0 2 43
+adc 1 0 2060
+n.snapshot
+hyb.getValue h1
+adc.getValue a3
+adc 0 2 2048
+adc 0 6 2260
+adc 1 4 4095
+adc 1 5 1221
+n.snapshot
+adc.getValue a4
+adc.getCV a1
+adc 1 5 3224
+adc 0 1 0
+adc 1 3 763
+adc 0 0 482
+n.snapshot
+adc.getValue a0
+adc.getCVValue a0
+adc 0 7 1
+adc 1 0 2063
+adc 1 1 2288
+adc 0 3 1775
+n.snapshot
+adc.getValue a2
+adc.getPot a3
+adc.getValue a0
+adc 0 3 1775
+adc 0 4 302
+n.snapshot
+hyb.getStaticVal h3
+hyb.getValue h1
+adc 1 2 969
+n.snapshot
+hyb.getValue h2
+hyb.getValue h3
+adc 0 0 2566
+adc 0 0 2561
+adc 1 2 955
+adc 1 5 3224
+n.snapshot
+adc.getValue a1
+adc.getCVValue a3
+adc 1 7 1738
+adc 1 6 2050
+adc 1 3 2016
+adc 0 6 2260
+n.snapshot
+hyb.getValue h2
+adc.getValue a4
+adc 0 0 2561
+n.snapshot
+hyb.getValue h0
+hyb.getValue h1
+adc 0 2 1
+adc 1 4 323
+n.snapshot
+adc.getValue a1
+adc.setIgnoreHID a0 b:True
+adc.getValue a2
+adc.getValue a2
+adc 0 4 4095
+adc 1 5 3224
+n.snapshot
+adc.setValue a1 f:-0.28
+adc.setValue a1 f:0.641935447546381
+adc.getValue a4
+adc.clipControl a4 f:0.118501
+adc.getRawCVValue a2
+adc 0 7 0
+n.snapshot
+hyb.setIgnoreHID h1 b:False
+adc 0 2 4095
+n.snapshot
+adc.getValue a3
+adc.getValue a4
+adc.getCV a1
+hyb.getRawCVValue h1
+adc 0 4 4094
+adc 0 7 0
+adc 0 7 8
+adc 0 1 4038
+n.snapshot
+hyb.setValue h3 f:0.107860037749273
+hyb.setIgnoreHID h1 b:False
+adc.clipControl a4 f:-0.32211227283807
+adc.setResistVal a4 f:0.9545652
+hyb.getValue h1
+hyb.getValue h1
+adc 1 0 2062
+n.snapshot
+hyb.getValue h2
+adc.getRawPotValue a4
+adc.setValue a4 i:1
+adc 1 1 2288
+adc 0 5 2450
+adc 0 4 4095
+n.snapshot
+hyb.getValue h0
+adc.getValue a2
+adc.getValue a4
+adc 1 7 1738
+n.snapshot
+adc.getValue a3
+hyb.getValue h3
+adc.setValue a1 f:1.159095
+hyb.setIgnoreHID h2 b:False
+hyb.getValue h0
+adc 0 6 1321
+adc 1 7 1738
+n.snapshot
+adc.getValue a2
+adc 1 4 2048
+adc 0 6 1321
+n.snapshot
+adc.getValue a0
+adc.getPotValue a3
+adc.getPot a4
+hyb.getValue h2
+adc.getCV a2
+hyb.getValue h3
+hyb.getValue h3
+adc.setValue a1 i:-2
+hyb.getValue h1
+hyb.setIgnoreHID h3 b:True
+hyb.getCVValue h2
+adc.getValue a4
+hyb.getValue h0
+hyb.setIgnoreHID h1 b:False
+hyb.getValue h3
+adc.getValue a2
+adc.getValue a4
+adc 1 6 2050
+adc 1 6 2050
+adc 0 6 1321
+adc 1 6 2050
+n.snapshot
+adc.getRawCVValue a4
+adc.setValue a3 f:-0.49035861
+adc 1 1 2298
+adc 1 2 955
+adc 1 6 2038
+n.snapshot
+hyb.getValue h3
+hyb.getValue h2
+adc.clipControl a0 f:1.16
+adc.getValue a1
+adc.getValue a2
+adc.getValue a0
+hyb.getValue h1
+hyb.getCVValue h0
+hyb.getValue h0
+hyb.setValue h3 f:1.0745166840641
+hyb.getValue h3
+hyb.setValue h0 f:0.5
+adc.getCV a0
+adc 0 7 6
+adc 1 3 0
+adc 0 7 470
+adc 1 4 2048
+n.snapshot
+adc.setIgnoreHID a1 b:False
+adc 1 1 2298
+adc 1 4 1
+adc 0 0 2561
+adc 0 6 2048
+n.snapshot
+adc.getCV a3
+hyb.getValue h2
+adc 0 6 0
+adc 0 5 1
+adc 0 2 4086
+adc 1 0 576
+n.snapshot
+adc.getPotValue a1
+hyb.getValue h0
+adc.setCVOffset a0 f:0.0222
+adc.getRawPotValue a3
+adc 0 2 4095
+adc 1 5 1
+adc 1 2 955
+n.snapshot
+hyb.getStaticVal h0
+adc.getValue a2
+hyb.getValue h2
+adc.getCVValue a1
+adc.getValue a2
+hyb.getValue h0
+adc.getValue a0
+adc.getValue a1
+adc 1 4 0
+adc 1 3 0
+n.snapshot
+hyb.getValue h3
+adc 0 7 458
+adc 0 4 4087
+n.snapshot
+hyb.getValue h2
+adc.getPot a1
+hyb.getValue h1
+adc 1 4 0
+adc 1 2 955
+adc 1 5 0
+n.snapshot
+adc.getValue a1
+adc 0 3 1319
+n.snapshot
+adc.getValue a3
+hyb.getValue h1
+adc.getValue a4
+adc.getValue a0
+adc.getValue a1
+adc.getValue a3
+adc 0 3 1322
+n.snapshot
+hyb.getStaticVal h2
+hyb.getValue h3
+adc.clipControl a3 f:1.0
+adc 0 4 4087
+adc 0 5 618
+adc 1 0 576
+adc 0 5 618
+n.snapshot
+adc.getValue a3
+hyb.getValue h3
+hyb.getValue h1
+hyb.getValue h2
+hyb.setCVOffset h3 f:0.0141
+adc 1 6 2040
+adc 0 6 12
+adc 0 6 22
+adc 0 2 799
+n.snapshot
+hyb.getValue h3
+hyb.getValue h0
+hyb.getValue h1
+hyb.getValue h0
+adc.getPot a1
+adc.getValue a1
+adc 0 1 1
+adc 1 5 0
+adc 1 3 0
+adc 1 4 2724
+n.snapshot
+hyb.getValue h0
+adc 0 1 1
+n.snapshot
+adc.getValue a2
+adc 1 2 3652
+adc 0 6 30
+n.snapshot
+adc.getValue a0
+adc 1 6 2040
+adc 1 1 2298
+n.snapshot
+hyb.getValue h2
+hyb.getValue h0
+hyb.getValue h1
+adc 0 1 1
+adc 1 4 2724
+adc 1 4 2717
+adc 1 1 2300
+n.snapshot
+hyb.getCVValue h0
+adc 0 0 3081
+adc 0 0 3085
+adc 1 2 3652
+adc 1 0 576
+n.snapshot
+adc.getValue a3
+adc 1 0 583
+n.snapshot
+adc.setValue a1 f:-0.4115635
+hyb.getValue h3
+adc.setValue a0 f:0.5991
+adc.setValue a3 f:0.4931744973
+hyb.getValue h3
+hyb.getValue h2
+hyb.getValue h3
+adc 1 2 3003
+adc 0 2 3881
+adc 1 2 4043
+n.snapshot
+adc.getValue a4
+adc 1 1 2300
+adc 0 6 32
+adc 0 5 618
+n.snapshot
+adc.getValue a3
+adc.getValue a4
+hyb.getValue h0
+adc.getValue a0
+adc.getValue a3
+adc.setResistVal a4 f:-0.015220324
+adc 1 3 2248
+adc 1 6 2040
+adc 0 7 458
+n.snapshot
+adc.setCVOffset a0 f:-0.0316
+hyb.getValue h3
+hyb.getValue h0
+adc.getValue a0
+adc 0 7 455
+adc 0 2 3872
+adc 1 7 1738
+adc 0 5 618
+n.snapshot
+adc.getValue a4
+adc 1 3 2239
+n.snapshot
+adc.getPot a2
+adc.getValue a4
+hyb.getValue h0
+adc.setValue a1 f:-0.03755995426787
+hyb.setValue h0 f:1.1173334704
+adc.setValue a4 f:0.44673277488618
+adc.setValue a0 f:1.463904535
+hyb.getValue h1
+adc.getValue a0
+adc.getPot a1
+adc.getValue a0
+adc 0 4 4088
+n.snapshot
+adc.getPot a2
+adc 1 3 2233
+adc 0 5 0
+adc 1 7 1749
+n.snapshot
+adc.getValue a1
+adc.isResisting a2
+adc 0 2 4095
+adc 0 6 1451
+adc 0 4 2627
+adc 0 5 0
+n.snapshot
+hyb.setValue h1 i:3
+hyb.setValue h2 f:-0.05379404230493212
+adc.getValue a1
+adc 1 4 2707
+adc 0 0 3082
+n.snapshot
+adc.getValue a2
+adc.getValue a3
+adc 0 6 1451
+adc 0 7 455
+n.snapshot
+adc.clipControl a4 f:0.3122
+adc 0 7 455
+n.snapshot
+adc.getValue a0
+adc.getValue a2
+adc 0 4 2630
+adc 1 5 0
+n.snapshot
+adc.getRawCVValue a3
+adc 0 1 1
+adc 1 1 2300
+n.snapshot
+hyb.setValue h1 f:-0.258
+adc 1 0 4094
+adc 0 5 2047
+adc 0 2 4095
+adc 1 3 2233
+n.snapshot
+adc.getValue a0
+adc 1 7 3297
+adc 1 0 2048
+adc 1 7 3286
+adc 1 3 2048
+n.snapshot
+adc.getRawCVValue a3
+adc.getValue a3
+hyb.getValue h1
+hyb.getValue h3
+adc.clipControl a0 f:1.2
+adc 1 4 1
+n.snapshot
+adc.getValue a2
+adc 0 0 1039
+n.snapshot
+adc.getPotValue a2
+adc 0 4 2623
+adc 1 3 2048
+n.snapshot
+hyb.getValue h0
+adc.isResisting a1
+adc 1 2 4043
+adc 1 6 2049
+n.snapshot
+adc.getRawPotValue a2
+adc.getValue a1
+adc 1 5 0
+n.snapshot
+hyb.setValue h0 f:1.197473
+adc.getValue a0
+hyb.getValue h0
+adc 1 6 2737
+adc 0 3 1320
+adc 1 4 1
+n.snapshot
+hyb.getValue h3
+adc.getValue a1
+hyb.setValue h0 f:0.1090290553022455
+adc.setResistVal a3 f:0.8419
+adc.getValue a1
+adc.clipControl a0 f:1.02659039
+adc 0 7 0
+adc 1 7 0
+adc 1 6 2726
+adc 1 5 2211
+n.snapshot
+hyb.getValue h3
+hyb.getStaticVal h0
+adc 0 5 2052
+adc 1 3 2060
+adc 1 0 0
+adc 0 4 2047
+n.snapshot
+hyb.getValue h1
+adc 1 6 2726
+adc 0 2 3432
+n.snapshot
+hyb.getValue h2
+adc.getPot a4
+adc.setIgnoreHID a3 b:True
+adc.isResisting a3
+hyb.getValue h3
+adc.isResisting a1
+adc.getValue a3
+hyb.getValue h2
+hyb.getValue h3
+adc.clipControl a0 f:1.390257700682
+hyb.setValue h3 f:0.55388023
+adc.getValue a0
+adc 1 5 2217
+adc 0 7 0
+n.snapshot
+hyb.getValue h0
+adc.getCV a1
+hyb.setValue h0 f:1.186356773
+hyb.getValue h1
+adc 0 1 2048
+n.snapshot
+hyb.setValue h1 f:-0.28117504
+hyb.getValue h3
+hyb.getValue h0
+hyb.getValue h3
+adc.getValue a1
+adc.setResistVal a4 f:-0.023
+hyb.getCVValue h1
+adc.getValue a0
+hyb.getRawCVValue h0
+adc.getPot a4
+adc 1 2 4047
+adc 1 4 1
+n.snapshot
+hyb.getValue h0
+adc.getValue a2
+hyb.getValue h1
+adc 1 7 0
+adc 1 2 4047
+adc 0 7 0
+adc 0 7 0
+n.snapshot
+hyb.getValue h3
+adc.getPot a2
+hyb.getValue h3
+adc 1 6 3563
+adc 1 0 0
+n.snapshot
+hyb.setValue h3 f:0.146953832
+adc 1 5 2216
+adc 1 6 3558
+n.snapshot
+hyb.setValue h3 f:1.2676031323
+hyb.getValue h2
+adc.getCVValue a0
+adc 0 0 1038
+adc 1 2 4047
+n.snapshot
+adc.clipControl a2 f:1e-05
+adc 0 1 2048
+adc 1 4 1
+adc 0 2 3432
+n.snapshot
+hyb.getValue h1
+hyb.getValue h1
+adc.getValue a0
+hyb.getValue h2
+adc.setValue a3 f:0.221312258836
+adc.getValue a4
+adc 1 4 1
+adc 0 1 1
+n.snapshot
+adc.getPot a3
+adc 0 3 1320
+n.snapshot
+adc.getValue a0
+hyb.getValue h0
+adc.getCV a4
+hyb.getValue h3
+adc 1 1 2300
+n.snapshot
+adc.getValue a1
+adc.getValue a2
+hyb.getValue h1
+adc.getValue a0
+adc 1 5 2216
+adc 1 0 4094
+adc 0 0 1038
+adc 0 4 2055
+n.snapshot
+adc.getValue a0
+hyb.setValue h3 f:0.2949172184931
+hyb.getValue h3
+hyb.getValue h1
+adc 0 6 1445
+n.snapshot
+adc.getPot a3
+adc.getValue a4
+adc.setValue a1 f:0.0
+hyb.getValue h3
+adc.getValue a4
+adc 0 7 7
+adc 0 1 1
+n.snapshot
+hyb.getValue h1
+adc 0 3 1320
+adc 1 4 4094
+n.snapshot
+adc.clipControl a3 f:-0.1245
+adc 1 3 2060
+adc 1 5 2214
+n.snapshot
+adc.getValue a1
+hyb.getValue h3
+adc.getCV a3
+adc 1 0 4094
+adc 0 7 0
+n.snapshot
+adc.clearResistVal a2
+hyb.getRawCVValue h1
+adc 1 1 2299
+adc 1 7 826
+adc 0 1 1
+n.snapshot
+adc.getValue a2
+adc.getPot a1
+adc 1 0 4095
+adc 0 5 2052
+adc 0 6 2048
+adc 0 7 0
+n.snapshot
+adc.getValue a4
+adc.getValue a2
+adc.getValue a4
+adc 0 7 1
+adc 1 2 4047
+n.snapshot
+adc.getValue a0
+adc 0 3 350
+adc 1 4 3500
+n.snapshot
+hyb.setIgnoreHID h3 b:False
+adc 1 4 3501
+adc 0 7 2048
+adc 1 6 3558
+adc 1 5 2202
+n.snapshot
+adc.getValue a2
+hyb.getValue h2
+adc.getValue a2
+adc.getValue a0
+hyb.getValue h1
+hyb.getValue h3
+adc 1 7 826
+adc 0 3 350
+n.snapshot
+hyb.getCVValue h2
+adc 0 3 3913
+n.snapshot
+adc.getCV a2
+hyb.getValue h0
+hyb.getValue h1
+hyb.getValue h3
+adc 1 7 826
+n.snapshot
+adc.getValue a2
+adc.getValue a2
+adc.getValue a0
+adc.getValue a3
+adc.setValue a2 i:2
+hyb.getValue h1
+hyb.setValue h0 f:1.26404518759051
+adc.clipControl a2 f:1e-05
+adc 1 6 3558
+adc 1 1 2047
+adc 1 4 2048
+n.snapshot
+adc.clipControl a0 f:0.573256941680089
+adc.getCV a3
+adc.getValue a4
+hyb.getValue h3
+adc.getValue a1
+hyb.getValue h3
+adc 1 2 2048
+n.snapshot
+adc.getPot a1
+adc.setValue a0 f:0.80046013981
+adc.getValue a3
+adc 1 0 4091
+n.snapshot
+adc.getValue a0
+hyb.getValue h1
+adc.getPot a3
+hyb.getValue h3
+hyb.getValue h3
+adc 1 1 1538
+adc 0 6 2048
+adc 1 6 4095
+n.snapshot
+hyb.getValue h0
+hyb.getValue h3
+adc.getValue a2
+hyb.getValue h3
+adc 1 7 826
+adc 1 5 4094
+n.snapshot
+adc.setValue a0 f:0.199214
+hyb.getValue h3
+adc.getValue a3
+adc 1 1 1538
+n.snapshot
+adc.getValue a3
+adc.getPot a1
+adc 1 3 2070
+n.snapshot
+adc.getValue a2
+hyb.setValue h0 f:0.7204719
+hyb.getValue h3
+hyb.getValue h1
+adc.getValue a0
+adc.setIgnoreHID a1 b:True
+hyb.getValue h3
+adc 0 3 3911
+adc 1 4 2040
+adc 0 5 2052
+n.snapshot
+adc.clipControl a1 f:0.188177
+hyb.getValue h3
+hyb.getValue h2
+adc.getValue a0
+adc 0 1 1
+adc 0 1 1
+adc 1 5 3164
+adc 0 6 2038
+n.snapshot
+adc.getValue a3
+hyb.getValue h0
+hyb.getValue h3
+adc.getCVValue a2
+hyb.getValue h2
+hyb.getValue h3
+hyb.getValue h1
+hyb.getValue h3
+adc.getValue a2
+adc.getRawCVValue a2
+adc.getRawCVValue a0
+hyb.getValue h0
+adc.getValue a1
+adc.clearResistVal a0
+adc.getCVValue a3
+adc.getValue a0
+adc.getRawCVValue a2
+adc.getValue a3
+hyb.setIgnoreHID h0 b:True
+adc 1 4 2047
+adc 1 0 4082
+adc 0 0 1038
+n.snapshot
+hyb.getCVValue h1
+hyb.getValue h2
+adc.getValue a0
+hyb.getValue h2
+hyb.getValue h3
+hyb.setValue h3 f:0.38987776084901
+hyb.getValue h3
+adc 0 5 2052
+adc 1 2 2048
+adc 1 5 3164
+adc 0 2 3433
+n.snapshot
+hyb.getValue h2
+adc.getValue a2
+adc 0 5 1
+n.snapshot
+hyb.getValue h0
+adc 0 1 1164
+adc 1 0 4082
+n.snapshot
+hyb.getValue h2
+adc.isResisting a2
+adc.getPotValue a4
+hyb.getRawCVValue h2
+adc.getValue a1
+adc.getValue a3
+hyb.getValue h2
+adc.getValue a1
+adc.clipControl a1 f:1.25
+hyb.getValue h0
+adc.getValue a2
+hyb.setValue h0 i:-3
+adc.getValue a1
+adc.getValue a0
+adc.getValue a4
+adc.isResisting a3
+hyb.setValue h1 i:5
+hyb.getValue h1
+adc.getCVValue a2
+adc.getPot a2
+adc.getPot a2
+adc 1 7 826
+adc 0 4 2055
+n.snapshot
+adc.getValue a0
+hyb.getValue h1
+hyb.getValue h3
+hyb.getValue h3
+hyb.getValue h0
+hyb.getValue h3
+adc.getRawCVValue a2
+adc.getValue a4
+adc.getValue a3
+adc 1 7 4095
+n.snapshot
+adc.getCV a1
+hyb.setValue h3 f:1.21560101775253
+adc.setIgnoreHID a3 b:True
+hyb.setCVOffset h0 f:0.0429
+adc.setValue a3 f:1.40883
+hyb.getValue h0
+hyb.getValue h0
+adc 0 4 2063
+adc 1 3 2070
+adc 0 5 590
+n.snapshot
+adc.setValue a1 f:1e-05
+adc.getValue a3
+adc 0 6 2049
+adc 0 2 3422
+adc 1 5 3155
+adc 1 4 2054
+n.snapshot
+hyb.getValue h1
+adc.getValue a2
+hyb.getStaticVal h3
+adc.isResisting a3
+adc.setIgnoreHID a4 b:True
+hyb.getValue h2
+hyb.setValue h3 i:4
+adc 1 3 2070
+n.snapshot
+adc.getValue a2
+adc 1 5 4094
+adc 0 4 2066
+adc 0 4 2067
+n.snapshot
+hyb.getStaticVal h0
+hyb.getValue h1
+adc.getValue a3
+hyb.getRawCVValue h3
+adc 1 1 2048
+adc 0 3 4095
+n.snapshot
+adc.getValue a4
+adc 1 4 2054
+n.snapshot
+adc.clearResistVal a1
+adc.getRawPotValue a3
+hyb.getValue h2
+adc 1 2 2048
+adc 0 5 590
+adc 1 5 1317
+n.snapshot
+hyb.setValue h1 f:0.233404
+adc.getCVValue a4
+adc.getValue a0
+hyb.getValue h0
+adc.setIgnoreHID a2 b:True
+adc.getPot a4
+hyb.getValue h1
+adc.setIgnoreHID a0 b:False
+hyb.getValue h1
+hyb.getValue h0
+adc 0 3 2048
+adc 1 0 1
+n.snapshot
+hyb.getValue h0
+hyb.getValue h3
+adc 1 6 4089
+n.snapshot
+adc.getRawPotValue a0
+hyb.getStaticVal h3
+adc 1 5 1308
+adc 0 5 1427
+adc 1 2 2048
+n.snapshot
+hyb.getValue h0
+adc.clearResistVal a0
+hyb.getValue h3
+adc.getCV a4
+adc 0 2 374
+adc 1 7 4095
+n.snapshot
+hyb.getStaticVal h2
+adc 0 4 3431
+adc 1 3 2070
+adc 0 0 1037
+adc 0 5 1422
+n.snapshot
+adc.getValue a3
+adc 1 2 2048
+adc 0 5 1414
+n.snapshot
+adc.getValue a3
+adc.clipControl a2 f:0.461848780317
+hyb.getValue h1
+adc.getCV a2
+hyb.getValue h1
+hyb.setIgnoreHID h0 b:False
+adc 0 0 1037
+adc 1 5 3643
+n.snapshot
+hyb.getStaticVal h1
+adc 1 6 4094
+n.snapshot
+adc.getValue a2
+adc 0 0 1042
+adc 0 5 1414
+adc 0 4 3431
+n.snapshot
+adc.getValue a2
+adc 1 4 2048
+adc 1 7 4095
+adc 1 5 3643
+n.snapshot
+hyb.getValue h3
+hyb.getValue h1
+hyb.getValue h1
+adc.getValue a2
+adc 0 2 362
+adc 1 4 2048
+adc 1 4 1895
+adc 1 2 2048
+n.snapshot
+hyb.getValue h3
+adc 1 3 797
+adc 1 4 601
+adc 0 6 2164
+adc 0 1 1164
+n.snapshot
+adc.getValue a3
+adc 1 4 597
+adc 0 3 2048
+n.snapshot
+hyb.getValue h3
+hyb.getValue h2
+adc 1 3 792
+adc 1 2 2048
+n.snapshot
+hyb.setValue h0 f:1.3295368813460224
+hyb.getValue h1
+adc 1 1 2847
+adc 1 1 2854
+adc 1 3 792
+adc 1 0 1
+n.snapshot
+hyb.getValue h1
+hyb.getValue h1
+hyb.getValue h1
+hyb.getValue h0
+adc.getCV a0
+hyb.getValue h2
+adc.getValue a3
+hyb.getValue h1
+adc 0 4 3420
+adc 0 4 3420
+adc 1 1 1686
+n.snapshot
+hyb.getValue h3
+hyb.getValue h3
+hyb.setValue h2 f:-0.109
+adc.getValue a4
+adc 0 1 1164
+n.snapshot
+hyb.getValue h1
+hyb.getValue h3
+adc.setIgnoreHID a2 b:True
+adc 1 0 0
+adc 1 3 787
+adc 0 6 4094
+adc 1 1 0
+n.snapshot
+adc.getCV a2
+adc.getValue a2
+adc 0 5 1410
+n.snapshot
+adc.getRawPotValue a2
+hyb.getValue h3
+adc.clipControl a3 f:1.3236228308981157
+hyb.setCVOffset h3 f:-0.0074
+adc.getValue a2
+hyb.getValue h1
+adc.getValue a2
+adc.getValue a4
+adc 0 3 2041
+n.snapshot
+hyb.getValue h3
+hyb.getValue h1
+hyb.getRawCVValue h1
+adc.setValue a1 f:-0.14403668166167
+adc.getValue a2
+hyb.getValue h0
+adc.getRawCVValue a2
+adc.getPot a0
+hyb.getValue h2
+hyb.getValue h3
+hyb.getValue h0
+adc.isResisting a1
+adc 1 7 4090
+n.snapshot
+hyb.getValue h2
+hyb.getValue h2
+adc.getPot a2
+adc.getValue a2
+adc 1 5 1931
+adc 0 2 4094
+adc 0 7 2048
+n.snapshot
+adc.setValue a2 i:-2
+adc 1 4 3983
+n.snapshot
+hyb.getValue h1
+adc.getValue a3
+adc.getValue a0
+adc.clipControl a3 f:0.9387133203636311
+adc 1 5 4094
+adc 0 6 4094
+adc 1 6 2048
+adc 1 5 4094
+n.snapshot
+hyb.getValue h3
+adc 0 3 2034
+adc 0 6 4095
+adc 1 7 1
+n.snapshot
+adc.getRawCVValue a2
+adc.clipControl a0 i:1
+hyb.getValue h1
+hyb.getValue h3
+hyb.setIgnoreHID h2 b:False
+hyb.getValue h1
+hyb.getValue h1
+adc.getValue a0
+adc.setValue a0 f:0.38
+adc.getCV a0
+adc 0 4 4095
+n.snapshot
+hyb.getValue h2
+hyb.getValue h1
+hyb.getValue h1
+adc.getValue a1
+adc.getValue a2
+adc.getPot a2
+adc.getValue a3
+adc.getValue a3
+hyb.getValue h2
+adc.getValue a3
+adc 0 2 1095
+adc 1 0 0
+adc 1 7 2047
+adc 1 3 787
+n.snapshot
+adc.isResisting a4
+adc 1 4 3995
+adc 1 1 3
+adc 1 1 2048
+n.snapshot
+adc.getCVValue a2
+adc.getValue a4
+hyb.getValue h2
+hyb.getValue h1
+adc.getValue a4
+adc.getValue a2
+hyb.getValue h3
+hyb.getCVValue h0
+hyb.getValue h0
+hyb.getCVValue h1
+adc.getRawCVValue a0
+adc.getValue a3
+hyb.getValue h3
+adc.getValue a3
+adc.getValue a3
+adc.getValue a4
+adc.getValue a1
+adc.getValue a1
+hyb.setValue h1 f:0.064313
+adc 0 1 1164
+adc 0 7 2048
+adc 1 0 2563
+adc 0 2 1084
+n.snapshot
+hyb.getCVValue h2
+adc.getRawCVValue a0
+adc 1 1 2050
+adc 0 0 2147
+n.snapshot
+adc.getValue a2
+adc.getValue a4
+adc 1 1 4095
+adc 1 6 1
+adc 0 2 2048
+adc 0 5 1410
+n.snapshot
+hyb.getValue h1
+adc.getCV a0
+hyb.getValue h0
+adc.getValue a2
+adc.getValue a1
+adc.getValue a0
+adc 0 2 865
+n.snapshot
+adc.getValue a2
+hyb.setValue h0 i:4
+adc.setResistVal a4 f:1.337806272471
+adc.getValue a0
+adc.getValue a4
+adc.getPot a0
+hyb.getValue h1
+adc 0 0 2147
+adc 1 0 2562
+n.snapshot
+adc.setIgnoreHID a1 b:True
+hyb.getValue h3
+hyb.getValue h3
+hyb.getValue h2
+hyb.getValue h3
+hyb.getValue h2
+adc.getValue a1
+adc.getValue a3
+hyb.getRawCVValue h3
+adc 0 0 2157
+adc 0 3 2034
+n.snapshot
+adc.setIgnoreHID a0 b:True
+hyb.setValue h2 f:0.2749493591847
+adc 1 7 2047
+n.snapshot
+adc.getValue a2
+adc.clearResistVal a4
+hyb.getValue h2
+adc.getRawCVValue a0
+adc.getValue a3
+adc 0 5 1408
+adc 0 5 1405
+adc 0 7 2057
+adc 1 7 2047
+n.snapshot
+hyb.getValue h1
+hyb.getValue h2
+hyb.getValue h0
+hyb.getValue h0
+adc.getValue a4
+adc.clipControl a4 f:-0.36825612
+hyb.setValue h1 f:-0.064
+adc.getValue a4
+adc 0 3 2038
+adc 1 5 4094
+adc 0 2 4094
+n.snapshot
+hyb.getValue h2
+adc.getValue a2
+hyb.getRawCVValue h1
+adc.getPotValue a2
+adc.getValue a3
+hyb.getCVValue h2
+adc.getPotValue a1
+hyb.getValue h1
+adc.getValue a0
+adc.getRawCVValue a1
+hyb.setIgnoreHID h2 b:False
+adc 0 7 2048
+n.snapshot
+hyb.getValue h1
+adc.setResistVal a1 f:0.72386429
+adc.getRawCVValue a2
+adc 0 7 2211
+adc 0 0 2157
+adc 1 7 1
+n.snapshot
+adc.getValue a2
+adc.getValue a4
+adc.getPot a4
+adc 0 5 4095
+n.snapshot
+adc.setValue a3 i:-3
+adc.getValue a1
+hyb.getValue h0
+adc 0 0 3679
+n.snapshot
+adc.isResisting a1
+adc 0 5 4095
+n.snapshot
+hyb.getValue h1
+adc.isResisting a3
+hyb.getValue h2
+hyb.getValue h2
+hyb.getValue h1
+adc.setResistVal a4 f:1e-05
+adc.getRawCVValue a2
+adc 0 5 2358
+adc 1 3 787
+adc 1 6 1
+adc 0 7 4095
+n.snapshot
+hyb.setValue h2 f:0.125
+hyb.getValue h1
+adc 0 0 4094
+n.snapshot
+adc.isResisting a4
+adc.getCV a2
+adc.getCV a3
+adc.getValue a0
+adc 0 5 2366
+adc 0 3 226
+adc 1 3 782
+adc 0 1 1153
+n.snapshot
+adc.getPot a2
+hyb.getValue h2
+adc 0 0 1547
+n.snapshot
+hyb.getValue h3
+adc.isResisting a3
+adc.getValue a3
+adc 0 1 1153
+adc 1 6 1
+n.snapshot
+adc.getValue a2
+hyb.getStaticVal h1
+adc.getValue a4
+adc.getValue a3
+adc.setIgnoreHID a4 b:False
+adc.getValue a1
+adc.setIgnoreHID a1 b:False
+hyb.getValue h1
+adc 0 5 2765
+adc 0 7 4095
+adc 1 4 3995
+adc 1 2 910
+n.snapshot
+hyb.setValue h0 f:1.42519
+adc.setIgnoreHID a2 b:False
+adc 0 2 2048
+adc 1 7 13
+adc 0 3 229
+n.snapshot
+hyb.getValue h2
+adc.getValue a1
+adc 0 4 2047
+adc 1 2 0
+adc 0 5 2765
+n.snapshot
+adc.getCV a3
+adc.getValue a1
+hyb.getValue h3
+hyb.getValue h0
+adc.isResisting a0
+hyb.getValue h0
+hyb.getValue h3
+adc.getValue a0
+adc 1 0 117
+n.snapshot
+adc.getValue a1
+adc.getValue a3
+adc.getValue a1
+adc 0 1 1151
+adc 1 0 1
+adc 0 4 2047
+adc 0 1 2275
+n.snapshot
+hyb.getValue h1
+adc.getValue a2
+adc.setValue a1 f:0.572910787042326
+adc 1 0 3549
+adc 1 0 2047
+adc 0 2 2949
+n.snapshot
+hyb.setIgnoreHID h1 b:True
+adc.getValue a1
+hyb.getValue h1
+hyb.getValue h1
+hyb.getValue h1
+adc.getValue a3
+adc.clearResistVal a3
+adc 1 2 0
+adc 0 4 2059
+adc 0 1 2505
+n.snapshot
+adc.getValue a3
+hyb.getValue h3
+adc 0 2 4094
+adc 0 4 3675
+adc 1 2 248
+adc 0 5 2769
+n.snapshot
+adc.getValue a0
+adc 0 0 4095
+n.snapshot
+hyb.getValue h2
+adc.getValue a2
+adc 0 3 229
+adc 1 3 4095
+adc 0 2 1708
+adc 0 3 229
+n.snapshot
+adc.getValue a4

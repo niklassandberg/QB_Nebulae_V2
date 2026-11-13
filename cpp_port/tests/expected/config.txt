@@ -1,0 +1,92 @@
+L3 [s:off,b:False,b:True,b:False,b:False,f:1.0,s:INFO,i:1200,i:400,i:400,b:False,i:70,b:False,f:5.0]
+L4 file configsettings.txt 
+L7 [s:shell,b:True,b:False,b:True,b:True,f:0.333,s:DEBUG,i:1500,i:400,i:400,b:True,i:99,b:True,f:12.3]
+L10 [s:nohlt,b:False,b:True,b:False,b:False,f:1.0,s:INFO,i:1200,i:400,i:1000,b:False,i:70,b:False,f:5.0]
+L13 [s:off,b:False,b:True,b:False,b:False,f:0.0,s:INFO,i:1200,i:7,i:400,b:False,i:70,b:False,f:5.0]
+L16 [s:off,b:False,b:True,b:False,b:False,f:0.0,s:STATS,i:1200,i:400,i:400,b:False,i:70,b:False,f:5.0]
+L19 None
+L20 file configsettings.txt power_regulator=off|no_pwm=on|led_stagger=on|services_quiet=off|wifi=off|led_dim=1.00|log_level=INFO|nebio_scan_hz=1200|nebio_digital_hz=400|nebio_adc_hz=400|nebio_fast_gpio=off|csound_rt_priority=70|gate_interrupts=off|gate_holdoff_ms=5.0|
+L21 None
+L22 None
+L23 bg /home/alarm/QB_Nebulae_V2/Code/scripts/quiet.sh services on
+L23 None
+L24 None
+L25 bg /home/alarm/QB_Nebulae_V2/Code/scripts/wifi.sh on
+L25 None
+L26 bg /home/alarm/QB_Nebulae_V2/Code/scripts/wifi.sh off
+L26 None
+L27 None
+L28 None
+L29 E:ValueError
+L30 None
+L31 None
+L32 None
+L33 None
+L34 None
+L35 E:ValueError
+L36 None
+L37 [s:off,b:True,b:False,b:True,b:False,f:1.0,s:INFO,i:1200,i:400,i:400,b:True,i:70,b:True,f:7.0]
+L38 file configsettings.txt power_regulator=off|no_pwm=on|led_stagger=off|services_quiet=on|wifi=off|led_dim=1.00|log_level=INFO|nebio_scan_hz=1200|nebio_digital_hz=400|nebio_adc_hz=400|nebio_fast_gpio=on|csound_rt_priority=70|gate_interrupts=on|gate_holdoff_ms=7.0|
+L39 [i:1200,i:400,i:400]
+L40 [i:100,i:100,i:100]
+L41 [i:1000,i:1000,i:1]
+L42 [i:1000,i:1000,i:300]
+L43 [i:800,i:99,i:300]
+L44 E:ValueError
+L45 [s:off,b:True,b:False,b:True,b:False,f:1.0,s:INFO,i:800,i:99,i:300,b:True,i:70,b:True,f:7.0]
+L46 file configsettings.txt power_regulator=off|no_pwm=on|led_stagger=off|services_quiet=on|wifi=off|led_dim=1.00|log_level=INFO|nebio_scan_hz=800|nebio_digital_hz=99|nebio_adc_hz=300|nebio_fast_gpio=on|csound_rt_priority=70|gate_interrupts=on|gate_holdoff_ms=7.0|
+L48 E:ValueError
+L49 b:False
+L50 bg /home/alarm/QB_Nebulae_V2/Code/scripts/quiet.sh spin yield
+L50 b:False
+L51 b:False
+L52 b:True
+L53 file cmdline.txt console=tty1 root=/dev/mmcblk0p2 rw nohlt|
+L54 b:True
+L56 b:False
+L57 b:True
+L58 file cmdline.txt console=tty1 root=/dev/mmcblk0p2 rw|
+L60 b:False
+L61 bg /home/alarm/QB_Nebulae_V2/Code/scripts/quiet.sh services on
+L61 bg /home/alarm/QB_Nebulae_V2/Code/scripts/quiet.sh spin shell
+L61 bg /home/alarm/QB_Nebulae_V2/Code/scripts/wifi.sh off
+L61 bg _syncCmdline
+L61 None
+L62 bg /home/alarm/QB_Nebulae_V2/Code/scripts/quiet.sh services off
+L62 None
+L63 None
+L64 bg /home/alarm/QB_Nebulae_V2/Code/scripts/quiet.sh spin shell
+L64 bg /home/alarm/QB_Nebulae_V2/Code/scripts/wifi.sh off
+L64 bg _syncCmdline
+L64 None
+L68 file cmdline.txt a b|
+L70 E:FileNotFoundError
+L71 E:FileNotFoundError
+L72 file configsettings.txt power_regulator=off|no_pwm=on|led_stagger=off|services_quiet=off|wifi=off|led_dim=1.00|log_level=INFO|nebio_scan_hz=800|nebio_digital_hz=99|nebio_adc_hz=300|nebio_fast_gpio=on|csound_rt_priority=70|gate_interrupts=on|gate_holdoff_ms=7.0|
+L74 [[s:gate_holdoff_ms,f:3.3],[s:gate_interrupts,b:True],[s:led_dim,f:0.46],[s:nebio_digital_hz,i:1],[s:nebio_fast_gpio,b:False],[s:nebio_scan_hz,i:2000],[s:no_pwm,b:True],[s:power_regulator,s:yield],[s:restart,s:nebulae],[s:services_quiet,b:True],[s:wifi,b:False]]
+L75 []
+L76 [[s:led_dim,f:0.0],[s:nebio_scan_hz,i:1]]
+L77 [[s:gate_holdoff_ms,f:0.0],[s:led_dim,f:1.0]]
+L78 []
+L79 []
+L80 [[s:gate_holdoff_ms,f:5.0],[s:led_dim,f:0.5],[s:nebio_adc_hz,i:300],[s:no_pwm,b:False],[s:power_regulator,s:off],[s:restart,s:nebulae]]
+L81 file config_request power_regulator=off|no_pwm=off|led_dim=0.5|nebio_adc_hz=300|gate_holdoff_ms=5.0|restart=nebulae|
+L82 [[s:gate_holdoff_ms,f:5.0],[s:led_dim,f:0.5],[s:nebio_adc_hz,i:300],[s:no_pwm,b:False],[s:power_regulator,s:off],[s:restart,s:nebulae]]
+L83 file config_request missing
+L85 [[s:nebio_scan_hz,i:1300],[s:wifi,b:True]]
+L86 f:5.0
+L87 f:0.0
+L88 f:0.1
+L89 f:0.1
+L90 None
+L91 f:100.0
+L92 f:100.0
+L93 i:400
+L94 i:7
+L95 i:10000
+L96 i:7
+L97 i:12
+L98 i:7
+L99 i:99
+L103 file configsettings.txt 
+L104 [s:off,b:False,b:True,b:False,b:False,f:1.0,s:INFO,i:1200,i:400,i:400,b:False,i:70,b:False,f:5.0]

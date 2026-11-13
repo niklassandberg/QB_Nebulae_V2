@@ -1,0 +1,139 @@
+# encoderpages.py: scale, pulse, Page, EncoderPages, PageState
+scale f:0.5 f:0.0 f:1.0 s:lin
+scale f:0.5 f:20.0 f:20000.0 exp
+scale f:0.5 f:20.0 f:20000.0 lin
+scale f:0.33 i:0 i:10 int
+scale f:0.25 i:0 i:10 int
+scale f:0.35 i:0 i:10 int
+scale f:0.45 i:0 i:10 int
+scale f:-1.0 f:1.0 f:2.0 lin
+scale f:2.0 f:1.0 f:2.0 lin
+scale f:nan f:1.0 f:2.0 lin
+scale s:0.75 f:1.0 f:2.0 lin
+scale s:abc f:1.0 f:2.0 lin
+scale f:0.5 f:0.0 f:1.0 exp
+scale f:0.5 f:-1.0 f:1.0 exp
+scale f:0.0 f:-1.0 f:1.0 exp
+scale f:1.0 f:-2.0 f:1.0 exp
+scale f:0.5 f:1e-300 f:1e300 exp
+scale f:1.0 f:1e300 f:1e308 exp
+scale i:1 i:3 i:7 lin
+scale f:0.5 f:inf f:1.0 int
+scale f:0.7 f:2.0 f:0.5 exp
+pulse i:0
+pulse i:22
+pulse i:44
+pulse f:65.5
+pulse i:88
+pulse i:1000
+pulse i:-10
+pulse f:123456.789
+# pages on one encoder
+pg.new a delay /neb/page/delay f:0.0 f:2.0 lin f:0.5
+pg.new b cut /neb/page/cut f:20.0 f:20000.0 exp f:0.25
+pg.new c steps /neb/page/steps i:1 i:16 int i:0 i:1
+pg.new d fb /fb f:0.0 f:1.0 lin f:1.0 f:0.05
+ep.new sp speed a,b,c,d cut
+ep.state sp
+ep.names sp
+ep.outputs sp f:0.0
+ep.outputs sp f:0.3
+ep.outputs sp f:-1.0
+ep.step sp i:3
+ep.state sp
+ep.step sp i:-100
+ep.state sp
+ep.move sp f:0.123456789
+ep.state sp
+ep.move sp f:2.0
+ep.state sp
+ep.nextPage sp
+ep.step sp i:-2
+ep.state sp
+ep.nextPage sp
+ep.step sp i:5
+ep.state sp
+ep.outputs sp f:0.0
+ep.nextPage sp
+ep.step sp i:-1
+ep.step sp i:-1
+ep.state sp
+ep.nextPage sp
+ep.state sp
+# choosing the CV page
+ep.startChoosing sp
+ep.candidateShown sp
+ep.setCandidate sp b:True
+ep.candidateShown sp
+ep.commitCandidate sp
+ep.state sp
+ep.nextPage sp
+ep.setCandidate sp b:False
+ep.state sp
+ep.nextPage sp
+ep.setCandidate sp b:False
+ep.state sp
+ep.commitCandidate sp
+ep.commitCandidate sp
+ep.outputs sp f:0.5
+ep.colour sp i:0
+ep.colour sp i:1
+ep.colour sp i:4
+ep.colour sp i:5
+ep.colour sp i:-1
+ep.marked sp i:0
+ep.marked sp i:2
+# a hold layer: colour on page 1, never CV
+pg.new h1 grain /h/grain f:0.0 f:1.0 lin f:0.0
+ep.new hold speed h1 grain 0,4095,4095
+ep.state hold
+ep.colour hold i:0
+ep.colour hold i:1
+ep.marked hold i:0
+ep.marked hold i:-3
+ep.new none pitch - None
+ep.state none
+ep.names none
+ep.outputs none f:0.1
+ep.nextPage none
+ep.step none i:1
+ep.setCandidate none b:True
+ep.candidateShown none
+ep.new missing pitch a nosuchpage
+ep.state missing
+# PageState: save, load, dirty timing
+pg.new p1 rev /neb/page/rev f:0.0 f:1.0 lin f:0.33333
+pg.new p2 mix /neb/page/mix f:0.0 f:1.0 lin i:1
+ep.new pi pitch p1,p2 mix
+ps.new st pages/instr.pages
+ps.dirty st
+ps.saveIfDue st i:5000 speed=sp,pitch=pi
+file.read pages/instr.pages
+ps.changed st i:5000
+ps.saveIfDue st i:5999 speed=sp,pitch=pi
+file.read pages/instr.pages
+ps.dirty st
+ps.saveIfDue st i:6000 speed=sp,pitch=pi
+ps.dirty st
+file.read pages/instr.pages
+ps.save st -
+file.read pages/instr.pages
+# load into fresh pages
+pg.new q1 rev /neb/page/rev f:0.0 f:1.0 lin f:0.0
+pg.new q2 mix /neb/page/mix f:0.0 f:1.0 lin f:0.0
+ep.new pi2 pitch q1,q2 None
+file.write pages/load.pages value,pitch,rev,0.75|value,pitch,mix,nan|cv,pitch,rev|value,speed,cut,0.1|junk|value,pitch|value,pitch,rev,abc|value,pitch,nosuch,0.5|cv,pitch,nosuch|value,pitch,mix,5|\_value,pitch,rev,0.5\_|value,\_pitch,rev,0.1
+ps.new ld pages/load.pages
+ps.load ld pitch=pi2
+ep.state pi2
+file.write pages/load2.pages cv,pitch,none|value,pitch,mix,-inf\r\nvalue,pitch,rev,1e-3
+ps.new ld2 pages/load2.pages
+ps.load ld2 pitch=pi2
+ep.state pi2
+ps.new nofile pages/missing.pages
+ps.load nofile pitch=pi2
+ep.state pi2
+ps.new rel relative.pages
+ps.save rel pitch=pi2
+file.read relative.pages
+pg.value q1

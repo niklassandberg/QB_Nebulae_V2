@@ -1,0 +1,351 @@
+L13 call inputs_init()
+L13 call set_input_rates(i:1200,i:400,i:400)
+L13 call input_scan_hz()
+L13 call input_digital_hz()
+L13 call input_adc_hz()
+L13 call set_gate_holdoff_us(i:5000)
+L13 call set_gate_interrupts(i:0)
+L13 call gate_interrupts()
+L14 [s:normal,s:normal,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L15 [None,b:False,[],[],b:False,[],b:False,[],[]]
+L16 [[s:speed,s:hybrid,f:0.625],[s:pitch,s:hybrid,f:0.6],[s:start,s:analog,f:0.0],[s:size,s:analog,f:0.0],[s:blend,s:analog,f:0.0],[s:density,s:analog,f:0.0],[s:overlap,s:analog,f:0.0],[s:window,s:analog,f:0.0],[s:reset,s:digital,i:0],[s:freeze,s:digital,f:0.0],[s:record,s:digital,f:0.0],[s:file,s:digital,f:0.0],[s:source,s:digital,f:0.0],[s:filestate,s:digital,i:0],[s:sourcegate,s:digital,i:0]]
+L16 [[s:speed_alt,f:23.0],[s:pitch_alt,f:0.0],[s:start_alt,f:0.0],[s:size_alt,f:0.0],[s:blend_alt,f:0.0],[s:density_alt,f:0.0],[s:overlap_alt,f:0.0],[s:window_alt,f:0.0],[s:reset_alt,f:0.0],[s:freeze_alt,f:0.0],[s:source_alt,f:0.0],[s:record_alt,f:0.0],[s:file_alt,f:0.0]]
+L17 b:False
+L19 call encoder_set_click(i:1,i:0)
+L19 call encoder_set_click(i:0,i:0)
+L19 call led_clear_sc()
+L20 [None,b:False,[],[],b:False,[],b:False,[s:record],[s:file,s:record]]
+L21 [[s:speed,i:0,s:cut,None,[f:0.5,f:0.2],None],[s:record:pitch,i:0,None,None,[f:0.3],[i:0,i:4095,i:4095]],[s:record:speed,i:0,None,None,[f:0.0],[i:0,i:4095,i:4095]],[s:record+file:pitch,i:0,None,None,[f:0.5],[i:4095,i:2000,i:0]]]
+L22 [[s:speed,s:hybrid,f:0.625],[s:pitch,s:hybrid,f:0.6],[s:start,s:analog,f:0.0],[s:size,s:analog,f:0.0],[s:blend,s:analog,f:0.0],[s:density,s:analog,f:0.0],[s:overlap,s:analog,f:0.0],[s:window,s:analog,f:0.0],[s:reset,s:digital,i:0],[s:freeze,s:digital,f:0.0],[s:record,s:digital,f:0.0],[s:file,s:digital,f:0.0],[s:source,s:digital,f:0.0],[s:filestate,s:digital,i:0],[s:sourcegate,s:digital,i:0]]
+L22 [[s:speed_alt,f:23.0],[s:pitch_alt,f:0.0],[s:start_alt,f:0.0],[s:size_alt,f:0.0],[s:blend_alt,f:0.0],[s:density_alt,f:0.0],[s:overlap_alt,f:0.0],[s:window_alt,f:0.0],[s:reset_alt,f:0.0],[s:freeze_alt,f:0.0],[s:source_alt,f:0.0],[s:record_alt,f:0.0],[s:file_alt,f:0.0]]
+L23 b:False
+L24 []
+L25 None
+L26 None
+L27 None
+L28 [s:supercollider,s:normal,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L29 call sc_sender_open()
+L29 call sc_open_sender()
+L29 call sc_listener_running()
+L29 call sc_start_listener()
+L29 call sc_sender_open()
+L29 call sc_listener_running()
+L29 call sc_sender_open()
+L29 call sc_listener_running()
+L29 call sc_sender_open()
+L29 call sc_open_sender()
+L29 call encoder_set_click(i:1,i:1)
+L29 call encoder_set_click(i:0,i:1)
+L32 None
+L33 call sc_send_float(s:pitch,f:0.6)
+L33 call sc_send_int(s:start,i:0)
+L33 call sc_send_int(s:size,i:0)
+L33 call sc_send_int(s:blend,i:0)
+L33 call sc_send_int(s:density,i:0)
+L33 call sc_send_int(s:overlap,i:0)
+L33 call sc_send_int(s:window,i:0)
+L33 call sc_send_int(s:reset,i:0)
+L33 call sc_send_int(s:freeze,i:0)
+L33 call sc_send_int(s:record,i:0)
+L33 call sc_send_int(s:file,i:0)
+L33 call sc_send_int(s:source,i:0)
+L33 call sc_send_int(s:filestate,i:0)
+L33 call sc_send_int(s:sourcegate,i:0)
+L33 call sc_send_path_float(s:/p/cut,f:894.4271909999159)
+L33 call sc_send_path_float(s:/p/res,f:0.2)
+L33 call sc_send_path_float(s:/p/echo,f:0.3)
+L33 call sc_send_path_float(s:/p/fb,f:0.0)
+L33 call sc_send_path_float(s:/p/vol,f:5.0)
+L37 None
+L39 None
+L40 call sc_send_float(s:pitch,f:1.033)
+L40 call sc_send_int(s:start,i:1)
+L40 call sc_send_float(s:size,f:0.5514)
+L40 call sc_send_float(s:blend,f:0.821)
+L40 call sc_send_float(s:density,f:0.5514)
+L40 call sc_send_float(s:overlap,f:0.5514)
+L40 call sc_send_float(s:window,f:0.5514)
+L40 call sc_send_float(s:pitch,f:1.034)
+L40 call sc_send_float(s:size,f:0.6996)
+L40 call sc_send_int(s:blend,i:1)
+L40 call sc_send_float(s:density,f:0.6996)
+L40 call sc_send_float(s:overlap,f:0.6996)
+L40 call sc_send_float(s:window,f:0.6996)
+L40 call sc_send_path_float(s:/p/cut,f:4061.457995318767)
+L42 f:0.34530000000000005
+L43 None
+L44 None
+L45 None
+L46 None
+L47 [[s:speed,i:1,s:cut,None,[f:0.35,f:0.325],None],[s:record:pitch,i:0,None,None,[f:0.3],[i:0,i:4095,i:4095]],[s:record:speed,i:0,None,None,[f:0.0],[i:0,i:4095,i:4095]],[s:record+file:pitch,i:0,None,None,[f:0.5],[i:4095,i:2000,i:0]]]
+L49 None
+L50 call sc_send_float(s:size,f:0.7989)
+L50 call sc_send_float(s:density,f:0.7989)
+L50 call sc_send_float(s:overlap,f:0.7989)
+L50 call sc_send_float(s:window,f:0.7989)
+L50 call sc_send_path_float(s:/p/cut,f:2397.3985624082857)
+L50 call sc_send_path_float(s:/p/res,f:0.325)
+L51 [None,b:False,[],[],b:False,[[s:/p/cut,f:2397.3985624082857],[s:/p/echo,f:0.3],[s:/p/fb,f:0.0],[s:/p/res,f:0.325],[s:/p/vol,f:5.0]],b:True,[s:record],[s:file,s:record]]
+L55 None
+L56 [s:record,b:False,[],[[s:record,i:2000008]],b:False,[[s:/p/cut,f:2397.3985624082857],[s:/p/echo,f:0.3],[s:/p/fb,f:0.0],[s:/p/res,f:0.325],[s:/p/vol,f:5.0]],b:True,[s:record],[s:file,s:record]]
+L57 None
+L58 None
+L59 [[s:speed,i:1,s:cut,None,[f:0.35,f:0.325],None],[s:record:pitch,i:0,None,None,[f:0.33],[i:0,i:4095,i:4095]],[s:record:speed,i:0,None,None,[f:0.01],[i:0,i:4095,i:4095]],[s:record+file:pitch,i:0,None,None,[f:0.5],[i:4095,i:2000,i:0]]]
+L61 None
+L62 call sc_send_float(s:size,f:0.8654)
+L62 call sc_send_float(s:density,f:0.8654)
+L62 call sc_send_float(s:overlap,f:0.8654)
+L62 call sc_send_float(s:window,f:0.8654)
+L62 call sc_send_int(s:record,i:1)
+L62 call sc_send_float(s:size,f:0.91)
+L62 call sc_send_float(s:density,f:0.91)
+L62 call sc_send_float(s:overlap,f:0.91)
+L62 call sc_send_float(s:window,f:0.91)
+L62 call sc_send_path_float(s:/p/echo,f:0.33)
+L62 call sc_send_path_float(s:/p/fb,f:0.02)
+L65 None
+L66 [None,b:True,[],[],b:False,[[s:/p/cut,f:2397.3985624082857],[s:/p/echo,f:0.33],[s:/p/fb,f:0.02],[s:/p/res,f:0.325],[s:/p/vol,f:5.0]],b:True,[s:record],[s:file,s:record]]
+L67 call sc_send_float(s:size,f:0.9399)
+L67 call sc_send_float(s:density,f:0.9399)
+L67 call sc_send_float(s:overlap,f:0.9399)
+L67 call sc_send_float(s:window,f:0.9399)
+L67 call sc_send_int(s:record,i:0)
+L71 None
+L73 None
+L76 None
+L77 [None,b:False,[],[],b:False,[[s:/p/cut,f:2397.3985624082857],[s:/p/echo,f:0.33],[s:/p/fb,f:0.02],[s:/p/res,f:0.325],[s:/p/vol,f:5.0]],b:True,[s:record],[s:file,s:record]]
+L78 call sc_send_float(s:size,f:0.9599)
+L78 call sc_send_float(s:density,f:0.9599)
+L78 call sc_send_float(s:overlap,f:0.9599)
+L78 call sc_send_float(s:window,f:0.9599)
+L78 call sc_send_int(s:record,i:1)
+L78 call sc_send_float(s:size,f:0.9733)
+L78 call sc_send_float(s:density,f:0.9733)
+L78 call sc_send_float(s:overlap,f:0.9733)
+L78 call sc_send_float(s:window,f:0.9733)
+L78 call sc_send_float(s:size,f:0.9823)
+L78 call sc_send_float(s:density,f:0.9823)
+L78 call sc_send_float(s:overlap,f:0.9823)
+L78 call sc_send_float(s:window,f:0.9823)
+L78 call sc_send_int(s:record,i:0)
+L82 None
+L85 None
+L86 [s:record+file,b:True,[s:file],[[s:file,i:2000718],[s:record,i:2000716]],b:False,[[s:/p/cut,f:2397.3985624082857],[s:/p/echo,f:0.33],[s:/p/fb,f:0.02],[s:/p/res,f:0.325],[s:/p/vol,f:5.0]],b:True,[s:record],[s:file,s:record]]
+L87 b:True
+L88 None
+L89 [[s:speed,i:1,s:cut,None,[f:0.35,f:0.325],None],[s:record:pitch,i:0,None,None,[f:0.33],[i:0,i:4095,i:4095]],[s:record:speed,i:0,None,None,[f:0.01],[i:0,i:4095,i:4095]],[s:record+file:pitch,i:0,None,None,[f:0.54],[i:4095,i:2000,i:0]]]
+L92 None
+L93 [s:record,b:True,[],[[s:record,i:2000716]],b:False,[[s:/p/cut,f:2397.3985624082857],[s:/p/echo,f:0.33],[s:/p/fb,f:0.02],[s:/p/res,f:0.325],[s:/p/vol,f:5.0]],b:True,[s:record],[s:file,s:record]]
+L96 None
+L97 [None,b:True,[],[],b:False,[[s:/p/cut,f:2397.3985624082857],[s:/p/echo,f:0.33],[s:/p/fb,f:0.02],[s:/p/res,f:0.325],[s:/p/vol,f:5.0]],b:True,[s:record],[s:file,s:record]]
+L98 call sc_send_float(s:size,f:0.9883)
+L98 call sc_send_float(s:density,f:0.9883)
+L98 call sc_send_float(s:overlap,f:0.9883)
+L98 call sc_send_float(s:window,f:0.9883)
+L98 call sc_send_int(s:record,i:1)
+L98 call sc_send_int(s:size,i:1)
+L98 call sc_send_int(s:density,i:1)
+L98 call sc_send_int(s:overlap,i:1)
+L98 call sc_send_int(s:window,i:1)
+L98 call sc_send_int(s:filestate,i:1)
+L98 call sc_send_int(s:filestate,i:0)
+L98 call sc_send_int(s:record,i:0)
+L102 None
+L105 None
+L106 [None,b:True,[],[[s:file,i:2000724]],b:True,[[s:/p/cut,f:2397.3985624082857],[s:/p/echo,f:0.33],[s:/p/fb,f:0.02],[s:/p/res,f:0.325],[s:/p/vol,f:5.0]],b:True,[s:record],[s:file,s:record]]
+L107 b:True
+L108 b:False
+L109 b:False
+L110 b:False
+L111 b:True
+L112 None
+L113 None
+L114 None
+L115 E:KeyError
+L116 [[s:speed,i:0,s:cut,s:cut,[f:0.35,f:0.375],None],[s:record:pitch,i:0,None,None,[f:0.33],[i:0,i:4095,i:4095]],[s:record:speed,i:0,None,None,[f:0.01],[i:0,i:4095,i:4095]],[s:record+file:pitch,i:0,None,None,[f:0.54],[i:4095,i:2000,i:0]]]
+L117 call sc_send_int(s:filestate,i:1)
+L120 None
+L123 None
+L124 [None,b:True,[],[],b:False,[[s:/p/cut,f:2397.3985624082857],[s:/p/echo,f:0.33],[s:/p/fb,f:0.02],[s:/p/res,f:0.375],[s:/p/vol,f:5.0]],b:True,[s:record],[s:file,s:record]]
+L125 [[s:speed,i:0,s:cut,s:cut,[f:0.35,f:0.375],None],[s:record:pitch,i:0,None,None,[f:0.33],[i:0,i:4095,i:4095]],[s:record:speed,i:0,None,None,[f:0.01],[i:0,i:4095,i:4095]],[s:record+file:pitch,i:0,None,None,[f:0.54],[i:4095,i:2000,i:0]]]
+L126 call sc_send_int(s:filestate,i:0)
+L126 call sc_send_path_float(s:/p/res,f:0.375)
+L129 None
+L130 file p.pages value,speed,cut,0.35|value,speed,res,0.375|cv,speed,cut|value,record:pitch,echo,0.33|cv,record:pitch,none|value,record:speed,fb,0.01|cv,record:speed,none|value,record+file:pitch,vol,0.54|cv,record+file:pitch,none|
+L134 None
+L136 None
+L137 [s:secondary controls,s:supercollider,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L138 call sc_sender_open()
+L138 call sc_listener_running()
+L138 call sc_sender_open()
+L138 call sc_open_sender()
+L138 call encoder_set_click(i:1,i:0)
+L138 call encoder_set_click(i:0,i:0)
+L138 call sc_sender_open()
+L138 call sc_listener_running()
+L138 call sc_send_float(s:speed_alt,f:23.0)
+L138 call sc_send_float(s:pitch_alt,f:0.0)
+L138 call sc_send_int(s:start_alt,i:0)
+L138 call sc_send_int(s:size_alt,i:0)
+L138 call sc_send_int(s:blend_alt,i:0)
+L138 call sc_send_int(s:density_alt,i:0)
+L138 call sc_send_int(s:overlap_alt,i:0)
+L138 call sc_send_int(s:window_alt,i:0)
+L138 call sc_send_int(s:reset_alt,i:0)
+L138 call sc_send_int(s:freeze_alt,i:0)
+L138 call sc_send_int(s:source_alt,i:0)
+L138 call sc_send_int(s:record_alt,i:0)
+L138 call sc_send_int(s:file_alt,i:0)
+L141 None
+L145 None
+L146 [s:supercollider,s:secondary controls,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L147 call sc_sender_open()
+L147 call sc_listener_running()
+L147 call sc_sender_open()
+L147 call sc_listener_running()
+L147 call sc_sender_open()
+L147 call sc_open_sender()
+L147 call encoder_set_click(i:1,i:1)
+L147 call encoder_set_click(i:0,i:1)
+L149 None
+L150 None
+L151 None
+L154 None
+L157 None
+L158 i:0
+L159 [s:instr selector,s:secondary controls,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L160 call encoder_set_click(i:1,i:0)
+L160 call encoder_set_click(i:0,i:0)
+L160 call sc_sender_open()
+L160 call sc_listener_running()
+L161 None
+L162 [s:supercollider,s:instr selector,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L163 call sc_sender_open()
+L163 call sc_listener_running()
+L163 call sc_sender_open()
+L163 call sc_listener_running()
+L163 call sc_sender_open()
+L163 call sc_open_sender()
+L163 call encoder_set_click(i:1,i:1)
+L163 call encoder_set_click(i:0,i:1)
+L166 None
+L167 call sc_zero_handshake()
+L167 call sc_handshake()
+L169 None
+L170 call sc_zero_handshake()
+L170 call sc_handshake()
+L170 call sc_send_int(s:ready,i:0)
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L170 call sc_handshake()
+L173 None
+L174 call sc_synth_is_up()
+L176 b:False
+L178 b:True
+L181 b:True
+L183 b:True
+L185 None
+L186 call sc_set_synth_down()
+L186 call sc_send_string(s:loadScFile,s:/home/alarm/sc/p.scd)
+L186 call sc_synth_is_up()
+L187 None
+L188 None
+L189 file nebsettings.txt speed,0.625|pitch,0.6|start,0|size,0|blend,0|density,0|overlap,0|window,0|reset,0|freeze,0|source,0|record,0|file,0|speed_alt,23|pitch_alt,0|start_alt,0|size_alt,0|blend_alt,0|density_alt,0|overlap_alt,0|window_alt,0.0|reset_alt,0|freeze_alt,0|source_alt,0|record_alt,0|file_alt,0|
+L190 file p.pages value,speed,cut,0.35|value,speed,res,0.375|cv,speed,cut|value,record:pitch,echo,0.33|cv,record:pitch,none|value,record:speed,fb,0.01|cv,record:speed,none|value,record+file:pitch,vol,0.54|cv,record+file:pitch,none|
+L191 call sc_send_int(s:quit,i:0)
+L191 call sc_sender_open()
+L191 call sc_send_int(s:save,i:1)
+L196 [[s:speed,s:rawencoder,i:0],[s:pitch,s:hybrid,f:1.034],[s:start,s:analog,i:1],[s:size,s:analog,i:1],[s:blend,s:analog,i:1],[s:density,s:analog,i:1],[s:overlap,s:analog,i:1],[s:window,s:analog,i:1],[s:reset,s:digital,i:0],[s:freeze,s:digital,i:0],[s:record,s:digital,i:0],[s:file,s:digital,i:0],[s:source,s:digital,i:0],[s:filestate,s:digital,i:0],[s:sourcegate,s:digital,i:0]]
+L196 [[s:speed_alt,f:23.0],[s:pitch_alt,f:0.0],[s:start_alt,i:0],[s:size_alt,i:0],[s:blend_alt,i:0],[s:density_alt,i:0],[s:overlap_alt,i:0],[s:window_alt,i:0],[s:reset_alt,i:0],[s:freeze_alt,i:0],[s:source_alt,i:0],[s:record_alt,i:0],[s:file_alt,i:0]]
+L197 [None,b:False,[],[],b:False,[],b:False,[],[]]
+L198 []
+L199 b:True
+L200 [s:speed]
+L201 None
+L202 None
+L203 None
+L204 call encoder_set_click(i:1,i:0)
+L204 call encoder_set_click(i:0,i:0)
+L204 call led_clear_sc()
+L204 call encoder_set_raw(i:1,i:1)
+L204 call encoder_set_click(i:1,i:1)
+L204 call encoder_set_click(i:0,i:1)
+L204 call sc_sender_open()
+L204 call sc_sender_open()
+L204 call encoder_set_raw(i:1,i:1)
+L204 call encoder_set_click(i:1,i:1)
+L204 call encoder_set_click(i:0,i:1)
+L204 call sc_send_float(s:pitch,f:1.034)
+L204 call sc_send_int(s:start,i:1)
+L204 call sc_send_int(s:size,i:1)
+L204 call sc_send_int(s:blend,i:1)
+L204 call sc_send_int(s:density,i:1)
+L204 call sc_send_int(s:overlap,i:1)
+L204 call sc_send_int(s:window,i:1)
+L204 call sc_send_int(s:reset,i:0)
+L204 call sc_send_int(s:freeze,i:0)
+L204 call sc_send_int(s:record,i:0)
+L204 call sc_send_int(s:file,i:0)
+L204 call sc_send_int(s:source,i:0)
+L204 call sc_send_int(s:filestate,i:0)
+L204 call sc_send_int(s:sourcegate,i:0)
+L205 None
+L206 call encoder_set_raw(i:1,i:0)
+L206 call encoder_set_click(i:1,i:0)
+L206 call encoder_set_click(i:0,i:0)
+L206 call sc_sender_open()
+L206 call sc_sender_open()
+L206 call sc_sender_open()
+L206 call sc_close_sender()
+L206 call sc_listener_running()
+L211 [[s:speed,s:hybrid,i:1],[s:pitch,s:hybrid,f:1.034],[s:start,s:analog,i:1],[s:size,s:analog,i:1],[s:blend,s:analog,i:1],[s:density,s:analog,i:1],[s:overlap,s:analog,i:1],[s:window,s:analog,i:1],[s:reset,s:digital,i:0],[s:freeze,s:digital,i:0],[s:record,s:digital,i:0],[s:file,s:digital,i:0],[s:source,s:digital,i:0],[s:filestate,s:digital,i:0],[s:sourcegate,s:digital,i:0]]
+L211 [[s:speed_alt,f:23.0],[s:pitch_alt,f:0.0],[s:start_alt,i:0],[s:size_alt,i:0],[s:blend_alt,i:0],[s:density_alt,i:0],[s:overlap_alt,i:0],[s:window_alt,i:0],[s:reset_alt,i:0],[s:freeze_alt,i:0],[s:source_alt,i:0],[s:record_alt,i:0],[s:file_alt,i:0]]
+L212 E:AttributeError
+L213 E:KeyError

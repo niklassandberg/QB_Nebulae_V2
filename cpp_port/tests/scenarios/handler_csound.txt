@@ -1,0 +1,176 @@
+# controlhandler.py: the Csound bank's handler: channels, Csound's channels
+# back (end of loop, record status), secondary controls, the instrument
+# selector, a file-edit freeze writing the record buffer
+cs.new
+mx.reset lib
+mkdir memory
+file.write defaultnebsettings.txt speed,0.625|pitch,0.6|start,0|size,0.5|blend,0|density,0|overlap,0|window,0|reset,0|freeze,0|source,0|record,0|file,0|speed_alt,23|pitch_alt,0|start_alt,0|size_alt,0|blend_alt,0|density_alt,0|overlap_alt,0|window_alt,0.0|reset_alt,0|freeze_alt,0|source_alt,0|record_alt,0|file_alt,0
+adc 1 1 2000
+adc 1 6 4000
+h.new h base 3 a_granularlooper instr None
+calls
+cs.calls
+h.state h
+h.chans h
+h.mode h
+h.isRaw h s:speed
+h.inputClipCount h
+time 2000
+h.updateAll h
+calls
+cs.calls
+h.chans h
+# Csound's end of loop and size status
+cs.chan sizestatus 0
+cs.chan eol 1
+advance 0.002
+h.updateAll h
+cs.chan eol 0
+advance 0.002
+h.updateAll h
+cs.chan sizestatus 1
+advance 0.002
+h.updateAll h
+calls
+# recording ends while source is on: pitch and speed back to normal
+cs.chan recordstatus 1
+advance 0.002
+h.updateAll h
+h.setValue h s:source i:1
+cs.chan recordstatus 0
+advance 0.002
+h.updateAll h
+h.getValue h s:record
+h.getValue h s:pitch
+h.getValue h s:speed
+h.getStaticVal h s:speed
+cs.calls
+h.setValue h s:source i:0
+# file held (filestate), then freeze: edit flag and the buffer written
+sr 128
+advance 0.002
+h.updateAll h
+h.getValue h s:filestate
+sr 144
+cs.chan bufferlength 120
+cs.tables tri 120
+advance 0.002
+h.updateAll h
+h.state h
+h.getEditFunctionFlag h s:freeze
+h.getValue h s:freeze
+cs.calls
+usb.calls
+file.read buffer_cnt.txt
+file.hex memory/neb_buffer_0.wav
+sr 128
+advance 0.002
+h.updateAll h
+sr 129
+advance 0.002
+h.updateAll h
+h.getEditFunctionFlag h s:reset
+h.clearEditFunctionFlag h s:reset
+h.getEditFunctionFlag h s:reset
+h.getEditFunctionFlag h s:file
+sr 0
+advance 0.002
+h.updateAll h
+# an empty buffer: a failure
+sr 128
+advance 0.002
+h.updateAll h
+sr 144
+cs.chan bufferlength 0
+advance 0.002
+h.updateAll h
+h.state h
+sr 0
+advance 0.002
+h.updateAll h
+# source held: secondary controls, alt values saved, input level
+sr 32
+advance 0.002
+h.updateAll h
+advance 0.2
+h.updateAll h
+h.state h
+adc 1 1 4095
+advance 0.002
+h.updateAll h
+adc 1 1 0
+advance 0.002
+h.updateAll h
+h.chans h
+calls
+sr 0
+advance 0.002
+h.updateAll h
+h.state h
+h.chans h
+h.restoreAltToDefault h
+h.chans h
+# the instrument selector
+h.enterInstrSelMode h
+h.setInstrSelOffset h i:2
+h.setInstrSelNumFiles h i:4
+sr 16
+advance 0.002
+h.updateAll h
+h.getInstrSelIdx h
+h.getInstrValue h s:freeze_instr
+sr 0
+advance 0.002
+h.updateAll h
+sr 8
+advance 0.002
+h.updateAll h
+h.getInstrSelIdx h
+h.state h
+h.enterNormalMode h
+h.saveInstrument h
+file.read nebsettings.txt
+h.printAllControls h
+h.printAllControlsVerbose h
+# Csound gone: a record buffer cannot be written
+cs.none
+h.new n base 2 other instr None
+h.writeBufferToAudioFile n
+h.state n
+# a configData block: button modes and the output period
+file.write k.instr nebconfigbegin|reset,latching,falling|freeze,triggered,rising|output_period,50|nebconfigend
+nc.new k k.instr
+cs.new
+h.new k base 2 other instr k
+time 3000
+h.updateAll k
+sr 16
+advance 0.002
+h.updateAll k
+h.getValue k s:freeze
+advance 0.03
+h.updateAll k
+h.getValue k s:freeze
+advance 0.03
+h.updateAll k
+h.getValue k s:freeze
+sr 1
+advance 0.002
+h.updateAll k
+h.getValue k s:reset
+sr 0
+advance 0.002
+h.updateAll k
+h.getValue k s:reset
+cs.calls
+# a mode without an edge, no values at all, an _alt mode (settings.py reads it as a number)
+file.write k3.instr nebconfigbegin|freeze,triggered|nebconfigend
+nc.new k3 k3.instr
+h.new k3 base 2 other instr k3
+file.write k4.instr nebconfigbegin|reset|nebconfigend
+nc.new k4 k4.instr
+h.new k4 base 2 other instr k4
+file.write k5.instr nebconfigbegin|file_alt,triggered,rising|nebconfigend
+nc.new k5 k5.instr
+h.new k5 base 2 other instr k5
+calls

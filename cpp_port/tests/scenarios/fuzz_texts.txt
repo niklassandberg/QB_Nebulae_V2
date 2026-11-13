@@ -1,0 +1,2998 @@
+# random texts through the number parsing of configsettings and the scale curves
+cfg.rate s:2.5+- i:7
+scale f:-0.0 f:1.139 f:0.020367389222 lin
+hyst f:-0.05 f:-0.3409518848 f:0.6283555591756427
+cfg.checked wifi=x509
+cfg.rate s: i:7
+hyst f:0.0 f:0.04569795513 f:0.3333333333333333
+cfg.checked nebio_scan_hz=inf
+cfg.holdoff s:5
+scale f:0.2894704597051 f:0.257 f:-0.4090463 exp
+cfg.holdoff s:.
+cfg.checked power_regulator=5e1_nan
+cfg.rate s:xe00nan i:7
+scale i:0 i:3 f:0.91773 exp
+cfg.rate s: i:7
+cfg.holdoff s:-_
+scale f:0.2236518089 f:0.541267891856 f:-0.1 lin
+cfg.checked nebio_scan_hz=2.51_nan_
+cfg.holdoff s:nan1\_1_05
+scale f:1.399048 f:1.1881023254907 f:-0.162068 exp
+cfg.holdoff s:002.5.
+cfg.checked led_dim=1_0
+cfg.rate s:e i:7
+scale f:1.2557833555454 f:1.41655532 f:0.30138367589722 int
+cfg.checked gate_holdoff_ms=2.5
+cfg.rate s:0090\_00 i:7
+cfg.rate s:1+ i:7
+scale f:1.43768665083 f:1.210993 f:1.3825971 exp
+cfg.checked power_regulator=nan+
+cfg.holdoff s:00
+cfg.checked gate_holdoff_ms=9\_x_inf
+cfg.rate s:inf_nan009 i:7
+cfg.rate s:\_xe i:7
+scale f:0.6747849316 i:3 f:0.369572248 lin
+cfg.holdoff s:+1_nan_
+scale f:0.48736 f:1.02 f:0.5 int
+hyst f:0.4205982552 f:0.9263626 f:-0.177032
+cfg.checked led_dim=00
+scale f:-0.4185804277973795 f:-0.26048622 f:1.45295 exp
+hyst f:0.1289 i:-1 i:-3
+scale f:0.17 i:3 f:0.3680270955 exp
+hyst f:0.791517 f:0.6055928 i:0
+scale f:0.9939 f:-0.3577160762531859 f:0.617363 exp
+hyst f:0.03544090346 f:0.7363686 i:2
+scale f:0.719751490330109 f:1.158245425527161 f:1.4 exp
+cfg.holdoff s:.-_-+
+hyst f:1.3864589895388713 f:2.675 f:-0.474714660678
+cfg.checked gate_holdoff_ms=_
+cfg.holdoff s:01_01_0
+cfg.rate s: i:7
+cfg.rate s: i:7
+cfg.holdoff s:2.5
+cfg.checked led_dim=-
+hyst f:0.6899272 f:1.1971133582 f:-0.10622842354058348
+scale f:0.985207992 i:2 f:0.672935009084627 lin
+cfg.holdoff s:05505
+cfg.checked gate_holdoff_ms=xe9
+hyst f:0.2 f:0.7218425 f:0.125
+scale i:1 f:0.260377380145 f:-0.027371536043 lin
+cfg.rate s:015 i:7
+scale f:0.4 f:-0.4 f:0.727501157234 lin
+scale f:1.0 f:0.37623 f:0.7 exp
+cfg.rate s:x12.5 i:7
+cfg.holdoff s:+2.5inf\_.
+cfg.holdoff s:einfinf_5
+cfg.rate s: i:7
+cfg.holdoff s:500\_
+hyst f:-0.4584054697 f:1.4085396507151853 f:0.336021975
+cfg.holdoff s:_
+cfg.rate s:_1_0 i:7
+cfg.rate s:1_09 i:7
+scale f:0.502674 f:1e-05 f:0.15337 exp
+scale f:-0.412095 f:1.07111546177953 f:-0.0 lin
+scale f:0.5194623416749931 f:0.126795070502 f:0.9516254958771677 lin
+cfg.holdoff s:
+scale f:0.89393389252628 f:0.3333333333333333 i:3 lin
+cfg.rate s:\_2.5_00. i:7
+cfg.rate s:9ex-+ i:7
+scale f:0.5 f:-0.4177441722751 f:1.15655540418 lin
+cfg.holdoff s:00x2.5+0
+cfg.rate s:00ex1 i:7
+cfg.checked nebio_scan_hz=0000
+scale f:1.0 f:0.440052 f:0.6151084096292 int
+scale f:0.2 f:0.125 i:0 lin
+cfg.rate s:.e00xe i:7
+hyst i:1 f:1.10587 f:0.454887681688
+cfg.holdoff s:5__
+cfg.checked nebio_scan_hz=000\_.9
+scale f:1.1463294842 f:-0.24 f:-0.39629023126 lin
+cfg.holdoff s:02.5\_\__
+cfg.holdoff s:92.5
+cfg.holdoff s:nan.0
+hyst f:-0.23 f:1.0754 f:0.7101364839948354
+cfg.rate s:0ee i:7
+cfg.rate s:x i:7
+cfg.checked led_dim=nan0
+scale f:-0.232159224 f:2.675 f:0.706043 int
+cfg.rate s: i:7
+cfg.rate s:+ i:7
+cfg.holdoff s:..e00.
+hyst f:1.2083 f:1.101411462598 f:0.375342
+cfg.holdoff s:0-inf001
+cfg.rate s:x i:7
+cfg.checked nebio_scan_hz=5
+cfg.checked wifi=nan+
+scale f:0.13048472579 f:-0.43506818 f:1.4462049 int
+cfg.rate s:00\_1 i:7
+hyst f:1.4259260492 f:1.499347 f:-0.4
+scale i:2 f:1.16923687488558 f:-0.18453984 int
+scale f:0.60678 f:1.10558775 f:0.18312502236 int
+hyst f:1.2253 f:1.0667114457099476 f:-0.4772
+cfg.holdoff s:+.infe
+cfg.checked wifi=
+cfg.holdoff s:
+hyst i:-3 f:0.1 f:1.003
+cfg.checked nebio_scan_hz=-2.5
+scale f:-0.0308179265186 f:-0.017 f:1.492238352 int
+scale f:0.742 f:-0.4756 f:1.08272904 int
+cfg.rate s:.0 i:7
+cfg.holdoff s:nan\_100
+hyst i:-2 f:0.5 f:0.87121457
+cfg.holdoff s:
+hyst f:1.079665536928769 f:1.1796 f:0.5103869022918097
+scale f:1.11520963 f:0.28646606602513 f:-0.3137335704 int
+cfg.rate s: i:7
+scale f:1.21787 f:0.716498354 f:-0.4914326 lin
+cfg.checked wifi=_002.5
+cfg.holdoff s:e_9nan+
+cfg.holdoff s:_
+hyst f:0.177784140294 f:1.48 f:0.0604321267734
+scale f:-0.3 f:1e-05 f:0.77 lin
+cfg.holdoff s:1_0
+hyst f:-0.182159127382 f:0.35036277 f:2.675
+cfg.rate s:\_9-1 i:7
+cfg.holdoff s:infnan9\_
+cfg.rate s:2.5+00x i:7
+hyst f:0.0 f:-0.4123835097030413 f:1.0
+cfg.checked wifi=1_0x
+hyst f:-0.45251 f:0.1593517155961 f:1.40297373710744
+scale f:0.6 f:0.12 f:0.4599361994302129 int
+scale f:0.0 f:-0.307 f:-0.230429094 lin
+scale f:0.78223 f:-0.157426 f:1.1 int
+hyst f:1.3885457992 f:0.5466867 f:0.3333333333333333
+cfg.checked wifi=1
+cfg.rate s: i:7
+cfg.checked led_dim=
+cfg.holdoff s:0
+scale f:-0.3407162 f:1.220651983697 f:1.219758971369702 int
+cfg.rate s:infinfnannan2.5 i:7
+cfg.checked gate_holdoff_ms=++
+scale f:0.5785325065 f:1.4287527811004 f:0.3215477749 exp
+scale f:0.154980090537 f:0.598184552 f:1.369156689581589 int
+scale f:0.37 f:0.441017 f:0.0610782020856 int
+hyst f:2.675 f:1.0261703 f:1.02158
+scale f:0.1532097890816 f:0.3333333333333333 i:-3 lin
+hyst f:0.184338118433571 f:0.3333333333333333 f:-0.3263987651840168
+cfg.holdoff s:+.
+cfg.holdoff s:
+cfg.rate s:nan i:7
+scale i:-3 f:0.0 f:0.7911972674 lin
+cfg.rate s:\_00005_ i:7
+cfg.rate s: i:7
+cfg.checked gate_holdoff_ms=5+0+.
+hyst i:2 f:0.6645 f:0.62486828
+cfg.rate s:2.5+ i:7
+cfg.rate s:00_ i:7
+hyst f:0.3333333333333333 i:1 f:0.64422
+scale i:-1 i:5 i:-2 exp
+scale f:0.9877725 f:0.1462397758493208 i:-2 int
+cfg.holdoff s:00nan-
+cfg.holdoff s:02.5x
+cfg.rate s:..e2.5 i:7
+hyst f:-0.3 i:2 f:0.3333333333333333
+cfg.holdoff s:xx
+scale f:1.15 f:0.067779 f:-0.28648500823637 lin
+cfg.checked nebio_scan_hz=x\_00nan2.5
+cfg.checked power_regulator=5.x
+hyst f:-0.33351 f:0.3 f:0.95149
+cfg.rate s:_+\_x- i:7
+cfg.rate s: i:7
+scale f:1.464823750755677 f:0.06 f:1.358150622638 int
+cfg.rate s: i:7
+hyst f:1.34965 f:-0.4249744 f:1.02
+scale f:0.5825071 f:0.1418575 f:1.27570558955829 lin
+cfg.holdoff s:e2.5-
+cfg.checked wifi=1_0000
+cfg.rate s:_2.519. i:7
+cfg.rate s:00+x_ i:7
+cfg.rate s:1_0 i:7
+cfg.checked gate_holdoff_ms=0519
+scale f:0.76033230076 f:0.10560935285279 f:0.264991523785 exp
+scale f:0.60020377 f:1.050309123726 f:1.08292103393932 lin
+cfg.checked gate_holdoff_ms=
+cfg.rate s:_1_0-. i:7
+cfg.rate s: i:7
+hyst f:0.9171399521577 f:1e-05 f:0.898
+cfg.rate s:-\_. i:7
+cfg.rate s:001_0e i:7
+cfg.checked led_dim=05
+hyst f:-0.108 i:3 f:1.0
+scale f:0.028109 f:0.9815483385 f:-0.354372587 lin
+cfg.holdoff s:..9
+cfg.rate s:1_02.5 i:7
+cfg.checked led_dim=00-91
+cfg.holdoff s:_1_0e
+hyst f:0.711 f:-0.12912605652136966 i:-2
+cfg.rate s: i:7
+cfg.rate s:+00 i:7
+cfg.checked gate_holdoff_ms=
+scale f:-0.09104846916 f:0.4815785203196583 f:2.675 exp
+hyst f:1.053646 f:0.354463605188 i:-2
+cfg.holdoff s:1_0
+hyst f:0.090514340208 f:1.0 f:0.125
+cfg.rate s: i:7
+cfg.rate s:_0 i:7
+cfg.rate s: i:7
+hyst f:-0.3257382468157743 f:0.556 f:-0.36681172503959
+cfg.checked led_dim=
+cfg.checked gate_holdoff_ms=-
+cfg.holdoff s:_.nan\_\_
+cfg.holdoff s:001_0inf0
+cfg.holdoff s:\_nan12.5-
+cfg.holdoff s:\_51_0-2.5
+hyst f:0.938630556519719 f:0.0278368 f:-0.2
+scale i:-1 i:0 f:0.334 lin
+cfg.checked gate_holdoff_ms=002.5x\_x
+scale i:-1 f:0.08 f:0.08409064373 int
+cfg.checked wifi=\_x2.5
+scale f:-0.47079541136755 f:0.690787 f:0.625019949454 int
+hyst f:-0.497770412 f:-0.2946552499901 f:-0.1467534
+cfg.checked nebio_scan_hz=.5einf
+scale f:0.98900507919 f:-0.1 f:1.38 lin
+hyst i:2 f:0.8 f:1.059
+cfg.holdoff s:-nan_
+cfg.rate s:\_infinf+5 i:7
+hyst f:-0.0 f:0.00779892 f:-0.06895446543728
+scale f:1.0238468651209 f:0.32417551575 f:-0.018 int
+scale f:1.483729 f:1.32406893 f:0.87372791 lin
+scale f:0.941468538 f:1.1710924 f:1.21198714338 int
+cfg.holdoff s:nan
+cfg.holdoff s:x\__02.5
+cfg.checked nebio_scan_hz=
+cfg.rate s:2.51_0inf._ i:7
+scale f:0.245913176343 f:1.324583470965814 f:0.0167836508845727 exp
+cfg.holdoff s:1einf\_
+scale i:1 f:0.30382068 f:0.7064569 lin
+cfg.checked led_dim=nan1_0nan
+hyst f:-0.41092 f:1.1337 f:1.3545782837
+cfg.checked power_regulator=
+cfg.rate s: i:7
+cfg.rate s:x i:7
+scale f:0.20107927522422 f:0.29 f:1.491 lin
+cfg.holdoff s:.inf2.500
+hyst f:1.32646560949076 f:1.0564 f:-0.3156
+cfg.rate s:x\_ i:7
+cfg.checked gate_holdoff_ms=
+cfg.rate s: i:7
+cfg.rate s:5500infinf i:7
+hyst f:1.251641436296978 f:0.6559035 f:1.4889510647
+scale f:0.3333333333333333 i:2 f:0.55761288 int
+cfg.checked power_regulator=\_xnan
+cfg.holdoff s:1
+cfg.rate s:x i:7
+cfg.holdoff s:.x5nan-
+hyst f:-0.052249339 f:0.39578897075 i:0
+cfg.rate s: i:7
+scale f:1.3538871 f:1.4234734 i:-2 int
+scale f:1.288 f:-0.304369 f:-0.4507518895756695 lin
+hyst f:-0.49161411 f:-0.49654 f:-0.02465736015
+cfg.checked power_regulator=01_01
+cfg.rate s:_000 i:7
+scale f:0.6815 f:0.02372157 i:1 int
+cfg.rate s: i:7
+cfg.checked led_dim=2.5e
+scale f:-0.0253107 f:2.675 i:-3 exp
+cfg.checked power_regulator=xnan2.5-
+hyst f:1.0 f:0.1891056 f:1.285
+cfg.holdoff s:1inf2.5_
+cfg.rate s:9.\_2.5 i:7
+scale f:1.242315569443 f:1.087844585 f:-0.441643399 exp
+cfg.rate s:0.0 i:7
+hyst f:1.472688477 i:5 f:0.93476745
+cfg.holdoff s:
+hyst i:5 i:2 f:0.8105108
+cfg.holdoff s:1
+hyst f:-0.0 f:0.69957062327516 f:0.02332
+cfg.holdoff s:\_x001_0\_
+cfg.rate s:5inf i:7
+scale f:0.84112 f:1.19226614968148 f:0.2924492350192 lin
+cfg.rate s:2.5. i:7
+hyst i:0 f:0.5 f:0.828076080794633
+cfg.rate s:0e91 i:7
+cfg.rate s:1_0e00. i:7
+cfg.holdoff s:1_0.0
+scale f:0.865775372 f:-0.354921 f:0.94162 int
+cfg.rate s:e i:7
+cfg.checked led_dim=e0e
+cfg.rate s:9 i:7
+cfg.checked led_dim=.
+cfg.checked power_regulator=2.5002.50inf
+hyst i:-2 i:4 f:1.029486678387212
+cfg.rate s:1_05 i:7
+cfg.rate s:1.1. i:7
+cfg.rate s:1+10 i:7
+cfg.holdoff s:
+scale f:0.03 f:-0.2 f:-0.184729037638 int
+scale i:5 f:0.5560375873146 i:-2 lin
+cfg.holdoff s:_
+scale i:2 f:-0.496030819442649 f:0.52 int
+scale f:0.11943 f:0.021407062582308 f:0.2378907 lin
+scale f:0.55789851 f:0.597677514 f:0.6689836 int
+hyst f:0.8532659201496 f:0.876941342534 f:0.943447138253
+cfg.holdoff s:_00inf
+cfg.rate s:-e. i:7
+hyst f:0.639729875 f:0.344482100547 f:0.067148187
+cfg.checked power_regulator=1_000nan_5
+cfg.holdoff s:\_00_00
+cfg.rate s:+nan2.59 i:7
+cfg.rate s:nan501- i:7
+cfg.holdoff s:-\_
+cfg.rate s:naninf_ i:7
+cfg.rate s: i:7
+scale f:-0.086 f:-0.276 f:0.5497342852061 lin
+cfg.checked power_regulator=05
+cfg.rate s:\_00\_infinf i:7
+scale f:0.20241298262973 f:1.0441 f:0.1 lin
+cfg.holdoff s:
+cfg.checked wifi=
+scale i:-3 f:1.081538466827415 f:0.5 lin
+scale i:1 f:0.54035472108566 f:1.46067928 lin
+cfg.rate s:00_inf1e i:7
+cfg.checked gate_holdoff_ms=91
+cfg.rate s:x i:7
+cfg.checked power_regulator=e.
+scale f:-0.481 f:1.087514 f:-0.31616728055 exp
+cfg.checked power_regulator=
+scale f:1.0222950456749047 f:-0.104240513295 f:1.424613043 exp
+hyst i:-1 i:5 f:-0.380906688037302
+cfg.rate s: i:7
+cfg.holdoff s:1\_2.5
+cfg.checked nebio_scan_hz=x_+
+hyst f:-0.350838695831708 f:1.0176794235 f:-0.281326664
+cfg.rate s: i:7
+cfg.holdoff s:5inf0inf
+scale f:1.0001615 i:1 i:-3 exp
+hyst f:0.9 i:5 f:0.6690961450395
+cfg.checked wifi=-5
+hyst f:-0.1173218018297186 f:1.03 f:0.9939841
+cfg.checked led_dim=infe2.5
+hyst f:0.9052846746100593 i:-3 f:-0.44958
+cfg.holdoff s:1_\_
+cfg.holdoff s:.\_
+hyst f:1.39850480128 i:-3 f:1.4175638934159154
+cfg.checked gate_holdoff_ms=-e
+cfg.rate s:02.5x i:7
+cfg.checked gate_holdoff_ms=-
+cfg.rate s:\_xnan5 i:7
+cfg.rate s:e19 i:7
+cfg.rate s:2.50\_5 i:7
+scale f:1.27647280603 f:-0.15747 i:-2 exp
+cfg.rate s:._1_0+0 i:7
+cfg.holdoff s:1
+cfg.checked gate_holdoff_ms=x1_0
+scale f:0.0 f:-0.137016005175 f:1.061822723503145 exp
+scale f:0.5 f:0.096 f:1.36404293 exp
+cfg.holdoff s:
+cfg.checked wifi=inf-nan
+hyst i:4 i:0 f:-0.4176
+cfg.checked wifi=
+cfg.rate s:_+-nan i:7
+cfg.rate s:2.5.9 i:7
+scale f:0.133894 f:0.69805 f:1.4 int
+cfg.checked nebio_scan_hz=__infx+
+cfg.checked wifi=infinf
+cfg.holdoff s:
+scale f:-0.0487472543870722 f:-0.381366 f:1.0 int
+cfg.holdoff s:inf.-1_0\_
+hyst f:0.36089723301 f:-0.0 f:1.174074795
+cfg.rate s:_ i:7
+cfg.rate s:9nan i:7
+cfg.rate s:2.5 i:7
+cfg.holdoff s:-2.5+
+hyst f:1.107286 f:1.1519353364331 f:1.2
+scale f:0.14605985 i:3 i:5 exp
+scale f:0.305647 f:0.301045836621 f:0.45792 lin
+cfg.checked power_regulator=5
+hyst i:1 f:1.28500259618 f:0.4
+cfg.checked power_regulator=e00infnan
+cfg.checked nebio_scan_hz=2.5-
+cfg.holdoff s:+
+cfg.rate s:nan51 i:7
+cfg.rate s:x5 i:7
+cfg.checked nebio_scan_hz=
+cfg.rate s:9-_5+ i:7
+cfg.checked wifi=.09
+cfg.rate s: i:7
+cfg.holdoff s:nan
+scale f:0.10498 f:1.4024 f:0.64024769494749 exp
+scale i:1 f:1.0 f:1.09 lin
+cfg.rate s:\__11 i:7
+cfg.holdoff s:+-
+cfg.rate s: i:7
+cfg.checked wifi=_1_095
+cfg.holdoff s:+\_nan
+cfg.rate s:nan\_500 i:7
+cfg.rate s: i:7
+scale f:-0.032 f:0.55 f:0.9513721277381801 lin
+cfg.checked power_regulator=19
+cfg.rate s:2.5.inf_ i:7
+cfg.checked nebio_scan_hz=00-
+hyst f:0.5818914052494688 i:1 f:0.5462060632
+cfg.rate s:5001_0- i:7
+cfg.rate s: i:7
+cfg.holdoff s:00-
+cfg.checked nebio_scan_hz=2.5+
+cfg.holdoff s:inf1500+
+cfg.checked wifi=.1_0
+cfg.rate s:5nan_.\_ i:7
+cfg.checked power_regulator=\_95+
+cfg.holdoff s:xinf91_0\_
+cfg.rate s: i:7
+cfg.holdoff s:-9\_
+scale f:2.675 f:1.451 f:0.34912517148625 int
+cfg.holdoff s:52.5e\_
+hyst f:0.0 f:0.125 f:0.0
+cfg.checked wifi=_-x
+cfg.checked power_regulator=x_1_0+5
+cfg.holdoff s:x
+cfg.rate s:1_0\_1_09 i:7
+cfg.checked gate_holdoff_ms=00+5\__
+cfg.rate s: i:7
+cfg.checked power_regulator=
+scale f:0.56 f:0.949 f:-0.27 exp
+cfg.checked led_dim=\_
+cfg.rate s:+inf i:7
+scale f:0.22496029253 f:1.412832 f:0.9626 exp
+scale f:1.1 f:1.38081711995815 i:0 int
+scale f:0.2679173741648226 f:-0.06139 f:2.675 int
+scale f:-0.34659169 f:0.2871850235577269 f:0.451140917346063 int
+cfg.rate s:xnan1_0 i:7
+hyst f:0.74302 f:0.1968493 f:1.0231793
+cfg.rate s:2.5nan\_ i:7
+cfg.rate s:\_1_0inf\_. i:7
+hyst f:0.0 f:0.6883870680708 f:1.046900788590843
+cfg.holdoff s:nan0.
+cfg.holdoff s:9._
+cfg.rate s:x i:7
+cfg.holdoff s:
+scale f:2.675 f:1.191 f:1.01904551343861 lin
+cfg.holdoff s:000000
+scale f:0.7 f:0.92553402 f:-0.468450643992 int
+cfg.rate s:e i:7
+scale i:4 f:0.3333333333333333 i:1 exp
+cfg.checked nebio_scan_hz=0e9
+cfg.rate s:nan. i:7
+scale f:1.4 f:0.9651503413449134 f:1.2 lin
+cfg.holdoff s:
+scale f:0.6682753667 i:-1 i:0 int
+cfg.holdoff s:\_infe0\_
+cfg.rate s:inf0x+\_ i:7
+cfg.rate s: i:7
+cfg.checked nebio_scan_hz=52.59
+cfg.holdoff s:10000
+hyst f:0.175272261 f:1.013983333945 i:5
+scale f:1.430925164837871 i:-2 f:1.36648849178 exp
+cfg.rate s:\__ i:7
+cfg.rate s: i:7
+cfg.rate s:. i:7
+hyst f:-0.1 f:0.3149148 f:0.63459796579077
+scale f:0.799880980415538 f:0.635414 f:0.032 lin
+cfg.rate s:x.-+ i:7
+cfg.holdoff s:nan
+hyst f:0.32377959 f:1.264188 f:1.248
+scale f:-0.3127 i:1 i:0 lin
+cfg.holdoff s:1_0005
+cfg.checked wifi=1\_5
+cfg.holdoff s:_
+scale f:0.018263828 f:1.149 f:0.125 lin
+cfg.checked led_dim=x.1.
+cfg.checked power_regulator=5
+cfg.rate s:9\_-.e i:7
+cfg.checked nebio_scan_hz=nan-00inf
+cfg.rate s:1_0e2.5 i:7
+cfg.holdoff s:inf1_000inf00
+cfg.rate s:00+5 i:7
+hyst f:0.00046155592 f:1.03442961 f:0.4110030976
+scale f:1.10652462938 f:1.4224489987846338 f:2.675 int
+cfg.rate s: i:7
+cfg.checked power_regulator=_
+scale i:5 f:0.4598938455156 f:0.3333333333333333 int
+cfg.checked gate_holdoff_ms=e+00
+hyst f:-0.00736094408054 f:-0.14673426 f:1.23152117
+cfg.checked power_regulator=
+cfg.checked wifi=1_0
+cfg.rate s:91 i:7
+cfg.checked gate_holdoff_ms=x+
+cfg.checked led_dim=00e-.
+hyst f:0.0 f:0.5659 f:-0.439604923
+cfg.rate s:0 i:7
+hyst f:1.0361530897507758 f:0.54667179 i:4
+cfg.rate s:_00\_ i:7
+cfg.checked nebio_scan_hz=inf
+scale f:0.21286 f:0.1365650329 f:1.0 exp
+cfg.rate s:10051_0+ i:7
+cfg.holdoff s:_00+
+scale f:-0.2775 f:1.3955215 f:1.3677412730241 int
+cfg.holdoff s:9+nanx-
+cfg.checked power_regulator=nan_
+hyst i:1 f:0.06 f:1.1389439564344852
+scale f:0.3298834574500824 f:0.220023367 f:-0.0 int
+scale i:0 f:0.69826 f:0.009550811 lin
+cfg.holdoff s:
+cfg.rate s:nannan+_ i:7
+cfg.holdoff s:1_01_0-00.
+scale f:0.427924 f:0.9166 f:0.1108387865 int
+cfg.rate s:._-\_9 i:7
+cfg.holdoff s:1_000
+cfg.rate s:nan1_0 i:7
+cfg.holdoff s:1_0--\_
+hyst f:-0.376245 i:-3 f:-0.48791298
+cfg.checked gate_holdoff_ms=+11_0
+cfg.rate s: i:7
+cfg.checked nebio_scan_hz=e
+hyst f:0.4654449580103517 f:0.28139 f:-0.244092936
+cfg.checked nebio_scan_hz=x19e1
+scale i:5 f:1.391264313095 i:0 lin
+scale f:0.679760664580334 f:1.023084 i:1 lin
+cfg.holdoff s:.1e.9
+cfg.rate s:00000 i:7
+cfg.rate s:nan0+ i:7
+hyst f:0.778846860997036 f:1.007 f:0.499351719985
+cfg.holdoff s:_nan2.559
+cfg.checked led_dim=+1_0inf12.5
+cfg.checked led_dim=x+
+scale i:0 i:-2 f:0.73563658 exp
+cfg.rate s:10__0 i:7
+cfg.rate s:\_x_9 i:7
+cfg.holdoff s:02.5-9\_
+cfg.rate s:5.9 i:7
+hyst f:0.69 i:-3 i:2
+cfg.checked gate_holdoff_ms=1
+scale f:0.646947717888 i:4 f:0.199 exp
+cfg.holdoff s:e2.5
+hyst f:0.0617861009 i:-2 f:1.3859876
+scale f:2.675 f:0.38220494226 i:-3 exp
+cfg.checked nebio_scan_hz=5-51
+hyst f:0.7308688202135554 i:5 f:-0.1366130133661265
+cfg.holdoff s:12.5e1
+cfg.holdoff s:
+cfg.checked gate_holdoff_ms=x0+
+cfg.checked gate_holdoff_ms=0
+cfg.rate s:inf i:7
+cfg.rate s:1_0 i:7
+scale f:-0.094388 i:1 f:1.2181744 lin
+hyst f:0.125 f:-0.112 f:0.247178
+cfg.rate s:e95xx i:7
+scale f:1.37084054641766 i:4 f:1.1165724941513195 lin
+cfg.holdoff s:5
+cfg.holdoff s:9
+cfg.rate s:9-. i:7
+cfg.holdoff s:inf.\__
+cfg.holdoff s:.xinfnan
+scale f:0.770448 f:-0.2463152449756567 f:1.2018930246617 int
+cfg.checked power_regulator=0__1_01_0
+scale f:1.0464375 f:0.24427232405303 f:-0.12522051295816494 lin
+cfg.checked power_regulator=0e-
+cfg.checked nebio_scan_hz=
+hyst i:-1 f:0.08 f:0.125
+cfg.rate s:1_0nan- i:7
+cfg.rate s:naninfenan i:7
+cfg.holdoff s:
+hyst i:4 f:0.5020810360233798 f:-0.12588632979416
+scale f:1.026316243 f:1.3113924918039 f:1.3116995317827 lin
+scale f:0.2026918812 f:0.4032627 f:1.0 int
+hyst f:0.2084662 f:-0.2398 f:-0.392379241823973
+cfg.checked nebio_scan_hz=x+
+cfg.holdoff s:000
+cfg.checked led_dim=
+scale i:-2 f:1.22034 f:0.24346679708827468 lin
+cfg.rate s:1_05 i:7
+cfg.checked nebio_scan_hz=11_0
+hyst f:0.84 f:0.8 f:1.21076
+cfg.rate s: i:7
+hyst f:0.125 i:-1 f:1e-05
+cfg.checked led_dim=nan1nane
+cfg.rate s:\__e9+ i:7
+cfg.holdoff s:x\_e9\_
+cfg.rate s:2.55 i:7
+scale f:0.0 i:-2 f:1.0 int
+cfg.checked nebio_scan_hz=009
+cfg.checked wifi=00.2.5x
+scale f:-0.228584 f:0.3733017 f:0.3781039173 int
+cfg.checked nebio_scan_hz=\_9--
+hyst f:1.3114543886172 f:1.056807988969374 f:1.0650114507838
+cfg.checked gate_holdoff_ms=9x
+cfg.checked gate_holdoff_ms=9inf.9
+hyst f:0.15381130660405473 f:0.03071 f:0.1206427455
+cfg.checked wifi=00_90inf
+cfg.checked wifi=e\_naninfinf
+scale f:0.901515304 f:0.3393540887554 f:0.423493434 int
+cfg.checked wifi=-
+scale f:-0.3470251220735 f:0.38171223417515 f:0.81217138 int
+scale f:-4.229875385708e-05 i:3 f:1.32861 lin
+cfg.checked led_dim=
+cfg.rate s:. i:7
+cfg.checked led_dim=e
+cfg.holdoff s:+_x1_0_
+cfg.checked nebio_scan_hz=x
+cfg.rate s:infe. i:7
+hyst i:5 f:1.1098794387 f:0.5
+scale f:0.90347320187139 f:0.9 i:5 int
+cfg.holdoff s:e0-2.5\_
+cfg.checked nebio_scan_hz=x-52.59
+cfg.holdoff s:0015
+cfg.checked wifi=5
+scale f:0.494814720582 f:0.8 i:0 exp
+hyst f:1.0 f:0.803 f:0.24201524
+cfg.holdoff s:inf1
+cfg.checked led_dim=1
+cfg.checked wifi=inf
+scale i:-2 f:0.7103024435 i:4 lin
+scale f:1.2514886412 f:0.152762 f:-0.0815 int
+cfg.checked wifi=2.52.5
+cfg.holdoff s:nan
+cfg.holdoff s:
+cfg.checked gate_holdoff_ms=00.00e2.5
+cfg.holdoff s:xinf
+scale f:-0.136716386333365 f:-0.0101850621 f:0.27415 int
+hyst f:0.53017014 f:0.0847238250526 f:0.3333333333333333
+cfg.rate s:00+x+ i:7
+cfg.holdoff s:\_.95
+hyst f:-0.253358321646706 f:-0.41733744458857 f:0.35372134
+cfg.rate s:1_0\_nan i:7
+cfg.rate s:+ i:7
+hyst f:1.447623 f:-0.43 f:0.89
+cfg.rate s:\_ i:7
+scale i:-3 f:-0.3927690389 f:1.33313165946177 int
+cfg.checked nebio_scan_hz=x2.59
+cfg.rate s:_inf i:7
+cfg.rate s:infe i:7
+scale f:1.0164 f:0.753187168675772 f:-0.1468302727 int
+hyst i:2 i:-2 f:0.0426803
+cfg.rate s: i:7
+hyst f:-0.0 f:1.201876549396 f:0.4718404
+cfg.holdoff s:
+cfg.rate s:nannan\_ i:7
+cfg.rate s: i:7
+cfg.checked nebio_scan_hz=_15+.
+cfg.holdoff s:..
+cfg.rate s:inf i:7
+cfg.holdoff s:.
+scale f:0.02 f:1.2927921628076 f:-0.4858124847 lin
+cfg.checked gate_holdoff_ms=2.5
+cfg.checked led_dim=1
+cfg.rate s:inf1 i:7
+cfg.rate s: i:7
+scale f:1.3 f:1.088909825219177 f:-0.334872 lin
+hyst f:0.5995513380306 f:1.2 i:-1
+scale f:0.42907657474801 f:-0.214509819 f:0.45165399745789 int
+hyst f:-0.004 f:0.686452 f:-0.317
+scale i:3 f:0.13145459564 f:0.49327628426 int
+cfg.rate s:5052.5 i:7
+hyst f:1.2290849859221482 f:0.5632889717774432 f:1.128046
+scale f:1.15 i:5 i:-1 lin
+cfg.checked power_regulator=9
+scale f:0.489331418918 f:2.675 f:-0.0 lin
+cfg.checked gate_holdoff_ms=
+cfg.holdoff s:011-
+hyst f:0.1776 i:0 f:1.39396992180683
+scale f:0.0 f:-0.42982917639607 f:0.125 lin
+cfg.checked power_regulator=+-_-
+hyst f:0.210527 f:0.525389 f:-0.0
+cfg.checked wifi=
+cfg.rate s:.0 i:7
+cfg.rate s:- i:7
+scale f:0.0153252 f:0.5289720821 f:1.02 int
+hyst f:0.3333333333333333 f:1.195972 f:-0.142932196044
+cfg.holdoff s:e
+cfg.rate s:1nan i:7
+cfg.holdoff s:naninf1_0nannan
+cfg.rate s:1_e_9 i:7
+cfg.holdoff s:059
+cfg.rate s:+00-9 i:7
+hyst f:-0.13946 i:4 f:0.371757642816002
+cfg.rate s:5_1_0e9 i:7
+hyst f:-0.4816204 f:0.4905272156 i:2
+scale f:0.942884086746013 f:0.3333333333333333 i:4 lin
+cfg.holdoff s:_x
+cfg.holdoff s:
+hyst f:-0.18294279 f:0.125 i:0
+cfg.checked led_dim=-
+scale i:2 i:-2 f:0.4446825 exp
+scale f:-0.365140464 f:0.204183201866549 f:-0.19476735 lin
+hyst f:1.3195411714834624 f:0.090281 i:2
+cfg.holdoff s:01
+hyst f:1.4 f:-0.46332822 f:-0.4714
+scale f:1.0 f:0.8318 f:0.6082694424823525 int
+cfg.holdoff s:_nan99
+cfg.checked led_dim=
+hyst f:0.76371691636674 f:-0.2680939983569 f:1.2825718
+cfg.checked gate_holdoff_ms=_inf1_0
+hyst f:-0.146097957913699 f:0.58949 f:0.5
+cfg.holdoff s:-\_2.51+
+scale f:0.154609445319117 f:-0.0804723263227229 f:0.826911151594497 int
+cfg.rate s:1\_0nan1_0 i:7
+cfg.checked power_regulator=1_0nan900.
+cfg.rate s: i:7
+cfg.rate s: i:7
+scale f:0.259328724814897 f:0.6254 f:0.7778840247714 lin
+cfg.holdoff s:_
+cfg.checked nebio_scan_hz=1inf5
+cfg.rate s:nan+5. i:7
+cfg.rate s:nan i:7
+cfg.rate s:infnan.00_ i:7
+cfg.checked wifi=2.5
+cfg.checked power_regulator=001_0e-x
+scale i:3 f:2.675 f:0.3 lin
+hyst f:0.526642672509 f:1.499478376491915 f:-0.496596473
+cfg.checked led_dim=--+xe
+cfg.holdoff s:
+cfg.rate s:xnan-9 i:7
+cfg.checked wifi=naninf
+scale f:-0.0 f:1.10556201066537 f:0.07 lin
+cfg.holdoff s:
+cfg.holdoff s:
+cfg.checked power_regulator=00\_+.
+scale f:0.4363086390641 i:-3 f:1.214798817569223 int
+hyst f:0.68579 f:0.64 i:0
+cfg.rate s:inf i:7
+cfg.checked led_dim=x
+scale f:-0.195 f:1.395923436678824 f:1.1190328417 int
+hyst f:0.125 f:0.703181229246 f:0.712734529309377
+cfg.holdoff s:5\_
+scale f:1.499848507 f:-0.1 f:0.5419837 lin
+cfg.checked nebio_scan_hz=
+scale f:-0.0 f:1.36 f:0.622735583 lin
+hyst f:-0.34 f:-0.45336038 f:0.0
+cfg.checked wifi=\_0e
+hyst f:0.708018247 f:0.36076565868491084 f:1.004226
+scale f:0.50112047543 i:-1 f:0.125 lin
+hyst f:1.0 f:0.5 f:-0.26
+cfg.rate s:1_00 i:7
+cfg.checked wifi=00infee
+cfg.holdoff s:-.0infnan
+scale f:0.125 f:-0.2998991467185 i:-2 lin
+scale f:0.9060393118682093 f:0.5 f:-0.31258047 exp
+cfg.rate s:x i:7
+cfg.holdoff s:
+cfg.checked nebio_scan_hz=050
+hyst f:1.483991907706824 i:1 f:1.0
+scale f:1.33897 f:0.2700464623655 f:-0.227 int
+cfg.rate s:_\_inf1 i:7
+cfg.holdoff s:.5
+scale f:0.5 f:0.85322 i:5 lin
+scale f:0.7462 f:1.472 i:4 exp
+cfg.rate s:2.5xinf i:7
+scale f:1.21668575 i:2 f:1.139152946 lin
+cfg.checked led_dim=
+hyst f:0.7343995681502049 f:-0.286846136766 f:1.0667
+cfg.checked led_dim=00e11
+cfg.holdoff s:xx0e
+cfg.holdoff s:-1\_
+hyst f:0.3452853 f:1.3225 i:-3
+cfg.holdoff s:_1_0
+hyst i:2 f:-0.20574208751271 f:0.0531935586326
+scale f:0.152405 f:1.08355 f:1.022977696149215 lin
+cfg.rate s: i:7
+hyst f:1.02 f:-0.255576756176 f:0.10691643356213243
+cfg.holdoff s:
+scale f:0.4 i:2 f:1.34 int
+cfg.checked power_regulator=e-0
+cfg.checked wifi=2.5-e5-
+scale f:1.26201117926394 f:0.795244916961793 i:-2 int
+cfg.checked led_dim=\_9__
+cfg.rate s:inf0e.9 i:7
+cfg.checked gate_holdoff_ms=5
+cfg.rate s:002.5nannan_ i:7
+cfg.checked gate_holdoff_ms=2.5x_-
+scale f:-0.055115 f:-0.26261081318 f:0.83489947977348 lin
+cfg.holdoff s:_5infe
+scale f:0.53 f:-0.336235 f:-0.088 exp
+cfg.holdoff s:+5nannan\_
+hyst f:0.93589 i:0 f:0.1003134659444
+cfg.checked gate_holdoff_ms=nan--
+hyst f:1.441402755 f:0.837 f:1.22718811928446
+scale i:-1 f:0.15171196171628343 f:0.678853117192 lin
+cfg.rate s:nan5 i:7
+cfg.rate s:.91. i:7
+scale f:0.575 f:1.1132872849 f:0.8974745298 int
+cfg.rate s:_5\_x i:7
+hyst f:1.259497646593277 i:-3 f:0.3333333333333333
+cfg.rate s:0000100 i:7
+cfg.holdoff s:e.1_0
+hyst i:4 f:0.8812870455 f:0.3439807366
+cfg.rate s:\_x i:7
+cfg.rate s: i:7
+hyst f:-0.34210329424 f:-0.472661140952784 f:0.9749474
+scale f:0.43319287065 f:0.00956645160064 f:0.1 int
+cfg.rate s:0000+- i:7
+scale f:1.17230978994 f:0.9261 i:-3 lin
+hyst f:0.9839811085458 f:0.9635951925662 f:0.7896133828810012
+scale f:1.37698089 i:4 f:1.09475506008 exp
+hyst f:1.0 f:1.007812335971031 i:3
+scale f:-0.4580575662153 f:-0.177 f:-0.438057339277 int
+cfg.rate s:. i:7
+cfg.rate s:2.52.5 i:7
+cfg.holdoff s:5x2.5
+cfg.checked wifi=_00+09
+cfg.checked power_regulator=-00
+cfg.rate s:+.5+ i:7
+scale f:1.282800789253 f:0.3333333333333333 f:0.3333333333333333 int
+cfg.rate s:\_2.55x+ i:7
+cfg.checked led_dim=1+
+cfg.rate s: i:7
+hyst f:0.6 f:1.375679077671587 i:5
+cfg.holdoff s:1_000.2.5-
+scale f:1.05 i:0 f:0.86387278183837 int
+cfg.checked gate_holdoff_ms=1_0x.\_
+cfg.rate s: i:7
+hyst i:-1 f:0.24444 f:1.0
+scale i:3 f:1.34923930115 i:4 int
+scale f:1.2 i:3 f:1.35194394767631 int
+cfg.rate s:00 i:7
+hyst f:0.0 i:-1 f:0.39215
+scale f:0.388551177401502 f:0.043380825055269 f:-0.2184700659 int
+hyst f:1.30619554 f:1.25140023777 f:1.11
+cfg.checked power_regulator=xx9-1
+scale i:-3 f:0.125 f:-0.2 int
+cfg.checked led_dim=_..0
+hyst f:0.768 i:-2 i:-1
+cfg.rate s: i:7
+hyst f:0.3333333333333333 f:1.0749934113051 i:2
+scale f:0.45 f:0.87933464367952 f:0.133 lin
+cfg.rate s:9\_1_0 i:7
+cfg.holdoff s:e_9nan
+hyst f:1.4049 f:-0.08951997 f:-0.14126845797776122
+scale f:-0.0 f:1.0519484895714 f:0.5507905331 lin
+hyst f:0.02 f:0.26 f:0.57488068
+scale f:0.679 f:0.7029509001659 i:5 exp
+cfg.checked wifi=9\_xnan
+cfg.checked nebio_scan_hz=
+scale f:1.270014109315554 f:-0.0 i:3 lin
+cfg.holdoff s:xnan.2.5
+scale f:-0.16565 f:0.575268 f:1.1031556182 int
+hyst f:0.125 f:0.427887877 f:0.652024
+cfg.rate s:-+x9- i:7
+scale f:-0.327111071681747 f:0.125 f:1.23 exp
+cfg.checked gate_holdoff_ms=00\_
+cfg.rate s:0 i:7
+cfg.checked gate_holdoff_ms=2.5
+hyst f:0.389968493472 f:0.125 f:1.4933442736343652
+cfg.checked wifi=1nan-5
+hyst f:1.079404034797087 f:0.3333333333333333 f:-0.06
+cfg.holdoff s:infinf
+hyst f:0.40650188986639 f:-0.2 f:1.0151
+cfg.checked power_regulator=-_.
+cfg.rate s: i:7
+scale f:1.1 f:1.04077 f:-0.0 exp
+hyst f:1.28619481 f:0.1112382 f:0.08902
+scale f:1.48633946 f:-0.4985 f:0.6677603332934 exp
+cfg.rate s:00 i:7
+cfg.rate s:.\_ i:7
+scale f:0.509082702628377 f:0.5183829 f:0.03583141 lin
+cfg.checked led_dim=1einf9
+cfg.checked gate_holdoff_ms=+50
+hyst f:0.5631285575000744 i:-2 f:-0.1359014409
+cfg.holdoff s:9
+cfg.checked wifi=002.5\_nan9
+hyst f:0.51749337 f:0.34374988029 f:1.108004300676944
+cfg.holdoff s:
+scale f:0.4088165574953722 i:3 f:1.342134 int
+hyst i:-2 f:0.22245 f:0.2494893053275
+cfg.rate s:. i:7
+hyst i:1 f:-0.45691722492 f:1.314035127511634
+cfg.checked gate_holdoff_ms=e2.5nan0inf
+cfg.checked nebio_scan_hz=1_05
+cfg.holdoff s:+
+cfg.checked led_dim=01_0inf2.5nan
+scale f:-0.397853 f:1.441717961 f:0.0684919141 exp
+cfg.holdoff s:1_02.5e51
+cfg.holdoff s:
+cfg.rate s: i:7
+cfg.rate s: i:7
+cfg.checked led_dim=\_1_0+55
+cfg.rate s:.5 i:7
+hyst f:0.71845879901345 f:0.5746348047634 f:1.4948879
+cfg.holdoff s:+
+hyst f:0.08081176 f:-0.16700712261723694 f:1.4589591730719265
+scale f:0.069365 i:2 f:0.20081194422 lin
+cfg.rate s: i:7
+cfg.rate s:1 i:7
+cfg.holdoff s:x
+hyst f:0.42281024966710534 f:0.02601274 f:1e-05
+cfg.holdoff s:+e
+cfg.rate s:+ i:7
+cfg.rate s:ee++ i:7
+hyst f:-0.311743107655 f:-0.453 f:0.08567
+cfg.checked gate_holdoff_ms=
+cfg.rate s:\_1_0nan00nan i:7
+hyst f:-0.1211997773686 i:1 f:0.0612938082595
+cfg.rate s:naninfx\_ i:7
+cfg.rate s:1_0inf9\_ i:7
+hyst f:0.480596867483 f:0.24117 f:0.743894337
+cfg.checked gate_holdoff_ms=
+cfg.rate s:00000nan i:7
+scale f:0.5 i:-2 f:-0.34933098963741815 exp
+cfg.holdoff s:1_0++inf
+cfg.rate s:01_0 i:7
+cfg.checked wifi=
+scale i:4 f:-0.219076397117938 f:0.2 exp
+cfg.rate s:x.inf i:7
+cfg.rate s:_.nan2.5 i:7
+cfg.holdoff s:9
+cfg.checked wifi=5-009_
+hyst i:-2 f:0.5 i:1
+cfg.holdoff s:-_ex
+cfg.rate s:nan0x99 i:7
+cfg.checked gate_holdoff_ms=1_0inf1_000
+cfg.checked wifi=5
+scale f:1.10884 i:-3 i:4 exp
+hyst i:5 f:-0.224817 i:3
+cfg.holdoff s:e9e
+scale i:-2 f:-0.1481193 f:1.362412538 lin
+scale f:0.8006049 i:1 f:1.21224002699 lin
+hyst f:-0.151142 f:-0.0 i:2
+scale f:0.8589570855319089 f:0.0 f:-0.5 lin
+cfg.holdoff s:._e\_
+scale f:0.56258 f:0.561535744 f:1.3518773176382615 exp
+hyst f:-0.4 i:-2 f:0.904
+cfg.checked nebio_scan_hz=
+cfg.rate s:95 i:7
+cfg.rate s:55\_- i:7
+cfg.checked wifi=e+.9nan
+scale f:1.17515680242568 f:0.245597 i:0 exp
+hyst f:2.675 f:-0.2298723707 f:0.0244
+cfg.rate s:12.5 i:7
+hyst f:1.328879686 f:0.0 f:0.3333333333333333
+cfg.checked led_dim=nan\_1_02.55
+cfg.holdoff s:_\_1_02.5
+cfg.rate s: i:7
+cfg.checked nebio_scan_hz=x9e0.
+cfg.checked power_regulator=\_+51_01_0
+hyst f:-0.06094143013385 i:-3 i:-1
+scale f:0.033336201 f:0.37710263 f:-0.1 exp
+cfg.rate s:00 i:7
+scale i:-1 f:0.638 f:0.864 lin
+cfg.rate s:_1_02.5_2.5 i:7
+scale f:-0.122933564786544 i:2 f:0.1500543629709321 lin
+scale f:0.845652 f:1.45565988 f:1.3971104325771118 int
+cfg.holdoff s:12.59+
+cfg.holdoff s:x2.5_500
+cfg.checked nebio_scan_hz=infnan
+hyst f:0.1150593 i:-1 i:2
+cfg.holdoff s:0991_0
+hyst f:1e-05 f:1.48739573823 f:0.94451301
+scale f:1.4366 f:0.0108760907867 i:3 exp
+scale f:-0.1 f:0.8399 f:-0.022115583778 int
+cfg.checked nebio_scan_hz=2.52.5_
+cfg.rate s:1.- i:7
+cfg.checked led_dim=_12.5inf
+cfg.holdoff s:nane-+
+hyst f:0.0 f:0.2504528 f:-0.48820793891862446
+cfg.holdoff s:
+cfg.holdoff s:900
+cfg.rate s:001inf5 i:7
+cfg.checked led_dim=-5
+cfg.checked nebio_scan_hz=
+hyst f:-0.15872396517252008 f:0.64646 f:0.0
+cfg.checked nebio_scan_hz=
+scale f:0.176 f:-0.051 f:1.26 int
+scale f:1.274701868 f:-0.08011615028381 f:-0.434153869423259 int
+hyst f:1.364007669 f:0.898929 f:0.3333333333333333
+cfg.holdoff s:\_inf.
+cfg.rate s:e-.e i:7
+hyst f:-0.22 f:0.820724582302 f:1.439191658159731
+scale i:-3 f:1.3 f:0.563787 exp
+cfg.holdoff s:-
+scale i:0 f:0.5 i:3 int
+cfg.rate s:900x i:7
+scale f:1.24057248986 i:4 f:0.5 lin
+cfg.holdoff s:-000
+cfg.checked led_dim=
+hyst f:0.790385213796467 f:0.125 f:-0.2528239216
+cfg.holdoff s:
+cfg.rate s:inf i:7
+cfg.checked led_dim=
+cfg.holdoff s:0e-.
+hyst f:0.5 f:-0.03102985811369 f:-0.1776831447
+cfg.checked power_regulator=5inf2.5e
+cfg.checked led_dim=15\_2.5x
+cfg.checked gate_holdoff_ms=5\_
+cfg.rate s:9- i:7
+cfg.holdoff s:009nannan
+cfg.rate s:\_nan i:7
+cfg.rate s:nanxnan i:7
+cfg.holdoff s:inf1_0
+scale f:1e-05 f:1.36452557 f:1.3 exp
+scale f:0.709 f:0.62835004808025 f:-0.0430803701877 exp
+cfg.holdoff s:nan9+
+hyst f:-0.084484 f:-0.34327219 i:0
+cfg.rate s: i:7
+cfg.rate s:- i:7
+cfg.rate s:_ i:7
+scale f:1.230922439 f:0.0 f:1.44698915372718 lin
+cfg.rate s:_\_ i:7
+cfg.rate s:1_0x_ i:7
+cfg.checked gate_holdoff_ms=0
+cfg.rate s: i:7
+cfg.checked nebio_scan_hz=e2.5-xx
+cfg.holdoff s:11-1_0
+cfg.holdoff s:e1_099nan
+cfg.checked gate_holdoff_ms=9
+cfg.rate s:1+inf-nan i:7
+hyst f:0.716863415390466 f:0.125 f:1.35003446104
+scale f:0.19772278699598 f:-0.32 f:0.3404151372116 int
+hyst i:-3 f:-0.488 i:-2
+cfg.checked nebio_scan_hz=9x\_2.5-
+cfg.holdoff s:e1_000
+cfg.checked led_dim=_
+cfg.checked power_regulator=1_01_0
+cfg.holdoff s:02.5+001
+hyst f:2.675 f:0.2152 f:-0.0255469
+cfg.holdoff s:
+cfg.checked wifi=00_
+scale i:-3 f:0.12500923117 f:0.22491 int
+hyst f:1.0335012 i:3 f:0.5
+cfg.holdoff s:nan00inf
+cfg.rate s:.009 i:7
+scale f:-0.393 f:1.175 f:0.125 exp
+cfg.rate s:infinf1_01_0x i:7
+cfg.rate s:5100 i:7
+scale f:0.17227298916 f:0.0 f:0.6687832103256293 lin
+scale f:-0.25119456293 f:0.135805780378 f:-0.189105 int
+scale f:0.40064 i:1 f:0.1193986196634 exp
+cfg.rate s:1_0nan9 i:7
+cfg.rate s:+e_\_ i:7
+hyst f:0.4708045 i:-2 f:0.476480480563415
+scale f:-0.0 f:0.0783800819 f:-0.2 exp
+cfg.holdoff s:+1_0-2.5
+hyst f:0.3509504 i:0 f:1.4
+cfg.holdoff s:x+inf1inf
+scale i:1 f:0.446630333977112 f:1.0 int
+cfg.holdoff s:
+cfg.holdoff s:2.5
+scale f:0.90453207 i:-3 f:0.02213790304367 exp
+scale f:0.0039812 f:1.46803083051 f:-0.2 lin
+hyst f:1.0 f:0.5 f:1.1288
+cfg.rate s:-11_0\_nan i:7
+cfg.checked wifi=\_\_1_
+cfg.checked power_regulator=511_0.1
+cfg.holdoff s:
+cfg.rate s:1_0 i:7
+cfg.checked gate_holdoff_ms=0-inf
+scale f:0.4 f:1.0 i:-2 lin
+cfg.holdoff s:1_0
+scale f:0.02247732825147 f:0.94189136 i:3 int
+hyst f:1.25093 f:1.30229 f:-0.491
+cfg.rate s:9infinf- i:7
+cfg.rate s:+2.5.x i:7
+scale f:0.04 f:0.4694365 f:0.0505514221354821 int
+cfg.checked led_dim=
+hyst f:0.7407262199817832 f:-0.0 f:0.31928252
+cfg.rate s:e.0xe i:7
+cfg.checked led_dim=2.502.500
+cfg.rate s:_5-e1 i:7
+scale f:-0.095 i:-3 f:0.7981402 int
+cfg.rate s:.91_0. i:7
+hyst f:0.8 f:0.5672 f:-0.0
+cfg.checked nebio_scan_hz=-001_0x
+cfg.checked power_regulator=900
+cfg.checked led_dim=-nan._
+scale f:0.32148967368188 f:1.02707 f:0.81987 lin
+scale f:0.01178770752 f:-0.337026881426693 f:-0.4221461321404238 int
+scale i:-3 f:1.39463396671515 f:2.675 int
+cfg.holdoff s:ex-0inf
+scale f:0.43298 f:0.2 f:1.2766 exp
+cfg.rate s:+00 i:7
+cfg.holdoff s:1_0
+cfg.checked power_regulator=
+cfg.holdoff s:_e\_
+cfg.holdoff s:+9
+hyst f:0.50511125227834 i:-3 i:4
+cfg.checked power_regulator=\__1_0
+cfg.checked gate_holdoff_ms=00
+hyst f:-0.07222372116448517 f:1.36590637 i:4
+cfg.checked nebio_scan_hz=+1
+hyst f:0.302655 f:-0.10521 f:0.7
+cfg.checked nebio_scan_hz=_.5e5
+hyst f:0.125 f:0.6847350311 f:1.334216611825746
+cfg.checked wifi=_1_0
+cfg.checked gate_holdoff_ms=+__
+cfg.holdoff s:
+cfg.holdoff s:2.5051
+scale f:0.8399641987168 f:-0.3631223669425854 i:2 int
+scale i:-1 f:0.3333333333333333 i:-2 lin
+scale f:-0.06893419 f:0.265138842157 f:1.1 exp
+scale f:-0.0 i:-2 f:0.74 int
+cfg.checked led_dim=
+cfg.checked power_regulator=.
+cfg.checked power_regulator=15-
+cfg.holdoff s:
+cfg.checked wifi=-+\_
+hyst f:0.102 f:0.908400287783964 i:0
+cfg.rate s:x.1infe i:7
+scale i:-1 f:-0.273555097 i:-2 int
+hyst f:0.05988594394 f:1.036 f:0.9394132797575925
+cfg.holdoff s:0\_5+.
+hyst f:-0.160157699632801 f:0.054992 i:-3
+cfg.rate s:5__1 i:7
+scale f:0.667 f:-0.18760748940785565 f:-0.257604 exp
+scale i:2 f:0.5152 f:1.48 exp
+cfg.holdoff s:naninf
+cfg.rate s:nan..e i:7
+cfg.checked power_regulator=
+scale f:0.19627 f:-0.0595557 f:1.3149 int
+cfg.rate s:00 i:7
+cfg.checked gate_holdoff_ms=9
+scale f:1.1489163 f:-0.1778125 f:0.7 int
+hyst f:0.7 i:-1 f:-0.05931934183
+cfg.holdoff s:\_5e5-
+hyst i:2 f:-0.3884328067524 i:-3
+cfg.holdoff s:._nan
+cfg.checked gate_holdoff_ms=05
+hyst f:0.5669345213765584 f:0.8 f:0.4052277564
+cfg.rate s:5nan00\_1_0 i:7
+cfg.checked gate_holdoff_ms=
+cfg.rate s:000 i:7
+cfg.checked nebio_scan_hz=e.
+cfg.rate s:0inf5 i:7
+scale i:5 f:0.889788759 f:0.5 lin
+cfg.rate s:-1. i:7
+cfg.holdoff s:5+1
+cfg.checked wifi=00\_-nan9
+hyst f:1.4974 f:0.4807392 f:-0.1419
+scale f:0.0 i:3 f:1.4514278548087616 lin
+hyst f:-0.28247446691 i:2 f:1.06770524
+cfg.rate s:1x2.51_0 i:7
+cfg.holdoff s:
+cfg.rate s:500+ i:7
+hyst f:1.488289 f:0.843 f:-0.48564014
+cfg.checked gate_holdoff_ms=005
+cfg.rate s:x\_nan__ i:7
+cfg.rate s: i:7
+scale f:-0.048736 f:1.099681656575019 f:1.06988737 exp
+cfg.holdoff s:00nan1_0
+cfg.holdoff s:2.51\__e
+cfg.checked nebio_scan_hz=0nan
+cfg.checked gate_holdoff_ms=-1_01e0
+hyst f:1.1162344973111669 f:1.460330391168523 f:-0.3894166455495
+cfg.checked wifi=0
+cfg.rate s:5 i:7
+hyst f:0.23 f:0.9942344792029 f:1.3208647623588785
+scale f:1.3169168550243116 f:1.3 f:0.718015 lin
+scale f:-0.25 f:0.6481090276 f:0.9341381160231361 int
+cfg.rate s:-+9 i:7
+cfg.rate s: i:7
+cfg.checked gate_holdoff_ms=2.59nan
+cfg.rate s:infnan1e1 i:7
+cfg.rate s: i:7
+cfg.holdoff s:\_x11\_
+cfg.holdoff s:_.9inf
+cfg.holdoff s:
+cfg.rate s:0e1_0+ i:7
+hyst f:-0.1769359751 f:-0.333620117 f:-0.45168000863461
+scale f:-0.29545642368617 f:-0.3278729953676973 f:0.738882 lin
+hyst i:3 f:-0.05897 i:0
+cfg.holdoff s:00\_9
+hyst f:-0.4906 f:0.8549403 f:-0.4
+cfg.rate s:- i:7
+cfg.checked power_regulator=_
+hyst f:-0.34438 f:1.4 f:0.2
+scale f:1.0 f:1.25971 f:0.70623729957435 lin
+cfg.checked led_dim=12.5e
+cfg.rate s:\_\_ i:7
+cfg.holdoff s:
+cfg.rate s:nan\_- i:7
+hyst f:0.8652902261027526 f:-0.401482308118063 f:1.136194176
+cfg.checked gate_holdoff_ms=nan5
+cfg.checked wifi=ee
+scale f:0.1993 f:-0.0 f:1.26315834 lin
+cfg.rate s: i:7
+cfg.holdoff s:0.005
+hyst f:1.2534 f:-0.30209 f:0.857717765
+cfg.holdoff s:2.59x
+scale f:0.13799629670981495 f:0.3333333333333333 f:-0.0161 int
+cfg.holdoff s:002.5e
+cfg.checked wifi=2.51_052.50
+hyst f:0.4752895988 f:-0.0014731460308317 f:0.7806
+scale f:-0.09476855 f:0.38644 f:1.447002994166 exp
+cfg.checked nebio_scan_hz=
+cfg.checked gate_holdoff_ms=.5-\_e
+cfg.holdoff s:55-
+cfg.checked led_dim=\_.e5
+hyst f:0.0 f:0.49088 i:4
+cfg.checked power_regulator=
+scale f:-0.1570084366123 i:1 f:-0.0871431725441152 int
+cfg.holdoff s:9.
+cfg.checked wifi=00100nan-
+scale f:1.182341 f:0.94503 f:0.492891825 exp
+cfg.checked power_regulator=
+scale f:0.747 f:1.059191034342124 f:0.65053058999934 int
+cfg.checked gate_holdoff_ms=-
+cfg.holdoff s:0nan\_
+cfg.checked power_regulator=
+cfg.rate s:2.52.5x i:7
+hyst f:0.5 f:1.367517296353 i:1
+scale f:0.3333333333333333 f:0.3608 f:1.35537 lin
+cfg.holdoff s:.inf
+hyst f:0.660198063962 f:0.194115381469547 f:0.3333333333333333
+cfg.rate s:1\_- i:7
+scale i:2 i:0 f:-0.2628851893564 exp
+scale f:0.5280554949318317 f:1.473726011756445 f:0.68 lin
+cfg.holdoff s:
+scale f:0.896818984649141 i:-2 f:0.00878 int
+cfg.rate s:01nan+ i:7
+hyst f:1.1791974319533 i:0 f:0.9732940925885
+scale f:0.78694 f:-0.0 f:0.3333333333333333 lin
+hyst f:0.3333333333333333 f:0.7926 f:0.7662658250724
+scale f:-0.4 f:-0.133358258234 f:1.1729505783 exp
+hyst f:0.81587605557 f:1e-05 i:-3
+cfg.rate s:1 i:7
+scale f:0.6 f:-0.167012727 f:0.212 lin
+hyst f:0.3333333333333333 f:1.0991226115480328 f:0.2698
+cfg.rate s:5- i:7
+hyst f:1.0304166173 f:1.0 f:0.182651
+cfg.holdoff s:
+hyst f:1e-05 f:-0.131818413556 f:0.0
+cfg.rate s:100infxinf i:7
+cfg.rate s:e--nan0 i:7
+cfg.rate s:x9nan i:7
+hyst f:-0.011611700252 f:0.29375451 f:-0.3346
+cfg.holdoff s:x+-1x
+scale f:0.2234577107794442 f:-0.27446793499757 i:2 exp
+cfg.checked nebio_scan_hz=
+hyst f:0.46298742 f:-0.22377 f:1.0944
+cfg.holdoff s:x.1_01e
+cfg.holdoff s:.+\_9
+cfg.rate s:e i:7
+cfg.holdoff s:
+cfg.checked wifi=inf-infx
+cfg.holdoff s:1_0.
+hyst f:1.015461052 f:1.2474496 f:-0.40020212
+scale f:1.0287286048173 f:-0.01211288019213441 f:-0.16147996314482 lin
+cfg.holdoff s:1_0
+scale i:3 i:1 f:1.25102 int
+scale f:0.743 f:0.4389322955197 f:-0.3432105114782 int
+hyst f:-0.1400425692483325 f:-0.1273782157141499 f:0.0282409
+cfg.rate s:.00 i:7
+scale f:-0.385359695 f:0.36633377840742 f:0.85216188574039 int
+hyst f:0.566534916 f:-0.253259605266152 f:0.3333333333333333
+cfg.holdoff s:1inf5
+cfg.holdoff s:
+hyst f:0.722379537152976 f:1e-05 f:1.2477411537765566
+cfg.holdoff s:91inf1_0
+hyst f:0.52231 f:-0.001638939344033 f:-0.4529954354654
+cfg.holdoff s:
+cfg.rate s:\_1_0 i:7
+cfg.checked nebio_scan_hz=
+cfg.holdoff s:x2.5\_.
+cfg.checked gate_holdoff_ms=e_9
+cfg.rate s: i:7
+cfg.rate s:9inf15 i:7
+cfg.checked power_regulator=_1_0
+cfg.holdoff s:2.550_1
+cfg.holdoff s:5.+\_nan
+cfg.holdoff s:
+cfg.checked gate_holdoff_ms=nane00\_
+cfg.rate s:+\__ i:7
+scale f:0.6707318 f:1.247606627267 f:-0.197 lin
+hyst f:1.2667339081 f:0.68968232246 f:-0.17048893
+cfg.checked led_dim=.inf00
+cfg.holdoff s:+_
+cfg.checked nebio_scan_hz=2.51
+cfg.rate s:00inf i:7
+cfg.holdoff s:1_0nan
+cfg.rate s:9+x_ i:7
+cfg.rate s: i:7
+scale f:0.574696891 f:1.34 f:0.489503 lin
+cfg.rate s:5+_00 i:7
+hyst f:-0.07955194 f:0.6 f:1.45753341268
+cfg.holdoff s:-91\_+
+scale f:0.3543 f:1.04 f:0.661955 exp
+hyst f:1.474334 f:-0.041114942 f:-0.39683506
+cfg.holdoff s:+1_0
+scale i:4 f:0.0302217 f:0.4125821490126511 lin
+cfg.checked led_dim=19x
+scale f:2.675 f:-0.03052 f:0.35203562421 lin
+hyst f:0.5429276909 i:5 f:1.2508588169
+cfg.holdoff s:_e900
+cfg.rate s:enan i:7
+hyst f:0.7535559676 f:-0.4360908 f:-0.07
+scale f:0.212946583756 f:1.3466567 f:-0.02166400191 lin
+cfg.rate s:+00-.nan i:7
+cfg.holdoff s:11_0
+cfg.rate s:nan2.5inf1_01 i:7
+cfg.rate s:02.5.00 i:7
+scale f:0.5 f:-0.01396673904419687 f:0.734954518 lin
+hyst f:0.98522349073225 f:0.91786667057621 f:0.125
+cfg.rate s:+inf i:7
+cfg.holdoff s:_2.5\_-
+scale f:0.97 f:0.275994648 f:0.487 int
+scale f:0.46233034 i:5 f:0.62805 exp
+hyst f:0.32167606 f:0.0 f:0.99
+cfg.holdoff s:9.1_0x-
+cfg.rate s: i:7
+scale f:-0.36 f:0.88 f:0.247117930487183 exp
+scale f:-0.2992857114 f:0.699714 f:1.4619935 exp
+hyst f:1.492027284222 f:0.0 i:1
+cfg.holdoff s:.
+cfg.holdoff s:1
+cfg.holdoff s:0\_5_
+cfg.holdoff s:1e_1_0
+cfg.holdoff s:9+
+scale f:0.0 i:3 i:5 int
+scale f:-0.49516073857 f:0.1056869441 f:1.0 lin
+scale f:-0.030948 f:0.647256543 f:1.251267 exp
+cfg.holdoff s:_-
+cfg.checked gate_holdoff_ms=
+scale f:0.57041 f:0.96037672743 i:5 int
+cfg.holdoff s:1
+hyst f:-0.27399 f:1.3037515 f:0.50513434207014
+cfg.holdoff s:
+cfg.checked gate_holdoff_ms=2.50-+
+cfg.rate s:x i:7
+cfg.holdoff s:-\_
+cfg.holdoff s:e+9
+cfg.checked gate_holdoff_ms=inf00
+hyst f:0.0906040867924 f:1.353541358475479 f:1.364958
+cfg.holdoff s:1_0+5nan
+cfg.rate s:1009\_+ i:7
+hyst f:0.0746091 f:-0.0 i:-3
+cfg.rate s:_. i:7
+scale f:-0.04199 f:1.1801513 f:0.0742535136 exp
+cfg.holdoff s:
+scale i:0 f:1.0 f:0.5771333658661 int
+cfg.holdoff s:0e1_5
+scale f:1.1552764401859779 f:-0.31441 i:0 exp
+scale i:-2 f:0.3333333333333333 i:1 exp
+cfg.rate s:enaninf00 i:7
+hyst f:0.572835255 f:0.8671827896013056 f:1.2863134
+cfg.holdoff s:9\_+0nan
+cfg.rate s:infinf00inf- i:7
+hyst f:-0.1 f:1.0096 f:0.6815717583
+cfg.holdoff s:1_0
+cfg.rate s:00nan.5 i:7
+cfg.checked power_regulator=nan00-e00
+cfg.rate s:2.52.5x\_ i:7
+cfg.checked gate_holdoff_ms=-
+cfg.checked nebio_scan_hz=_900
+cfg.rate s: i:7
+hyst f:0.0 f:0.41568 f:0.584
+scale f:-0.174366 f:0.5552647066 i:-2 int
+hyst i:1 f:0.02871955 f:0.30004317
+cfg.rate s:1_0nan+ i:7
+cfg.holdoff s:
+cfg.checked gate_holdoff_ms=
+cfg.rate s: i:7
+scale f:0.41809846 f:0.17 f:0.4668837 exp
+hyst f:1.01712723338 f:-0.0377 f:-0.09
+cfg.holdoff s:-_ee.
+cfg.checked power_regulator=
+cfg.holdoff s:5
+cfg.holdoff s:_1\_00
+hyst f:1.4682713113845 f:1.19223296 f:0.76577607
+scale f:0.6192669908 i:-3 f:-0.2527889129817873 int
+hyst f:0.125 f:1.28576344311303 f:0.57
+cfg.holdoff s:00e2.59.
+cfg.rate s:5\_ i:7
+hyst f:1.4746109512450225 f:-0.4 i:3
+cfg.rate s:2.52.59_1 i:7
+hyst f:0.0 f:0.57799817902 f:1.14
+cfg.holdoff s:1_0.
+cfg.checked power_regulator=.00.nan
+cfg.holdoff s:
+cfg.rate s:001_05- i:7
+cfg.rate s:infnan\_- i:7
+hyst f:0.03467342146076913 f:0.360794 f:0.9709199434048659
+cfg.holdoff s:
+cfg.rate s:_+ i:7
+cfg.rate s:_0092.5 i:7
+hyst f:-0.17199187824951 f:-0.0196158439 f:1.052
+cfg.checked wifi=
+cfg.rate s:+inf2.5 i:7
+cfg.rate s:12.5+900 i:7
+cfg.rate s: i:7
+cfg.holdoff s:inf\_0
+cfg.rate s:1_02.5. i:7
+cfg.checked wifi=
+cfg.checked wifi=1_0e\_nan5
+cfg.rate s:. i:7
+hyst f:0.2137246987 f:0.88 i:-1
+cfg.rate s: i:7
+scale f:-0.3234547987322 f:0.2762196940225 f:1.4 lin
+scale f:1.398938 f:0.2 f:1.0 lin
+cfg.checked nebio_scan_hz=x00.
+cfg.checked power_regulator=
+scale f:0.73 f:-0.31 f:1e-05 int
+cfg.rate s: i:7
+cfg.checked power_regulator=infe\_9
+cfg.rate s: i:7
+cfg.checked wifi=
+scale i:-2 f:0.569 f:1.05143321022 lin
+cfg.rate s:x\_inf.nan i:7
+cfg.checked power_regulator=inf2.5.x.
+cfg.rate s:2.5inf i:7
+hyst f:0.8 f:0.0 f:0.54923
+cfg.holdoff s:1_inf
+cfg.checked power_regulator=inf
+hyst f:0.0 i:-2 f:0.53604558768
+scale f:-0.17899 f:0.055 f:-0.4 exp
+cfg.checked led_dim=1_01+5
+cfg.rate s:nan5- i:7
+cfg.rate s:_._500 i:7
+hyst f:-0.0 f:0.60660162508 i:2
+cfg.holdoff s:9inf1-9
+hyst f:0.3074009387 f:-0.1700400543 f:-0.2737061408
+cfg.holdoff s:9
+cfg.checked power_regulator=xx500inf
+cfg.checked led_dim=2.5\_1e
+cfg.checked led_dim=-
+cfg.rate s:2.59+ i:7
+cfg.checked nebio_scan_hz=x
+cfg.rate s:.x9.9 i:7
+cfg.checked wifi=.2.5
+cfg.checked led_dim=e\__e
+scale f:1.24414 i:-2 f:0.3822228 exp
+scale f:0.0 i:-1 f:0.3333333333333333 exp
+cfg.rate s: i:7
+scale f:1e-05 i:-2 i:2 exp
+scale f:0.9510928755319352 f:0.844988467389 f:1.29622983579 int
+cfg.holdoff s:
+hyst f:0.7112258 f:-0.062252745308 f:-0.0
+scale i:0 f:0.3 f:0.64941746446576 exp
+cfg.checked nebio_scan_hz=.9
+hyst i:1 f:0.092 f:1.04346083242
+cfg.holdoff s:x
+scale f:0.56967428321 f:0.0834841 f:-0.17 lin
+cfg.checked nebio_scan_hz=inf2.5
+cfg.holdoff s:-5
+hyst f:1.4426851 f:0.46085108 i:-3
+cfg.checked gate_holdoff_ms=.1nan
+cfg.checked power_regulator=1_0.inf52.5
+cfg.rate s:+nan+ i:7
+cfg.rate s: i:7
+cfg.checked power_regulator=1_0
+cfg.rate s:500 i:7
+scale f:0.624 f:0.650945994 f:0.5 int
+cfg.checked led_dim=1_0xx00
+cfg.holdoff s:-.x5\_
+cfg.checked wifi=-00
+cfg.holdoff s:2.501
+hyst f:-0.45622203024 f:1.0 f:0.5666864341119224
+scale f:0.7 f:0.607860812 f:1.24785 int
+cfg.checked gate_holdoff_ms=1-9
+cfg.holdoff s:1
+cfg.rate s:-5 i:7
+cfg.holdoff s:9\_-.
+scale f:0.5 f:2.675 f:0.53263 lin
+cfg.rate s:5.02.5\_ i:7
+cfg.rate s: i:7
+scale f:0.045 f:1.20838 f:0.69868570956214 lin
+cfg.rate s:inf0 i:7
+scale f:0.8083 f:0.3333333333333333 f:0.7891692 exp
+scale f:1.28 f:-0.274813087594 f:0.0 lin
+scale f:0.75764718140996 f:0.1804876534205238 f:0.16756826 lin
+cfg.holdoff s:.\_x
+cfg.checked gate_holdoff_ms=
+hyst f:0.3249430456049 f:1e-05 f:0.5299850858637476
+cfg.rate s:nan i:7
+cfg.rate s:0e1 i:7
+cfg.holdoff s:_
+hyst f:1.33 i:5 f:1.0
+cfg.holdoff s:nan\_x_x
+cfg.holdoff s:nan11nan.
+cfg.rate s: i:7
+cfg.holdoff s:e
+scale f:0.239219 f:0.3333333333333333 f:0.6388151051355 int
+scale f:-0.061260882083 f:-0.159234739496472 f:0.54928475 exp
+cfg.holdoff s:\_9
+cfg.rate s:nan2.5 i:7
+scale f:0.5271586411 f:1.0 i:5 exp
+scale f:1.1782329179 f:0.299526780802213 f:1.14411789123 lin
+cfg.rate s:1_0 i:7
+cfg.rate s:00 i:7
+cfg.holdoff s:50
+cfg.holdoff s:nan+1.
+cfg.holdoff s:00
+scale i:-3 f:0.5 f:1.4 lin
+hyst f:0.0529 f:0.246 f:-0.0
+cfg.rate s:12.5.. i:7
+cfg.checked wifi=1nan
+hyst f:0.5328523876339 f:0.6568114967345398 i:4
+cfg.checked nebio_scan_hz=1000
+cfg.checked gate_holdoff_ms=100
+scale f:0.096572652 f:0.25 f:0.587968851 exp
+cfg.holdoff s:e
+cfg.rate s:-1_0inf0_ i:7
+hyst f:-0.31259721185 i:1 f:0.5
+cfg.holdoff s:nan\__
+hyst f:1.478939836597 f:0.810284 f:1.0
+cfg.holdoff s:000.00
+cfg.holdoff s:---x
+scale f:0.125 f:0.0 f:0.0992601172559 int
+cfg.checked power_regulator=
+cfg.rate s:09-\_5 i:7
+cfg.holdoff s:naninf
+cfg.checked led_dim=1inf.5\_
+scale f:0.4342773301350198 f:-0.19843159025 f:1.4 exp
+scale f:-0.06372175373107 f:0.435741218212938 f:0.1944569246491556 lin
+cfg.rate s:5inf5_ i:7
+scale i:5 f:0.19257925310469703 f:0.79758259898 exp
+cfg.holdoff s:__00e
+cfg.holdoff s:\_00
+cfg.rate s:-9 i:7
+cfg.rate s:\_ i:7
+cfg.holdoff s:+
+cfg.rate s:1.inf i:7
+hyst f:0.3333333333333333 f:1.07386488580718 f:1.2809426193593
+cfg.holdoff s:1_059
+cfg.checked led_dim=x1_0.x
+cfg.checked gate_holdoff_ms=1_02.5xe
+cfg.checked gate_holdoff_ms=
+cfg.rate s:1infinf00 i:7
+cfg.rate s:5ex2.5e i:7
+cfg.rate s:100\_ i:7
+scale f:0.6855532844479 f:-0.4 f:0.125 int
+cfg.checked nebio_scan_hz=
+cfg.checked led_dim=
+hyst f:0.6879 f:1.1901692 f:0.95
+scale i:5 i:0 f:1.393 lin
+scale f:0.119 f:0.5 f:0.04202 exp
+hyst f:0.5 f:0.7116 f:-0.21337313
+cfg.checked wifi=9
+cfg.rate s:2.5x9 i:7
+cfg.rate s:x1_0 i:7
+hyst i:2 f:0.3871 f:-0.34100836264125434
+scale f:1.2242 f:0.3 f:-0.32645 int
+cfg.holdoff s:5nannan
+cfg.checked power_regulator=infinf
+cfg.holdoff s:
+cfg.rate s:inf1\_\_ i:7
+scale i:-1 f:1.2291698 f:1.4345432 lin
+scale f:-0.232657 f:-0.23036677588015 f:-0.213308237532 exp
+scale f:-0.2757627011 f:-0.0 f:1.1827023763196 lin
+hyst f:0.9655545 i:4 f:1e-05
+cfg.checked power_regulator=
+hyst f:-0.3831204 i:-2 f:0.0102227551920957
+cfg.holdoff s:2.5\_+5x
+cfg.rate s:9.1.nan i:7
+hyst f:1.43836994 f:-0.07368 f:0.6453
+scale i:1 f:1.329532831 f:0.001088 exp
+scale f:1.305 f:0.52533 f:-0.3365570781922 exp
+cfg.rate s:00 i:7
+scale i:-2 f:1.016548 f:0.524 int
+cfg.checked gate_holdoff_ms=95e2.5
+scale f:1.336052618 i:-3 f:0.24463799 exp
+cfg.rate s: i:7
+cfg.holdoff s:x05e
+cfg.rate s:-\_+2.55 i:7
+cfg.rate s:00 i:7
+cfg.checked gate_holdoff_ms=009.
+scale i:-2 f:1.0 f:0.016421032 lin
+hyst f:-0.3231369765 f:0.733137988 f:0.22156
+scale f:1.16651633157 f:0.0 f:1.2699125 int
+hyst f:0.186563359 f:1e-05 i:2
+scale i:5 i:2 f:0.47533 exp
+cfg.checked power_regulator=e
+cfg.rate s:1-.\_ i:7
+cfg.rate s: i:7
+cfg.rate s:+infenan. i:7
+hyst f:1.0 i:3 f:-0.47906424445809
+cfg.holdoff s:00
+hyst f:0.6756252021830322 i:-3 f:1.29766664
+cfg.rate s:.x+9 i:7
+cfg.checked wifi=nan0-0
+cfg.holdoff s:2.519
+cfg.checked wifi=00
+hyst f:1.1 f:1.17792794447 f:0.24
+cfg.checked nebio_scan_hz=infnanx\_
+cfg.checked power_regulator=
+cfg.holdoff s:+infe_
+hyst f:-0.27770642298 f:0.79 f:0.5
+cfg.checked nebio_scan_hz=_-inf..
+cfg.rate s:\_ i:7
+scale f:1.2539912127341 f:0.4786640621915899 f:1.1 exp
+cfg.rate s:e00 i:7
+scale f:-0.07321540134 f:0.944935666253626 f:1.07 lin
+cfg.checked gate_holdoff_ms=\_nan_00
+scale f:0.7267761590487807 f:-0.204561110672 f:-0.24315618638964 exp
+scale f:-0.305977112 f:0.865565012 f:0.0 exp
+hyst f:-0.381493244 f:0.3333333333333333 f:-0.19033075662789978
+cfg.rate s:1001_0 i:7
+cfg.holdoff s:
+cfg.holdoff s:099inf
+cfg.rate s:x i:7
+hyst f:0.3857 f:1.351242432443 f:-0.07599674144743
+cfg.rate s:nan1_000 i:7
+cfg.rate s:2.5+500 i:7
+hyst f:0.4751365483942682 f:1.0 f:-0.15
+cfg.rate s:1+ i:7
+cfg.rate s:nan i:7
+hyst f:0.3 f:-0.03814197 f:1.0
+cfg.rate s:\_1_0x2.5 i:7
+cfg.holdoff s:\_95+
+cfg.checked power_regulator=09000
+cfg.holdoff s:einf
+hyst f:0.149423763103463 f:0.09955280508742 f:1.23
+cfg.rate s:+ i:7
+cfg.holdoff s:e1_0x52.5
+cfg.checked nebio_scan_hz=
+cfg.checked nebio_scan_hz=__xx
+scale f:0.18601516997 f:0.917651662514 f:-0.5 lin
+cfg.rate s:0nan i:7
+cfg.rate s:05 i:7
+cfg.holdoff s:1_0
+cfg.rate s:102.5 i:7
+cfg.checked gate_holdoff_ms=\__inf2.5.
+scale f:0.23986239023044 f:-0.2730222169 i:3 exp
+scale f:1.07538511194 f:1.131202053697385 i:-1 lin
+cfg.holdoff s:52.5
+cfg.rate s:1_0 i:7
+hyst f:0.794 f:-0.499 i:1
+cfg.rate s:9+100 i:7
+cfg.rate s: i:7
+scale f:1.2646146654096 f:1.0 i:-1 exp
+hyst f:1.3233768510734838 f:1.19 f:1.49
+cfg.rate s: i:7
+cfg.rate s:e-. i:7
+cfg.holdoff s:11
+cfg.holdoff s:inf59
+hyst f:0.604225022461 f:0.959619 f:-0.494995428
+cfg.checked power_regulator=
+hyst i:5 f:0.833580557 f:0.33032626773
+cfg.rate s:9_92.5 i:7
+scale i:5 f:1.142891483 i:2 exp
+cfg.checked wifi=5inf
+cfg.holdoff s:e\_-1_0
+scale f:-0.0 f:-0.386001 f:0.3 lin
+scale f:0.4228973213134115 f:-0.051060902 f:-0.40073831316107 exp
+cfg.rate s: i:7
+cfg.holdoff s:-2.5
+cfg.checked wifi=..00
+scale f:1.0 i:-1 i:-1 exp
+cfg.rate s:900\_5\_ i:7
+cfg.holdoff s:900+1
+cfg.rate s:ee i:7
+cfg.holdoff s:
+cfg.checked wifi=infx
+cfg.checked nebio_scan_hz=_.
+cfg.rate s:0x9_ i:7
+scale f:0.91143492 f:0.4 f:1.046417423182904 exp
+cfg.checked nebio_scan_hz=x00-0000
+scale f:1.032128767387 f:-0.0 f:0.372043 int
+hyst i:0 i:1 f:0.5996997552822128
+scale f:0.635327947 f:0.341625 f:-0.16727603940375 lin
+cfg.checked power_regulator=nan
+scale f:1.1457 f:-0.4508752132707079 f:0.47 lin
+scale f:1.29928 f:0.013927028909377 f:-0.08022531469 exp
+scale f:-0.2 f:0.9404386 i:-3 lin
+cfg.rate s: i:7
+cfg.checked led_dim=\_
+hyst f:0.1067316 f:1.4 f:0.63981
+cfg.rate s:.50-e i:7
+cfg.checked gate_holdoff_ms=00.00
+hyst f:0.14 f:1e-05 f:0.3333333333333333
+cfg.checked wifi=00e10
+cfg.checked gate_holdoff_ms=1
+cfg.checked gate_holdoff_ms=00-1_01_05
+cfg.holdoff s:9-.nan\_
+cfg.holdoff s:1inf2.5
+cfg.holdoff s:x2.50-
+scale f:0.0472319 f:1.3415360318387646 f:-0.0 exp
+cfg.checked wifi=+1infeinf
+cfg.rate s:11_0 i:7
+cfg.rate s:.e9 i:7
+cfg.checked power_regulator=
+cfg.holdoff s:x
+scale f:0.99203789 f:0.8345933673 i:2 exp
+hyst f:0.1366379327 f:0.2913420149 f:-0.204494
+cfg.holdoff s:enan+x
+scale f:0.9185130063858 f:0.014 i:4 int
+cfg.holdoff s:x-0
+cfg.holdoff s:e\_\_
+hyst i:-1 f:-0.2786623588409951 f:0.125
+cfg.holdoff s:e00x02.5
+scale f:-0.4389485144 f:0.9885846337 f:0.565694130011126 int
+cfg.rate s: i:7
+hyst f:1.15 f:0.5 f:1e-05
+cfg.rate s:00-x1_0 i:7
+hyst f:1.46432 f:1.25693826932773 f:1.20235398
+cfg.holdoff s:inf2.5_
+cfg.holdoff s:01
+scale f:0.4767944732220211 f:1.2672964979 i:1 int
+cfg.holdoff s:ee
+hyst f:1.343030753 f:0.5 f:0.91547469739
+cfg.checked gate_holdoff_ms=1_0
+hyst f:-0.48 f:-0.00717726 f:0.6438
+cfg.holdoff s:_9
+hyst f:-0.368848 f:1.1280962 f:1.231343
+scale f:0.3333333333333333 f:0.96896158726473 f:0.29799303 lin
+scale f:0.001661712617 f:0.6728111722108789 f:1.08852 exp
+cfg.checked nebio_scan_hz=9nan.
+scale f:0.67691100347199 f:0.3576233 f:2.675 int
+cfg.holdoff s:xe5
+hyst f:0.421 f:-0.0 f:0.494031582503395
+scale f:0.5086226771830695 f:-0.34353 f:0.6274335 int
+cfg.holdoff s:inf\_ee
+cfg.checked power_regulator=
+hyst f:2.675 f:1.0179516 f:0.4654
+cfg.rate s:5e i:7
+cfg.checked wifi=nan-
+cfg.rate s:1+__e i:7
+cfg.rate s: i:7
+scale f:1.1 f:0.9143 f:0.3311332929914863 int
+cfg.holdoff s:1\_+
+cfg.checked nebio_scan_hz=
+scale f:1.1 i:3 f:0.23434 exp
+scale f:0.2 f:0.125 i:0 int
+hyst f:0.2430728877019355 f:-0.09025615 f:0.00538931076457
+cfg.holdoff s:1_0x_
+hyst f:0.35838153109007953 f:-0.4046513738 i:1
+cfg.checked nebio_scan_hz=
+cfg.holdoff s:1
+cfg.checked led_dim=00.0
+cfg.holdoff s:_
+hyst f:-0.36 f:0.03 f:1.0
+cfg.checked nebio_scan_hz=9
+hyst f:0.1807846989736497 f:1.21 f:1.492881094634881
+cfg.checked nebio_scan_hz=
+cfg.rate s:- i:7
+cfg.holdoff s:--51.
+cfg.holdoff s:_
+scale f:-0.0 f:0.8780020866102629 f:-0.330005 int
+cfg.rate s:00nan i:7
+cfg.rate s:99 i:7
+hyst i:0 f:0.2773187518005 f:1.0855317291926
+cfg.rate s:_000 i:7
+cfg.checked wifi=1
+hyst f:0.125 f:0.497 f:0.07521200189592392
+cfg.rate s:2.5000 i:7
+cfg.holdoff s:ee
+cfg.checked power_regulator=5-
+cfg.holdoff s:9.
+hyst f:0.3333333333333333 i:1 i:-3
+scale f:0.586 f:0.13292043 f:1.4697592759664 int
+hyst f:-0.44149 f:0.761904279983642 f:-0.3
+scale f:-0.32768233 f:-0.25223053 f:0.2862914 lin
+cfg.checked nebio_scan_hz=+2.5
+cfg.rate s: i:7
+cfg.rate s:x.nan i:7
+cfg.rate s:1 i:7
+cfg.rate s: i:7
+scale f:-0.47334 f:0.8590177337512 f:0.8930727124529882 lin
+hyst i:3 i:0 i:5
+scale f:-0.2196491017981 f:0.5 f:0.97 exp
+hyst f:1.122784 f:-0.13 f:1.0589582628946
+cfg.holdoff s:1_0einfnan
+cfg.rate s:1_09. i:7
+cfg.rate s:005 i:7
+cfg.checked power_regulator=1_01._e
+scale f:1.2839 i:5 i:-3 lin
+cfg.checked nebio_scan_hz=nan
+scale i:2 f:-0.4613 f:0.19923 exp
+cfg.holdoff s:2.5
+cfg.checked wifi=
+cfg.checked gate_holdoff_ms=1+nan
+hyst i:3 f:0.042208335 f:-0.064376
+cfg.holdoff s:_-_\_
+hyst i:0 f:0.6293370614 f:1.12949172813856
+cfg.rate s:1_0inf9x0 i:7
+cfg.holdoff s:02.52.59
+hyst f:-0.0 f:0.624797135 f:1.12208642116334
+cfg.holdoff s:x_9
+cfg.holdoff s:
+hyst f:1.0531140572 i:-3 f:1.0195161056837
+cfg.rate s: i:7
+cfg.checked wifi=2.5.1
+cfg.checked power_regulator=.+
+cfg.rate s:5 i:7
+hyst f:0.446195411 f:-0.31972013374050334 f:1.2
+scale f:1.3979117331 f:1.039 f:-0.04 lin
+hyst f:0.62 f:0.847903972 f:0.4494145944377
+cfg.rate s:e-e i:7
+cfg.holdoff s:e.x.
+hyst f:1.08643374566657 f:0.755276284 f:0.34661318
+cfg.holdoff s:
+cfg.holdoff s:0x
+hyst f:-0.3441671582475 i:3 f:2.675
+cfg.holdoff s:5
+cfg.checked wifi=0e-x0
+cfg.rate s:\_1_0nan i:7
+hyst f:0.7583 f:0.36312423913 f:0.977
+cfg.checked power_regulator=500_1_09
+scale f:0.602210427258827 f:0.81971 f:1.076355350458 lin
+cfg.rate s:.10000 i:7
+hyst f:0.946 f:2.675 f:0.085481824765679
+cfg.rate s:+0 i:7
+hyst f:0.295935039 f:0.4604 f:0.3271745385265823
+scale f:0.69190165856 f:0.6047641041430136 f:1.19086418564 int
+scale f:-0.3926679141439 f:1.466275060681 i:5 int
+cfg.holdoff s:2.5e\__+
+hyst i:3 i:-1 i:0
+cfg.checked led_dim=2.5
+cfg.holdoff s:.1inf
+hyst f:-0.22908517 f:-0.093028753415 f:0.5708
+cfg.rate s:_e11_0 i:7
+cfg.holdoff s:00nan
+cfg.holdoff s:00inf1_01_0
+hyst f:1.2652707 i:-2 f:1.2706
+cfg.holdoff s:-
+scale f:1.285 f:0.1714 f:0.3240162669901 lin
+cfg.holdoff s:inf
+cfg.holdoff s:2.5_5infinf
+scale f:1.361 f:0.4069988858128799 f:-0.4250044897 exp
+hyst f:1.2 f:0.309533589534 f:0.0
+cfg.checked power_regulator=
+cfg.rate s: i:7
+hyst f:0.453647108 f:0.4 f:1.2654157026076571
+scale f:-0.423429 f:0.9061115234 f:1.442182180582679 int
+hyst f:0.964 f:-0.18613758319486085 f:-0.0
+cfg.holdoff s:
+cfg.rate s: i:7
+hyst f:1.147621448 f:0.9561 i:-2
+cfg.checked gate_holdoff_ms=+_2.5inf
+scale f:0.49089 f:-0.487 i:-1 int
+cfg.checked gate_holdoff_ms=nannan11
+cfg.holdoff s:
+cfg.rate s: i:7
+hyst f:0.32062204645278 i:4 f:0.724
+cfg.holdoff s:00_
+cfg.holdoff s:5
+cfg.checked gate_holdoff_ms=00nannan95
+hyst f:-0.45908177 f:-0.04956349204092 i:-3
+cfg.rate s:9_-_e i:7
+hyst f:0.3576534609 f:0.4967377 f:1.32482192
+cfg.holdoff s:-11_000
+scale i:3 f:1.1495461886 f:0.98281091848 exp
+hyst i:4 f:-0.3171632332 f:0.3333333333333333
+cfg.holdoff s:9inf+5\_
+scale f:1.3280445667380216 i:2 f:0.9596 int
+hyst f:0.77943430214 i:0 f:1.2242768989
+cfg.holdoff s:_inf9x
+cfg.holdoff s:infnan_x00
+hyst f:0.11182180592 f:-0.27 f:1.0978
+cfg.holdoff s:00nan
+cfg.holdoff s:2.500
+scale f:1.0819901437 f:0.1199605 f:0.17281989219 exp
+cfg.rate s:-e.- i:7
+cfg.checked nebio_scan_hz=
+scale f:0.66204094446 f:0.316519 f:0.875594181151798 int
+cfg.rate s:x1nan i:7
+scale f:-0.139149 f:0.2976764160464205 f:-0.05294626711309 lin
+cfg.rate s:inf0e i:7
+hyst f:0.08940515134 f:0.1011779327464426 f:0.44
+cfg.holdoff s:2.5
+hyst f:0.91666402 f:0.543011451 i:4
+cfg.checked nebio_scan_hz=
+hyst i:1 f:0.38 f:0.005
+cfg.rate s:_ i:7
+scale f:0.0 f:1.29352801391 f:0.0308815535 exp
+hyst f:-0.0113348 f:0.4879730634 f:0.372204
+cfg.holdoff s:
+cfg.holdoff s:e9
+cfg.holdoff s:1
+scale f:0.52380873073 f:-0.4578346343462 f:0.1 exp
+hyst f:1.1111 f:0.28500845 f:0.9581961350314
+cfg.checked wifi=1
+scale f:0.04171420255309188 f:0.326386 f:0.43 exp
+cfg.rate s:2.5 i:7
+cfg.holdoff s:inf\_1_02.50
+cfg.checked gate_holdoff_ms=2.5e
+scale f:1.40473653 f:1.33778132331483 f:-0.122588638601209 exp
+cfg.rate s:2.5enan i:7
+cfg.holdoff s:-2.5
+cfg.rate s:x i:7
+hyst i:3 f:1e-05 f:1.3
+scale i:1 i:4 f:0.79726 lin
+cfg.rate s: i:7
+hyst f:1.480258353407137 f:0.8380289357 f:0.2468888124468
+cfg.holdoff s:2.5-959
+hyst f:1.2327712207 f:0.40216248483302 f:0.3333333333333333
+scale f:0.795 f:-0.1971432789 f:1.03 exp
+cfg.checked led_dim=+inf1_012.5
+cfg.rate s:+ i:7
+cfg.rate s:+x9e i:7
+hyst f:0.18 f:0.901648609 f:0.27570256288567
+cfg.holdoff s:0
+cfg.checked led_dim=10005
+cfg.checked power_regulator=12.55e
+cfg.holdoff s:
+cfg.holdoff s:0
+hyst f:0.18612594557016 f:0.9346825094100093 f:0.359
+scale i:0 i:0 f:0.9780897 int
+cfg.checked nebio_scan_hz=inf
+scale f:1.46664590345178 f:1.151 f:0.3333333333333333 lin
+cfg.checked nebio_scan_hz=9
+cfg.holdoff s:2.52.501
+hyst f:1.139295330633152 f:0.125 i:1
+scale f:0.2922 f:0.051 f:0.34684208 int
+cfg.checked power_regulator=+
+cfg.rate s:-.51 i:7
+hyst f:0.916462918281 f:-0.4590124614 f:-0.39
+cfg.rate s:51_0 i:7
+cfg.checked wifi=e
+hyst f:0.3333333333333333 f:1.4 f:-0.2041485
+cfg.rate s:infnane i:7
+cfg.holdoff s:nan
+hyst f:0.0191365 f:1.0509504 i:5
+cfg.rate s:1_0e2.5+\_ i:7
+cfg.checked nebio_scan_hz=12.5
+cfg.checked led_dim=.2.592.5
+cfg.checked led_dim=infnan0000
+cfg.holdoff s:2.591
+cfg.holdoff s:+-+._
+cfg.holdoff s:1_0
+cfg.rate s:inf0_ i:7
+hyst f:0.8 f:0.6121552198899709 i:2
+cfg.rate s:0.e i:7
+cfg.checked power_regulator=-0infenan
+scale f:0.275231123310266 f:0.248053178 f:-0.43823 int
+cfg.checked power_regulator=\_x-
+cfg.holdoff s:0x.\_
+cfg.holdoff s:-.e
+cfg.holdoff s:-9
+cfg.checked wifi=000inf
+cfg.checked nebio_scan_hz=naninf
+cfg.checked led_dim=1_05nan9
+cfg.checked gate_holdoff_ms=
+scale f:0.66229 f:-0.0 f:-0.2786111019 lin
+cfg.rate s:- i:7
+cfg.rate s:5 i:7
+scale i:-1 f:1.0 i:-2 lin
+hyst f:0.032984246 f:-0.251805523 f:1.162763837
+scale f:-0.389518316 f:-0.08116593617397 i:1 lin
+hyst i:-2 f:0.4 f:0.71
+cfg.rate s:e51_0inf i:7
+cfg.checked led_dim=00+1_0
+cfg.holdoff s:
+scale f:0.5556076 f:0.25632347586929 f:1.4565399217462 int
+cfg.holdoff s:00+
+cfg.checked led_dim=00\_+
+cfg.rate s:inf00 i:7
+cfg.holdoff s:_nan.00
+cfg.checked nebio_scan_hz=1_0
+hyst f:-0.02074355445295861 f:1.489049728134558 f:0.3333333333333333
+cfg.rate s:-- i:7
+cfg.checked led_dim=\_nan00
+hyst f:-0.3114 f:0.6960402294445158 i:1
+cfg.rate s:00_9inf i:7
+cfg.rate s:1_0 i:7
+hyst f:-0.5 f:0.633248649493 f:-0.29
+cfg.checked gate_holdoff_ms=.01_0inf\_
+cfg.holdoff s:9nan1_01inf
+cfg.holdoff s:.500
+scale i:3 i:4 f:1.39843 lin
+cfg.holdoff s:11
+cfg.holdoff s:\_e
+cfg.rate s: i:7
+hyst f:-0.05 f:1.4565917144 f:1.043
+cfg.checked nebio_scan_hz=inf
+cfg.holdoff s:500
+cfg.holdoff s:.1
+cfg.holdoff s:99005
+cfg.checked gate_holdoff_ms=9
+cfg.holdoff s:1_0e
+hyst f:-0.44758 i:4 f:-0.458609693079
+scale f:-0.248624342 i:-2 i:0 exp
+hyst i:-3 f:0.45750167104474 f:1.03656073
+scale f:-0.03624723812 f:0.6671753484999745 f:1.44147539 lin
+scale f:-0.336711289809404 f:-0.39 i:2 exp
+cfg.rate s: i:7
+cfg.checked wifi=2.51_0
+scale f:0.5 i:0 f:0.4668637 int
+cfg.rate s:1002.5 i:7
+cfg.holdoff s:00-
+hyst f:-0.3526938 f:0.3333333333333333 f:1.2614957
+cfg.rate s:5_ i:7
+cfg.rate s:. i:7
+cfg.holdoff s:nan
+cfg.checked nebio_scan_hz=
+cfg.holdoff s:9e-5
+cfg.checked led_dim=+1_01_0+
+cfg.holdoff s:inf
+cfg.checked wifi=_e2.5
+scale f:0.387984195971 f:0.2572632 f:0.794 int
+cfg.rate s:00 i:7
+cfg.rate s:95 i:7
+cfg.rate s:e_ i:7
+hyst f:1.2981301027842347 i:-1 i:3
+scale i:-2 f:0.09352 i:0 exp
+scale f:0.1982806132820509 f:0.125 f:-0.0152299026934 exp
+cfg.holdoff s:einfxinf
+cfg.checked led_dim=01_0
+cfg.holdoff s:
+cfg.checked gate_holdoff_ms=5_
+cfg.checked power_regulator=1_0
+cfg.holdoff s:9x
+cfg.holdoff s:_e
+cfg.holdoff s:15-
+scale f:0.63273639 f:0.37 f:1.304015505075 exp
+scale f:0.28050621211 f:-0.4229947806964 f:0.0946 exp
+scale f:0.27174315305203733 f:0.7994942761606534 f:-0.16888 exp
+cfg.rate s:++ i:7
+cfg.holdoff s:inf_
+hyst i:1 f:1.1963064358766378 f:0.4997799871288
+scale f:-0.1741916654 f:1.37173010621105 f:0.645776072862 lin
+scale i:-2 f:0.69655 f:0.849507 lin
+scale f:0.7099403439213643 f:0.808388799 f:0.9114456597175515 int
+cfg.holdoff s:9
+scale f:1.32322951139915 f:0.2623118695 i:-3 int
+cfg.checked led_dim=e
+cfg.holdoff s:+-1
+scale f:-0.02660686903399 f:0.3333333333333333 f:-0.434408756852 exp
+cfg.holdoff s:9e1+_
+cfg.rate s: i:7
+scale i:-3 i:5 f:0.079 exp
+cfg.checked nebio_scan_hz=+2.55
+hyst f:0.5447 f:0.3333333333333333 f:1.22606
+scale i:-1 f:1.48263724786 i:5 int
+hyst f:-0.05520980026689 f:0.765960348 i:-3
+scale f:0.5 f:0.5 f:-0.017814590015564 lin
+cfg.holdoff s:5\_2.51
+cfg.holdoff s:_2.5+002.5
+hyst f:0.9598378186236791 f:-0.29037284762475 i:-1
+scale f:0.1817044694 f:1e-05 f:0.83919 exp
+hyst i:-1 f:1.210151864 f:0.0
+cfg.holdoff s:
+cfg.checked led_dim=
+scale f:1.47481712 f:-0.01795139790238132 f:0.981087066229 lin
+hyst f:1.0674915 f:0.893 f:1.453101157369785
+scale f:-0.0 f:1e-05 f:0.35489330683 lin
+cfg.rate s: i:7
+cfg.rate s:1-e90 i:7
+cfg.holdoff s:inf
+hyst f:0.4352502507928 f:-0.168415493911217 f:-0.258767
+cfg.rate s:00+1_0_ i:7
+cfg.holdoff s:\_1
+cfg.holdoff s:500nan
+hyst f:0.10209454816 f:-0.42347897021 i:5
+cfg.checked wifi=9nan2.5inf
+cfg.rate s:+2.5 i:7
+hyst f:-0.40830237155806 f:-0.4497888320476069 f:0.820328
+cfg.holdoff s:x
+cfg.checked power_regulator=2.5
+cfg.checked led_dim=ee.
+cfg.rate s:900 i:7
+hyst f:0.1913909 f:-0.435377 f:0.76464071
+cfg.checked gate_holdoff_ms=inf_.95
+cfg.holdoff s:5001_0
+scale i:3 f:0.46914536715 f:1.23312 exp
+cfg.checked power_regulator=e+5
+cfg.rate s:9\_e_ i:7
+cfg.rate s:1_01e2.51_0 i:7
+cfg.rate s:-1 i:7
+scale f:-0.3 i:-2 f:0.26452994 exp
+cfg.holdoff s:inf_nan\_
+scale f:0.9 f:0.02 f:-0.396 lin
+cfg.rate s:1_ i:7
+cfg.holdoff s:9.x0x
+scale f:-0.020409 f:0.0 f:1.1017618994666334 int
+cfg.checked power_regulator=1_0
+cfg.rate s:.x i:7
+cfg.checked led_dim=.
+cfg.holdoff s:1.5
+cfg.rate s:0nan5x2.5 i:7
+scale f:-0.322258 i:4 f:0.40493 exp
+cfg.checked led_dim=
+hyst f:1.24851227512 f:1.488536772601503 i:3
+cfg.holdoff s:
+cfg.checked power_regulator=e___
+scale f:1.29212888042 i:2 f:-0.038352 lin
+hyst f:1.34352030773223 f:1.218200807225 f:0.2815383835
+cfg.holdoff s:x15
+scale f:0.281187997 f:-0.39928299962799096 i:2 int
+scale f:1.219938339567768 f:1.33937764507854 f:0.3189427851278468 int
+hyst i:1 f:-0.11 f:-0.332365627379871
+cfg.holdoff s:.000nan
+hyst f:1.431053694607 f:0.99812063 f:-0.42713
+cfg.rate s:0 i:7
+cfg.rate s:\_ i:7
+cfg.holdoff s:\_
+cfg.holdoff s:.inf\_inf9
+cfg.rate s:inf i:7
+cfg.rate s:2.5 i:7
+scale f:-0.467690084857 f:-0.22623367 f:-0.0709019 int
+hyst f:0.0 f:-0.484550403293 f:-0.186340419
+scale f:0.5226357 f:-0.1047268565050341 f:1.333636 exp
+cfg.checked power_regulator=e1_002.5
+hyst f:-0.40743817 f:0.1412 f:-0.0506504441775
+cfg.holdoff s:nan
+hyst f:0.0970238809422 f:0.125 f:0.125
+cfg.rate s:2.5e2.5 i:7
+hyst f:0.6963 i:-2 f:1.4988358642077
+cfg.rate s: i:7
+cfg.holdoff s:__00
+cfg.holdoff s:+1
+cfg.rate s: i:7
+cfg.checked wifi=
+scale f:0.5 f:0.2501512249 f:1.10272 int
+cfg.checked wifi=_
+cfg.rate s:001_059 i:7
+cfg.holdoff s:1
+cfg.rate s:2.512.5 i:7
+cfg.checked gate_holdoff_ms=
+hyst f:0.7360825719254471 i:5 f:0.56601
+cfg.checked led_dim=
+hyst f:-0.399225686525558 f:1.4369644594759 f:-0.34
+cfg.holdoff s:2.5e00
+cfg.rate s: i:7
+scale f:0.5 f:-0.129112837 f:0.54163 lin
+cfg.holdoff s:
+cfg.rate s:0 i:7
+hyst f:0.0098720327 f:1.186380806239821 f:0.7528826
+cfg.checked led_dim=x1x
+cfg.rate s: i:7
+cfg.checked power_regulator=9_nan9
+cfg.holdoff s:.2.5nan
+scale f:1.094 f:-0.3249397091077 f:0.6137660264500211 lin
+cfg.holdoff s:x1_0_
+cfg.checked gate_holdoff_ms=_0
+cfg.holdoff s:\__1
+cfg.rate s:2.5000 i:7
+hyst f:1.49198 f:-0.4888557877821 f:1e-05
+scale f:0.901486 f:-0.0 f:0.115 int
+cfg.holdoff s:\_\_
+cfg.checked led_dim=
+cfg.holdoff s:+x--2.5
+cfg.rate s:inf00 i:7
+cfg.checked wifi=_5-
+hyst f:-0.4186 f:1.174294533041573 i:-1
+cfg.rate s:05-\_9 i:7
+cfg.holdoff s:x
+hyst f:0.6286700168722004 i:0 f:0.82
+cfg.holdoff s:2.5
+scale f:-0.247863267 f:0.5736482300637 i:-1 int
+hyst f:0.0 f:-0.4499279906461531 f:0.256591
+cfg.rate s:-. i:7
+cfg.checked power_regulator=9
+cfg.holdoff s:einf90nan
+cfg.checked led_dim=1_001
+hyst f:1.135542228 f:1.0 f:-0.0
+cfg.checked nebio_scan_hz=2.5ee\_
+hyst f:0.8766004 f:0.4122025756962 f:-0.0758643923246
+cfg.checked wifi=_0000
+cfg.checked wifi=-e50
+cfg.holdoff s:52.500
+cfg.rate s: i:7
+cfg.rate s: i:7
+hyst f:-0.0 f:0.5839088928 i:3
+cfg.checked led_dim=\_9-
+scale f:0.27069959 f:-0.143962393521 f:0.6225653 exp
+cfg.holdoff s:+
+cfg.checked power_regulator=\_9e+
+cfg.rate s:00_x1 i:7
+cfg.holdoff s:\_e9.
+cfg.checked wifi=0nan00
+scale f:0.089 f:1.41 f:-0.2061 int
+cfg.rate s:0- i:7
+cfg.rate s:infnan-nan0 i:7
+scale f:-0.074068387746577 f:0.5 i:2 int
+cfg.rate s:+.1_000 i:7
+hyst f:0.748464351242 f:-0.10212406708 f:0.7227514266144
+cfg.holdoff s:nan_
+cfg.holdoff s:
+scale f:1.1182 f:0.550966059 f:0.2516009808006463 lin
+cfg.holdoff s:
+cfg.rate s:inf11_09 i:7
+cfg.rate s:1inf-00+ i:7
+cfg.holdoff s:\__2.51_0x
+scale f:0.125 f:-0.0221599076891108 f:1.2261056108 exp
+cfg.checked gate_holdoff_ms=\_x+
+cfg.holdoff s:+0_x
+cfg.checked nebio_scan_hz=0nan
+cfg.holdoff s:enan\_.+
+scale f:0.24668 f:-0.12 f:1.1675303112128 int
+cfg.checked led_dim=_nan
+cfg.holdoff s:\_
+cfg.holdoff s:e+-1_0
+scale f:0.855 f:-0.4183529002 f:0.36880452001305 int
+cfg.rate s:00 i:7
+scale f:2.675 f:0.67634305409065 f:0.3730512239 exp
+scale f:0.9900695 f:0.76147064975 f:1.131224545 int
+cfg.rate s:-nan2.50 i:7
+cfg.rate s:x__0. i:7
+hyst f:1.259570933759 f:1.200973049 f:-0.3481897662601
+cfg.checked power_regulator=95+
+cfg.rate s: i:7
+cfg.checked led_dim=2.51xinf1_0
+scale f:1.4433505 f:-0.33375106755601 f:0.69696882516 exp
+cfg.checked nebio_scan_hz=_+e
+scale f:1.45132 f:-0.0 f:-0.0658877511 exp
+scale f:0.6 f:1.0 f:0.823302291001075 lin
+cfg.checked led_dim=\_2.5
+cfg.rate s:- i:7
+cfg.holdoff s:00
+cfg.checked nebio_scan_hz=
+scale i:4 f:0.5646703042215011 i:-3 lin
+hyst f:0.1050247 i:0 f:1.4
+cfg.rate s:\_ i:7
+cfg.rate s:._9 i:7
+cfg.checked led_dim=9
+scale f:-0.4710004780694894 f:0.5 i:1 exp
+hyst f:-0.11802683607444 f:-0.45487305 i:-3
+cfg.rate s:\_ i:7
+cfg.rate s:+__\_ i:7
+cfg.rate s:\_nan__+ i:7
+cfg.rate s:50einf i:7
+scale f:0.33043 i:-1 f:-0.36422 int
+scale i:-3 i:3 i:3 lin
+scale f:0.5195065 f:-0.05185637348362016 f:0.739 lin
+scale f:0.5 f:0.776233029662972 f:0.754 exp
+cfg.holdoff s:e1_0nannannan
+cfg.checked power_regulator=5
+cfg.checked led_dim=
+cfg.rate s:2.52.5\_inf i:7
+cfg.holdoff s:00
+scale f:0.08238463878 f:0.0062809504169852 i:2 exp
+scale i:3 f:1e-05 f:0.004314 exp
+cfg.rate s:+-1 i:7
+scale f:0.50069241205 f:0.5231934241 f:1.4240847991 exp
+cfg.checked gate_holdoff_ms=_
+cfg.holdoff s:inf9
+cfg.checked power_regulator=
+scale f:1.24697795 f:0.9070341949901 i:-1 exp
+cfg.rate s: i:7
+hyst f:0.11159035 f:0.076 f:0.32
+cfg.holdoff s:
+cfg.holdoff s:
+cfg.rate s:\_500.+ i:7
+cfg.rate s:2.5 i:7
+cfg.checked wifi=1
+hyst f:0.7874 f:-0.2093179046803473 f:-0.210078403
+scale f:0.0567 f:0.5 f:0.5836092 exp
+cfg.holdoff s:
+cfg.rate s: i:7
+scale f:0.1106124744 f:1.39778256818654 f:0.950989020154 int
+scale f:0.32636276412 f:0.3199136326 f:-0.0 exp
+cfg.checked led_dim=2.5
+cfg.checked gate_holdoff_ms=_-x
+cfg.checked led_dim=09-
+cfg.holdoff s:.0+5
+cfg.checked wifi=x-
+hyst f:-0.0 f:0.7695871736 f:0.7976872524514347
+cfg.checked wifi=e5
+cfg.checked led_dim=_e
+scale f:-0.239330807 f:1.19465383676 f:1.4645088166196 lin
+cfg.rate s:-_\_ i:7
+cfg.holdoff s:\_1
+cfg.checked power_regulator=++
+cfg.holdoff s:\_x2.5
+scale f:-0.169 f:0.2768 f:-0.187 exp
+hyst f:1.171366 f:0.77866419074 f:0.0555127824413
+scale f:0.415395454321 f:-0.2835180178591152 f:0.76795989338071 lin
+cfg.rate s: i:7
+cfg.holdoff s:11x+
+cfg.checked led_dim=-
+cfg.checked wifi=-inf.inf0
+cfg.rate s:0nan\_ i:7
+cfg.holdoff s:inf91_0nan_
+scale f:0.3333333333333333 f:0.329755173962 f:-0.28 lin
+scale f:-0.38267374 f:-0.1505208377579 i:3 exp
+cfg.holdoff s:
+cfg.rate s: i:7
+scale f:1.31631087 f:1.31395 f:1.279257056585974 lin
+cfg.rate s:9 i:7
+cfg.rate s:-_ee i:7
+hyst f:0.8195533 f:0.9631358 i:2
+cfg.checked power_regulator=-
+hyst f:1.2 f:0.5522514 f:0.568895439252
+cfg.rate s:infnanxinf- i:7
+cfg.checked gate_holdoff_ms=.
+cfg.holdoff s:1_0
+cfg.holdoff s:5
+cfg.holdoff s:_
+cfg.rate s: i:7
+scale f:1.4704015133363837 f:2.675 f:0.64399665 exp
+cfg.holdoff s:11_0+xe
+cfg.holdoff s:_900--
+scale f:0.15707353 f:-0.00173793 f:0.51 exp
+cfg.rate s:_+ i:7
+hyst i:2 f:1.1445442796 f:0.8177473455
+scale f:-0.15913208441445 f:0.0902276 f:0.24577727439314 exp
+cfg.rate s:inf i:7
+scale f:0.5859926809465 f:0.7626810268670565 f:0.21557884439383 exp
+cfg.rate s: i:7
+cfg.checked nebio_scan_hz=52.5-91
+scale f:0.42975985152316 i:-2 f:0.66686 int
+cfg.checked led_dim=inf
+hyst i:4 f:0.9234705795 f:0.46438865573
+cfg.checked wifi=+
+cfg.rate s:. i:7
+hyst i:0 f:1.31762 f:-0.45846919842179
+cfg.rate s:5 i:7
+cfg.checked power_regulator=002.5_00
+cfg.checked wifi=inf-.
+cfg.checked power_regulator=inf0
+scale f:0.3740714867263 i:4 f:1.0284807 exp
+hyst f:0.4410631344315 f:1.2087 f:-0.02962334
+cfg.checked gate_holdoff_ms=
+cfg.holdoff s:
+cfg.holdoff s:_\_.xinf
+cfg.checked power_regulator=2.5nan_1_0
+cfg.rate s:x i:7
+cfg.checked nebio_scan_hz=\_+9
+scale f:0.8191664433921 f:0.9333887759816861 f:0.0 exp
+cfg.rate s:\_1_00inf i:7
+cfg.checked led_dim=2.5001
+hyst f:0.0660629 f:0.15 i:0
+cfg.holdoff s:2.5-inf1_0-
+cfg.holdoff s:_2.5
+cfg.checked power_regulator=911_0
+scale f:-0.0 i:5 f:1.39247035 int
+cfg.rate s:\_ i:7
+hyst f:1.4669365 f:-0.4397305876699 f:0.193873724
+scale f:1.1288724898653 f:0.125 i:2 lin
+hyst f:0.14680750011728017 f:0.8 f:0.9621976785
+scale f:0.794 f:1.41 f:1.0 int
+cfg.rate s:000\_ i:7
+cfg.checked power_regulator=nanx00
+cfg.holdoff s:+2.5
+cfg.checked gate_holdoff_ms=-xx_nan
+hyst i:2 f:1.4281684 f:0.262769683097
+cfg.holdoff s:
+scale f:0.16780960711554 f:0.8 f:-0.3700745 int
+scale f:0.1196619231484 f:-0.1021047353268167 i:4 lin
+cfg.holdoff s:
+cfg.checked led_dim=1_09e+
+cfg.checked wifi=9inf
+cfg.holdoff s:
+cfg.holdoff s:9-x_00
+cfg.checked gate_holdoff_ms=.90enan
+cfg.holdoff s:00
+cfg.checked gate_holdoff_ms=
+hyst f:0.801 f:1.3943057684811857 f:1.382
+cfg.rate s: i:7
+scale f:0.3398638829935 f:1.45 f:-0.0052532804 int
+scale f:1.2864 f:0.438917611 f:-0.43013456263 lin
+cfg.checked led_dim=xx0
+hyst f:0.7 f:0.4849675315 f:1.487292499958953
+cfg.checked nebio_scan_hz=15\_.+
+scale f:-0.3840103 f:0.9484 f:1.0038137054229945 lin
+scale f:1.17945740815308 f:-0.4439 f:1.46808 int
+scale f:0.10208231 f:1.325266364100952 f:-0.4527734026 exp
+cfg.holdoff s:00
+cfg.checked wifi=01.
+scale f:1.1284805129 f:0.6616714553293059 f:1.3597692328 exp
+cfg.checked nebio_scan_hz=0\_+inf
+cfg.rate s:9 i:7
+hyst f:1.24795944 f:0.5326267878 f:-0.032469
+cfg.checked power_regulator=000x.-
+cfg.checked nebio_scan_hz=9-infxinf
+hyst f:-0.416 f:0.689936288 f:0.4233068964192426
+cfg.checked nebio_scan_hz=0x
+cfg.checked nebio_scan_hz=
+scale f:0.7153938895289 f:1.0 f:-0.4182604443488 exp
+cfg.holdoff s:nan_
+scale f:0.07321168265 f:0.125 i:4 exp
+hyst f:1.05 f:0.478386223757 f:0.734
+cfg.rate s: i:7
+cfg.holdoff s:5x9
+cfg.checked power_regulator=0inf
+cfg.holdoff s:
+cfg.rate s:nan00\_2.5 i:7
+cfg.holdoff s:
+hyst i:3 f:1.315 f:0.411006861486
+cfg.rate s:5 i:7
+scale f:0.21 i:4 i:0 lin
+cfg.checked gate_holdoff_ms=2.5
+cfg.rate s:5inf i:7
+hyst i:2 f:0.262350265 f:0.724106017219963
+scale i:-1 f:0.708 f:2.675 exp
+cfg.rate s:. i:7
+cfg.checked led_dim=52.5inf0
+scale f:1.13138227 f:0.842900917634 f:1e-05 int
+cfg.holdoff s:inf_-.inf
+cfg.rate s:0 i:7
+cfg.checked power_regulator=_50000nan
+cfg.holdoff s:00.inf
+cfg.holdoff s:e9nan
+cfg.holdoff s:_\_
+scale f:1.335523671996 f:-0.226924814 i:2 lin
+cfg.holdoff s:11_0
+cfg.rate s:_ i:7
+scale f:1.0031382 f:0.17247 f:1.39001444846173 int
+cfg.checked nebio_scan_hz=.5591_0
+cfg.holdoff s:_
+cfg.checked nebio_scan_hz=x-x-
+cfg.checked gate_holdoff_ms=5
+hyst f:0.3333333333333333 f:-0.418498 f:0.17397798814239
+scale i:5 f:0.399388244 f:0.5 exp
+cfg.checked wifi=9nan2.5
+cfg.holdoff s:infxinf\_
+scale i:-1 f:0.42042 f:0.9673550970436 lin
+cfg.checked gate_holdoff_ms=
+hyst f:0.680795829881752 f:-0.091 i:2
+cfg.checked nebio_scan_hz=0-0012.5
+cfg.holdoff s:+e
+cfg.holdoff s:x+9_
+cfg.holdoff s:9nan\_5
+cfg.checked wifi=1e2.5
+cfg.holdoff s:_5
+cfg.rate s:+nan_9nan i:7
+scale f:-0.30761 f:-0.2 f:-0.455495831237 exp
+cfg.rate s:.1_000 i:7
+cfg.rate s:+-nan1- i:7
+cfg.checked wifi=00nan.
+cfg.rate s:_1_0nan+ i:7
+cfg.rate s:.52.5nan00 i:7
+cfg.rate s:_ i:7
+cfg.checked wifi=+001inf2.5
+scale f:-0.03 i:4 f:1.2065435493 int
+cfg.rate s:- i:7
+cfg.rate s:0 i:7
+cfg.checked power_regulator=1_05
+cfg.holdoff s:9x+50
+hyst f:0.5409349 f:-0.450217 f:0.705614217
+cfg.checked power_regulator=+\_e2.51
+cfg.rate s: i:7
+cfg.rate s:-_2.5 i:7
+scale f:0.6 f:1.0095 f:1.35192986461 exp
+hyst i:3 f:0.125 f:0.71607
+cfg.checked power_regulator=1_0
+hyst i:-3 i:4 f:1e-05
+cfg.holdoff s:
+hyst f:1.4 i:1 f:0.65639012
+cfg.rate s:00_ i:7
+scale f:0.769268 f:1.440970061 f:-0.443882472 exp
+scale f:-0.339011709 i:1 f:-0.47856396961545133 int
+hyst i:4 f:0.7535306634915546 f:0.9867711556
+cfg.checked power_regulator=inf1nan
+hyst f:0.2650046446532341 f:0.9172 f:1.266764142629
+cfg.checked led_dim=009\_
+cfg.checked gate_holdoff_ms=0+
+scale i:0 f:1.36323366 f:-0.4118964143 int
+hyst i:-3 f:-0.0752577 f:0.819
+scale f:-0.18108239714121 f:-0.3161978202776239 f:0.4876909 exp
+cfg.rate s:_ i:7
+hyst i:-2 f:0.78 f:0.0
+cfg.checked wifi=-x
+cfg.rate s:1_0 i:7
+scale f:0.134281 f:1.1787341076653892 f:-0.3520455473853983 lin
+cfg.rate s: i:7
+scale f:0.5 f:1.1091 f:-0.219919407915 exp
+scale f:0.940649 f:1.0 i:3 exp
+cfg.holdoff s:1xnan
+cfg.rate s:0infinf- i:7
+scale f:-0.0607 f:0.3333333333333333 f:-0.4987366521647236 int
+scale f:-0.03124 f:0.2 f:-0.11 int
+cfg.rate s: i:7
+cfg.rate s:+_ i:7
+cfg.checked gate_holdoff_ms=1_0_0nan
+scale f:0.18247148439386018 i:-3 f:0.726839407439354 exp
+scale f:0.2969594706 f:1.2442 f:1.3764332788237135 int
+cfg.checked nebio_scan_hz=eeinf
+cfg.checked wifi=2.51_00nan
+cfg.checked wifi=e0
+scale f:1.4 f:1.2 f:0.8872832434553095 exp
+scale f:0.0 f:1.24605143990273 f:0.347926 int
+cfg.rate s:9e\_52.5 i:7
+cfg.checked gate_holdoff_ms=ee_00
+scale f:1.0 f:0.0644 f:-0.387504124402 int
+cfg.holdoff s:1_0e+1
+cfg.rate s: i:7
+cfg.checked wifi=2.5
+hyst i:4 f:0.117678511911372 f:-0.16203430045
+cfg.checked gate_holdoff_ms=-
+cfg.holdoff s:\_909
+cfg.holdoff s:nan1_01.
+scale f:0.551670638 f:-0.14224822662 f:0.6123424 lin
+cfg.holdoff s:\_
+hyst f:0.13117 f:-0.1983049486 i:4
+cfg.checked nebio_scan_hz=5
+cfg.checked nebio_scan_hz=+..
+hyst i:3 f:0.4 f:1.0987345105797
+scale f:1.06 f:1.0216841774573773 f:1.2342512739 int
+cfg.holdoff s:5\_1_0.2.5
+cfg.checked power_regulator=5_-nannan
+cfg.holdoff s:-
+scale f:0.696411268392611 i:-2 f:0.14907 int
+cfg.rate s:51_0+\_e i:7
+cfg.checked power_regulator=1_02.5_1_0
+hyst f:-0.478102 f:-0.0621 f:0.027027
+cfg.rate s:05 i:7
+cfg.rate s:12.5- i:7
+cfg.holdoff s:nanx5.
+cfg.checked wifi=911_09
+scale f:0.236423661 f:2.675 f:1.3621090936594245 exp
+scale f:1.0 f:1.0882210581672311 f:-0.31564671912468 lin
+cfg.checked wifi=nannan+0
+hyst f:-0.2039 f:0.47859194565195 f:0.6212594671
+cfg.checked led_dim=x
+hyst i:3 f:0.4858210858 f:0.6
+scale f:-0.2175882417373 f:-0.167012866 f:0.98322 int
+cfg.holdoff s:00x
+cfg.checked nebio_scan_hz=00_
+cfg.holdoff s:.9905
+cfg.rate s:+000099 i:7
+cfg.holdoff s:
+cfg.rate s:\_ i:7
+cfg.holdoff s:002.5inf+
+cfg.rate s:0 i:7
+scale f:1.3 i:2 f:1.3176 lin
+cfg.rate s:59 i:7
+cfg.holdoff s:e
+scale f:1.348999539518419 f:-0.21500699286 f:1.5 exp
+scale f:1.0970251054538 f:-0.379948 i:-2 int
+cfg.rate s:nan_1_0 i:7
+scale f:0.09 f:0.1008546985 f:1.0168 lin
+cfg.holdoff s:x\_
+cfg.holdoff s:-1_0100+
+cfg.holdoff s:2.5_nan+00
+hyst f:0.2 f:1.349413678622 f:0.37900528459
+cfg.rate s:001_0+nan i:7
+scale f:1.2 f:-0.1091409 f:-0.43622 int
+scale f:0.7909591692489757 f:0.7249 f:-0.3964177883599 exp
+scale f:0.613145887488 i:4 f:0.476 lin
+cfg.rate s:inf+e9 i:7
+scale f:0.929097 f:-0.0487251 f:0.9 lin
+cfg.holdoff s:2.5xxinf
+cfg.checked gate_holdoff_ms=\_2.51_0inf
+cfg.holdoff s:..1_0
+cfg.holdoff s:
+hyst f:2.675 f:0.9512 f:1.37448028
+cfg.checked led_dim=5
+cfg.rate s:1\__ i:7
+cfg.checked led_dim=5.\_9
+hyst f:1.1026285681 i:1 f:0.2801698152386
+cfg.holdoff s:e
+cfg.rate s:00+92.5x i:7
+hyst f:0.3 f:-0.06 f:0.5817303641
+scale f:0.70451446645 f:0.431041389982209 f:1.1526040956 lin
+hyst f:0.7954884 f:1.3800778574715675 f:0.32624
+cfg.checked wifi=51_0
+cfg.checked gate_holdoff_ms=_
+cfg.holdoff s:
+cfg.holdoff s:.1002.5
+cfg.rate s:1_0 i:7
+cfg.rate s:+x2.55 i:7
+scale f:0.921 f:1.4 f:1.0 exp
+scale f:0.5 f:1.4929120620157 f:0.25053462425 exp
+hyst f:-0.380869472385 i:-3 f:-0.00991798387551301
+cfg.holdoff s:+
+cfg.checked gate_holdoff_ms=_\_
+scale f:0.0926 f:1.022385616 f:-0.45494305379 lin
+scale i:4 f:1e-05 f:-0.072351 lin
+cfg.rate s:1 i:7
+hyst f:1.0 f:-0.2274 i:-1
+cfg.checked wifi=1_01_0xe\_
+cfg.rate s:\_9e.e i:7
+scale f:0.125 f:0.909368 f:-0.04 lin
+hyst f:0.719092097 f:0.965358165 f:1.2
+cfg.rate s:1_01009 i:7
+scale f:1.2 f:0.3333333333333333 f:0.021361525034213 int
+hyst i:5 f:-0.38966244 f:0.0
+cfg.rate s:1_09ex i:7
+scale f:-0.4297418928 f:0.928751 f:-0.13062592338 int
+cfg.holdoff s:10_einf
+scale f:0.71811860495 i:-1 f:0.9411571194336 int
+scale f:0.326 f:0.6751253 f:1e-05 exp
+scale f:0.2 f:0.41 f:-0.2531780831462933 lin
+hyst f:2.675 f:0.306967330702 i:5
+cfg.checked gate_holdoff_ms=inf2.5nan00_
+cfg.holdoff s:1\_.
+cfg.holdoff s:92.5nan\_.
+hyst f:1.4335617940547 f:0.04191378757 f:0.819456656289
+scale f:1.4605314 f:-0.436830514 f:0.734498455284 exp
+hyst f:0.1156994660679393 f:0.7869641466 i:5
+cfg.holdoff s:
+cfg.checked wifi=nane
+cfg.holdoff s:
+scale f:0.98739 f:1.271486046 f:0.9 int
+cfg.checked wifi=-_
+cfg.checked led_dim=
+cfg.checked power_regulator=naninfe.00
+cfg.holdoff s:_
+scale f:-0.3924175469916935 f:0.53440613215376 f:0.5 lin
+cfg.rate s:e0.e i:7
+scale f:-0.08869446 f:-0.41 f:0.0 exp
+scale i:-2 f:0.426180048446 f:0.984571904673 int
+cfg.holdoff s:+00
+scale f:0.804598 f:1.09310340104715 f:0.45 exp
+scale f:0.08 f:0.058081768191 f:0.125 lin
+cfg.rate s:-x9_- i:7
+cfg.holdoff s:
+cfg.rate s:+.einfx i:7
+cfg.holdoff s:2.51
+cfg.holdoff s:\_2.5
+cfg.checked nebio_scan_hz=\_
+hyst f:0.76600166335 f:1.0 f:0.11263623
+cfg.checked led_dim=2.55
+cfg.checked wifi=-2.5002.5
+scale f:0.429703 f:0.078475777727493 f:-0.0234750375726 lin
+cfg.rate s:x\_5nane i:7
+cfg.checked nebio_scan_hz=\_
+cfg.checked gate_holdoff_ms=x-e
+cfg.holdoff s:inf\_00
+cfg.checked power_regulator=inf
+cfg.rate s: i:7
+scale f:0.0077420339787002 f:1.39722360294154 f:0.5 lin
+scale f:0.690076 f:-0.18378 f:0.3309 exp
+cfg.holdoff s:
+cfg.holdoff s:1_050_
+hyst f:0.06637229 f:-0.06281464285 f:0.101901794748
+cfg.rate s:e5.2.5 i:7
+cfg.checked wifi=00
+hyst f:-0.29679720202058846 f:0.5 f:0.080752239248555
+cfg.checked wifi=_1_0e9
+cfg.holdoff s:2.5._e-
+cfg.rate s:x.0 i:7
+cfg.checked wifi=
+cfg.rate s:inf5\_ i:7
+hyst f:1.07 f:-0.04873208191 f:-0.0396920273
+scale f:-0.48761526616 f:-0.1738484142878 f:-0.12 exp
+cfg.rate s:inf0 i:7
+cfg.rate s:0 i:7
+cfg.rate s:_ i:7
+scale f:-0.1145623965232 f:0.0 f:-0.255009202 exp
+cfg.holdoff s:+5_15
+cfg.checked nebio_scan_hz=inf
+hyst f:0.02977291513199 f:-0.420846420956 i:-3
+cfg.holdoff s:ee.00x
+scale f:1.02422243397375 f:0.4032036555060108 i:1 int
+cfg.checked led_dim=00nan0\_
+scale f:-0.278528012 f:0.0 i:-1 lin
+scale f:-0.3234924 f:-0.04393 f:0.9846666859115887 lin
+scale f:1.395290759 f:-0.2377306 i:-2 lin
+hyst f:-0.0849 f:0.41745 f:0.6956977
+cfg.holdoff s:
+cfg.rate s:.9 i:7
+scale f:0.2014 f:-0.2 f:0.8656106 int
+cfg.holdoff s:-nan95
+cfg.checked nebio_scan_hz=
+hyst f:0.02 f:0.770347658 f:1.0
+cfg.holdoff s:
+cfg.rate s:. i:7
+cfg.rate s:xnan5enan i:7
+cfg.holdoff s:11
+cfg.rate s: i:7
+scale f:0.429 f:-0.2689 i:-1 exp
+cfg.holdoff s:2.5\_
+scale f:0.125 i:2 i:3 lin
+cfg.holdoff s:2.52.51_00
+hyst f:1.43613 f:0.0 i:-3
+cfg.holdoff s:+x5
+cfg.rate s: i:7
+hyst f:1.2813266717494 f:0.187912 f:1.0
+cfg.holdoff s:__inf\_
+hyst i:0 i:5 i:2
+cfg.checked wifi=\_15
+scale f:0.6164489065 f:0.3333333333333333 f:0.158227293267471 int
+hyst f:1e-05 f:-0.23 f:0.34292752549296
+cfg.holdoff s:nan
+scale f:0.7171217404154024 f:1.4150937083 f:0.4889910004516862 lin
+hyst f:0.632065441329 i:-2 f:0.560654518754042
+cfg.checked led_dim=0-_0
+hyst f:0.8754217 f:-0.187539862467 f:0.1027699653
+cfg.holdoff s:.91_0x
+cfg.holdoff s:9-\_\_
+cfg.holdoff s:e00
+scale f:0.8478 f:-0.07298044386770575 f:0.052 int
+cfg.rate s:0x1 i:7
+cfg.rate s:nanxnan0000 i:7
+scale f:-0.20193593 f:-0.273 f:1e-05 lin
+scale i:4 f:0.04201 f:0.5639345682 int
+hyst f:0.4509 f:-0.07218626113952 f:-0.40556
+cfg.holdoff s:
+cfg.rate s:00ex1 i:7
+cfg.holdoff s:
+cfg.rate s:inf00_xe i:7
+cfg.holdoff s:
+scale f:0.05483139 f:0.945512 f:-0.3644118964939831 lin
+scale f:0.2 f:1.228325641744 f:-0.175407195233 int
+hyst f:-0.179 f:0.077411350525 f:0.5480094218409355
+cfg.holdoff s:
+cfg.holdoff s:
+scale i:0 f:0.8789 f:0.108036 int
+scale f:0.38655813 f:0.4481 i:2 exp
+cfg.checked gate_holdoff_ms=inf51_0-nan
+cfg.checked led_dim=1_0-90
+cfg.holdoff s:
+hyst f:-0.2 f:0.18 i:-1
+cfg.holdoff s:1inf1_0.
+cfg.rate s:0 i:7
+cfg.holdoff s:+0nan-\_
+cfg.checked wifi=
+cfg.holdoff s:1_15.
+cfg.holdoff s:x100+
+cfg.rate s:\_002.5 i:7
+cfg.checked wifi=9e0-
+cfg.rate s:2.55_ i:7
+cfg.checked wifi=.1nan00
+cfg.rate s:inf-2.5_ i:7
+cfg.holdoff s:x02.5x1_0
+scale f:0.8571 f:0.377484197595279 f:-0.37 int
+cfg.checked wifi=_
+hyst f:0.831 f:0.456346174 f:1.0608
+cfg.checked wifi=1-001_0\_
+cfg.checked led_dim=x11_0
+cfg.holdoff s:
+cfg.holdoff s:.
+cfg.checked gate_holdoff_ms=.
+cfg.holdoff s:nannan-
+hyst f:-0.035597984989912 f:0.671 f:0.0956866101
+scale f:0.24103 f:-0.17247673618748 f:1.3434940130897215 lin
+scale f:0.125 f:0.854476 f:-0.4248426189 exp
+cfg.rate s:9x0._ i:7
+cfg.checked led_dim=0
+scale f:-0.24310666 f:0.78 f:0.18 int
+hyst f:1.3646576 f:1.24206355433 f:0.81
+cfg.checked nebio_scan_hz=_\_00
+hyst f:0.510727682144 f:0.1172919467 f:-0.0
+scale f:-0.382992804 f:0.5 f:-0.44735027159 int
+cfg.checked gate_holdoff_ms=inf100009
+cfg.rate s:2.5 i:7
+cfg.holdoff s:2.5
+hyst f:0.72 i:3 f:0.970715623257
+cfg.holdoff s:xnan91_01_0
+cfg.holdoff s:__
+cfg.rate s:1+\_\_ i:7
+cfg.rate s:9inf1_01_0 i:7
+cfg.checked gate_holdoff_ms=002.59
+scale f:0.19541 f:0.5557577309 f:-0.283168 exp
+hyst f:0.25165895798 f:0.86085 f:0.801144145
+cfg.rate s:nan.1_02.5 i:7
+cfg.holdoff s:000019x
+hyst f:1.44056581 f:1.014575 f:1.239
+scale f:-0.2304186922887 f:-0.320837 f:0.491865688256926 exp
+cfg.checked power_regulator=e+100
+cfg.checked power_regulator=
+cfg.holdoff s:e-
+cfg.checked wifi=1.1
+scale f:0.36195964 f:0.70366023 f:-0.200950024562476 lin
+cfg.holdoff s:1_0
+cfg.checked power_regulator=000nanx
+cfg.holdoff s:x19
+scale i:-1 f:0.978100383437 f:-0.328 exp
+hyst f:0.86885926198188 i:5 f:0.3333333333333333
+cfg.holdoff s:91nan
+hyst f:0.5595809227358997 f:1.0134139438903509 f:0.2792
+scale f:0.43839 f:1.3042553410369 f:1.192397153164056 lin
+scale f:1.34924635071 f:1.2368 f:0.16 exp
+hyst f:1.1261996578746958 i:3 i:0
+cfg.checked gate_holdoff_ms=
+cfg.holdoff s:x_2.59_
+cfg.rate s:x_\_ i:7
+cfg.checked power_regulator=_11_00
+cfg.holdoff s:x\_9xinf
+scale f:-0.432438108 f:-0.464274757207 f:0.0 lin
+cfg.holdoff s:e
+cfg.checked wifi=e
+hyst f:0.4180016023 f:-0.412588 f:0.00200515259
+cfg.rate s: i:7
+cfg.checked wifi=
+cfg.checked nebio_scan_hz=
+hyst f:0.7218477857866887 f:0.8046445604634167 f:-0.460546295919
+cfg.checked nebio_scan_hz=_x9+2.5
+hyst f:-0.05285680614 f:-0.1147908 f:0.1427671815700875
+cfg.rate s:x000000 i:7
+scale f:1.0 f:0.9115865951046558 i:-1 int
+cfg.rate s:x i:7
+scale f:1.3856168810993 f:-0.4382866113633641 f:0.060523895937 lin
+hyst f:1.04 i:4 f:0.565357087
+cfg.checked gate_holdoff_ms=1_05
+cfg.checked nebio_scan_hz=ee--9
+hyst f:1.2169269841 f:-0.408887684105 f:2.675
+cfg.checked gate_holdoff_ms=
+cfg.holdoff s:.-
+hyst f:0.499 f:-0.4057 i:0
+scale i:-2 f:1.0 i:3 exp
+cfg.checked power_regulator=\_infx2.59
+cfg.checked wifi=
+cfg.checked wifi=5.++
+hyst f:-0.47 f:0.417238071401332 f:1.4341953
+scale i:2 f:0.684649 f:-0.0827842548355 lin
+scale f:-0.2539653661 f:1.3746635957996096 f:0.3333333333333333 lin
+scale f:0.42674 i:-3 i:-2 int
+cfg.rate s:_ i:7
+cfg.checked led_dim=.
+cfg.checked nebio_scan_hz=
+cfg.rate s:1x i:7
+cfg.rate s: i:7
+cfg.holdoff s:\_\_00e
+cfg.rate s:inf-.09 i:7
+cfg.holdoff s:1_0nan0
+cfg.holdoff s:
+cfg.holdoff s:1nan\_1_05
+cfg.holdoff s:0
+cfg.holdoff s:1_02.5
+cfg.checked wifi=inf2.5\_9
+hyst f:0.93 f:-0.49 i:0
+cfg.checked wifi=55nan
+cfg.holdoff s:e2.5nan
+cfg.holdoff s:.2.5
+cfg.holdoff s:__
+cfg.holdoff s:
+cfg.checked power_regulator=infeinf000
+cfg.checked power_regulator=00inf2.5
+cfg.checked led_dim=.2.500-9
+cfg.holdoff s:
+cfg.holdoff s:
+cfg.rate s: i:7
+cfg.rate s: i:7
+scale f:-0.4870922952929508 f:1.03545972 f:0.08 exp
+cfg.checked nebio_scan_hz=
+cfg.holdoff s:1_0
+cfg.holdoff s:nan
+cfg.checked nebio_scan_hz=_nan.
+cfg.checked power_regulator=e9
+hyst f:-0.18703936867 f:1.0 f:1e-05
+cfg.rate s:0000_5e i:7
+hyst f:2.675 f:1.23839 f:0.53724723
+cfg.rate s:e50e i:7
+cfg.checked wifi=+e
+cfg.holdoff s:1\_-
+cfg.holdoff s:
+cfg.rate s: i:7
+hyst f:0.844 f:0.439045786 f:1.22859404642773
+cfg.holdoff s:2.52.5+
+hyst f:0.1866375602943 f:0.2715788669048 f:-0.232886042
+cfg.holdoff s:
+cfg.checked nebio_scan_hz=.-
+cfg.holdoff s:5
+cfg.holdoff s:000
+cfg.checked gate_holdoff_ms=
+hyst f:1.135306385664051 f:1.2804859451117419 f:1.0355617
+scale f:0.9541711643654684 f:0.4665409 f:0.7405634635226 exp
+scale i:2 f:1.308813146978 f:0.322784713348878 lin
+cfg.rate s:02.500infe i:7
+cfg.checked nebio_scan_hz=
+hyst f:0.0201537037082209 f:0.23411918977007 f:0.8322291527856294
+cfg.holdoff s:.xinfx
+scale f:0.1265 f:-0.1010726407266651 f:1.470168633602 exp
+cfg.rate s:9. i:7
+cfg.rate s:000 i:7
+cfg.checked wifi=1_0_5ee
+cfg.checked led_dim=5_0
+cfg.holdoff s:.
+cfg.rate s:\_.+x i:7
+hyst i:4 f:0.74234376814304 f:1.058142617
+cfg.checked nebio_scan_hz=infe.
+cfg.holdoff s:1_0
+hyst f:-0.40488 f:0.14459673166827902 i:-2
+cfg.checked wifi=_1_0
+cfg.rate s:000.5 i:7
+cfg.rate s:e1_09 i:7
+hyst f:0.077051825820301 f:0.099670323524 f:0.0886110954
+cfg.holdoff s:00
+scale f:0.944157666149877 f:0.22188228769998597 f:1.0 exp
+hyst i:4 f:1.2248 i:-3
+cfg.holdoff s:0+
+cfg.holdoff s:15
+scale f:1.3851150102015 f:-0.0196044 f:0.4 exp
+hyst f:0.00126454762 f:1.018637640205224 i:-3
+scale f:-0.2527770922018522 f:-0.1303312083 f:1.4939524 exp
+cfg.checked power_regulator=inf
+cfg.checked power_regulator=
+cfg.holdoff s:
+scale f:0.6764199 i:-1 f:1.31430554 int
+cfg.checked nebio_scan_hz=ex5\_5
+hyst f:1.0527166133 f:1.4505917110699218 i:2
+scale f:1.02471671404897 f:0.70664590393047 f:0.5697985701 lin
+scale f:0.5265083701 f:1.160472092277528 f:0.395 int
+cfg.rate s:_ i:7
+scale f:0.389578931873 f:0.88734005 f:1.38014661722 exp
+cfg.checked led_dim=
+cfg.checked nebio_scan_hz=+
+scale i:3 i:1 f:1.2718273169508 int
+cfg.rate s: i:7
+cfg.holdoff s:+inf2.5
+scale f:1.0 f:1.0 f:0.66456239 int
+scale f:1.0 i:5 i:-2 exp
+hyst f:1.47 f:0.8014 f:1.0771
+cfg.holdoff s:xx__00
+hyst f:0.47019 f:1.4473704418 f:1.283417211886
+scale f:0.818587 f:0.09553298709809055 f:1.2 lin
+scale f:0.46373 f:-0.42174267 f:0.746 lin
+cfg.holdoff s:2.5
+scale f:0.736029825767 f:1.2100349196301 f:-0.46310914032629 lin
+scale f:0.0 f:0.28 f:0.40520847 exp
+cfg.rate s:-inf i:7
+cfg.checked gate_holdoff_ms=enan+\__
+cfg.holdoff s:2.51
+hyst f:0.3394312536680806 f:1.2975027390318 f:0.9781046191865634
+cfg.holdoff s:
+cfg.rate s:00 i:7
+scale f:1.47354573 f:1.19177160442133 f:1.0 lin
+scale f:0.963 f:0.280219676550388 f:1.164542445 lin
+cfg.checked wifi=
+scale f:0.5776534035918219 f:0.03 f:1.021 int
+cfg.checked led_dim=5
+cfg.rate s:e2.5x+ i:7
+hyst f:-0.3398983919 i:4 i:-1
+cfg.rate s:\_nanx i:7
+hyst f:0.125 f:0.0159 f:0.717226218550479
+scale f:-0.478889684480825 f:0.5515318711 f:0.968417071 exp
+hyst f:0.603526 f:-0.0 f:0.46
+cfg.rate s:1_0 i:7
+cfg.holdoff s:.
+cfg.holdoff s:500
+hyst f:-0.36993632 f:-0.27 f:1.32879048989
+cfg.rate s:x-\__x i:7
+cfg.rate s:_nan i:7
+cfg.checked power_regulator=0_nannan
+cfg.checked gate_holdoff_ms=eenan5x
+hyst f:1.388973912 f:-0.268830398520552 i:-1
+cfg.checked led_dim=5inf00
+hyst i:0 f:0.51556328838 f:1.0706756
+cfg.checked nebio_scan_hz=-9
+cfg.rate s:00 i:7
+cfg.rate s:inf- i:7
+cfg.checked gate_holdoff_ms=11_0\_500
+cfg.rate s:x-x.0 i:7
+cfg.holdoff s:+-
+cfg.checked power_regulator=009
+cfg.rate s:9 i:7
+scale f:0.9 f:1.1068397298288408 f:-0.16748359 exp
+cfg.rate s: i:7
+cfg.checked nebio_scan_hz=--92.5
+cfg.checked nebio_scan_hz=nan
+cfg.checked wifi=\_92.5inf
+cfg.rate s: i:7
+cfg.rate s:_.9 i:7
+cfg.holdoff s:12.5-+
+cfg.holdoff s:99
+cfg.rate s: i:7
+cfg.checked wifi=\_-1_0e
+cfg.checked wifi=\_02.500
+cfg.checked power_regulator=1_000-2.5nan
+hyst f:0.9433 f:-0.0 f:1.4748243618524077
+cfg.checked led_dim=+
+hyst f:1.25147064575221 f:0.49542644 f:1.367
+cfg.checked nebio_scan_hz=nan+-50
+hyst f:0.8687280458618181 f:0.4892 f:0.041481957
+cfg.holdoff s:++1
+scale f:0.7777645 f:0.3721159 f:1.081903651127 int
+hyst f:1.16693900771 f:1e-05 f:1e-05
+scale f:0.3026 f:-0.381224 f:0.45468376 lin
+cfg.checked power_regulator=5x5inf
+hyst f:1.10763735173 f:0.34259580791 f:0.041008603
+cfg.holdoff s:1_0
+cfg.rate s:00 i:7
+cfg.rate s:e01x9 i:7
+cfg.checked nebio_scan_hz=__\_e
+cfg.holdoff s:\_-0
+cfg.holdoff s:2.5
+scale f:0.3333333333333333 f:1.132398647847 f:0.4207163 lin
+hyst f:0.421 f:0.23831240784669072 f:0.3333333333333333
+cfg.checked wifi=e
+cfg.holdoff s:01_0e-
+cfg.checked nebio_scan_hz=nan
+scale f:-0.0713073777549 f:-0.3 f:0.8 lin
+cfg.rate s:xnan1_0- i:7
+hyst i:-2 i:5 i:-1
+cfg.rate s: i:7
+cfg.holdoff s:
+cfg.holdoff s:2.50_+
+cfg.rate s:00-_e i:7
+scale f:1.0951189291529082 f:0.4080350082 f:0.513117 exp
+hyst f:0.4407178359 f:0.85416958312121 f:-0.39434618527
+cfg.holdoff s:+
+cfg.checked gate_holdoff_ms=-+
+hyst f:0.543133795624857 f:0.30224 f:1.1525923
+cfg.holdoff s:_inf.11
+hyst i:-3 f:0.79692399 f:1.01
+cfg.holdoff s:e5inf5
+cfg.rate s:0nan i:7
+cfg.holdoff s:0
+cfg.rate s: i:7
+hyst f:0.391 i:5 i:2
+cfg.holdoff s:
+cfg.checked wifi=.+
+hyst f:0.2650378130287 f:-0.454 f:0.877805787396378
+scale f:0.125 f:0.973 f:0.36407115196969 int
+cfg.rate s:nan1_05e i:7
+cfg.holdoff s:1\_9nan
+scale f:0.5 f:0.23479 f:0.3333333333333333 lin
+cfg.checked power_regulator=nan11+
+cfg.holdoff s:xx
+hyst f:1.4182 f:0.9855114994062486 f:-0.269692228
+cfg.rate s:91_0._. i:7
+cfg.holdoff s:00inf
+hyst i:-1 f:-0.138 i:3
+cfg.holdoff s:1_0x
+hyst f:1.0 f:0.4084 f:2.675
+cfg.rate s: i:7
+cfg.checked led_dim=\_001_09
+cfg.checked wifi=1_0inf_1_0x
+scale f:0.8202 i:0 f:0.125 exp
+scale f:-0.369 f:0.6760993 f:-0.1602304654091 lin
+cfg.holdoff s:e01_01_0
+cfg.checked gate_holdoff_ms=0inf
+hyst f:0.709719563467319 f:-0.29843768 f:0.6613864913
+cfg.holdoff s:1_0nane
+scale f:-0.12525 f:0.56876637 i:0 int
+scale f:0.5 f:1.29156181709 f:0.885 exp
+cfg.holdoff s:00900e
+cfg.checked led_dim=01_0_inf
+hyst f:-0.215 f:0.2195465304021 f:0.0

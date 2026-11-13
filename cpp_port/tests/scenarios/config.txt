@@ -1,0 +1,104 @@
+# configsettings.py: load, setters, the saved file, web requests, cmdline
+cfg.new c
+cfg.props c
+file.read configsettings.txt
+file.write configsettings.txt power_regulator=shell|no_pwm=on|led_stagger=off|services_quiet=on|wifi=on|led_dim=0.333|log_level=debug|nebio_scan_hz=1500|nebio_digital_hz=0|nebio_adc_hz=x|nebio_fast_gpio=on|csound_rt_priority=99|gate_interrupts=on|gate_holdoff_ms=12.34|junk|=x
+cfg.new c2
+cfg.props c2
+file.write configsettings.txt \_power_regulator\_=\_nohlt\_|wifi=ON|led_dim=7|log_level=verbose|nebio_scan_hz=10001|nebio_adc_hz=1_000|csound_rt_priority=100|gate_holdoff_ms=-1|no_pwm=off
+cfg.new c3
+cfg.props c3
+file.write configsettings.txt led_dim=nan|csound_rt_priority=-1|gate_holdoff_ms=100.04|nebio_digital_hz=+7|nebio_scan_hz=1.5e3
+cfg.new c4
+cfg.props c4
+file.write configsettings.txt led_dim=-inf|gate_holdoff_ms=100.06|log_level=Stats
+cfg.new c5
+cfg.props c5
+# setters write the file
+file.write cmdline.txt console=tty1 root=/dev/mmcblk0p2 rw
+cfg.setNoPwm c b:True
+file.read configsettings.txt
+cfg.setNoPwm c i:1
+cfg.setLedStagger c b:False
+cfg.setServicesQuiet c b:True
+cfg.setServicesQuiet c b:True
+cfg.setWifiOn c i:1
+cfg.setWifiOn c s:
+cfg.setLedDim c f:0.555
+cfg.setLedDim c s:0.125
+cfg.setLedDim c s:x
+cfg.setLedDim c i:5
+cfg.setNebioFastGpio c b:True
+cfg.setGateInterrupts c b:True
+cfg.setGateHoldoffMs c f:2.25
+cfg.setGateHoldoffMs c f:2.35
+cfg.setGateHoldoffMs c f:200
+cfg.setGateHoldoffMs c s:7
+cfg.props c
+file.read configsettings.txt
+cfg.setNebioRates c
+cfg.setNebioRates c i:50
+cfg.setNebioRates c i:1000 i:5000 i:0
+cfg.setNebioRates c None None i:300
+cfg.setNebioRates c s:800 f:99.9 None
+cfg.setNebioRates c s:x
+cfg.props c
+file.read configsettings.txt
+# power regulator and nohlt
+cfg.setPowerRegulator c s:fast
+cfg.setPowerRegulator c s:off
+cfg.setPowerRegulator c s:yield
+cfg.needsRestart c
+cfg.setPowerRegulator c s:nohlt
+file.read cmdline.txt
+cfg.needsRestart c
+cmdline.nohlt 1
+cfg.needsRestart c
+cfg.setPowerRegulator c s:shell
+file.read cmdline.txt
+cmdline.nohlt 0
+cfg.needsRestart c
+cfg.applyAtStart c
+cfg.setServicesQuiet c b:False
+cfg.setWifiOn c b:False
+cfg.applyAtStart c
+cfg.syncCmdline c
+file.write cmdline.txt nohlt a nohlt b
+cfg.syncCmdline c
+file.read cmdline.txt
+file.rm cmdline.txt
+cfg.syncCmdline c
+cfg.setPowerRegulator c s:off
+file.read configsettings.txt
+# requests from the web page
+cfg.checked power_regulator=yield no_pwm=on wifi=off led_stagger=maybe led_dim=0.456 nebio_scan_hz=5000 nebio_digital_hz=0 nebio_adc_hz=1.5 gate_holdoff_ms=3.33 restart=nebulae gate_interrupts=on nebio_fast_gpio=off services_quiet=on
+cfg.checked power_regulator=fast led_dim=x gate_holdoff_ms=101 restart=pi
+cfg.checked led_dim=nan gate_holdoff_ms=nan nebio_scan_hz=-5
+cfg.checked led_dim=inf gate_holdoff_ms=0
+cfg.checked
+cfg.takeRequest
+cfg.writeRequest no_pwm=off led_dim=0.5 nebio_adc_hz=300 gate_holdoff_ms=5 restart=nebulae power_regulator=off
+file.read config_request
+cfg.takeRequest
+file.read config_request
+file.write config_request a=b|wifi\_=\_on\_|=on|led_dim=0.2=3|nebio_scan_hz=1200|nebio_scan_hz=1300|novalue
+cfg.takeRequest
+cfg.holdoff s:5
+cfg.holdoff f:0.04
+cfg.holdoff f:0.05
+cfg.holdoff f:0.15
+cfg.holdoff None
+cfg.holdoff i:100
+cfg.holdoff s:1e2
+cfg.rate s:400 i:7
+cfg.rate s:0 i:7
+cfg.rate s:10000 i:7
+cfg.rate None i:7
+cfg.rate f:12.9 i:7
+cfg.rate s:12.9 i:7
+cfg.rate s:\_9_9\_ i:7
+# no config file yet: created empty
+file.rm configsettings.txt
+cfg.new c6
+file.read configsettings.txt
+cfg.props c6

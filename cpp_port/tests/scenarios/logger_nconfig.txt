@@ -1,0 +1,66 @@
+# classlogger.py formatting and nconfig.py (configparser rules)
+log.priority 50
+log.priority 49
+log.priority 40
+log.priority 30
+log.priority 20
+log.priority 15
+log.priority 10
+log.priority 0
+log.priority 99
+log.format 20 /home/alarm/x/control.py 42 hello 1
+log.format 40 control.py 7 first|second|third 1
+log.format 15 a/b/c.py 1 stats\_line 1
+log.format 30 ui.py 3 not|journal 0
+log.format 25 ui.py 3 odd\_level 1
+log.format 50 ui.py 3 trailing| 1
+# nconfig: no file
+ini.new n0
+ini.get n0 filterCoeff analog f:0.33
+file.write nebulae.opt [filterCoeff]|analog\_=\_0.25|Hybrid:0.5|#\_comment|;\_also|pitch\_=\_0.9\_|\_\_continued|start=%(analog)s|ratio=50%%|bad=5%|loop=%(loop)s|empty=|[other]|analog=1|[DEFAULT]|shared=yes
+ini.new n1
+ini.get n1 filterCoeff analog f:0.33
+ini.get n1 filterCoeff ANALOG f:0.33
+ini.get n1 filterCoeff hybrid f:0.43
+ini.get n1 filterCoeff pitch f:0.95
+ini.get n1 filterCoeff start f:0.95
+ini.get n1 filterCoeff ratio None
+ini.get n1 filterCoeff bad i:7
+ini.get n1 filterCoeff loop i:8
+ini.get n1 filterCoeff empty i:9
+ini.get n1 filterCoeff shared None
+ini.get n1 filterCoeff missing f:1.5
+ini.get n1 FilterCoeff analog f:0.33
+ini.get n1 other analog None
+ini.get n1 DEFAULT shared None
+file.write nebulae.opt analog=1
+ini.new n2
+file.write nebulae.opt [a]|x=1|x=2
+ini.new n3
+file.write nebulae.opt [a]|x=1|[a]|y=2
+ini.new n4
+file.write nebulae.opt [a]|novalue
+ini.new n5
+file.write nebulae.opt [a]|=5
+ini.new n6
+# the coefficients control.py reads at import
+file.write nebulae.opt [filterCoeff]|analog=0.5|hybrid=0.1
+control.reload [filterCoeff]|analog=0.5|hybrid=0.1|start=0.2
+adc 1 1 4095
+n.snapshot
+adc.new a 1 -1 blend i:0 i:1 f:0.0
+adc.getValue a
+adc.getValue a
+adc.getPotValue a
+adc.new s 1 -1 start i:0 i:1 f:0.0
+adc.getValue s
+adc.getPotValue s
+hyb.new h 1 other f:0.0 f:1.0 f:0.5
+hyb.getValue h
+hyb.getValue h
+hyb.getCVValue h
+control.reload [filterCoeff]|analog=x
+control.reload none
+adc.new b 1 -1 blend i:0 i:1 f:0.0
+adc.getValue b
+adc.getPotValue b

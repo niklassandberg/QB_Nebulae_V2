@@ -1,0 +1,8007 @@
+# random button and gate edges through DigitalData in every mode
+time 5000
+sr 0
+sr.new s
+sr.update s
+gpio 23 1
+gpio 24 1
+gpio 25 1
+gpio 4 1
+gpio 17 1
+dd.new d0 source 1 24 3 s latching falling i:1 0 0 f:2.0
+dd.new d1 file 2 6 5 s latching falling f:4.0 1 0 i:0
+dd.new d2 record 0 17 25 s latching falling i:1 0 1 f:2.0
+dd.new d3 source 5 -1 0 s latching falling i:1 0 2 i:0
+dd.new d4 file 4 -1 4 s latching falling i:5 0 1 i:7
+dd.new d5 source 1 24 3 s latching rising i:5 1 2 f:2.0
+dd.new d6 source 2 6 5 s latching rising f:4.0 0 0 f:2.0
+dd.new d7 x 0 17 25 s latching rising i:1 1 0 i:7
+dd.new d8 x 5 -1 0 s latching rising i:5 0 0 i:0
+dd.new d9 record 4 -1 4 s latching rising i:3 0 2 i:0
+dd.new d10 record 1 24 3 s triggered falling f:4.0 1 2 i:1
+dd.new d11 file 2 6 5 s triggered falling i:5 0 0 i:1
+dd.new d12 record 0 17 25 s triggered falling i:3 1 2 i:1
+dd.new d13 x 5 -1 0 s triggered falling i:1 1 2 i:1
+dd.new d14 file 4 -1 4 s triggered falling i:3 0 1 f:2.0
+dd.new d15 source 1 24 3 s triggered rising i:3 0 1 f:2.0
+dd.new d16 record 2 6 5 s triggered rising i:3 0 0 i:0
+dd.new d17 x 0 17 25 s triggered rising f:4.0 1 0 i:1
+dd.new d18 file 5 -1 0 s triggered rising f:4.0 1 0 i:1
+dd.new d19 source 4 -1 4 s triggered rising f:4.0 0 0 i:1
+dd.new d20 file_alt 1 24 3 s momentary falling i:3 0 2 i:7
+dd.new d21 source 2 6 5 s momentary falling i:5 1 0 i:1
+dd.new d22 file_alt 0 17 25 s momentary falling i:3 1 1 i:1
+dd.new d23 x 5 -1 0 s momentary falling i:1 0 2 f:2.0
+dd.new d24 file_alt 4 -1 4 s momentary falling i:1 1 1 i:1
+dd.new d25 x 1 24 3 s momentary rising f:4.0 1 2 f:2.0
+dd.new d26 source 2 6 5 s momentary rising i:5 1 2 i:0
+dd.new d27 file_alt 0 17 25 s momentary rising i:3 0 2 i:1
+dd.new d28 file_alt 5 -1 0 s momentary rising i:3 1 2 f:2.0
+dd.new d29 file 4 -1 4 s momentary rising i:5 1 0 i:1
+dd.new d30 file 1 24 3 s incremental falling f:4.0 1 2 i:0
+dd.new d31 record 2 6 5 s incremental falling i:3 0 0 i:0
+dd.new d32 file_alt 0 17 25 s incremental falling i:5 1 1 f:2.0
+dd.new d33 record 5 -1 0 s incremental falling f:4.0 0 1 i:1
+dd.new d34 file_alt 4 -1 4 s incremental falling i:1 1 1 i:1
+dd.new d35 file_alt 1 24 3 s incremental rising f:4.0 0 0 i:0
+dd.new d36 source 2 6 5 s incremental rising f:4.0 1 0 i:7
+dd.new d37 record 0 17 25 s incremental rising i:5 0 2 i:0
+dd.new d38 file 5 -1 0 s incremental rising i:3 1 0 i:0
+dd.new d39 reset_alt 4 -1 4 s incremental rising i:5 0 0 i:7
+dd.getLEDValue d0
+dd.getValue d21
+dd.getValue d18
+dd.getValue d30
+dd.setIncOrder d34 i:2
+rand 4 1
+dd.getTrigSource d38
+rand 0 3
+dd.getValue d33
+dd.setOutputPeriod d25 i:5
+advance 0.0449
+dd.setIgnoreGate d18 b:True
+dd.getLEDValue d8
+dd.getValue d2
+sr 16
+sr.update s
+dd.getValue d19
+sr 144
+sr.update s
+dd.getLEDValue d4
+sr 176
+sr.update s
+dd.getValue d28
+dd.getTrigSource d4
+dd.getLEDValue d9
+sr 177
+sr.update s
+dd.getValue d33
+sr 176
+sr.update s
+dd.getValue d21
+gpio 4 0
+advance 0.26
+dd.getValue d22
+dd.getValue d15
+advance 0.0023
+dd.getValue d13
+dd.getValue d4
+dd.getValue d32
+dd.getValue d27
+dd.getValue d21
+sr 144
+sr.update s
+dd.getValue d6
+sr 152
+sr.update s
+dd.getValue d26
+dd.getValue d4
+dd.getValue d37
+dd.setIgnoreHID d22 b:True
+dd.getValue d3
+advance 0.0088
+dd.getValue d24
+advance 0.0396
+dd.setMode d28 s:latching s:rising
+sr 184
+sr.update s
+dd.getValue d29
+dd.getValue d9
+sr 185
+sr.update s
+dd.setOutputPeriod d31 i:5
+dd.getValue d0
+dd.getLEDValue d0
+dd.getValue d9
+sr 57
+sr.update s
+dd.getValue d22
+dd.getValue d6
+dd.getValue d11
+dd.getValue d17
+dd.getLEDValue d30
+dd.getValue d38
+dd.getLEDValue d16
+dd.getValue d31
+dd.getLEDValue d39
+rand 3 1
+dd.getValue d10
+dd.getValue d39
+dd.getValue d3
+advance 0.0222
+dd.getValue d32
+sr 185
+sr.update s
+dd.setIgnoreNextButton d9
+dd.getValue d39
+sr 184
+sr.update s
+dd.setOutputPeriod d17 i:10
+dd.getValue d17
+gpio 4 1
+advance 0.26
+dd.getLEDValue d37
+dd.getLEDValue d39
+dd.getValue d30
+dd.setMode d8 s:momentary s:falling
+dd.getLEDValue d29
+sr 56
+sr.update s
+dd.getLEDValue d6
+gpio 4 0
+advance 0.26
+dd.getValue d35
+dd.getValue d38
+dd.getValue d37
+dd.getValue d14
+dd.getValue d30
+dd.getValue d10
+advance 0.0157
+dd.getValue d33
+sr 40
+sr.update s
+dd.getValue d32
+dd.getTrigSource d7
+dd.setIgnoreHID d24 b:True
+dd.getValue d16
+dd.setIgnoreGate d3 b:False
+dd.getValue d2
+rand 2 3
+dd.setIgnoreGate d2 b:True
+dd.getValue d33
+dd.getValue d23
+advance 0.057
+dd.getValue d22
+dd.getValue d4
+sr 32
+sr.update s
+dd.getValue d15
+rand 6 3
+dd.getLEDValue d29
+advance 0.0289
+dd.getLEDValue d18
+dd.getValue d10
+dd.getValue d26
+dd.getValue d20
+dd.setIgnoreHID d32 b:True
+dd.getTrigSource d9
+dd.getValue d4
+sr 160
+sr.update s
+dd.getValue d24
+sr 128
+sr.update s
+dd.getValue d22
+gpio 23 0
+advance 0.26
+dd.getValue d9
+dd.getValue d38
+dd.getValue d30
+dd.getValue d31
+dd.getValue d33
+dd.getLEDValue d27
+dd.getValue d39
+dd.getValue d19
+dd.getValue d10
+dd.getValue d1
+dd.getValue d9
+dd.setIgnoreGate d11 b:True
+dd.getValue d13
+dd.getValue d34
+dd.getValue d4
+dd.getLEDValue d27
+advance 0.0536
+dd.getValue d16
+dd.getLEDValue d16
+sr 0
+sr.update s
+dd.getValue d18
+gpio 17 0
+advance 0.26
+dd.setIgnoreHID d19 b:False
+dd.getLEDValue d6
+advance 0.0354
+dd.getValue d11
+gpio 25 0
+advance 0.26
+dd.getValue d35
+dd.getValue d31
+dd.setIgnoreGate d28 b:False
+dd.getValue d37
+dd.getValue d29
+dd.getValue d31
+dd.getValue d14
+advance 0.0151
+dd.getLEDValue d33
+dd.getLEDValue d1
+dd.getValue d26
+dd.getTrigSource d15
+dd.getValue d3
+dd.getValue d8
+dd.getValue d6
+dd.getValue d34
+dd.getValue d37
+dd.getValue d37
+dd.getValue d37
+rand 3 1
+dd.getValue d12
+dd.getValue d19
+dd.getValue d38
+advance 0.0446
+dd.getValue d20
+dd.getValue d20
+dd.getValue d27
+sr 128
+sr.update s
+dd.getValue d17
+dd.getTrigSource d9
+sr 192
+sr.update s
+dd.getValue d5
+dd.getTrigSource d32
+rand -1 0
+dd.getValue d5
+sr 64
+sr.update s
+dd.getValue d18
+sr 192
+sr.update s
+dd.getValue d22
+sr 128
+sr.update s
+dd.setIgnoreHID d16 b:False
+sr 136
+sr.update s
+dd.getValue d7
+dd.getValue d17
+dd.getTrigSource d20
+advance 0.0251
+dd.getValue d17
+dd.getValue d31
+sr 137
+sr.update s
+dd.getValue d30
+dd.setIgnoreHID d31 b:False
+dd.getValue d22
+dd.getValue d23
+dd.getValue d35
+dd.getLEDValue d15
+dd.getValue d2
+sr 169
+sr.update s
+dd.getLEDValue d14
+sr 41
+sr.update s
+dd.getValue d32
+dd.getValue d22
+dd.getLEDValue d38
+dd.getValue d4
+dd.getLEDValue d5
+dd.setIgnoreGate d12 b:True
+dd.getValue d6
+dd.getValue d4
+dd.getLEDValue d29
+sr 105
+sr.update s
+dd.getValue d25
+dd.getValue d30
+sr 41
+sr.update s
+dd.getValue d4
+dd.getValue d21
+dd.getValue d8
+dd.getLEDValue d35
+dd.getValue d30
+sr 57
+sr.update s
+dd.getValue d25
+dd.getValue d36
+dd.getValue d11
+dd.getValue d27
+sr 41
+sr.update s
+dd.getValue d15
+advance 0.0239
+dd.getValue d15
+dd.getValue d37
+dd.getValue d22
+sr 57
+sr.update s
+dd.getValue d20
+dd.getLEDValue d11
+dd.getTrigSource d17
+dd.getValue d8
+dd.getValue d2
+sr 41
+sr.update s
+dd.getValue d0
+advance 0.0393
+dd.getLEDValue d23
+dd.getValue d31
+dd.getValue d10
+dd.getValue d7
+dd.getLEDValue d24
+dd.getValue d28
+dd.getValue d5
+dd.getValue d28
+gpio 17 1
+advance 0.26
+dd.getValue d28
+rand -1 1
+dd.getLEDValue d13
+dd.setValue d0 i:0
+dd.getValue d23
+dd.getValue d2
+dd.getValue d7
+dd.getValue d22
+gpio 25 1
+advance 0.26
+dd.getValue d23
+dd.getValue d13
+dd.getValue d37
+dd.getLEDValue d29
+dd.getValue d22
+gpio 24 0
+advance 0.26
+dd.getTrigSource d28
+dd.getValue d6
+dd.getLEDValue d11
+dd.getValue d21
+advance 0.0127
+dd.getValue d11
+advance 0.0415
+dd.getValue d38
+dd.getValue d25
+dd.getValue d30
+dd.getLEDValue d27
+dd.getLEDValue d13
+rand 1 3
+dd.getValue d9
+dd.getLEDValue d12
+dd.getValue d38
+gpio 23 1
+advance 0.26
+dd.getValue d20
+dd.setIgnoreGate d29 b:False
+gpio 24 1
+advance 0.26
+dd.getValue d17
+dd.getValue d20
+dd.getLEDValue d37
+dd.getValue d20
+dd.getValue d36
+sr 169
+sr.update s
+dd.getValue d23
+dd.getValue d23
+dd.getValue d8
+dd.getLEDValue d28
+dd.getValue d11
+dd.setIgnoreNextButton d26
+gpio 24 0
+advance 0.26
+dd.getValue d26
+dd.getValue d4
+sr 137
+sr.update s
+dd.getValue d37
+dd.getValue d18
+dd.getValue d0
+sr 129
+sr.update s
+dd.getLEDValue d11
+rand -1 1
+dd.getLEDValue d3
+gpio 17 0
+advance 0.26
+dd.getValue d36
+dd.getValue d5
+advance 0.0593
+dd.getLEDValue d5
+sr 137
+sr.update s
+dd.setMode d24 s:momentary s:rising
+dd.getValue d18
+sr 9
+sr.update s
+dd.getTrigSource d15
+gpio 25 0
+advance 0.26
+dd.getLEDValue d30
+advance 0.0221
+dd.getLEDValue d32
+dd.getValue d19
+dd.getLEDValue d6
+dd.getLEDValue d24
+sr 41
+sr.update s
+dd.setIgnoreNextButton d11
+sr 40
+sr.update s
+dd.setIncOrder d32 i:1
+advance 0.053
+dd.getValue d35
+dd.getTrigSource d35
+dd.getValue d19
+sr 168
+sr.update s
+dd.getValue d31
+dd.getValue d23
+dd.getLEDValue d32
+sr 160
+sr.update s
+dd.getValue d35
+dd.getLEDValue d18
+gpio 17 1
+advance 0.26
+dd.getLEDValue d37
+dd.getValue d25
+dd.getValue d33
+dd.getValue d16
+dd.getValue d24
+sr 161
+sr.update s
+dd.getValue d16
+dd.getValue d8
+dd.getLEDValue d8
+dd.getValue d25
+sr 129
+sr.update s
+dd.getValue d8
+sr 161
+sr.update s
+dd.getValue d0
+rand 5 3
+dd.getValue d37
+dd.getValue d24
+dd.getValue d4
+dd.getValue d25
+dd.getValue d21
+gpio 24 1
+advance 0.26
+dd.getValue d28
+dd.getValue d15
+dd.setIgnoreNextButton d20
+gpio 25 1
+advance 0.26
+dd.getValue d32
+dd.getValue d17
+rand 4 1
+dd.getLEDValue d15
+dd.getValue d33
+dd.getValue d0
+dd.getValue d35
+dd.setIgnoreNextButton d7
+dd.getLEDValue d0
+dd.getValue d12
+dd.setIgnoreNextButton d1
+sr 177
+sr.update s
+dd.getLEDValue d8
+dd.getLEDValue d12
+dd.getValue d7
+dd.getValue d27
+dd.getValue d18
+dd.getValue d15
+gpio 24 0
+advance 0.26
+dd.getValue d16
+dd.getLEDValue d11
+dd.getValue d29
+dd.getLEDValue d30
+dd.getLEDValue d7
+advance 0.0501
+dd.getValue d29
+sr 145
+sr.update s
+dd.getValue d36
+sr 153
+sr.update s
+dd.getValue d5
+rand 5 2
+dd.getValue d4
+dd.setIgnoreGate d38 b:False
+dd.getValue d26
+dd.getValue d39
+dd.getValue d29
+dd.getValue d22
+dd.getValue d29
+dd.getValue d38
+dd.getValue d1
+dd.getLEDValue d16
+dd.getValue d11
+dd.setIncOrder d14 i:1
+rand 6 0
+dd.getValue d30
+advance 0.0212
+dd.getValue d26
+sr 217
+sr.update s
+dd.getValue d1
+dd.getValue d33
+sr 89
+sr.update s
+dd.getValue d21
+advance 0.0198
+dd.setOutputPeriod d33 i:40
+dd.getValue d24
+dd.getValue d39
+gpio 23 0
+advance 0.26
+dd.setIncOrder d37 i:2
+dd.getValue d39
+dd.getValue d13
+dd.getValue d3
+dd.getValue d10
+dd.getValue d32
+dd.getValue d30
+dd.setValue d11 i:4
+dd.getValue d30
+dd.getValue d9
+sr 81
+sr.update s
+dd.getTrigSource d7
+rand 2 3
+dd.getValue d11
+advance 0.0373
+dd.getLEDValue d3
+dd.getValue d17
+dd.getValue d18
+dd.getLEDValue d37
+rand 4 2
+dd.getValue d12
+dd.getValue d3
+dd.setValue d5 i:0
+dd.setOutputPeriod d18 i:40
+dd.getValue d25
+advance 0.0053
+dd.getValue d22
+sr 209
+sr.update s
+dd.getValue d8
+dd.getValue d33
+sr 145
+sr.update s
+dd.getValue d29
+gpio 17 0
+advance 0.26
+dd.getValue d14
+dd.getLEDValue d24
+dd.getLEDValue d29
+dd.setIgnoreNextButton d23
+dd.getLEDValue d37
+gpio 17 1
+advance 0.26
+dd.getValue d7
+dd.getLEDValue d21
+dd.setMode d3 s:momentary s:falling
+advance 0.0354
+dd.getValue d26
+dd.getLEDValue d13
+sr 209
+sr.update s
+dd.getValue d14
+dd.getValue d4
+sr 241
+sr.update s
+dd.getValue d24
+dd.getValue d23
+dd.getValue d9
+dd.getValue d13
+dd.setIgnoreGate d16 b:False
+dd.setIgnoreNextButton d17
+gpio 24 1
+advance 0.26
+dd.getValue d21
+dd.getValue d30
+dd.setIgnoreGate d9 b:True
+dd.getValue d25
+dd.getValue d18
+dd.getValue d8
+dd.getValue d30
+dd.getValue d11
+dd.getValue d20
+dd.getValue d14
+dd.setValue d5 i:4
+dd.getValue d11
+dd.getValue d30
+dd.getTrigSource d24
+gpio 23 1
+advance 0.26
+dd.getValue d23
+dd.getValue d38
+dd.getValue d12
+dd.getLEDValue d7
+dd.getValue d23
+gpio 23 0
+advance 0.26
+dd.getValue d0
+sr 177
+sr.update s
+dd.getLEDValue d20
+advance 0.0512
+dd.getValue d3
+dd.getValue d8
+gpio 24 0
+advance 0.26
+dd.getValue d29
+advance 0.0501
+dd.getValue d8
+dd.getLEDValue d15
+dd.getValue d1
+dd.getValue d22
+advance 0.009
+dd.setIncOrder d5 i:1
+gpio 17 0
+advance 0.26
+dd.getValue d7
+dd.getValue d12
+advance 0.048
+dd.getValue d13
+dd.getLEDValue d20
+advance 0.0506
+dd.getValue d6
+dd.getValue d28
+dd.getValue d31
+advance 0.0039
+dd.getLEDValue d23
+dd.getValue d28
+sr 161
+sr.update s
+dd.setIgnoreHID d29 b:True
+dd.getValue d38
+dd.setMode d8 s:momentary s:rising
+sr 33
+sr.update s
+dd.getValue d25
+dd.getLEDValue d33
+sr 32
+sr.update s
+dd.getValue d8
+sr 33
+sr.update s
+dd.getValue d28
+dd.setIgnoreHID d7 b:False
+dd.getValue d23
+dd.getValue d11
+dd.getLEDValue d5
+dd.getValue d29
+sr 161
+sr.update s
+dd.getValue d17
+rand 3 3
+dd.getValue d4
+dd.getValue d27
+dd.getLEDValue d15
+advance 0.0142
+dd.getValue d21
+dd.setMode d19 s:triggered s:rising
+sr 129
+sr.update s
+dd.getValue d20
+dd.getValue d35
+advance 0.0406
+dd.getLEDValue d24
+gpio 25 0
+advance 0.26
+dd.getValue d29
+dd.getValue d23
+gpio 24 1
+advance 0.26
+dd.getValue d1
+sr 1
+sr.update s
+dd.getLEDValue d20
+dd.getLEDValue d2
+dd.getValue d21
+dd.getValue d17
+gpio 17 1
+advance 0.26
+dd.getTrigSource d25
+dd.getLEDValue d26
+sr 129
+sr.update s
+dd.setIgnoreHID d22 b:True
+dd.setValue d12 i:2
+dd.getValue d5
+dd.getValue d6
+sr 137
+sr.update s
+dd.getValue d24
+dd.getValue d21
+dd.getValue d18
+dd.getLEDValue d25
+gpio 4 1
+advance 0.26
+dd.getValue d39
+sr 169
+sr.update s
+dd.setOutputPeriod d9 i:5
+advance 0.0385
+dd.getValue d10
+dd.setIgnoreHID d37 b:True
+sr 185
+sr.update s
+dd.getLEDValue d24
+advance 0.0344
+dd.getValue d22
+sr 153
+sr.update s
+dd.getLEDValue d20
+dd.getValue d11
+gpio 4 0
+advance 0.26
+dd.getValue d28
+sr 25
+sr.update s
+dd.getValue d14
+dd.getValue d25
+dd.getValue d20
+dd.getValue d24
+advance 0.0398
+dd.getValue d31
+dd.setIncOrder d37 i:1
+dd.getValue d34
+gpio 23 1
+advance 0.26
+dd.getValue d16
+dd.getValue d11
+dd.setIgnoreNextButton d19
+advance 0.0536
+dd.getValue d18
+gpio 4 1
+advance 0.26
+dd.getValue d37
+dd.getValue d23
+dd.getValue d20
+dd.getLEDValue d24
+dd.getLEDValue d37
+dd.getValue d24
+dd.getValue d29
+dd.getValue d8
+sr 17
+sr.update s
+dd.getValue d3
+dd.getLEDValue d31
+rand 1 2
+dd.getValue d0
+dd.getLEDValue d34
+dd.getValue d16
+dd.getValue d0
+dd.getValue d10
+dd.getLEDValue d34
+dd.setIgnoreGate d32 b:False
+dd.getValue d4
+dd.getValue d22
+sr 25
+sr.update s
+dd.getValue d8
+dd.getLEDValue d28
+dd.getValue d9
+dd.getValue d33
+dd.getValue d5
+sr 57
+sr.update s
+dd.getLEDValue d33
+dd.getLEDValue d13
+dd.getValue d15
+dd.getValue d4
+sr 25
+sr.update s
+dd.getValue d23
+dd.getValue d15
+dd.getLEDValue d8
+dd.getLEDValue d4
+advance 0.0238
+dd.getValue d5
+dd.getValue d30
+dd.setIgnoreHID d27 b:False
+dd.getValue d33
+gpio 23 0
+advance 0.26
+dd.getValue d9
+sr 9
+sr.update s
+dd.getValue d24
+dd.getLEDValue d21
+dd.getLEDValue d34
+dd.getValue d22
+dd.getValue d1
+sr 8
+sr.update s
+dd.getLEDValue d19
+dd.getLEDValue d33
+dd.getLEDValue d20
+dd.getLEDValue d35
+dd.getValue d38
+dd.getLEDValue d37
+dd.setIgnoreNextButton d17
+dd.getLEDValue d27
+dd.getValue d18
+dd.setIncOrder d16 i:2
+dd.getValue d25
+dd.getLEDValue d26
+dd.getValue d21
+dd.getLEDValue d6
+dd.setIgnoreNextButton d20
+dd.getValue d38
+gpio 4 0
+advance 0.26
+dd.getValue d33
+gpio 4 1
+advance 0.26
+dd.getValue d36
+dd.getValue d33
+advance 0.0131
+dd.getValue d13
+gpio 23 1
+advance 0.26
+dd.getValue d19
+dd.getValue d0
+dd.getLEDValue d2
+gpio 4 0
+advance 0.26
+dd.getValue d13
+dd.getValue d31
+dd.getValue d6
+advance 0.038
+dd.getValue d14
+rand 1 3
+dd.getTrigSource d34
+dd.getValue d17
+dd.getValue d28
+dd.getLEDValue d28
+sr 40
+sr.update s
+dd.getValue d16
+dd.getValue d11
+gpio 17 0
+advance 0.26
+dd.getValue d10
+dd.getValue d20
+dd.getValue d27
+dd.getLEDValue d28
+advance 0.0095
+dd.getValue d6
+dd.getLEDValue d4
+dd.getValue d17
+dd.getLEDValue d19
+advance 0.0348
+dd.getValue d26
+dd.getValue d30
+dd.getValue d4
+gpio 4 1
+advance 0.26
+dd.getValue d3
+dd.getValue d39
+dd.getValue d37
+sr 8
+sr.update s
+dd.getValue d34
+dd.setIgnoreNextButton d30
+advance 0.0308
+dd.getValue d4
+gpio 24 0
+advance 0.26
+dd.getLEDValue d9
+sr 40
+sr.update s
+dd.getLEDValue d13
+dd.getValue d37
+gpio 4 0
+advance 0.26
+dd.getValue d7
+gpio 4 1
+advance 0.26
+dd.getLEDValue d1
+dd.getLEDValue d34
+dd.getLEDValue d1
+dd.getValue d0
+dd.getValue d15
+dd.getValue d6
+dd.getValue d23
+sr 104
+sr.update s
+dd.getValue d24
+dd.getValue d8
+dd.getLEDValue d9
+gpio 23 0
+advance 0.26
+dd.getValue d20
+gpio 23 1
+advance 0.26
+dd.getValue d32
+dd.getLEDValue d30
+dd.getValue d35
+gpio 17 1
+advance 0.26
+dd.getValue d16
+dd.getValue d15
+dd.getValue d8
+sr 120
+sr.update s
+dd.getTrigSource d15
+sr 121
+sr.update s
+dd.getValue d13
+dd.getValue d3
+dd.getValue d35
+dd.getValue d23
+dd.getValue d35
+dd.setIgnoreHID d9 b:False
+dd.getValue d18
+dd.getLEDValue d1
+dd.getValue d5
+dd.getLEDValue d32
+dd.getValue d39
+dd.getValue d15
+advance 0.0446
+dd.getValue d5
+dd.getValue d26
+advance 0.042
+dd.getValue d13
+gpio 23 0
+advance 0.26
+dd.getLEDValue d19
+dd.getValue d9
+dd.getLEDValue d26
+dd.getTrigSource d32
+dd.getValue d25
+dd.getValue d2
+dd.getLEDValue d15
+sr 120
+sr.update s
+dd.getValue d24
+dd.getValue d27
+dd.setValue d17 i:3
+dd.setValue d31 i:2
+sr 112
+sr.update s
+dd.getValue d32
+advance 0.0013
+dd.setIgnoreHID d7 b:False
+dd.getValue d19
+dd.getValue d36
+dd.getValue d21
+sr 240
+sr.update s
+dd.setIgnoreGate d20 b:True
+dd.getValue d22
+dd.getValue d37
+sr 208
+sr.update s
+dd.getValue d6
+dd.getValue d11
+gpio 17 0
+advance 0.26
+dd.getValue d17
+dd.getValue d33
+sr 216
+sr.update s
+dd.getValue d15
+rand 4 2
+dd.getValue d3
+dd.getValue d35
+dd.setValue d1 i:3
+dd.getValue d21
+dd.getLEDValue d32
+dd.getValue d19
+dd.getTrigSource d4
+dd.getValue d3
+dd.getValue d29
+dd.getValue d19
+dd.getValue d20
+dd.setOutputPeriod d39 i:5
+advance 0.0353
+dd.getLEDValue d37
+sr 208
+sr.update s
+dd.getValue d21
+dd.getValue d0
+dd.getValue d6
+sr 144
+sr.update s
+dd.getValue d33
+dd.getLEDValue d37
+dd.getValue d4
+dd.getValue d3
+gpio 17 1
+advance 0.26
+dd.getValue d38
+sr 128
+sr.update s
+dd.getValue d0
+dd.getLEDValue d12
+dd.getLEDValue d31
+dd.getValue d16
+dd.setIgnoreGate d38 b:False
+rand 0 1
+dd.getValue d34
+rand 1 2
+dd.getValue d29
+dd.getValue d3
+dd.setOutputPeriod d27 i:10
+dd.getValue d23
+dd.getValue d39
+dd.getValue d26
+dd.getValue d39
+dd.getValue d16
+dd.getValue d29
+dd.getValue d21
+dd.getLEDValue d38
+dd.setIncOrder d2 i:0
+advance 0.0398
+dd.getValue d17
+sr 129
+sr.update s
+dd.getValue d18
+dd.getValue d6
+sr 128
+sr.update s
+dd.getValue d12
+dd.getValue d36
+sr 136
+sr.update s
+dd.getValue d38
+dd.getValue d35
+dd.getLEDValue d24
+dd.getValue d0
+sr 8
+sr.update s
+dd.getValue d16
+dd.getLEDValue d10
+advance 0.0562
+dd.getValue d4
+dd.getValue d30
+advance 0.0136
+dd.getTrigSource d3
+gpio 24 1
+advance 0.26
+dd.getValue d20
+dd.getLEDValue d25
+dd.getValue d31
+dd.getValue d11
+dd.getValue d31
+dd.getLEDValue d10
+advance 0.057
+dd.getValue d11
+dd.getValue d35
+dd.getValue d27
+gpio 4 0
+advance 0.26
+dd.getLEDValue d17
+gpio 23 1
+advance 0.26
+dd.getValue d17
+advance 0.0006
+dd.getValue d25
+dd.getValue d14
+dd.getValue d0
+dd.getValue d16
+sr 24
+sr.update s
+dd.getValue d20
+dd.getValue d32
+dd.getValue d30
+dd.getValue d28
+dd.setIgnoreGate d33 b:False
+dd.getValue d4
+gpio 4 1
+advance 0.26
+dd.getValue d3
+dd.getLEDValue d10
+dd.getTrigSource d23
+dd.getValue d28
+dd.getValue d9
+dd.setIgnoreGate d7 b:False
+dd.getValue d0
+dd.getValue d15
+dd.getValue d15
+sr 16
+sr.update s
+dd.setIncOrder d7 i:2
+gpio 17 0
+advance 0.26
+dd.setOutputPeriod d33 i:5
+sr 80
+sr.update s
+dd.getLEDValue d37
+dd.getLEDValue d30
+dd.getValue d3
+dd.getValue d28
+dd.getValue d21
+dd.setIgnoreGate d31 b:False
+dd.getValue d17
+dd.getLEDValue d5
+dd.getValue d16
+dd.getValue d8
+sr 16
+sr.update s
+dd.getValue d0
+dd.setIgnoreHID d21 b:False
+dd.setIgnoreNextButton d1
+dd.getValue d28
+dd.getValue d3
+dd.getValue d28
+dd.getValue d23
+dd.getLEDValue d22
+dd.getValue d23
+sr 80
+sr.update s
+dd.getValue d6
+sr 112
+sr.update s
+dd.setIncOrder d17 i:1
+dd.getValue d36
+gpio 4 0
+advance 0.26
+dd.getLEDValue d27
+dd.getValue d2
+advance 0.0404
+dd.setValue d25 i:2
+dd.getValue d10
+dd.getValue d17
+dd.getValue d30
+gpio 23 0
+advance 0.26
+dd.getValue d19
+dd.getValue d5
+dd.getValue d3
+dd.getLEDValue d5
+dd.getValue d22
+gpio 4 1
+advance 0.26
+dd.getValue d32
+advance 0.0049
+dd.getValue d4
+sr 48
+sr.update s
+dd.getValue d2
+gpio 24 0
+advance 0.26
+dd.getLEDValue d6
+dd.getValue d6
+sr 112
+sr.update s
+dd.getValue d32
+dd.getValue d11
+dd.getValue d19
+dd.getLEDValue d5
+dd.getLEDValue d20
+dd.getValue d17
+dd.getValue d37
+sr 240
+sr.update s
+dd.getValue d2
+gpio 4 0
+advance 0.26
+dd.setMode d27 s:momentary s:falling
+sr 176
+sr.update s
+dd.getLEDValue d28
+dd.getValue d28
+gpio 25 1
+advance 0.26
+dd.getValue d2
+dd.setOutputPeriod d12 i:5
+sr 184
+sr.update s
+dd.getValue d33
+dd.getValue d33
+dd.getValue d25
+dd.getLEDValue d10
+sr 56
+sr.update s
+dd.setIncOrder d34 i:2
+rand 3 1
+dd.getValue d23
+dd.getValue d25
+dd.getValue d24
+advance 0.0027
+dd.getValue d12
+sr 40
+sr.update s
+dd.getValue d34
+dd.getValue d15
+dd.getValue d5
+dd.getTrigSource d24
+dd.setMode d11 s:triggered s:falling
+dd.getValue d33
+gpio 17 1
+advance 0.26
+dd.getValue d0
+dd.getLEDValue d10
+dd.getLEDValue d4
+dd.getValue d32
+sr 41
+sr.update s
+dd.setIgnoreHID d37 b:True
+dd.getValue d21
+advance 0.0554
+dd.getValue d27
+dd.getValue d10
+dd.getLEDValue d0
+sr 57
+sr.update s
+dd.getValue d27
+dd.getValue d2
+dd.getValue d21
+dd.getValue d18
+dd.getValue d39
+sr 25
+sr.update s
+dd.getValue d15
+dd.getLEDValue d6
+dd.getValue d39
+dd.getValue d10
+dd.getValue d2
+advance 0.0504
+dd.getTrigSource d18
+dd.getLEDValue d27
+dd.getValue d38
+advance 0.0259
+dd.getLEDValue d11
+sr 24
+sr.update s
+dd.getValue d30
+dd.setIgnoreGate d3 b:False
+advance 0.0063
+dd.getValue d39
+dd.getValue d36
+dd.getValue d13
+dd.getValue d11
+gpio 4 1
+advance 0.26
+dd.getValue d5
+dd.getLEDValue d3
+sr 8
+sr.update s
+dd.getLEDValue d11
+dd.getValue d19
+dd.getValue d14
+dd.getValue d3
+dd.getValue d9
+dd.getLEDValue d14
+dd.getLEDValue d37
+sr 72
+sr.update s
+dd.getLEDValue d18
+dd.getLEDValue d12
+dd.getTrigSource d12
+sr 64
+sr.update s
+dd.getValue d8
+sr 96
+sr.update s
+dd.getValue d37
+dd.getValue d36
+sr 104
+sr.update s
+dd.getValue d25
+advance 0.0053
+dd.setOutputPeriod d13 i:5
+advance 0.0303
+dd.getValue d1
+sr 120
+sr.update s
+dd.getValue d0
+dd.getValue d6
+dd.getValue d10
+dd.getValue d15
+dd.getValue d21
+gpio 23 1
+advance 0.26
+dd.getValue d24
+advance 0.029
+dd.getValue d0
+sr 104
+sr.update s
+dd.getLEDValue d18
+gpio 23 0
+advance 0.26
+dd.getValue d23
+advance 0.0342
+dd.getValue d7
+dd.setIgnoreNextButton d10
+dd.getValue d4
+gpio 4 0
+advance 0.26
+dd.getValue d25
+dd.getValue d11
+dd.getValue d31
+dd.getValue d1
+advance 0.0191
+dd.getValue d37
+dd.getLEDValue d6
+sr 232
+sr.update s
+dd.setIgnoreHID d7 b:True
+dd.getValue d32
+dd.getValue d19
+dd.getLEDValue d30
+dd.getValue d20
+dd.getValue d39
+dd.getValue d27
+dd.getValue d26
+dd.getValue d9
+gpio 25 0
+advance 0.26
+dd.getLEDValue d34
+dd.getValue d38
+dd.getValue d25
+advance 0.0562
+dd.getValue d37
+gpio 17 0
+advance 0.26
+dd.getValue d16
+advance 0.037
+dd.setIgnoreHID d18 b:False
+dd.getValue d28
+advance 0.0078
+dd.getLEDValue d16
+advance 0.0326
+dd.getValue d37
+dd.setIncOrder d34 i:2
+dd.getValue d21
+dd.getValue d11
+dd.getValue d9
+dd.getValue d35
+sr 168
+sr.update s
+dd.setIgnoreHID d29 b:False
+dd.getValue d8
+gpio 23 1
+advance 0.26
+dd.getValue d11
+dd.getValue d29
+dd.getLEDValue d2
+dd.getValue d24
+gpio 17 1
+advance 0.26
+dd.getValue d24
+dd.getValue d4
+dd.getValue d23
+advance 0.0409
+dd.getValue d20
+gpio 23 0
+advance 0.26
+dd.getValue d10
+dd.setIgnoreNextButton d23
+dd.setIgnoreGate d18 b:False
+sr 160
+sr.update s
+dd.getTrigSource d19
+dd.getValue d38
+sr 224
+sr.update s
+dd.setValue d13 i:3
+dd.getLEDValue d33
+dd.getValue d23
+dd.getValue d27
+dd.getValue d7
+advance 0.0501
+dd.getValue d27
+advance 0.0413
+dd.getValue d12
+dd.getValue d30
+sr 232
+sr.update s
+dd.getTrigSource d21
+dd.getLEDValue d37
+gpio 4 1
+advance 0.26
+dd.getValue d28
+dd.getValue d12
+dd.getLEDValue d31
+sr 104
+sr.update s
+dd.getValue d17
+advance 0.0131
+dd.getValue d14
+dd.getValue d21
+dd.getValue d30
+sr 40
+sr.update s
+dd.getValue d16
+sr 41
+sr.update s
+dd.getValue d4
+dd.getValue d36
+dd.getValue d13
+dd.getValue d10
+gpio 23 1
+advance 0.26
+dd.getValue d27
+sr 105
+sr.update s
+dd.getValue d38
+advance 0.0373
+dd.getValue d12
+advance 0.0136
+dd.getValue d23
+dd.getValue d28
+gpio 25 1
+advance 0.26
+dd.setMode d24 s:latching s:falling
+dd.getValue d34
+dd.getValue d32
+dd.getValue d29
+advance 0.0064
+dd.getLEDValue d39
+dd.getValue d21
+dd.getValue d9
+dd.getValue d3
+sr 73
+sr.update s
+dd.setIgnoreGate d21 b:True
+dd.getValue d0
+dd.setValue d12 i:4
+dd.getLEDValue d11
+dd.getValue d15
+rand 5 1
+dd.getValue d3
+dd.getLEDValue d28
+advance 0.0444
+dd.getValue d21
+dd.getValue d2
+rand 1 2
+dd.getLEDValue d37
+dd.setIgnoreHID d20 b:True
+dd.getLEDValue d31
+dd.getValue d33
+dd.getValue d20
+advance 0.0515
+dd.getValue d19
+dd.getLEDValue d12
+dd.getValue d22
+dd.getTrigSource d35
+dd.getTrigSource d31
+sr 201
+sr.update s
+dd.getValue d2
+dd.getValue d29
+advance 0.0217
+dd.getValue d8
+sr 137
+sr.update s
+dd.getLEDValue d32
+advance 0.015
+dd.getValue d12
+sr 169
+sr.update s
+dd.getLEDValue d27
+dd.setIgnoreHID d32 b:False
+dd.getLEDValue d35
+dd.getValue d6
+dd.getLEDValue d18
+dd.getValue d31
+rand 5 3
+dd.getLEDValue d31
+dd.setIgnoreGate d26 b:False
+dd.getValue d25
+sr 161
+sr.update s
+dd.getValue d6
+dd.getValue d15
+dd.getValue d31
+gpio 23 0
+advance 0.26
+dd.setIncOrder d2 i:0
+rand 4 1
+dd.getValue d35
+dd.getValue d4
+dd.setIgnoreHID d33 b:True
+dd.getValue d15
+dd.getValue d24
+rand 6 2
+dd.setValue d15 i:0
+sr 225
+sr.update s
+dd.getValue d21
+dd.getLEDValue d9
+dd.getValue d9
+advance 0.0234
+dd.getValue d16
+dd.getValue d20
+dd.getValue d19
+dd.getValue d4
+dd.getValue d17
+sr 233
+sr.update s
+dd.getValue d6
+dd.getValue d2
+sr 169
+sr.update s
+dd.setIgnoreNextButton d27
+dd.setOutputPeriod d24 i:10
+advance 0.0474
+dd.getLEDValue d19
+dd.getLEDValue d33
+rand 6 3
+dd.getValue d26
+sr 185
+sr.update s
+dd.getValue d3
+dd.getLEDValue d5
+dd.setIncOrder d8 i:0
+dd.getLEDValue d39
+dd.getValue d2
+dd.getValue d26
+dd.getValue d6
+dd.getLEDValue d17
+dd.getValue d19
+dd.getValue d27
+sr 153
+sr.update s
+dd.getLEDValue d19
+sr 217
+sr.update s
+dd.setValue d14 i:4
+dd.getValue d18
+advance 0.0308
+dd.getValue d14
+dd.setIgnoreGate d37 b:True
+advance 0.0226
+dd.getValue d11
+gpio 4 0
+advance 0.26
+dd.getValue d26
+dd.setIgnoreNextButton d14
+dd.getValue d14
+dd.getLEDValue d17
+dd.setIgnoreNextButton d15
+advance 0.0456
+dd.getLEDValue d1
+dd.getValue d19
+sr 201
+sr.update s
+dd.getValue d14
+gpio 23 1
+advance 0.26
+dd.setOutputPeriod d3 i:40
+dd.getValue d5
+dd.getValue d14
+gpio 17 0
+advance 0.26
+dd.getValue d0
+dd.getValue d14
+dd.setIncOrder d5 i:0
+dd.getValue d35
+dd.getValue d22
+advance 0.0087
+dd.getValue d37
+dd.setIgnoreNextButton d10
+dd.getValue d39
+dd.getValue d24
+sr 193
+sr.update s
+dd.getValue d3
+dd.setIgnoreGate d31 b:False
+dd.getLEDValue d5
+dd.getValue d33
+rand 4 2
+dd.getValue d37
+dd.getValue d7
+dd.getValue d23
+dd.getValue d11
+gpio 17 1
+advance 0.26
+dd.getLEDValue d33
+dd.getLEDValue d20
+sr 192
+sr.update s
+dd.setIncOrder d2 i:1
+dd.getValue d1
+dd.getValue d5
+dd.getValue d32
+dd.getValue d23
+gpio 25 0
+advance 0.26
+dd.getValue d15
+dd.getLEDValue d35
+dd.getValue d14
+dd.getValue d25
+dd.getValue d8
+dd.getLEDValue d29
+rand 1 2
+dd.getValue d7
+dd.getValue d24
+dd.getValue d39
+dd.getValue d14
+advance 0.034
+dd.getValue d31
+sr 224
+sr.update s
+dd.getLEDValue d34
+dd.getValue d21
+sr 192
+sr.update s
+dd.getValue d15
+dd.getTrigSource d23
+dd.getLEDValue d37
+dd.getValue d24
+advance 0.0453
+dd.getValue d34
+dd.getValue d12
+dd.getLEDValue d33
+rand 0 3
+dd.getValue d12
+dd.getValue d21
+sr 193
+sr.update s
+dd.getValue d9
+dd.getLEDValue d38
+dd.getLEDValue d1
+dd.setIgnoreNextButton d21
+advance 0.0156
+dd.getValue d5
+gpio 25 1
+advance 0.26
+dd.getValue d31
+dd.getValue d31
+dd.getTrigSource d23
+dd.getValue d38
+sr 129
+sr.update s
+dd.getLEDValue d24
+dd.setIgnoreHID d24 b:False
+dd.getValue d12
+dd.getLEDValue d37
+rand 0 1
+dd.getValue d30
+gpio 4 1
+advance 0.26
+dd.getValue d8
+dd.getLEDValue d11
+dd.getLEDValue d1
+dd.setOutputPeriod d12 i:40
+dd.setOutputPeriod d16 i:10
+dd.getValue d23
+dd.getLEDValue d4
+dd.getLEDValue d28
+advance 0.0409
+dd.getValue d9
+sr 161
+sr.update s
+dd.getValue d29
+dd.setIgnoreHID d23 b:True
+dd.getValue d13
+dd.getLEDValue d14
+sr 177
+sr.update s
+dd.getValue d6
+dd.getValue d33
+dd.setIgnoreNextButton d17
+dd.setIgnoreGate d3 b:True
+rand 3 2
+dd.getValue d27
+gpio 25 0
+advance 0.26
+dd.getValue d21
+dd.getValue d37
+dd.setIgnoreNextButton d28
+dd.getValue d17
+sr 185
+sr.update s
+dd.getValue d15
+sr 153
+sr.update s
+dd.setIgnoreNextButton d38
+dd.setOutputPeriod d11 i:5
+dd.getValue d31
+sr 137
+sr.update s
+dd.getValue d8
+dd.getValue d20
+dd.getValue d4
+sr 201
+sr.update s
+dd.getValue d36
+dd.getLEDValue d16
+advance 0.006
+dd.getValue d3
+sr 193
+sr.update s
+dd.getValue d6
+dd.setValue d6 i:2
+sr 209
+sr.update s
+dd.setIgnoreNextButton d12
+dd.getValue d8
+sr 145
+sr.update s
+dd.getLEDValue d2
+advance 0.0451
+dd.getTrigSource d24
+dd.getLEDValue d21
+gpio 25 1
+advance 0.26
+dd.getLEDValue d4
+advance 0.0098
+dd.getValue d19
+gpio 23 0
+advance 0.26
+dd.getLEDValue d11
+dd.getValue d16
+dd.setIgnoreNextButton d30
+dd.getValue d16
+rand -1 3
+dd.getValue d14
+dd.getValue d33
+dd.getValue d32
+dd.getValue d30
+rand -1 1
+dd.getValue d7
+gpio 4 0
+advance 0.26
+dd.getValue d22
+dd.getValue d34
+dd.getLEDValue d4
+dd.getValue d24
+dd.getValue d21
+dd.getValue d32
+dd.getValue d9
+dd.getValue d33
+sr 129
+sr.update s
+dd.getLEDValue d14
+dd.getValue d0
+dd.getValue d26
+dd.setMode d33 s:incremental s:falling
+sr 193
+sr.update s
+dd.getValue d14
+dd.getLEDValue d23
+dd.getValue d14
+rand 0 2
+dd.setIncOrder d1 i:1
+sr 129
+sr.update s
+dd.getValue d20
+dd.getValue d2
+dd.getValue d26
+dd.getValue d16
+gpio 4 1
+advance 0.26
+dd.getValue d14
+sr 193
+sr.update s
+dd.getValue d14
+dd.getValue d3
+gpio 25 0
+advance 0.26
+dd.setIgnoreHID d29 b:True
+dd.getValue d8
+sr 65
+sr.update s
+dd.setIgnoreGate d18 b:True
+sr 81
+sr.update s
+dd.getValue d23
+dd.setIncOrder d8 i:1
+sr 209
+sr.update s
+dd.setIncOrder d20 i:0
+dd.getValue d9
+dd.setIgnoreGate d4 b:False
+dd.getValue d13
+dd.getValue d19
+dd.getTrigSource d5
+dd.getValue d34
+dd.getTrigSource d22
+advance 0.0054
+dd.getValue d24
+dd.getValue d7
+sr 208
+sr.update s
+dd.getValue d22
+dd.getLEDValue d2
+dd.getLEDValue d7
+advance 0.0061
+dd.setIgnoreHID d24 b:True
+dd.getLEDValue d33
+dd.getValue d27
+dd.getValue d36
+dd.getValue d2
+advance 0.0469
+dd.getValue d36
+sr 144
+sr.update s
+dd.getValue d30
+dd.getValue d23
+dd.getValue d36
+sr 128
+sr.update s
+dd.getValue d38
+dd.getValue d11
+dd.getValue d25
+dd.getLEDValue d36
+dd.setIncOrder d10 i:0
+gpio 24 1
+advance 0.26
+dd.getLEDValue d5
+sr 192
+sr.update s
+dd.getValue d20
+dd.getValue d0
+dd.getValue d20
+dd.getValue d18
+dd.getValue d23
+gpio 4 0
+advance 0.26
+dd.getTrigSource d32
+advance 0.0494
+dd.getValue d26
+dd.getValue d23
+dd.getValue d31
+gpio 24 0
+advance 0.26
+dd.getLEDValue d33
+dd.getValue d7
+sr 224
+sr.update s
+dd.getValue d34
+dd.getValue d31
+dd.getLEDValue d11
+advance 0.0527
+dd.getValue d23
+sr 160
+sr.update s
+dd.getValue d0
+dd.getValue d39
+dd.getValue d30
+dd.getValue d39
+dd.getValue d16
+dd.getValue d1
+advance 0.0082
+dd.getValue d38
+gpio 24 1
+advance 0.26
+dd.getValue d11
+advance 0.0143
+dd.getValue d26
+gpio 17 0
+advance 0.26
+dd.getValue d32
+advance 0.029
+dd.getTrigSource d0
+dd.getValue d1
+dd.getValue d17
+dd.getValue d23
+advance 0.0559
+dd.setMode d14 s:incremental s:falling
+dd.getValue d16
+advance 0.0002
+dd.getValue d26
+dd.getValue d18
+dd.getValue d21
+dd.getValue d19
+gpio 25 1
+advance 0.26
+dd.getValue d31
+dd.getValue d18
+dd.getValue d37
+dd.getValue d11
+rand 2 0
+dd.getValue d11
+dd.setIgnoreGate d7 b:True
+dd.getValue d35
+dd.getValue d33
+dd.getValue d18
+dd.getLEDValue d9
+dd.getValue d8
+sr 128
+sr.update s
+dd.getValue d39
+sr 144
+sr.update s
+dd.getValue d17
+dd.setMode d7 s:triggered s:falling
+dd.getValue d22
+dd.getValue d9
+dd.getValue d1
+sr 152
+sr.update s
+dd.getLEDValue d5
+advance 0.0391
+dd.getLEDValue d24
+gpio 4 1
+advance 0.26
+dd.getLEDValue d22
+gpio 24 0
+advance 0.26
+dd.getValue d14
+dd.getLEDValue d15
+sr 144
+sr.update s
+dd.setMode d30 s:incremental s:falling
+dd.getLEDValue d32
+dd.getValue d29
+dd.getLEDValue d8
+dd.getValue d21
+dd.getLEDValue d31
+gpio 23 1
+advance 0.26
+dd.getValue d7
+sr 128
+sr.update s
+dd.getValue d14
+gpio 24 1
+advance 0.26
+dd.getLEDValue d36
+dd.getValue d37
+dd.getValue d24
+advance 0.0174
+dd.getValue d33
+advance 0.0073
+dd.getValue d17
+dd.getValue d21
+advance 0.0037
+dd.getValue d39
+dd.getTrigSource d1
+dd.getValue d5
+gpio 25 0
+advance 0.26
+dd.getValue d31
+dd.getLEDValue d21
+dd.getValue d31
+dd.getValue d22
+dd.getTrigSource d1
+dd.getValue d27
+sr 136
+sr.update s
+dd.getValue d11
+dd.getValue d38
+gpio 25 1
+advance 0.26
+dd.getLEDValue d5
+dd.getValue d26
+dd.getValue d33
+dd.setMode d27 s:latching s:falling
+rand 5 0
+dd.getValue d15
+sr 137
+sr.update s
+dd.getTrigSource d19
+sr 201
+sr.update s
+dd.setIgnoreGate d16 b:True
+dd.getValue d30
+dd.getValue d36
+advance 0.0042
+dd.getValue d39
+dd.getValue d17
+dd.getValue d26
+gpio 4 0
+advance 0.26
+dd.getValue d26
+dd.getValue d9
+dd.getValue d5
+dd.getLEDValue d34
+dd.getValue d17
+advance 0.0006
+dd.getValue d18
+dd.getValue d29
+gpio 25 0
+advance 0.26
+dd.getValue d29
+dd.getValue d17
+dd.getLEDValue d38
+dd.getValue d33
+dd.getValue d33
+dd.getValue d30
+advance 0.0576
+dd.setIgnoreNextButton d34
+dd.setIgnoreGate d16 b:True
+sr 137
+sr.update s
+dd.getValue d27
+gpio 23 0
+advance 0.26
+dd.getValue d6
+dd.getValue d0
+dd.getLEDValue d7
+dd.getValue d13
+dd.setIncOrder d0 i:0
+dd.getLEDValue d24
+sr 153
+sr.update s
+dd.getValue d16
+dd.getValue d21
+dd.getValue d19
+dd.getValue d22
+dd.getLEDValue d18
+dd.getLEDValue d33
+dd.setIgnoreGate d17 b:False
+dd.getValue d9
+dd.getValue d18
+dd.getValue d22
+dd.getValue d1
+dd.getLEDValue d2
+advance 0.0193
+dd.setIgnoreNextButton d12
+dd.getValue d13
+dd.getLEDValue d13
+rand 3 0
+dd.getValue d21
+sr 217
+sr.update s
+dd.getValue d33
+dd.getLEDValue d8
+dd.getValue d8
+dd.getLEDValue d2
+dd.getLEDValue d3
+dd.getValue d31
+dd.getValue d17
+dd.getValue d4
+dd.getValue d0
+dd.getValue d0
+dd.getValue d38
+advance 0.0306
+dd.getValue d39
+sr 201
+sr.update s
+dd.getValue d20
+dd.getLEDValue d11
+sr 200
+sr.update s
+dd.getValue d4
+dd.getValue d32
+gpio 23 1
+advance 0.26
+dd.getValue d2
+sr 72
+sr.update s
+dd.getLEDValue d9
+sr 8
+sr.update s
+dd.getTrigSource d34
+sr 72
+sr.update s
+dd.getValue d39
+sr 88
+sr.update s
+dd.getValue d19
+dd.getValue d8
+sr 80
+sr.update s
+dd.getValue d23
+dd.getValue d8
+dd.getValue d17
+dd.getValue d35
+dd.getValue d2
+dd.getValue d32
+dd.getLEDValue d21
+dd.getValue d25
+dd.getValue d12
+sr 81
+sr.update s
+dd.getValue d13
+dd.getValue d34
+dd.getValue d4
+dd.getValue d20
+dd.getValue d21
+dd.getLEDValue d27
+dd.getLEDValue d38
+dd.getValue d23
+sr 209
+sr.update s
+dd.getValue d20
+dd.getValue d31
+advance 0.0156
+dd.getLEDValue d18
+dd.getValue d11
+dd.getValue d19
+dd.getValue d1
+sr 145
+sr.update s
+dd.getLEDValue d39
+dd.getValue d6
+dd.getValue d3
+dd.getValue d11
+dd.getValue d30
+dd.getValue d2
+advance 0.0322
+dd.getValue d14
+dd.setIncOrder d25 i:2
+dd.getValue d24
+gpio 24 0
+advance 0.26
+dd.getValue d2
+dd.getLEDValue d27
+dd.getValue d18
+dd.getValue d21
+dd.getValue d8
+rand -1 2
+dd.getValue d30
+sr 17
+sr.update s
+dd.getValue d32
+sr 81
+sr.update s
+dd.getValue d4
+advance 0.0038
+dd.setIgnoreHID d20 b:True
+dd.getValue d34
+dd.getLEDValue d37
+dd.getValue d28
+dd.setIgnoreGate d13 b:False
+dd.getValue d31
+dd.getValue d38
+dd.getLEDValue d9
+dd.getValue d25
+dd.getValue d32
+dd.setValue d13 i:4
+dd.getValue d23
+dd.getValue d25
+gpio 23 0
+advance 0.26
+dd.getTrigSource d37
+dd.getValue d37
+dd.getValue d34
+dd.getValue d38
+dd.getLEDValue d24
+sr 89
+sr.update s
+dd.getValue d13
+gpio 17 1
+advance 0.26
+dd.getValue d10
+dd.getValue d29
+dd.setOutputPeriod d33 i:5
+gpio 17 0
+advance 0.26
+dd.getValue d36
+dd.getValue d21
+dd.setIgnoreNextButton d29
+dd.getValue d6
+dd.getValue d3
+sr 217
+sr.update s
+dd.getValue d26
+dd.getLEDValue d39
+gpio 4 1
+advance 0.26
+dd.getValue d0
+dd.getValue d26
+gpio 4 0
+advance 0.26
+dd.getValue d1
+dd.getValue d13
+dd.getLEDValue d31
+dd.setIgnoreHID d23 b:True
+sr 216
+sr.update s
+dd.getValue d18
+sr 217
+sr.update s
+dd.setMode d31 s:latching s:falling
+dd.getValue d15
+dd.getValue d31
+dd.setValue d13 i:4
+dd.getValue d26
+dd.getLEDValue d23
+gpio 24 1
+advance 0.26
+dd.getValue d26
+dd.getValue d28
+dd.getValue d17
+dd.getValue d22
+dd.getValue d30
+dd.getValue d26
+dd.getValue d24
+sr 153
+sr.update s
+dd.getValue d28
+advance 0.0373
+dd.getValue d9
+dd.getValue d11
+dd.getValue d20
+sr 185
+sr.update s
+dd.getValue d5
+dd.getValue d17
+dd.getValue d25
+dd.setOutputPeriod d3 i:40
+dd.getValue d38
+dd.getValue d18
+gpio 17 1
+advance 0.26
+dd.getLEDValue d30
+sr 57
+sr.update s
+dd.setOutputPeriod d19 i:5
+dd.getLEDValue d35
+dd.getValue d20
+rand 5 0
+dd.getValue d14
+dd.getValue d13
+dd.getValue d37
+sr 49
+sr.update s
+dd.getValue d9
+dd.getValue d0
+gpio 4 1
+advance 0.26
+dd.getLEDValue d13
+sr 113
+sr.update s
+dd.setIgnoreGate d17 b:True
+dd.getValue d30
+dd.getValue d30
+dd.getValue d4
+sr 121
+sr.update s
+dd.getTrigSource d18
+dd.getValue d34
+gpio 17 0
+advance 0.26
+dd.getValue d30
+dd.getValue d37
+dd.getValue d23
+dd.getValue d33
+dd.getValue d15
+sr 105
+sr.update s
+dd.getValue d21
+dd.getValue d8
+sr 104
+sr.update s
+dd.getValue d20
+sr 40
+sr.update s
+dd.getValue d28
+rand 4 3
+dd.getTrigSource d3
+dd.getValue d0
+dd.getValue d7
+gpio 25 1
+advance 0.26
+dd.getValue d22
+dd.getTrigSource d38
+advance 0.0437
+dd.getValue d36
+dd.getValue d10
+dd.getValue d26
+advance 0.0485
+dd.getValue d24
+dd.getValue d31
+sr 56
+sr.update s
+dd.getValue d19
+sr 24
+sr.update s
+dd.getValue d35
+dd.getValue d24
+dd.getLEDValue d12
+dd.getValue d4
+advance 0.0103
+dd.getValue d4
+advance 0.055
+dd.getValue d34
+dd.getValue d20
+sr 56
+sr.update s
+dd.setMode d22 s:triggered s:falling
+dd.getValue d4
+advance 0.0013
+dd.getValue d38
+rand 0 0
+dd.setIncOrder d27 i:0
+advance 0.0254
+dd.getValue d32
+dd.getValue d17
+dd.getValue d10
+dd.setIgnoreHID d29 b:True
+dd.getLEDValue d35
+dd.getLEDValue d4
+advance 0.0063
+dd.setIgnoreGate d26 b:False
+dd.getLEDValue d14
+dd.getLEDValue d10
+dd.getValue d20
+dd.getValue d9
+dd.getValue d14
+advance 0.0452
+dd.getValue d12
+sr 57
+sr.update s
+dd.setIgnoreNextButton d37
+dd.getValue d3
+dd.getLEDValue d26
+dd.setIgnoreNextButton d10
+dd.getTrigSource d34
+sr 185
+sr.update s
+dd.getValue d16
+dd.getLEDValue d32
+gpio 17 1
+advance 0.26
+dd.getValue d30
+dd.setIncOrder d11 i:1
+dd.getValue d33
+dd.getValue d17
+dd.getValue d9
+dd.getLEDValue d17
+dd.getLEDValue d16
+rand 3 2
+dd.setIncOrder d29 i:1
+dd.setIgnoreGate d16 b:True
+advance 0.045
+dd.getLEDValue d37
+sr 57
+sr.update s
+dd.getValue d15
+advance 0.0107
+dd.getValue d34
+dd.getValue d7
+advance 0.0335
+dd.getLEDValue d15
+dd.getValue d11
+rand 5 1
+dd.getValue d19
+dd.setIncOrder d6 i:2
+dd.getValue d20
+advance 0.0347
+dd.getValue d20
+advance 0.0271
+dd.setIncOrder d4 i:1
+dd.getValue d23
+dd.getValue d3
+sr 49
+sr.update s
+dd.getValue d1
+dd.getValue d15
+dd.setIncOrder d32 i:2
+dd.getLEDValue d18
+dd.getValue d20
+dd.getValue d28
+dd.getValue d0
+dd.getValue d23
+gpio 17 0
+advance 0.26
+dd.getValue d38
+dd.getValue d11
+dd.getValue d29
+sr 48
+sr.update s
+dd.getValue d1
+advance 0.0238
+dd.getValue d35
+dd.setOutputPeriod d10 i:10
+dd.setIgnoreHID d31 b:True
+advance 0.049
+dd.getValue d36
+dd.getTrigSource d3
+dd.getValue d34
+sr 112
+sr.update s
+dd.getValue d8
+dd.getValue d1
+dd.getValue d25
+dd.getValue d35
+dd.getValue d34
+dd.getValue d15
+dd.getTrigSource d27
+dd.getValue d9
+dd.getValue d29
+advance 0.0106
+dd.getValue d37
+dd.getValue d5
+sr 240
+sr.update s
+dd.getValue d35
+gpio 24 0
+advance 0.26
+dd.getValue d28
+dd.getLEDValue d2
+dd.getValue d9
+dd.getLEDValue d12
+dd.getLEDValue d13
+sr 241
+sr.update s
+dd.getValue d10
+dd.getValue d11
+sr 209
+sr.update s
+dd.setIgnoreHID d15 b:False
+gpio 25 0
+advance 0.26
+dd.setValue d19 i:4
+dd.getValue d15
+dd.getLEDValue d22
+rand 2 2
+dd.getValue d23
+dd.getValue d35
+dd.setOutputPeriod d35 i:40
+dd.getValue d8
+advance 0.0475
+dd.getValue d25
+advance 0.017
+dd.setMode d19 s:triggered s:falling
+dd.getValue d32
+dd.getValue d14
+dd.getValue d3
+dd.getValue d15
+dd.getLEDValue d25
+dd.getLEDValue d38
+dd.getValue d24
+sr 81
+sr.update s
+dd.getLEDValue d6
+dd.getValue d22
+dd.getLEDValue d10
+dd.getValue d17
+sr 209
+sr.update s
+dd.getLEDValue d3
+dd.getValue d22
+sr 145
+sr.update s
+dd.setIgnoreNextButton d19
+dd.getLEDValue d36
+dd.getLEDValue d12
+rand 5 1
+dd.getValue d24
+dd.getValue d12
+dd.getLEDValue d32
+advance 0.0331
+dd.getValue d33
+dd.getValue d14
+dd.getValue d29
+dd.getTrigSource d34
+dd.getValue d4
+dd.getValue d12
+dd.getValue d36
+dd.getValue d24
+dd.getValue d35
+dd.getValue d2
+dd.setValue d16 i:0
+dd.getLEDValue d4
+gpio 17 1
+advance 0.26
+dd.getValue d25
+sr 209
+sr.update s
+dd.getValue d35
+dd.getValue d38
+rand -1 1
+dd.getValue d9
+advance 0.0275
+dd.getValue d39
+gpio 23 1
+advance 0.26
+dd.getValue d3
+gpio 24 1
+advance 0.26
+dd.getValue d34
+gpio 25 1
+advance 0.26
+dd.getLEDValue d37
+dd.getValue d5
+dd.getLEDValue d26
+sr 81
+sr.update s
+dd.getValue d17
+dd.getTrigSource d39
+dd.getLEDValue d26
+gpio 25 0
+advance 0.26
+dd.getValue d29
+sr 113
+sr.update s
+dd.setOutputPeriod d37 i:5
+dd.setIgnoreGate d25 b:True
+dd.getValue d20
+dd.getLEDValue d35
+dd.getLEDValue d34
+rand 4 0
+dd.getValue d14
+dd.getValue d6
+dd.getValue d13
+dd.getValue d17
+dd.getValue d2
+sr 241
+sr.update s
+dd.getLEDValue d1
+gpio 23 0
+advance 0.26
+dd.getValue d22
+dd.getValue d6
+dd.setValue d16 i:2
+advance 0.0001
+dd.getValue d25
+sr 113
+sr.update s
+dd.getValue d12
+dd.getValue d7
+dd.getValue d23
+dd.getLEDValue d4
+dd.getValue d11
+dd.getValue d2
+advance 0.0025
+dd.getValue d27
+dd.getValue d15
+sr 121
+sr.update s
+dd.getValue d13
+dd.getValue d37
+dd.getValue d32
+dd.getValue d38
+sr 105
+sr.update s
+dd.getValue d30
+dd.getValue d7
+dd.getLEDValue d7
+dd.getValue d2
+dd.getValue d10
+dd.getValue d34
+dd.getValue d16
+dd.getLEDValue d3
+gpio 23 1
+advance 0.26
+dd.getValue d31
+dd.getValue d15
+dd.getValue d26
+dd.getValue d33
+sr 104
+sr.update s
+dd.getLEDValue d1
+dd.getLEDValue d3
+gpio 24 0
+advance 0.26
+dd.getValue d37
+dd.setIncOrder d35 i:2
+dd.getValue d12
+dd.getValue d5
+dd.getValue d4
+sr 105
+sr.update s
+dd.getValue d9
+dd.getLEDValue d25
+dd.getValue d13
+dd.getValue d15
+dd.getLEDValue d19
+dd.getLEDValue d24
+dd.getValue d30
+dd.getValue d2
+dd.getLEDValue d5
+dd.getValue d38
+dd.getValue d39
+dd.getValue d17
+dd.getValue d9
+sr 97
+sr.update s
+dd.getLEDValue d32
+dd.getValue d6
+dd.getValue d17
+dd.getValue d10
+sr 33
+sr.update s
+dd.getValue d38
+rand -1 0
+dd.getValue d11
+dd.getValue d0
+dd.getTrigSource d9
+dd.getValue d20
+dd.setIgnoreGate d22 b:True
+dd.getValue d12
+gpio 24 1
+advance 0.26
+dd.getValue d16
+dd.getTrigSource d13
+advance 0.0187
+dd.getValue d16
+dd.getValue d5
+advance 0.0404
+dd.getLEDValue d20
+sr 41
+sr.update s
+dd.setIncOrder d37 i:0
+gpio 25 1
+advance 0.26
+dd.getValue d29
+gpio 24 0
+advance 0.26
+dd.getValue d14
+dd.getValue d17
+dd.getValue d0
+dd.getValue d30
+advance 0.0004
+dd.getValue d18
+dd.getValue d18
+advance 0.0527
+dd.getValue d10
+dd.getValue d11
+dd.getValue d11
+dd.getValue d1
+dd.getLEDValue d37
+sr 9
+sr.update s
+dd.getValue d12
+dd.getLEDValue d0
+dd.getValue d39
+dd.getValue d11
+dd.getLEDValue d30
+sr 73
+sr.update s
+dd.setIgnoreHID d31 b:False
+dd.getLEDValue d35
+dd.getLEDValue d38
+gpio 4 0
+advance 0.26
+dd.getValue d1
+dd.getLEDValue d11
+dd.getValue d17
+dd.getValue d1
+dd.getLEDValue d13
+sr 201
+sr.update s
+dd.getLEDValue d19
+dd.getValue d5
+dd.getValue d32
+dd.setIgnoreHID d11 b:True
+dd.getLEDValue d20
+dd.getValue d5
+gpio 23 0
+advance 0.26
+dd.getValue d32
+dd.getValue d33
+gpio 25 0
+advance 0.26
+dd.getValue d30
+dd.getValue d4
+dd.getValue d33
+dd.getValue d26
+dd.getValue d2
+gpio 4 1
+advance 0.26
+dd.setIgnoreHID d7 b:False
+advance 0.0396
+dd.setIgnoreNextButton d25
+advance 0.0177
+dd.getValue d10
+sr 200
+sr.update s
+dd.getValue d27
+advance 0.0327
+dd.getValue d10
+dd.getLEDValue d36
+sr 216
+sr.update s
+dd.getTrigSource d31
+dd.getValue d20
+dd.getValue d32
+dd.setIgnoreNextButton d25
+dd.getValue d26
+gpio 4 0
+advance 0.26
+dd.getValue d26
+rand 0 3
+dd.getValue d37
+dd.getValue d23
+dd.getValue d36
+sr 200
+sr.update s
+dd.setIgnoreNextButton d7
+sr 216
+sr.update s
+dd.getValue d7
+dd.getValue d15
+dd.getValue d28
+dd.getValue d19
+dd.getLEDValue d32
+dd.getValue d8
+gpio 23 1
+advance 0.26
+dd.getValue d4
+gpio 17 0
+advance 0.26
+dd.getLEDValue d3
+dd.getLEDValue d31
+dd.getLEDValue d32
+dd.getValue d35
+sr 248
+sr.update s
+dd.getValue d17
+dd.getValue d18
+dd.getValue d26
+rand 6 2
+dd.getValue d5
+sr 249
+sr.update s
+dd.getLEDValue d25
+sr 241
+sr.update s
+dd.setIgnoreGate d30 b:True
+gpio 24 1
+advance 0.26
+dd.getValue d37
+dd.getLEDValue d6
+dd.getLEDValue d16
+gpio 23 0
+advance 0.26
+dd.getValue d21
+dd.getValue d23
+gpio 23 1
+advance 0.26
+dd.getValue d29
+dd.getValue d23
+dd.getValue d39
+dd.getValue d17
+rand -1 3
+dd.getValue d26
+gpio 24 0
+advance 0.26
+dd.setMode d3 s:incremental s:falling
+dd.getLEDValue d12
+gpio 24 1
+advance 0.26
+dd.getValue d15
+gpio 4 1
+advance 0.26
+dd.getValue d16
+dd.getValue d14
+advance 0.0061
+dd.getLEDValue d36
+dd.getLEDValue d11
+advance 0.0435
+dd.getValue d2
+dd.getValue d35
+dd.getTrigSource d0
+rand -1 3
+dd.getLEDValue d19
+dd.getValue d4
+dd.setIgnoreNextButton d35
+sr 240
+sr.update s
+dd.getValue d8
+advance 0.05
+dd.getValue d12
+sr 112
+sr.update s
+dd.getValue d35
+dd.getValue d8
+dd.getValue d21
+gpio 17 1
+advance 0.26
+dd.getValue d25
+dd.getValue d9
+dd.getValue d22
+dd.getValue d39
+dd.getValue d11
+gpio 4 0
+advance 0.26
+dd.getValue d2
+dd.getLEDValue d6
+rand 6 0
+dd.getValue d4
+dd.setIgnoreHID d20 b:True
+dd.getLEDValue d22
+dd.setIgnoreHID d10 b:False
+dd.getLEDValue d7
+dd.getValue d3
+dd.getValue d13
+dd.getValue d0
+sr 120
+sr.update s
+dd.getValue d30
+dd.getValue d9
+dd.getValue d25
+dd.getValue d26
+advance 0.004
+dd.getValue d14
+sr 88
+sr.update s
+dd.getLEDValue d27
+advance 0.0536
+dd.getLEDValue d7
+rand -1 2
+dd.getValue d18
+dd.setMode d22 s:triggered s:rising
+advance 0.0597
+dd.getValue d30
+dd.getLEDValue d15
+gpio 4 1
+advance 0.26
+dd.getValue d1
+sr 80
+sr.update s
+dd.setValue d26 i:4
+dd.getValue d39
+dd.getValue d37
+dd.getValue d8
+gpio 25 1
+advance 0.26
+dd.getLEDValue d7
+dd.getLEDValue d21
+rand 3 1
+dd.getValue d22
+dd.getLEDValue d19
+dd.getLEDValue d2
+sr 64
+sr.update s
+dd.getValue d30
+dd.getValue d28
+dd.getValue d11
+dd.getValue d3
+dd.getValue d24
+gpio 17 0
+advance 0.26
+dd.setIgnoreNextButton d27
+sr 72
+sr.update s
+dd.getValue d36
+dd.getLEDValue d11
+dd.getTrigSource d6
+dd.getValue d39
+dd.getTrigSource d2
+dd.getValue d18
+sr 200
+sr.update s
+dd.getValue d34
+dd.getValue d23
+dd.getValue d19
+sr 216
+sr.update s
+dd.setIncOrder d27 i:0
+dd.getValue d25
+dd.getValue d2
+dd.getTrigSource d30
+dd.getValue d16
+sr 217
+sr.update s
+dd.getValue d12
+sr 216
+sr.update s
+dd.getLEDValue d6
+dd.getValue d14
+dd.getLEDValue d8
+dd.getValue d21
+dd.getValue d7
+dd.getLEDValue d28
+advance 0.0325
+dd.getLEDValue d10
+gpio 24 0
+advance 0.26
+dd.getValue d39
+dd.getValue d3
+dd.getValue d5
+dd.getValue d10
+sr 208
+sr.update s
+dd.getValue d38
+sr 144
+sr.update s
+dd.getValue d25
+dd.getValue d18
+dd.setIgnoreNextButton d19
+dd.getLEDValue d37
+dd.setMode d17 s:latching s:falling
+dd.getTrigSource d15
+sr 176
+sr.update s
+dd.setIgnoreGate d35 b:True
+dd.getValue d20
+dd.getValue d14
+rand 3 2
+dd.getValue d15
+dd.getValue d17
+dd.setIgnoreHID d19 b:True
+dd.getValue d9
+dd.getValue d30
+dd.getValue d19
+dd.getValue d22
+dd.getTrigSource d7
+gpio 4 0
+advance 0.26
+dd.getValue d24
+dd.getValue d16
+dd.getValue d5
+gpio 25 0
+advance 0.26
+dd.getLEDValue d4
+gpio 4 1
+advance 0.26
+dd.getLEDValue d12
+dd.getValue d24
+dd.getValue d12
+dd.getValue d37
+dd.getValue d11
+dd.getValue d26
+dd.getValue d29
+dd.setIgnoreHID d9 b:False
+dd.getLEDValue d24
+sr 184
+sr.update s
+dd.getValue d3
+dd.setIgnoreHID d22 b:False
+dd.getValue d22
+gpio 4 0
+advance 0.26
+dd.getValue d28
+dd.getValue d15
+dd.getValue d28
+dd.getValue d3
+dd.getValue d2
+dd.setIgnoreNextButton d23
+dd.getValue d22
+dd.getLEDValue d35
+sr 248
+sr.update s
+dd.getValue d17
+gpio 17 1
+advance 0.26
+dd.getLEDValue d29
+dd.setIgnoreNextButton d3
+gpio 25 1
+advance 0.26
+dd.getValue d13
+dd.getLEDValue d15
+dd.getLEDValue d34
+dd.getLEDValue d39
+dd.getValue d4
+dd.setIgnoreNextButton d7
+dd.setIgnoreHID d33 b:False
+sr 249
+sr.update s
+dd.setIgnoreHID d32 b:False
+dd.getValue d39
+dd.getValue d7
+sr 241
+sr.update s
+dd.getValue d4
+dd.getTrigSource d7
+advance 0.0052
+dd.getLEDValue d6
+gpio 25 0
+advance 0.26
+dd.getValue d19
+dd.getValue d4
+sr 113
+sr.update s
+dd.getLEDValue d25
+dd.getValue d29
+dd.getValue d27
+dd.getValue d16
+dd.getValue d31
+dd.getValue d28
+gpio 17 0
+advance 0.26
+dd.getValue d30
+dd.getValue d8
+sr 241
+sr.update s
+dd.getLEDValue d33
+advance 0.0035
+dd.getValue d34
+advance 0.0551
+dd.getValue d4
+advance 0.0573
+dd.setOutputPeriod d34 i:40
+dd.setIgnoreHID d35 b:True
+dd.getLEDValue d1
+dd.getValue d13
+gpio 24 1
+advance 0.26
+dd.getValue d26
+gpio 23 0
+advance 0.26
+dd.getLEDValue d38
+dd.getValue d7
+dd.getValue d31
+dd.getValue d4
+dd.getLEDValue d21
+dd.getValue d9
+dd.getLEDValue d12
+gpio 23 1
+advance 0.26
+dd.getValue d4
+sr 240
+sr.update s
+dd.getValue d23
+dd.getValue d5
+dd.getValue d39
+dd.getValue d1
+gpio 25 1
+advance 0.26
+dd.getValue d3
+dd.getValue d1
+dd.getValue d5
+advance 0.0388
+dd.getValue d3
+gpio 25 0
+advance 0.26
+dd.getValue d29
+advance 0.016
+dd.getValue d2
+sr 208
+sr.update s
+dd.getTrigSource d10
+dd.getTrigSource d34
+sr 144
+sr.update s
+dd.setOutputPeriod d17 i:40
+advance 0.0421
+dd.getValue d30
+rand -1 1
+dd.getValue d1
+dd.getValue d22
+dd.getValue d10
+advance 0.011
+dd.getLEDValue d0
+dd.getValue d6
+dd.getValue d2
+sr 16
+sr.update s
+dd.getValue d18
+dd.getValue d19
+sr 48
+sr.update s
+dd.getValue d32
+advance 0.0425
+dd.getLEDValue d2
+dd.getValue d4
+sr 56
+sr.update s
+dd.getValue d6
+dd.getValue d11
+dd.getValue d34
+dd.getValue d16
+dd.getValue d18
+dd.getValue d2
+dd.setIgnoreHID d23 b:True
+dd.getValue d7
+dd.getLEDValue d32
+dd.getValue d32
+dd.getValue d7
+dd.getLEDValue d12
+sr 48
+sr.update s
+dd.getValue d1
+dd.getValue d17
+dd.getValue d13
+advance 0.0038
+dd.getValue d11
+dd.getValue d17
+advance 0.0585
+dd.getValue d30
+dd.getValue d10
+dd.getValue d2
+sr 49
+sr.update s
+dd.getLEDValue d30
+dd.getTrigSource d29
+dd.setIgnoreGate d15 b:False
+dd.getValue d0
+sr 177
+sr.update s
+dd.getValue d10
+dd.getValue d3
+dd.getValue d16
+advance 0.0229
+dd.setIgnoreNextButton d35
+gpio 24 0
+advance 0.26
+dd.getValue d36
+gpio 17 1
+advance 0.26
+dd.getValue d10
+dd.getValue d29
+dd.getValue d30
+advance 0.0153
+dd.getValue d11
+advance 0.0207
+dd.getValue d26
+rand -1 3
+dd.getValue d16
+advance 0.0375
+dd.getValue d29
+gpio 17 0
+advance 0.26
+dd.getValue d9
+sr 185
+sr.update s
+dd.getValue d22
+sr 177
+sr.update s
+dd.getValue d8
+gpio 24 1
+advance 0.26
+dd.getValue d36
+dd.getValue d34
+dd.getValue d36
+gpio 25 1
+advance 0.26
+dd.getValue d15
+dd.getValue d22
+dd.getValue d15
+dd.getTrigSource d6
+dd.setIncOrder d24 i:2
+dd.getLEDValue d4
+dd.getLEDValue d5
+sr 241
+sr.update s
+dd.getValue d24
+sr 225
+sr.update s
+dd.getValue d15
+sr 241
+sr.update s
+dd.getLEDValue d10
+dd.setOutputPeriod d38 i:40
+dd.getValue d16
+dd.getValue d39
+dd.getValue d3
+dd.getValue d5
+dd.getValue d1
+sr 177
+sr.update s
+dd.getLEDValue d16
+rand 3 0
+dd.getLEDValue d23
+sr 185
+sr.update s
+dd.getValue d31
+dd.getValue d14
+sr 169
+sr.update s
+dd.getValue d20
+dd.getValue d19
+dd.getValue d8
+sr 233
+sr.update s
+dd.getValue d23
+sr 225
+sr.update s
+dd.getValue d14
+dd.getValue d37
+sr 161
+sr.update s
+dd.setIgnoreNextButton d4
+sr 169
+sr.update s
+dd.getValue d14
+dd.getValue d23
+dd.getValue d38
+advance 0.046
+dd.getValue d0
+sr 41
+sr.update s
+dd.getValue d0
+dd.getValue d31
+sr 40
+sr.update s
+dd.getLEDValue d12
+dd.getTrigSource d34
+dd.getValue d37
+dd.getValue d5
+dd.getValue d3
+gpio 4 1
+advance 0.26
+dd.getValue d20
+sr 41
+sr.update s
+dd.getLEDValue d33
+dd.getLEDValue d26
+dd.setIgnoreHID d28 b:True
+sr 57
+sr.update s
+dd.getValue d28
+dd.getValue d15
+advance 0.0085
+dd.getValue d14
+dd.getValue d39
+dd.getTrigSource d14
+sr 41
+sr.update s
+dd.getLEDValue d0
+advance 0.0513
+dd.getValue d13
+rand -1 1
+dd.getLEDValue d39
+dd.getValue d11
+dd.getLEDValue d37
+sr 57
+sr.update s
+dd.getValue d4
+dd.getValue d14
+sr 185
+sr.update s
+dd.getValue d23
+dd.setIgnoreGate d12 b:True
+dd.getValue d7
+advance 0.0228
+dd.getValue d7
+dd.getValue d11
+dd.getTrigSource d34
+dd.getLEDValue d18
+dd.getValue d1
+dd.getValue d38
+advance 0.0266
+dd.getValue d20
+gpio 24 0
+advance 0.26
+dd.getValue d18
+sr 57
+sr.update s
+dd.getValue d25
+dd.setIgnoreNextButton d32
+dd.getLEDValue d39
+gpio 17 1
+advance 0.26
+dd.getValue d7
+dd.getValue d28
+dd.getValue d16
+advance 0.044
+dd.setIgnoreGate d33 b:False
+gpio 17 0
+advance 0.26
+dd.getTrigSource d11
+sr 56
+sr.update s
+dd.getLEDValue d36
+dd.getValue d2
+dd.getLEDValue d8
+dd.getValue d21
+dd.setMode d38 s:latching s:falling
+dd.getLEDValue d38
+dd.getValue d2
+dd.getValue d20
+rand 2 2
+dd.getValue d26
+dd.getValue d8
+dd.getValue d30
+dd.getValue d30
+dd.getValue d8
+dd.getValue d27
+dd.setOutputPeriod d30 i:40
+advance 0.0026
+dd.setIgnoreHID d21 b:False
+dd.getValue d29
+dd.getLEDValue d21
+dd.getValue d22
+dd.setOutputPeriod d8 i:10
+gpio 4 0
+advance 0.26
+dd.getValue d27
+dd.getValue d16
+rand 5 3
+dd.setIgnoreNextButton d23
+dd.getValue d25
+sr 57
+sr.update s
+dd.getValue d22
+advance 0.0253
+dd.getValue d34
+gpio 4 1
+advance 0.26
+dd.getValue d9
+rand 3 2
+dd.getValue d36
+dd.getValue d33
+dd.getValue d12
+sr 41
+sr.update s
+dd.setIgnoreGate d28 b:False
+dd.getValue d37
+gpio 4 0
+advance 0.26
+dd.getValue d14
+advance 0.0452
+dd.getValue d20
+dd.getValue d38
+dd.getValue d0
+dd.getLEDValue d8
+advance 0.0559
+dd.getValue d20
+dd.getValue d10
+dd.setIgnoreHID d24 b:True
+advance 0.0213
+dd.getValue d36
+gpio 4 1
+advance 0.26
+dd.getValue d4
+sr 9
+sr.update s
+dd.setOutputPeriod d8 i:40
+gpio 23 0
+advance 0.26
+dd.getValue d26
+sr 1
+sr.update s
+dd.getLEDValue d32
+dd.getValue d0
+advance 0.0208
+dd.setIgnoreNextButton d8
+dd.getValue d25
+dd.getValue d38
+sr 33
+sr.update s
+dd.getLEDValue d31
+rand 0 1
+dd.getValue d39
+dd.getValue d21
+dd.getValue d0
+dd.getValue d38
+dd.getValue d27
+dd.getLEDValue d31
+dd.getValue d3
+sr 161
+sr.update s
+dd.getValue d7
+advance 0.0256
+dd.setIncOrder d19 i:1
+advance 0.0024
+dd.getValue d33
+dd.getValue d36
+dd.getValue d15
+dd.getValue d20
+sr 225
+sr.update s
+dd.getValue d34
+sr 233
+sr.update s
+dd.getValue d29
+dd.getValue d9
+dd.getValue d3
+dd.getValue d38
+dd.setValue d23 i:4
+sr 225
+sr.update s
+dd.getValue d10
+dd.getLEDValue d1
+dd.setValue d33 i:3
+dd.getValue d9
+advance 0.018
+dd.getValue d36
+dd.getValue d15
+rand 2 0
+dd.getValue d34
+sr 224
+sr.update s
+dd.getLEDValue d11
+dd.getValue d22
+dd.getValue d20
+sr 160
+sr.update s
+dd.getValue d14
+dd.getValue d2
+advance 0.0332
+dd.getValue d26
+advance 0.0199
+dd.getValue d38
+dd.getValue d11
+sr 128
+sr.update s
+dd.setMode d20 s:triggered s:rising
+sr 0
+sr.update s
+dd.getValue d23
+sr 64
+sr.update s
+dd.getValue d38
+sr 80
+sr.update s
+dd.setIncOrder d28 i:2
+dd.getValue d19
+dd.getValue d7
+dd.getValue d25
+dd.getValue d23
+dd.getValue d20
+dd.getLEDValue d31
+sr 81
+sr.update s
+dd.getValue d35
+dd.setIgnoreHID d26 b:True
+dd.getValue d39
+gpio 23 1
+advance 0.26
+dd.getValue d10
+dd.getValue d23
+sr 65
+sr.update s
+dd.getLEDValue d17
+advance 0.0222
+dd.getValue d33
+dd.getValue d5
+rand 0 0
+dd.getLEDValue d14
+gpio 17 1
+advance 0.26
+dd.setIncOrder d10 i:1
+advance 0.0104
+dd.getValue d23
+dd.getValue d30
+dd.getValue d23
+dd.getLEDValue d8
+sr 1
+sr.update s
+dd.getValue d3
+dd.getLEDValue d28
+dd.getLEDValue d17
+gpio 4 0
+advance 0.26
+dd.getLEDValue d1
+advance 0.0575
+dd.getValue d1
+dd.getValue d30
+sr 17
+sr.update s
+dd.getValue d21
+gpio 23 0
+advance 0.26
+dd.setValue d34 i:3
+dd.setIgnoreGate d23 b:True
+dd.getLEDValue d8
+dd.getLEDValue d28
+dd.getLEDValue d4
+sr 1
+sr.update s
+dd.getValue d0
+sr 129
+sr.update s
+dd.getValue d32
+dd.setIgnoreHID d27 b:False
+gpio 24 1
+advance 0.26
+dd.getValue d6
+dd.getLEDValue d8
+dd.getValue d37
+advance 0.0275
+dd.getLEDValue d8
+dd.getValue d32
+gpio 25 0
+advance 0.26
+dd.setMode d32 s:momentary s:falling
+advance 0.0539
+dd.getValue d6
+dd.getValue d23
+advance 0.0546
+dd.setIgnoreGate d25 b:False
+dd.getValue d20
+sr 161
+sr.update s
+dd.getValue d18
+sr 33
+sr.update s
+dd.getValue d20
+dd.getValue d11
+dd.getLEDValue d20
+dd.getValue d21
+advance 0.0258
+dd.getValue d10
+gpio 23 1
+advance 0.26
+dd.getValue d0
+gpio 4 1
+advance 0.26
+dd.getValue d6
+advance 0.0262
+dd.getLEDValue d28
+dd.getValue d36
+sr 49
+sr.update s
+dd.getValue d37
+dd.getValue d24
+advance 0.0492
+dd.getValue d3
+dd.getValue d28
+sr 113
+sr.update s
+dd.getValue d9
+dd.getValue d9
+gpio 23 0
+advance 0.26
+dd.getValue d18
+dd.getValue d16
+advance 0.0271
+dd.getLEDValue d0
+sr 121
+sr.update s
+dd.getTrigSource d29
+dd.getValue d8
+dd.getLEDValue d27
+sr 89
+sr.update s
+dd.getValue d16
+sr 81
+sr.update s
+dd.getTrigSource d2
+dd.getValue d10
+dd.getValue d23
+dd.setMode d6 s:latching s:falling
+dd.getValue d25
+gpio 4 0
+advance 0.26
+dd.getValue d6
+dd.getValue d9
+dd.getLEDValue d32
+dd.getLEDValue d20
+dd.getValue d35
+dd.getValue d21
+dd.getValue d20
+sr 17
+sr.update s
+dd.setIgnoreGate d11 b:False
+gpio 4 1
+advance 0.26
+dd.getLEDValue d19
+dd.getValue d34
+dd.getLEDValue d9
+sr 81
+sr.update s
+dd.getValue d15
+gpio 17 0
+advance 0.26
+dd.getLEDValue d17
+gpio 25 1
+advance 0.26
+dd.getValue d32
+dd.getValue d29
+dd.getValue d11
+dd.getValue d38
+dd.getValue d36
+dd.getLEDValue d23
+dd.getLEDValue d14
+dd.getLEDValue d9
+dd.setIgnoreGate d11 b:False
+dd.getTrigSource d4
+dd.getValue d29
+sr 209
+sr.update s
+dd.getValue d10
+dd.getValue d14
+sr 217
+sr.update s
+dd.getLEDValue d14
+dd.getValue d0
+dd.getValue d18
+sr 153
+sr.update s
+dd.getValue d13
+advance 0.022
+dd.getLEDValue d39
+dd.getValue d26
+dd.getValue d25
+dd.getLEDValue d2
+dd.getValue d26
+sr 185
+sr.update s
+dd.getValue d5
+dd.setIgnoreNextButton d24
+dd.getValue d1
+dd.getValue d13
+sr 177
+sr.update s
+dd.getValue d1
+dd.getTrigSource d38
+dd.setMode d15 s:incremental s:rising
+sr 161
+sr.update s
+dd.getValue d34
+gpio 23 1
+advance 0.26
+dd.getLEDValue d32
+dd.setOutputPeriod d10 i:40
+rand -1 1
+dd.getLEDValue d17
+dd.getValue d19
+dd.getValue d2
+dd.setOutputPeriod d15 i:10
+dd.getValue d4
+advance 0.0335
+dd.getValue d34
+sr 33
+sr.update s
+dd.getValue d34
+sr 49
+sr.update s
+dd.setOutputPeriod d14 i:5
+dd.getValue d25
+dd.getValue d17
+advance 0.039
+dd.getValue d6
+dd.getValue d3
+dd.getValue d26
+dd.getLEDValue d17
+dd.getValue d7
+dd.getLEDValue d27
+dd.getValue d39
+dd.getValue d31
+advance 0.0331
+dd.getLEDValue d24
+gpio 23 0
+advance 0.26
+dd.getValue d21
+sr 17
+sr.update s
+dd.getValue d22
+sr 145
+sr.update s
+dd.getLEDValue d38
+dd.setMode d22 s:triggered s:rising
+sr 144
+sr.update s
+dd.getValue d4
+gpio 23 1
+advance 0.26
+dd.getValue d20
+dd.getLEDValue d11
+sr 145
+sr.update s
+dd.getValue d8
+advance 0.0198
+dd.setValue d1 i:3
+advance 0.022
+dd.getValue d38
+advance 0.0064
+dd.getValue d30
+dd.getValue d25
+dd.getValue d4
+dd.getValue d9
+dd.getValue d22
+dd.getLEDValue d37
+dd.getValue d19
+dd.getLEDValue d32
+dd.getTrigSource d32
+dd.getValue d0
+dd.getValue d25
+dd.setMode d16 s:latching s:falling
+dd.getValue d31
+dd.getValue d27
+sr 17
+sr.update s
+dd.getValue d32
+dd.getValue d12
+dd.setValue d28 i:3
+dd.getValue d13
+dd.getLEDValue d23
+rand -1 3
+dd.setIgnoreNextButton d18
+sr 145
+sr.update s
+dd.getLEDValue d5
+dd.getValue d37
+sr 153
+sr.update s
+dd.getLEDValue d13
+dd.getValue d11
+sr 152
+sr.update s
+dd.setIgnoreGate d10 b:False
+dd.getValue d37
+advance 0.0482
+dd.getValue d26
+sr 144
+sr.update s
+dd.getTrigSource d9
+dd.getValue d32
+gpio 23 0
+advance 0.26
+dd.getTrigSource d39
+dd.getValue d36
+dd.getValue d15
+dd.getValue d8
+dd.getValue d6
+sr 208
+sr.update s
+dd.getTrigSource d6
+dd.getValue d29
+sr 192
+sr.update s
+dd.setIgnoreHID d19 b:False
+dd.getValue d23
+dd.setMode d16 s:latching s:rising
+dd.getValue d24
+gpio 24 0
+advance 0.26
+dd.getValue d29
+sr 128
+sr.update s
+dd.getValue d4
+advance 0.0548
+dd.getValue d6
+dd.getValue d14
+dd.getValue d37
+dd.getValue d23
+advance 0.0123
+dd.getValue d2
+dd.getValue d31
+dd.getValue d27
+dd.getLEDValue d12
+dd.getValue d27
+dd.getValue d22
+dd.getValue d10
+dd.setOutputPeriod d14 i:40
+dd.getValue d4
+gpio 25 0
+advance 0.26
+dd.getValue d1
+dd.getValue d5
+sr 0
+sr.update s
+dd.getValue d30
+dd.getValue d21
+sr 64
+sr.update s
+dd.getTrigSource d22
+dd.getValue d10
+dd.getValue d7
+dd.getValue d10
+dd.getValue d29
+sr 72
+sr.update s
+dd.getLEDValue d31
+dd.getLEDValue d10
+dd.getValue d33
+advance 0.0391
+dd.getValue d2
+dd.getValue d34
+dd.getTrigSource d2
+dd.getValue d36
+dd.getValue d1
+dd.getValue d13
+dd.getValue d31
+rand -1 1
+dd.setIgnoreNextButton d36
+dd.getValue d32
+dd.getValue d37
+dd.getLEDValue d25
+gpio 17 1
+advance 0.26
+dd.getValue d21
+dd.getLEDValue d26
+sr 8
+sr.update s
+dd.getValue d37
+dd.setIgnoreGate d39 b:True
+dd.getValue d19
+dd.getLEDValue d37
+dd.getValue d37
+dd.getValue d11
+dd.getValue d27
+sr 40
+sr.update s
+dd.getValue d22
+dd.getValue d20
+dd.getValue d14
+advance 0.0306
+dd.getTrigSource d12
+dd.getValue d38
+dd.getValue d19
+dd.getValue d20
+advance 0.0406
+dd.getLEDValue d14
+dd.getValue d18
+sr 41
+sr.update s
+dd.getValue d37
+advance 0.0223
+dd.getTrigSource d14
+dd.getValue d30
+advance 0.0241
+dd.getValue d35
+dd.getValue d5
+gpio 24 1
+advance 0.26
+dd.getValue d3
+dd.setOutputPeriod d4 i:5
+dd.getValue d39
+gpio 25 1
+advance 0.26
+dd.getValue d23
+dd.getValue d38
+dd.getValue d3
+dd.getLEDValue d38
+dd.getValue d18
+rand -1 3
+dd.getValue d17
+dd.getLEDValue d7
+dd.getValue d14
+sr 33
+sr.update s
+dd.getLEDValue d14
+dd.getValue d21
+dd.getValue d34
+sr 41
+sr.update s
+dd.getLEDValue d16
+sr 169
+sr.update s
+dd.getValue d32
+sr 41
+sr.update s
+dd.getValue d3
+dd.getValue d2
+dd.getLEDValue d24
+advance 0.0061
+dd.getValue d8
+advance 0.0513
+dd.getValue d36
+gpio 23 1
+advance 0.26
+dd.getLEDValue d20
+advance 0.0459
+dd.getValue d12
+dd.getValue d31
+rand 6 2
+dd.getValue d21
+dd.getValue d37
+dd.getLEDValue d37
+dd.getValue d25
+dd.getLEDValue d11
+dd.getValue d15
+sr 9
+sr.update s
+dd.getLEDValue d16
+dd.getValue d37
+dd.getValue d0
+sr 73
+sr.update s
+dd.setMode d16 s:latching s:rising
+gpio 23 0
+advance 0.26
+dd.getValue d0
+dd.setIgnoreGate d7 b:True
+advance 0.0261
+dd.getLEDValue d18
+advance 0.0088
+dd.getValue d13
+dd.setMode d27 s:incremental s:falling
+dd.getLEDValue d19
+advance 0.0221
+dd.getValue d3
+sr 89
+sr.update s
+dd.getValue d37
+dd.setIgnoreGate d17 b:False
+dd.getLEDValue d11
+dd.getLEDValue d16
+dd.setIgnoreNextButton d17
+dd.getValue d37
+dd.getValue d25
+sr 121
+sr.update s
+dd.getLEDValue d17
+dd.getValue d23
+gpio 4 0
+advance 0.26
+dd.getValue d14
+dd.getValue d20
+dd.getValue d11
+advance 0.0196
+dd.getValue d8
+dd.getValue d22
+dd.getValue d4
+dd.getValue d4
+advance 0.0475
+dd.getValue d28
+dd.getValue d39
+sr 249
+sr.update s
+dd.getValue d7
+advance 0.0315
+dd.getLEDValue d32
+gpio 24 0
+advance 0.26
+dd.getValue d1
+dd.getValue d12
+dd.getLEDValue d19
+advance 0.0587
+dd.getValue d32
+dd.getValue d9
+dd.getValue d12
+sr 248
+sr.update s
+dd.getValue d13
+dd.setMode d14 s:incremental s:falling
+advance 0.0428
+dd.getValue d21
+sr 240
+sr.update s
+dd.getValue d30
+dd.getLEDValue d7
+sr 224
+sr.update s
+dd.getValue d27
+dd.getValue d8
+dd.getValue d2
+advance 0.0453
+dd.getValue d36
+dd.getValue d8
+dd.getValue d29
+sr 160
+sr.update s
+dd.getValue d23
+advance 0.0536
+dd.setIgnoreGate d22 b:True
+rand 3 1
+dd.getValue d9
+dd.getValue d27
+gpio 25 0
+advance 0.26
+dd.getLEDValue d26
+advance 0.0485
+dd.getValue d5
+dd.getValue d36
+sr 176
+sr.update s
+dd.getValue d38
+dd.getTrigSource d23
+dd.getValue d10
+dd.getValue d7
+dd.setIgnoreNextButton d26
+sr 184
+sr.update s
+dd.setIgnoreHID d25 b:False
+dd.setValue d26 i:1
+advance 0.0368
+dd.setIgnoreHID d24 b:True
+dd.getValue d12
+dd.getLEDValue d6
+rand 6 0
+dd.getValue d14
+advance 0.0144
+dd.getLEDValue d20
+dd.getValue d17
+gpio 23 1
+advance 0.26
+dd.setValue d12 i:3
+sr 248
+sr.update s
+dd.getLEDValue d4
+dd.getValue d32
+dd.getLEDValue d22
+dd.getValue d25
+gpio 23 0
+advance 0.26
+dd.getLEDValue d12
+dd.getLEDValue d37
+rand 4 3
+dd.getValue d23
+dd.getValue d24
+dd.setMode d14 s:latching s:rising
+dd.getLEDValue d8
+dd.setOutputPeriod d16 i:10
+dd.getValue d0
+dd.getValue d19
+dd.getValue d34
+sr 232
+sr.update s
+dd.getValue d23
+gpio 25 1
+advance 0.26
+dd.setIgnoreNextButton d27
+gpio 4 1
+advance 0.26
+dd.getValue d17
+sr 224
+sr.update s
+dd.getValue d7
+dd.getValue d8
+dd.getValue d11
+sr 225
+sr.update s
+dd.getLEDValue d8
+gpio 25 0
+advance 0.26
+dd.setIgnoreGate d10 b:True
+dd.getLEDValue d25
+gpio 23 1
+advance 0.26
+dd.getValue d7
+dd.setOutputPeriod d31 i:10
+dd.getValue d34
+rand 3 0
+dd.getValue d16
+dd.getValue d25
+dd.getValue d9
+dd.getValue d23
+dd.getValue d10
+dd.getValue d27
+gpio 23 0
+advance 0.26
+dd.getLEDValue d24
+dd.setIgnoreNextButton d35
+advance 0.0263
+dd.getValue d27
+dd.getTrigSource d28
+dd.getLEDValue d31
+dd.getValue d36
+dd.getValue d26
+advance 0.0378
+dd.getLEDValue d12
+sr 224
+sr.update s
+dd.getValue d29
+dd.getValue d27
+dd.getValue d38
+dd.getValue d12
+advance 0.0478
+dd.getLEDValue d19
+rand 0 1
+dd.getValue d26
+dd.getTrigSource d14
+dd.setMode d11 s:momentary s:falling
+dd.setValue d35 i:0
+dd.getValue d16
+dd.getLEDValue d6
+dd.getValue d3
+dd.getValue d39
+sr 232
+sr.update s
+dd.getLEDValue d15
+dd.getValue d20
+dd.getLEDValue d8
+dd.getValue d36
+advance 0.0088
+dd.getValue d33
+gpio 4 0
+advance 0.26
+dd.getLEDValue d37
+sr 104
+sr.update s
+dd.getValue d1
+dd.getValue d24
+gpio 24 1
+advance 0.26
+dd.getValue d11
+gpio 23 1
+advance 0.26
+dd.getValue d27
+dd.getValue d39
+dd.getValue d5
+dd.getValue d25
+dd.getValue d38
+dd.setMode d10 s:triggered s:falling
+sr 72
+sr.update s
+dd.getValue d2
+dd.setMode d31 s:momentary s:falling
+dd.setValue d24 i:2
+sr 64
+sr.update s
+dd.getValue d36
+sr 96
+sr.update s
+dd.getValue d27
+dd.setIgnoreNextButton d21
+dd.getValue d22
+gpio 24 0
+advance 0.26
+dd.getValue d3
+dd.getValue d7
+dd.getValue d14
+dd.getValue d11
+gpio 17 0
+advance 0.26
+dd.getValue d36
+dd.getValue d20
+dd.getValue d21
+sr 32
+sr.update s
+dd.getLEDValue d30
+dd.setIgnoreGate d34 b:False
+sr 40
+sr.update s
+dd.getLEDValue d18
+rand 6 3
+dd.getLEDValue d21
+gpio 17 1
+advance 0.26
+dd.getValue d3
+advance 0.0077
+dd.getValue d30
+dd.getValue d10
+dd.getLEDValue d11
+dd.getLEDValue d5
+dd.getValue d39
+advance 0.0355
+dd.getValue d26
+gpio 24 1
+advance 0.26
+dd.getValue d31
+gpio 17 0
+advance 0.26
+dd.getValue d19
+dd.getValue d22
+sr 32
+sr.update s
+dd.getValue d15
+dd.setIgnoreHID d16 b:False
+dd.getLEDValue d38
+dd.getValue d38
+dd.getValue d27
+dd.setMode d35 s:latching s:rising
+dd.getValue d32
+dd.setOutputPeriod d11 i:10
+dd.setValue d8 i:4
+dd.getValue d37
+dd.getValue d36
+dd.getLEDValue d28
+dd.getValue d16
+dd.getLEDValue d10
+sr 33
+sr.update s
+dd.getValue d1
+dd.getLEDValue d35
+dd.getValue d4
+dd.getLEDValue d36
+dd.getLEDValue d3
+dd.getValue d25
+gpio 23 0
+advance 0.26
+dd.getValue d10
+dd.getValue d10
+dd.getTrigSource d22
+sr 49
+sr.update s
+dd.getValue d16
+advance 0.0291
+dd.getValue d6
+dd.getValue d31
+sr 57
+sr.update s
+dd.getValue d6
+dd.setIgnoreGate d25 b:True
+sr 121
+sr.update s
+dd.getValue d11
+rand 2 2
+dd.getLEDValue d37
+sr 57
+sr.update s
+dd.getValue d6
+dd.getLEDValue d30
+advance 0.0084
+dd.getValue d15
+sr 41
+sr.update s
+dd.getValue d25
+dd.getValue d34
+dd.getValue d10
+dd.getTrigSource d37
+dd.getValue d26
+dd.getValue d39
+sr 40
+sr.update s
+dd.getValue d37
+dd.setIgnoreGate d28 b:True
+dd.getValue d18
+dd.getValue d12
+dd.setIgnoreNextButton d18
+dd.getLEDValue d22
+sr 168
+sr.update s
+dd.getValue d5
+advance 0.0526
+dd.getLEDValue d25
+dd.setIncOrder d29 i:0
+dd.getValue d3
+dd.getValue d26
+dd.getLEDValue d20
+dd.getLEDValue d34
+dd.setIncOrder d11 i:0
+gpio 4 1
+advance 0.26
+dd.setValue d25 i:0
+dd.getValue d3
+advance 0.0323
+dd.getValue d12
+dd.getValue d26
+advance 0.0154
+dd.setOutputPeriod d5 i:40
+gpio 25 1
+advance 0.26
+dd.getValue d34
+dd.getValue d20
+dd.getValue d39
+dd.getValue d0
+gpio 25 0
+advance 0.26
+dd.getValue d39
+dd.getValue d17
+dd.getValue d35
+dd.getLEDValue d9
+sr 184
+sr.update s
+dd.getValue d34
+dd.getValue d0
+sr 168
+sr.update s
+dd.getTrigSource d17
+dd.getValue d20
+dd.getLEDValue d8
+sr 169
+sr.update s
+dd.getValue d15
+sr 137
+sr.update s
+dd.getValue d28
+sr 153
+sr.update s
+dd.getValue d15
+dd.getValue d20
+advance 0.0346
+dd.getLEDValue d19
+dd.setIgnoreHID d34 b:True
+sr 152
+sr.update s
+dd.getValue d37
+dd.getValue d33
+dd.getValue d27
+rand 0 0
+dd.getValue d30
+dd.getValue d30
+sr 144
+sr.update s
+dd.getLEDValue d12
+dd.getValue d25
+sr 152
+sr.update s
+dd.getValue d21
+dd.getValue d1
+dd.getValue d16
+sr 144
+sr.update s
+dd.getValue d14
+sr 208
+sr.update s
+dd.getValue d8
+dd.getValue d14
+sr 192
+sr.update s
+dd.getValue d22
+dd.getValue d6
+dd.getValue d21
+dd.getLEDValue d36
+gpio 25 1
+advance 0.26
+dd.setIgnoreGate d9 b:True
+sr 128
+sr.update s
+dd.getValue d12
+sr 192
+sr.update s
+dd.getLEDValue d16
+sr 64
+sr.update s
+dd.setValue d6 i:2
+rand 0 2
+dd.getLEDValue d31
+sr 65
+sr.update s
+dd.getValue d38
+gpio 17 1
+advance 0.26
+dd.getValue d16
+dd.getValue d24
+dd.getValue d12
+dd.getValue d10
+dd.getLEDValue d21
+dd.getValue d33
+sr 97
+sr.update s
+dd.setIgnoreGate d26 b:False
+dd.getValue d28
+gpio 4 0
+advance 0.26
+dd.getValue d11
+dd.getTrigSource d4
+dd.getLEDValue d5
+gpio 24 0
+advance 0.26
+dd.getValue d38
+sr 225
+sr.update s
+dd.getLEDValue d0
+gpio 25 0
+advance 0.26
+dd.getTrigSource d21
+dd.getValue d13
+dd.getValue d10
+dd.getLEDValue d37
+dd.getValue d27
+dd.getLEDValue d35
+dd.getLEDValue d31
+sr 193
+sr.update s
+dd.getValue d0
+dd.getValue d22
+dd.getLEDValue d23
+dd.getLEDValue d25
+dd.getValue d26
+dd.getTrigSource d3
+sr 201
+sr.update s
+dd.getValue d22
+gpio 24 1
+advance 0.26
+dd.getValue d12
+dd.getValue d3
+sr 200
+sr.update s
+dd.setIgnoreHID d23 b:False
+sr 192
+sr.update s
+dd.getValue d29
+sr 224
+sr.update s
+dd.getValue d15
+dd.getTrigSource d35
+sr 160
+sr.update s
+dd.getValue d31
+gpio 4 1
+advance 0.26
+dd.getLEDValue d0
+advance 0.0104
+dd.setIgnoreHID d39 b:True
+dd.getValue d30
+gpio 17 0
+advance 0.26
+dd.getValue d8
+advance 0.0128
+dd.getValue d18
+dd.getValue d28
+rand -1 2
+dd.getValue d10
+dd.setIgnoreNextButton d35
+sr 168
+sr.update s
+dd.setIgnoreHID d9 b:False
+dd.getValue d32
+dd.getTrigSource d6
+gpio 25 1
+advance 0.26
+dd.getValue d16
+dd.getLEDValue d18
+sr 232
+sr.update s
+dd.setOutputPeriod d6 i:10
+dd.getValue d19
+dd.getValue d7
+advance 0.0582
+dd.getValue d31
+gpio 4 0
+advance 0.26
+dd.getValue d15
+gpio 24 0
+advance 0.26
+dd.getValue d14
+dd.setValue d16 i:2
+advance 0.0202
+dd.getLEDValue d5
+gpio 25 0
+advance 0.26
+dd.getValue d25
+dd.getValue d26
+gpio 23 1
+advance 0.26
+dd.getValue d20
+dd.setIgnoreGate d20 b:True
+dd.getValue d37
+advance 0.0542
+dd.getValue d18
+sr 233
+sr.update s
+dd.getValue d24
+sr 169
+sr.update s
+dd.getValue d20
+rand 5 0
+dd.getValue d17
+sr 161
+sr.update s
+dd.getValue d4
+dd.setIgnoreNextButton d34
+dd.setIgnoreNextButton d21
+dd.getValue d6
+dd.getLEDValue d14
+dd.getValue d25
+dd.getValue d32
+sr 160
+sr.update s
+dd.setIgnoreGate d5 b:True
+dd.getLEDValue d2
+dd.getValue d29
+dd.setIgnoreHID d5 b:True
+sr 176
+sr.update s
+dd.getValue d29
+dd.getValue d6
+dd.getValue d17
+gpio 4 1
+advance 0.26
+dd.getValue d15
+gpio 17 1
+advance 0.26
+dd.getValue d22
+dd.getValue d34
+dd.getValue d17
+advance 0.0075
+dd.getValue d2
+gpio 17 0
+advance 0.26
+dd.getValue d29
+dd.getValue d6
+dd.getLEDValue d37
+dd.getLEDValue d15
+advance 0.0363
+dd.setIgnoreNextButton d16
+dd.getValue d21
+dd.getLEDValue d20
+advance 0.0346
+dd.getLEDValue d15
+dd.getValue d20
+dd.getValue d24
+dd.getValue d21
+gpio 25 1
+advance 0.26
+dd.getValue d22
+gpio 25 0
+advance 0.26
+dd.getValue d17
+sr 240
+sr.update s
+dd.getValue d3
+sr 208
+sr.update s
+dd.getValue d35
+advance 0.0465
+dd.setValue d10 i:1
+dd.getValue d3
+dd.setValue d24 i:4
+sr 216
+sr.update s
+dd.getValue d20
+dd.getValue d12
+dd.setValue d9 i:2
+dd.getLEDValue d7
+dd.getValue d22
+advance 0.0557
+dd.getValue d18
+dd.getLEDValue d23
+dd.setIgnoreGate d6 b:True
+dd.getValue d32
+sr 208
+sr.update s
+dd.getValue d37
+advance 0.0314
+dd.getLEDValue d30
+dd.getValue d3
+dd.getTrigSource d38
+dd.getLEDValue d22
+advance 0.028
+dd.getValue d15
+dd.getValue d10
+dd.getValue d27
+dd.getLEDValue d4
+dd.setIgnoreHID d12 b:True
+sr 240
+sr.update s
+dd.getValue d0
+advance 0.0599
+dd.getValue d4
+dd.getValue d1
+gpio 17 1
+advance 0.26
+dd.getValue d17
+dd.getValue d31
+dd.getValue d29
+sr 248
+sr.update s
+dd.getValue d5
+dd.setValue d16 i:0
+advance 0.0074
+dd.setValue d28 i:2
+dd.getValue d11
+dd.getValue d20
+dd.getValue d18
+dd.getValue d0
+dd.getLEDValue d13
+rand 6 0
+dd.setIgnoreHID d31 b:True
+dd.setIgnoreGate d9 b:False
+gpio 17 0
+advance 0.26
+dd.getValue d2
+gpio 25 1
+advance 0.26
+dd.getValue d8
+dd.getValue d32
+dd.getLEDValue d29
+dd.getValue d26
+dd.getLEDValue d21
+dd.setIncOrder d32 i:2
+dd.getValue d37
+dd.getValue d31
+sr 232
+sr.update s
+dd.getValue d24
+sr 168
+sr.update s
+dd.getValue d22
+rand 6 2
+dd.setIgnoreHID d36 b:False
+dd.getValue d31
+dd.getValue d25
+dd.getLEDValue d18
+gpio 25 0
+advance 0.26
+dd.getValue d32
+gpio 4 0
+advance 0.26
+dd.getLEDValue d37
+dd.getLEDValue d8
+dd.getValue d5
+dd.getValue d21
+dd.getValue d26
+dd.getValue d23
+dd.setIgnoreGate d9 b:True
+gpio 25 1
+advance 0.26
+dd.getLEDValue d34
+dd.getValue d18
+dd.getValue d7
+advance 0.0114
+dd.getTrigSource d31
+dd.getValue d24
+gpio 17 1
+advance 0.26
+dd.getValue d15
+dd.getValue d23
+dd.setIgnoreHID d2 b:False
+sr 169
+sr.update s
+dd.getLEDValue d14
+dd.getValue d16
+advance 0.0445
+dd.getValue d23
+sr 233
+sr.update s
+dd.getLEDValue d28
+dd.getValue d5
+dd.getValue d39
+dd.getValue d21
+sr 249
+sr.update s
+dd.getTrigSource d37
+dd.getLEDValue d35
+dd.getValue d7
+dd.getValue d1
+dd.getValue d39
+advance 0.0231
+dd.getLEDValue d19
+gpio 23 0
+advance 0.26
+dd.getValue d8
+dd.getValue d10
+dd.getLEDValue d3
+advance 0.0495
+dd.getValue d22
+dd.getValue d1
+dd.getValue d19
+gpio 25 0
+advance 0.26
+dd.getValue d1
+dd.getValue d6
+sr 241
+sr.update s
+dd.getValue d2
+dd.getValue d9
+dd.getValue d32
+dd.getLEDValue d15
+gpio 17 0
+advance 0.26
+dd.getValue d33
+sr 225
+sr.update s
+dd.getValue d14
+dd.getValue d10
+sr 193
+sr.update s
+dd.getValue d34
+dd.getValue d17
+dd.getValue d19
+advance 0.015
+dd.getValue d12
+dd.getValue d22
+dd.getLEDValue d38
+dd.getValue d16
+dd.setIgnoreNextButton d20
+advance 0.0483
+dd.getValue d10
+dd.getValue d30
+dd.getValue d17
+dd.setOutputPeriod d25 i:40
+gpio 25 1
+advance 0.26
+dd.getValue d16
+advance 0.0221
+dd.setIncOrder d30 i:2
+dd.getValue d4
+dd.getLEDValue d17
+dd.getValue d32
+sr 192
+sr.update s
+dd.getValue d24
+dd.setValue d9 i:1
+sr 193
+sr.update s
+dd.getTrigSource d28
+rand 1 3
+dd.getValue d17
+sr 201
+sr.update s
+dd.getLEDValue d38
+sr 217
+sr.update s
+dd.getValue d3
+dd.getLEDValue d8
+sr 153
+sr.update s
+dd.getValue d6
+dd.getValue d18
+dd.getValue d20
+sr 145
+sr.update s
+dd.getValue d13
+dd.getValue d24
+sr 129
+sr.update s
+dd.getValue d18
+dd.getValue d8
+advance 0.0327
+dd.getValue d25
+sr 137
+sr.update s
+dd.getValue d1
+advance 0.0202
+dd.getLEDValue d10
+dd.getValue d11
+dd.getValue d25
+dd.setIgnoreHID d19 b:False
+rand 3 2
+dd.getValue d16
+gpio 24 1
+advance 0.26
+dd.getValue d5
+advance 0.0137
+dd.getValue d19
+dd.getValue d7
+sr 201
+sr.update s
+dd.getLEDValue d36
+sr 73
+sr.update s
+dd.getValue d15
+dd.getValue d15
+gpio 17 1
+advance 0.26
+dd.getValue d3
+dd.getValue d27
+dd.getLEDValue d15
+dd.getValue d5
+dd.getLEDValue d22
+rand 1 3
+dd.getValue d1
+dd.getValue d10
+dd.getValue d16
+dd.getValue d20
+dd.getValue d20
+dd.getLEDValue d3
+dd.getValue d35
+dd.getLEDValue d10
+dd.getValue d33
+sr 89
+sr.update s
+dd.getValue d29
+dd.getValue d1
+dd.getValue d39
+dd.getValue d8
+dd.getValue d16
+advance 0.0312
+dd.getValue d5
+dd.getValue d32
+sr 88
+sr.update s
+dd.getValue d14
+dd.getValue d34
+dd.getValue d7
+dd.getTrigSource d14
+dd.getValue d11
+dd.setMode d5 s:incremental s:rising
+advance 0.008
+dd.getValue d8
+dd.getLEDValue d13
+dd.getValue d34
+dd.getValue d11
+dd.getValue d15
+dd.getValue d20
+advance 0.0399
+dd.setMode d29 s:incremental s:falling
+dd.setOutputPeriod d30 i:40
+dd.setIgnoreNextButton d14
+dd.getValue d22
+dd.getValue d8
+advance 0.0024
+dd.getValue d2
+dd.getValue d16
+dd.getLEDValue d25
+dd.getValue d1
+gpio 24 0
+advance 0.26
+dd.getValue d8
+dd.getValue d25
+dd.getValue d39
+sr 80
+sr.update s
+dd.getValue d12
+dd.getValue d35
+sr 112
+sr.update s
+dd.getLEDValue d14
+gpio 25 0
+advance 0.26
+dd.getValue d17
+dd.getValue d37
+dd.getValue d19
+dd.getValue d17
+dd.getTrigSource d16
+advance 0.0512
+dd.setIgnoreNextButton d17
+dd.getLEDValue d30
+rand 5 3
+dd.getValue d7
+dd.getValue d37
+dd.getLEDValue d34
+sr 80
+sr.update s
+dd.getValue d9
+dd.getLEDValue d20
+sr 208
+sr.update s
+dd.getLEDValue d25
+sr 216
+sr.update s
+dd.getLEDValue d20
+advance 0.0203
+dd.getValue d34
+dd.getLEDValue d23
+dd.getLEDValue d12
+gpio 23 1
+advance 0.26
+dd.getValue d0
+dd.getValue d33
+dd.setIgnoreGate d29 b:True
+dd.getValue d33
+advance 0.0304
+dd.getValue d1
+dd.setIgnoreGate d3 b:True
+dd.getLEDValue d28
+dd.getValue d9
+dd.getValue d0
+dd.getValue d14
+dd.getValue d4
+dd.getValue d21
+dd.getValue d29
+dd.getLEDValue d16
+advance 0.0127
+dd.getLEDValue d1
+dd.getValue d30
+dd.getValue d8
+dd.getValue d10
+dd.getValue d23
+dd.getValue d37
+dd.setIgnoreHID d21 b:False
+sr 217
+sr.update s
+dd.getLEDValue d19
+gpio 4 1
+advance 0.26
+dd.getValue d38
+advance 0.0271
+dd.setOutputPeriod d24 i:40
+dd.getValue d6
+dd.getValue d11
+dd.getValue d35
+advance 0.0328
+dd.getValue d38
+sr 153
+sr.update s
+dd.getLEDValue d10
+gpio 17 0
+advance 0.26
+dd.getValue d10
+sr 152
+sr.update s
+dd.getValue d8
+sr 24
+sr.update s
+dd.setIgnoreGate d5 b:True
+rand 6 0
+dd.getLEDValue d26
+dd.getValue d15
+dd.getValue d18
+rand 1 1
+dd.getValue d38
+advance 0.0015
+dd.getValue d30
+sr 152
+sr.update s
+dd.getValue d1
+dd.getValue d26
+dd.getValue d37
+sr 153
+sr.update s
+dd.getLEDValue d17
+dd.getLEDValue d39
+gpio 23 0
+advance 0.26
+dd.getValue d5
+sr 137
+sr.update s
+dd.setOutputPeriod d37 i:10
+sr 129
+sr.update s
+dd.getValue d39
+dd.getValue d7
+sr 128
+sr.update s
+dd.getValue d18
+dd.getValue d32
+dd.getValue d23
+dd.getTrigSource d36
+rand -1 0
+dd.getLEDValue d5
+sr 144
+sr.update s
+dd.getValue d11
+dd.getLEDValue d8
+dd.getValue d29
+dd.getValue d2
+dd.getValue d24
+dd.getValue d9
+dd.getValue d31
+gpio 4 0
+advance 0.26
+dd.getValue d29
+dd.getLEDValue d24
+dd.getLEDValue d33
+rand 4 2
+dd.getValue d18
+dd.setIncOrder d32 i:0
+dd.getValue d10
+dd.getValue d17
+dd.getValue d31
+dd.getValue d20
+dd.getValue d18
+dd.getValue d11
+dd.getValue d23
+dd.setValue d16 i:0
+sr 208
+sr.update s
+dd.getValue d25
+gpio 23 1
+advance 0.26
+dd.getValue d17
+dd.getValue d39
+dd.getValue d38
+sr 209
+sr.update s
+dd.getValue d1
+dd.getValue d31
+dd.getValue d10
+dd.getValue d9
+dd.getLEDValue d38
+dd.getValue d35
+dd.getValue d27
+dd.getValue d18
+dd.getValue d1
+advance 0.04
+dd.getValue d12
+dd.getTrigSource d21
+dd.getValue d2
+dd.getTrigSource d9
+dd.getTrigSource d11
+sr 81
+sr.update s
+dd.getLEDValue d17
+dd.setValue d5 i:2
+dd.getTrigSource d6
+advance 0.0224
+dd.getLEDValue d38
+dd.getValue d2
+dd.getLEDValue d22
+dd.getValue d17
+dd.getValue d5
+gpio 4 1
+advance 0.26
+dd.getValue d2
+dd.getLEDValue d20
+dd.getValue d25
+gpio 23 0
+advance 0.26
+dd.getValue d13
+rand 4 2
+dd.getValue d30
+dd.getValue d37
+dd.getValue d5
+sr 80
+sr.update s
+dd.getValue d39
+dd.getValue d14
+dd.getValue d27
+advance 0.0045
+dd.getValue d3
+dd.getValue d12
+sr 81
+sr.update s
+dd.getLEDValue d11
+dd.getTrigSource d12
+gpio 4 0
+advance 0.26
+dd.getLEDValue d5
+advance 0.0391
+dd.getValue d7
+gpio 24 1
+advance 0.26
+dd.getTrigSource d23
+dd.setOutputPeriod d38 i:40
+sr 17
+sr.update s
+dd.getValue d11
+dd.getLEDValue d22
+dd.setIncOrder d19 i:0
+dd.getValue d10
+dd.getValue d18
+dd.getValue d6
+rand 6 3
+dd.getValue d17
+dd.getValue d37
+dd.getLEDValue d28
+dd.getValue d38
+dd.getLEDValue d36
+dd.getValue d12
+dd.getValue d16
+sr 25
+sr.update s
+dd.setIgnoreGate d15 b:True
+sr 24
+sr.update s
+dd.getValue d30
+dd.getValue d0
+dd.setIgnoreGate d25 b:False
+dd.getLEDValue d22
+dd.getValue d15
+dd.setIgnoreGate d25 b:False
+dd.setIncOrder d1 i:2
+gpio 17 1
+advance 0.26
+dd.setIgnoreHID d34 b:False
+dd.getValue d16
+gpio 24 0
+advance 0.26
+dd.getValue d1
+sr 8
+sr.update s
+dd.getValue d29
+dd.getValue d1
+advance 0.0161
+dd.getValue d37
+sr 40
+sr.update s
+dd.getLEDValue d37
+dd.getValue d14
+dd.getValue d22
+dd.getValue d9
+dd.getValue d18
+advance 0.0039
+dd.getLEDValue d39
+dd.getValue d0
+dd.getValue d32
+dd.getValue d24
+dd.getValue d34
+sr 56
+sr.update s
+dd.getValue d18
+gpio 4 1
+advance 0.26
+dd.getValue d38
+dd.getValue d38
+dd.getLEDValue d22
+dd.getValue d25
+dd.getValue d35
+sr 120
+sr.update s
+dd.getValue d15
+dd.setIgnoreNextButton d23
+advance 0.0053
+dd.setIgnoreGate d19 b:False
+rand 0 1
+dd.getValue d28
+dd.getLEDValue d31
+sr 104
+sr.update s
+dd.getValue d12
+dd.getValue d1
+advance 0.003
+dd.getValue d16
+gpio 4 0
+advance 0.26
+dd.getValue d1
+sr 72
+sr.update s
+dd.getLEDValue d14
+advance 0.0544
+dd.getValue d28
+dd.getValue d19
+sr 73
+sr.update s
+dd.getValue d1
+dd.getValue d29
+advance 0.0104
+dd.getValue d13
+dd.setOutputPeriod d10 i:40
+dd.getLEDValue d19
+dd.getLEDValue d8
+dd.getValue d9
+dd.getValue d15
+dd.getLEDValue d23
+dd.getValue d11
+dd.getValue d26
+advance 0.0476
+dd.getValue d38
+sr 89
+sr.update s
+dd.getValue d12
+dd.getValue d13
+sr 73
+sr.update s
+dd.getValue d38
+dd.getLEDValue d17
+dd.getLEDValue d19
+dd.setIgnoreGate d0 b:False
+dd.getValue d11
+dd.getTrigSource d37
+gpio 17 0
+advance 0.26
+dd.getValue d0
+sr 89
+sr.update s
+dd.getValue d4
+dd.setIgnoreNextButton d28
+advance 0.0243
+dd.getValue d7
+dd.getValue d30
+sr 25
+sr.update s
+dd.getLEDValue d13
+dd.getValue d34
+dd.getLEDValue d36
+dd.getValue d12
+sr 17
+sr.update s
+dd.getValue d37
+gpio 17 1
+advance 0.26
+dd.getLEDValue d10
+dd.getLEDValue d37
+gpio 23 1
+advance 0.26
+dd.getLEDValue d32
+dd.getValue d20
+gpio 25 1
+advance 0.26
+dd.getValue d5
+sr 145
+sr.update s
+dd.getLEDValue d3
+dd.getLEDValue d20
+dd.getTrigSource d37
+gpio 17 0
+advance 0.26
+dd.setIgnoreNextButton d29
+dd.getValue d0
+dd.getValue d18
+dd.getLEDValue d30
+dd.getLEDValue d39
+rand -1 1
+dd.getValue d37
+gpio 25 0
+advance 0.26
+dd.getValue d25
+dd.getValue d34
+sr 129
+sr.update s
+dd.getValue d4
+advance 0.0057
+dd.getValue d31
+dd.getValue d38
+sr 193
+sr.update s
+dd.getValue d33
+dd.setIgnoreGate d37 b:False
+dd.getValue d10
+dd.getValue d31
+dd.getValue d36
+dd.getValue d38
+dd.getValue d11
+advance 0.0526
+dd.setIgnoreHID d28 b:True
+advance 0.0368
+dd.getLEDValue d11
+dd.setIgnoreHID d16 b:False
+dd.setIgnoreGate d27 b:True
+dd.setIgnoreNextButton d30
+sr 129
+sr.update s
+dd.getValue d19
+dd.getValue d12
+dd.getValue d31
+dd.getValue d20
+dd.getValue d13
+dd.getValue d23
+sr 137
+sr.update s
+dd.getValue d15
+sr 9
+sr.update s
+dd.getLEDValue d22
+sr 137
+sr.update s
+dd.getValue d18
+advance 0.0206
+dd.setMode d13 s:latching s:rising
+dd.getValue d19
+dd.getValue d22
+sr 153
+sr.update s
+dd.getValue d29
+advance 0.0036
+dd.getLEDValue d3
+sr 217
+sr.update s
+dd.getValue d29
+dd.setIgnoreNextButton d2
+dd.getValue d31
+dd.getValue d11
+dd.getValue d21
+sr 209
+sr.update s
+dd.getValue d0
+dd.getValue d21
+dd.getValue d4
+dd.getValue d34
+sr 145
+sr.update s
+dd.getValue d15
+dd.getValue d36
+dd.getValue d26
+dd.getValue d19
+dd.getValue d31
+dd.setIgnoreHID d22 b:False
+dd.getValue d6
+dd.getLEDValue d4
+advance 0.0463
+dd.getValue d6
+dd.getLEDValue d6
+dd.getValue d38
+dd.getLEDValue d19
+dd.getValue d34
+dd.setMode d13 s:triggered s:falling
+dd.getLEDValue d3
+advance 0.0475
+dd.getValue d32
+gpio 24 1
+advance 0.26
+dd.getValue d31
+dd.getValue d17
+dd.getValue d12
+dd.getLEDValue d5
+sr 209
+sr.update s
+dd.getLEDValue d31
+dd.getValue d0
+dd.getValue d24
+dd.getValue d0
+dd.getValue d5
+dd.setIgnoreNextButton d31
+advance 0.0283
+dd.getValue d38
+advance 0.0561
+dd.getValue d12
+dd.getLEDValue d3
+dd.getLEDValue d8
+dd.getLEDValue d35
+dd.setIgnoreHID d14 b:True
+dd.setValue d26 i:2
+dd.getLEDValue d30
+dd.getValue d2
+dd.getValue d18
+sr 217
+sr.update s
+dd.setIgnoreGate d0 b:False
+dd.getValue d3
+dd.setIgnoreHID d21 b:True
+dd.getLEDValue d14
+dd.setIgnoreHID d33 b:True
+dd.setIgnoreHID d14 b:True
+advance 0.0522
+dd.getValue d11
+dd.getLEDValue d15
+advance 0.0033
+dd.getLEDValue d20
+sr 89
+sr.update s
+dd.getValue d33
+gpio 23 0
+advance 0.26
+dd.getValue d5
+dd.getValue d15
+dd.setOutputPeriod d30 i:40
+rand 0 3
+dd.getValue d3
+dd.getValue d13
+dd.getValue d15
+sr 121
+sr.update s
+dd.getLEDValue d9
+dd.getValue d8
+dd.getLEDValue d3
+dd.getTrigSource d5
+dd.getValue d32
+dd.getValue d1
+sr 249
+sr.update s
+dd.setIgnoreGate d21 b:False
+dd.getValue d11
+dd.getValue d9
+gpio 24 0
+advance 0.26
+dd.getValue d6
+dd.getValue d16
+dd.getValue d18
+dd.getValue d10
+dd.getValue d16
+dd.getValue d24
+dd.getLEDValue d1
+dd.getLEDValue d23
+gpio 23 1
+advance 0.26
+dd.getLEDValue d1
+dd.getLEDValue d39
+sr 185
+sr.update s
+dd.getLEDValue d25
+dd.getValue d37
+sr 57
+sr.update s
+dd.getValue d39
+sr 185
+sr.update s
+dd.getLEDValue d18
+gpio 23 0
+advance 0.26
+dd.getLEDValue d26
+dd.getLEDValue d2
+dd.getLEDValue d6
+rand 3 2
+dd.getLEDValue d37
+sr 57
+sr.update s
+dd.getValue d4
+dd.getValue d13
+sr 185
+sr.update s
+dd.getValue d27
+dd.getValue d17
+gpio 24 1
+advance 0.26
+dd.getValue d29
+advance 0.0099
+dd.getValue d0
+dd.getLEDValue d30
+sr 184
+sr.update s
+dd.getValue d11
+gpio 17 1
+advance 0.26
+dd.getLEDValue d20
+sr 176
+sr.update s
+dd.getValue d22
+sr 177
+sr.update s
+dd.setIgnoreGate d2 b:True
+dd.getValue d24
+sr 185
+sr.update s
+dd.getValue d24
+dd.getLEDValue d3
+dd.getValue d8
+sr 177
+sr.update s
+dd.getLEDValue d18
+advance 0.0143
+dd.getValue d39
+gpio 24 0
+advance 0.26
+dd.getValue d35
+dd.setIncOrder d38 i:1
+dd.getTrigSource d33
+sr 145
+sr.update s
+dd.getValue d2
+dd.getValue d22
+dd.getValue d6
+gpio 25 1
+advance 0.26
+dd.getValue d2
+sr 153
+sr.update s
+dd.getLEDValue d35
+dd.getValue d23
+dd.getLEDValue d32
+dd.getValue d8
+gpio 23 1
+advance 0.26
+dd.getValue d1
+dd.getValue d14
+dd.getValue d9
+dd.getLEDValue d19
+dd.setMode d26 s:latching s:falling
+dd.getValue d37
+dd.getValue d29
+dd.getLEDValue d6
+sr 25
+sr.update s
+dd.getValue d27
+dd.getLEDValue d0
+dd.getValue d31
+dd.getValue d28
+sr 153
+sr.update s
+dd.getValue d17
+dd.getLEDValue d14
+dd.getValue d15
+dd.getValue d29
+dd.getValue d39
+advance 0.0083
+dd.getLEDValue d32
+dd.getValue d9
+dd.getValue d36
+dd.getLEDValue d3
+dd.getValue d22
+dd.getLEDValue d7
+dd.getLEDValue d3
+dd.getLEDValue d29
+dd.getValue d22
+dd.getValue d15
+dd.getTrigSource d30
+sr 152
+sr.update s
+dd.setIgnoreHID d21 b:False
+sr 144
+sr.update s
+dd.getValue d20
+dd.setIgnoreGate d1 b:True
+dd.getValue d10
+dd.getValue d17
+dd.getValue d10
+dd.getLEDValue d15
+gpio 4 1
+advance 0.26
+dd.getValue d15
+gpio 25 0
+advance 0.26
+dd.getValue d35
+advance 0.0296
+dd.getValue d22
+gpio 25 1
+advance 0.26
+dd.setValue d9 i:0
+dd.getValue d16
+dd.getTrigSource d17
+dd.setOutputPeriod d21 i:40
+dd.getValue d31
+gpio 25 0
+advance 0.26
+dd.setOutputPeriod d30 i:40
+dd.getValue d25
+advance 0.0407
+dd.getLEDValue d39
+gpio 17 0
+advance 0.26
+dd.getValue d35
+sr 152
+sr.update s
+dd.getValue d1
+dd.getValue d36
+dd.getValue d25
+dd.getValue d3
+dd.setIgnoreHID d7 b:True
+dd.getValue d30
+dd.getValue d1
+dd.getValue d9
+dd.getValue d32
+dd.getValue d20
+sr 24
+sr.update s
+dd.getValue d28
+dd.getValue d17
+sr 8
+sr.update s
+dd.getValue d25
+sr 40
+sr.update s
+dd.getValue d15
+sr 41
+sr.update s
+dd.getValue d16
+gpio 17 1
+advance 0.26
+dd.setIgnoreNextButton d37
+dd.getValue d31
+dd.getValue d31
+dd.getValue d36
+dd.getValue d25
+dd.getValue d15
+dd.getValue d3
+dd.getTrigSource d39
+dd.getValue d15
+sr 105
+sr.update s
+dd.getValue d25
+dd.getLEDValue d6
+dd.getValue d10
+dd.getValue d12
+dd.getValue d7
+dd.getValue d21
+dd.setIgnoreNextButton d28
+gpio 25 1
+advance 0.26
+dd.getValue d11
+dd.setValue d13 i:3
+dd.getValue d18
+dd.getLEDValue d23
+gpio 25 0
+advance 0.26
+dd.getValue d32
+dd.setMode d26 s:latching s:falling
+sr 73
+sr.update s
+dd.getValue d35
+gpio 4 0
+advance 0.26
+dd.setIgnoreGate d6 b:True
+gpio 24 1
+advance 0.26
+dd.getValue d16
+dd.getLEDValue d14
+gpio 4 1
+advance 0.26
+dd.getValue d20
+advance 0.0027
+dd.setIgnoreHID d31 b:True
+dd.getValue d34
+dd.getValue d35
+dd.getLEDValue d37
+advance 0.0485
+dd.getValue d19
+advance 0.0377
+dd.getValue d36
+dd.getValue d24
+dd.setIgnoreNextButton d24
+sr 201
+sr.update s
+dd.getValue d5
+dd.getValue d21
+dd.getLEDValue d27
+dd.getValue d31
+dd.getLEDValue d4
+dd.getValue d32
+dd.getValue d35
+rand -1 3
+dd.getValue d0
+advance 0.0333
+dd.getValue d20
+advance 0.0505
+dd.getLEDValue d27
+dd.getLEDValue d15
+dd.getValue d36
+dd.getValue d16
+advance 0.0458
+dd.setIncOrder d27 i:2
+gpio 24 0
+advance 0.26
+dd.getTrigSource d26
+sr 233
+sr.update s
+dd.getValue d17
+dd.getLEDValue d24
+dd.getLEDValue d11
+sr 232
+sr.update s
+dd.getLEDValue d33
+gpio 25 1
+advance 0.26
+dd.getValue d4
+advance 0.0326
+dd.getValue d36
+dd.getValue d2
+dd.getValue d38
+dd.getValue d10
+advance 0.0124
+dd.getLEDValue d1
+dd.getValue d3
+dd.getValue d22
+gpio 23 0
+advance 0.26
+dd.getValue d24
+dd.getValue d17
+dd.getLEDValue d38
+sr 104
+sr.update s
+dd.getValue d11
+sr 40
+sr.update s
+dd.setMode d17 s:triggered s:rising
+dd.setIgnoreGate d28 b:True
+dd.getValue d2
+dd.getValue d33
+dd.setIgnoreGate d33 b:False
+dd.getValue d8
+dd.getValue d31
+dd.getLEDValue d22
+dd.getValue d24
+sr 56
+sr.update s
+dd.getValue d16
+advance 0.0108
+dd.getLEDValue d18
+dd.getValue d20
+dd.getValue d9
+dd.getTrigSource d26
+rand 2 2
+dd.setIgnoreNextButton d8
+dd.getValue d38
+dd.setIgnoreGate d10 b:True
+dd.getValue d10
+rand 2 1
+dd.getValue d7
+gpio 24 1
+advance 0.26
+dd.setIgnoreNextButton d5
+gpio 4 0
+advance 0.26
+dd.getValue d18
+dd.getValue d8
+dd.getValue d9
+gpio 23 1
+advance 0.26
+dd.getValue d36
+advance 0.0186
+dd.setIgnoreNextButton d3
+rand 0 3
+dd.getValue d35
+dd.getValue d20
+sr 57
+sr.update s
+dd.getValue d29
+gpio 4 1
+advance 0.26
+dd.getValue d24
+dd.getValue d33
+dd.getTrigSource d7
+dd.getValue d8
+dd.getLEDValue d6
+gpio 25 0
+advance 0.26
+dd.getValue d28
+sr 56
+sr.update s
+dd.getValue d24
+sr 184
+sr.update s
+dd.getValue d12
+dd.getValue d34
+dd.getValue d11
+sr 168
+sr.update s
+dd.getValue d37
+advance 0.0384
+dd.getValue d14
+gpio 4 0
+advance 0.26
+dd.getValue d0
+dd.getValue d23
+dd.getLEDValue d10
+dd.getValue d16
+gpio 23 0
+advance 0.26
+dd.getValue d14
+sr 136
+sr.update s
+dd.getValue d12
+advance 0.0434
+dd.getValue d38
+dd.getValue d4
+dd.getValue d4
+gpio 4 1
+advance 0.26
+dd.getLEDValue d26
+dd.getLEDValue d3
+dd.getLEDValue d13
+dd.getValue d8
+sr 168
+sr.update s
+dd.getValue d12
+dd.getValue d24
+advance 0.0453
+dd.setMode d13 s:momentary s:rising
+dd.getValue d23
+dd.getLEDValue d36
+dd.getValue d0
+dd.getValue d31
+dd.getValue d23
+gpio 23 1
+advance 0.26
+dd.getValue d35
+dd.getValue d8
+sr 40
+sr.update s
+dd.getValue d36
+dd.getValue d9
+dd.setIgnoreHID d1 b:True
+sr 56
+sr.update s
+dd.getValue d11
+dd.getLEDValue d14
+dd.getValue d1
+advance 0.0005
+dd.getValue d14
+dd.setMode d39 s:triggered s:rising
+dd.getValue d10
+dd.getLEDValue d30
+dd.getValue d22
+advance 0.0457
+dd.getValue d20
+dd.getValue d30
+advance 0.0472
+dd.getValue d39
+dd.getValue d21
+sr 48
+sr.update s
+dd.getValue d34
+dd.getLEDValue d39
+dd.getLEDValue d11
+dd.getValue d36
+sr 32
+sr.update s
+dd.getValue d6
+dd.setIgnoreNextButton d18
+dd.setIgnoreNextButton d1
+dd.getLEDValue d0
+advance 0.0187
+dd.setOutputPeriod d35 i:40
+dd.getLEDValue d8
+sr 96
+sr.update s
+dd.setIgnoreHID d32 b:False
+dd.getValue d32
+sr 97
+sr.update s
+dd.getValue d9
+dd.getLEDValue d19
+dd.getLEDValue d30
+sr 225
+sr.update s
+dd.getValue d17
+dd.getLEDValue d4
+dd.getValue d33
+dd.getTrigSource d34
+dd.getLEDValue d31
+sr 97
+sr.update s
+dd.getValue d7
+advance 0.0141
+dd.getValue d37
+dd.getTrigSource d27
+dd.getValue d32
+dd.getValue d16
+advance 0.0408
+dd.getValue d8
+dd.getLEDValue d32
+dd.getValue d6
+dd.getValue d19
+dd.getValue d16
+dd.getValue d18
+sr 65
+sr.update s
+dd.getValue d2
+dd.getValue d33
+dd.getValue d1
+sr 73
+sr.update s
+dd.setMode d7 s:momentary s:falling
+dd.getValue d7
+sr 89
+sr.update s
+dd.getValue d8
+dd.getLEDValue d36
+dd.getValue d21
+dd.setMode d37 s:latching s:falling
+sr 88
+sr.update s
+dd.getValue d26
+advance 0.0355
+dd.getValue d4
+dd.getValue d39
+sr 72
+sr.update s
+dd.getValue d32
+dd.getValue d17
+dd.getValue d38
+gpio 4 0
+advance 0.26
+dd.getLEDValue d28
+dd.getValue d0
+dd.getValue d6
+advance 0.0317
+dd.getLEDValue d4
+dd.getValue d25
+dd.getValue d33
+rand -1 3
+dd.getValue d33
+dd.getValue d3
+sr 104
+sr.update s
+dd.setIgnoreNextButton d13
+dd.getValue d1
+dd.getValue d17
+dd.getValue d26
+dd.getValue d11
+dd.getValue d35
+dd.getValue d0
+gpio 25 1
+advance 0.26
+dd.getValue d39
+gpio 24 0
+advance 0.26
+dd.getValue d31
+sr 105
+sr.update s
+dd.getValue d9
+sr 233
+sr.update s
+dd.getLEDValue d27
+sr 232
+sr.update s
+dd.getValue d36
+sr 168
+sr.update s
+dd.getValue d30
+sr 160
+sr.update s
+dd.getValue d23
+rand 4 3
+dd.getValue d8
+dd.getLEDValue d36
+gpio 17 0
+advance 0.26
+dd.getValue d26
+rand 4 1
+dd.getValue d17
+sr 128
+sr.update s
+dd.getLEDValue d26
+gpio 4 1
+advance 0.26
+dd.getValue d12
+sr 136
+sr.update s
+dd.getValue d3
+dd.getValue d31
+sr 137
+sr.update s
+dd.getValue d34
+sr 129
+sr.update s
+dd.getValue d1
+dd.getValue d9
+dd.getValue d8
+sr 1
+sr.update s
+dd.getValue d19
+dd.getValue d7
+dd.getValue d19
+sr 65
+sr.update s
+dd.getValue d28
+dd.getValue d26
+dd.getValue d36
+dd.getLEDValue d7
+dd.getValue d31
+dd.getValue d32
+sr 97
+sr.update s
+dd.getLEDValue d31
+advance 0.0547
+dd.setIgnoreHID d23 b:True
+dd.getValue d11
+dd.getValue d21
+dd.getValue d36
+dd.setIgnoreNextButton d22
+dd.getValue d37
+dd.getValue d0
+dd.getValue d17
+gpio 25 0
+advance 0.26
+dd.getValue d2
+sr 33
+sr.update s
+dd.getValue d17
+dd.getValue d31
+dd.getValue d22
+dd.getLEDValue d3
+dd.getValue d38
+dd.getLEDValue d34
+gpio 4 0
+advance 0.26
+dd.getTrigSource d3
+dd.getValue d13
+dd.getTrigSource d9
+dd.getLEDValue d37
+dd.getValue d13
+dd.getValue d39
+dd.getValue d5
+dd.getTrigSource d22
+dd.getLEDValue d26
+dd.getLEDValue d3
+sr 32
+sr.update s
+dd.getValue d38
+dd.getValue d33
+dd.setIgnoreNextButton d4
+dd.getValue d36
+dd.getValue d27
+dd.getLEDValue d36
+dd.getValue d39
+sr 40
+sr.update s
+dd.getValue d14
+dd.getValue d27
+sr 56
+sr.update s
+dd.setOutputPeriod d24 i:5
+advance 0.0285
+dd.getValue d8
+sr 48
+sr.update s
+dd.getValue d24
+dd.getValue d37
+sr 112
+sr.update s
+dd.getValue d3
+dd.getValue d0
+dd.getValue d2
+dd.getValue d8
+dd.getValue d29
+dd.setOutputPeriod d4 i:40
+dd.getValue d16
+dd.getLEDValue d8
+dd.getValue d2
+dd.getValue d4
+dd.getValue d30
+dd.getValue d4
+dd.getValue d16
+dd.getValue d15
+dd.getValue d6
+advance 0.0146
+dd.getValue d11
+dd.setIgnoreHID d8 b:False
+dd.getLEDValue d14
+sr 113
+sr.update s
+dd.getValue d5
+dd.getValue d5
+sr 81
+sr.update s
+dd.getValue d3
+advance 0.0124
+dd.getLEDValue d18
+gpio 17 1
+advance 0.26
+dd.getValue d33
+dd.getValue d3
+dd.getValue d12
+dd.getValue d9
+dd.getLEDValue d33
+gpio 17 0
+advance 0.26
+dd.getValue d4
+dd.getLEDValue d29
+dd.setIgnoreNextButton d27
+gpio 23 0
+advance 0.26
+dd.getValue d21
+sr 209
+sr.update s
+dd.setIgnoreHID d5 b:True
+sr 145
+sr.update s
+dd.getValue d7
+advance 0.035
+dd.getLEDValue d38
+dd.getLEDValue d39
+advance 0.0186
+dd.getValue d0
+dd.getValue d1
+dd.getLEDValue d37
+dd.getValue d15
+dd.getValue d2
+gpio 17 1
+advance 0.26
+dd.setValue d36 i:3
+dd.getLEDValue d1
+dd.setValue d1 i:2
+dd.getValue d28
+dd.getValue d30
+dd.getValue d11
+gpio 4 1
+advance 0.26
+dd.getValue d9
+dd.getValue d38
+dd.getValue d26
+advance 0.0091
+dd.getValue d8
+gpio 25 1
+advance 0.26
+dd.getValue d8
+gpio 24 1
+advance 0.26
+dd.getValue d16
+dd.getValue d11
+dd.getValue d37
+dd.getValue d19
+gpio 25 0
+advance 0.26
+dd.getValue d25
+dd.setIgnoreNextButton d28
+dd.getValue d35
+dd.getTrigSource d1
+dd.getValue d9
+dd.getValue d18
+sr 144
+sr.update s
+dd.getValue d25
+advance 0.0376
+dd.setMode d15 s:momentary s:rising
+gpio 24 0
+advance 0.26
+dd.getValue d6
+advance 0.0139
+dd.getLEDValue d4
+dd.getValue d1
+sr 152
+sr.update s
+dd.getValue d11
+dd.getLEDValue d34
+dd.getValue d29
+dd.getValue d29
+dd.setIgnoreHID d22 b:True
+rand 0 0
+dd.getValue d11
+dd.getValue d25
+dd.getValue d12
+sr 144
+sr.update s
+dd.getValue d24
+dd.setIncOrder d28 i:1
+dd.getLEDValue d26
+dd.getValue d35
+dd.getValue d13
+sr 208
+sr.update s
+dd.getValue d22
+dd.getValue d26
+dd.getValue d3
+gpio 4 0
+advance 0.26
+dd.getValue d6
+dd.getValue d17
+sr 144
+sr.update s
+dd.getLEDValue d13
+gpio 17 0
+advance 0.26
+dd.getValue d28
+dd.getValue d27
+sr 128
+sr.update s
+dd.getValue d35
+dd.getValue d29
+dd.setValue d37 i:4
+dd.getValue d31
+dd.getValue d33
+dd.getValue d14
+dd.getTrigSource d14
+dd.getValue d5
+sr 192
+sr.update s
+dd.getLEDValue d22
+dd.getValue d19
+dd.getValue d34
+dd.getTrigSource d30
+rand 1 3
+dd.getValue d37
+gpio 24 1
+advance 0.26
+dd.getValue d36
+dd.getLEDValue d20
+sr 128
+sr.update s
+dd.getValue d10
+gpio 17 1
+advance 0.26
+dd.setMode d19 s:incremental s:rising
+gpio 17 0
+advance 0.26
+dd.getValue d30
+dd.getValue d9
+sr 144
+sr.update s
+dd.getValue d12
+advance 0.0368
+dd.getValue d0
+dd.getValue d7
+dd.getLEDValue d14
+dd.setOutputPeriod d32 i:5
+dd.getValue d35
+dd.getValue d6
+dd.getLEDValue d18
+gpio 4 1
+advance 0.26
+dd.getValue d28
+dd.getValue d18
+sr 208
+sr.update s
+dd.getValue d2
+advance 0.0259
+dd.getValue d30
+gpio 24 0
+advance 0.26
+dd.getValue d9
+rand 1 2
+dd.setMode d16 s:triggered s:falling
+sr 80
+sr.update s
+dd.getValue d16
+rand 2 3
+dd.getValue d5
+rand 6 1
+dd.getValue d21
+dd.getValue d35
+gpio 17 1
+advance 0.26
+dd.getValue d6
+dd.getValue d20
+advance 0.0038
+dd.getValue d28
+gpio 4 0
+advance 0.26
+dd.getValue d23
+rand 1 3
+dd.getValue d27
+dd.getLEDValue d20
+dd.getLEDValue d28
+dd.getValue d12
+advance 0.0091
+dd.getLEDValue d39
+dd.getLEDValue d21
+sr 16
+sr.update s
+dd.getValue d22
+dd.getValue d25
+dd.getValue d4
+dd.getValue d33
+dd.getValue d19
+dd.getValue d18
+advance 0.0306
+dd.getValue d25
+dd.setIgnoreGate d33 b:False
+dd.getValue d17
+dd.getLEDValue d3
+dd.getValue d17
+sr 0
+sr.update s
+dd.getLEDValue d1
+dd.getTrigSource d25
+sr 128
+sr.update s
+dd.getValue d39
+dd.getValue d32
+dd.getValue d22
+dd.getValue d8
+sr 160
+sr.update s
+dd.getValue d29
+dd.getValue d4
+dd.getTrigSource d33
+gpio 24 1
+advance 0.26
+dd.getTrigSource d36
+sr 32
+sr.update s
+dd.getValue d26
+dd.getLEDValue d2
+dd.getValue d38
+dd.getValue d22
+gpio 25 1
+advance 0.26
+dd.getLEDValue d17
+dd.getTrigSource d38
+dd.getValue d11
+sr 40
+sr.update s
+dd.getValue d34
+rand 5 1
+dd.getLEDValue d30
+sr 8
+sr.update s
+dd.getValue d32
+rand 2 2
+dd.getValue d21
+dd.getLEDValue d30
+gpio 24 0
+advance 0.26
+dd.getLEDValue d33
+dd.getValue d16
+sr 40
+sr.update s
+dd.getLEDValue d9
+dd.getValue d27
+dd.getValue d4
+dd.getTrigSource d7
+advance 0.0154
+dd.getValue d34
+dd.getValue d17
+dd.getValue d39
+dd.getLEDValue d20
+dd.getValue d23
+sr 8
+sr.update s
+dd.getValue d21
+rand 6 0
+dd.getValue d38
+dd.getValue d37
+dd.getValue d36
+sr 136
+sr.update s
+dd.getValue d10
+advance 0.0433
+dd.getValue d3
+dd.getValue d14
+dd.getLEDValue d36
+dd.getValue d34
+rand 3 1
+dd.getValue d3
+dd.setValue d25 i:3
+rand 4 3
+dd.getValue d18
+sr 8
+sr.update s
+dd.getValue d16
+dd.getValue d24
+dd.getValue d22
+dd.getLEDValue d26
+dd.setOutputPeriod d4 i:5
+gpio 4 1
+advance 0.26
+dd.getValue d39
+sr 9
+sr.update s
+dd.getValue d31
+dd.setIgnoreGate d20 b:False
+dd.setIgnoreGate d28 b:True
+gpio 4 0
+advance 0.26
+dd.getLEDValue d32
+advance 0.0458
+dd.setIgnoreHID d5 b:True
+gpio 23 1
+advance 0.26
+dd.getValue d35
+dd.getValue d29
+dd.getValue d32
+dd.getValue d11
+dd.getValue d30
+dd.getValue d22
+advance 0.0372
+dd.getValue d2
+dd.getValue d4
+dd.getValue d23
+dd.getValue d1
+sr 73
+sr.update s
+dd.getValue d9
+advance 0.0347
+dd.getValue d32
+dd.getValue d21
+dd.getValue d21
+sr 201
+sr.update s
+dd.getValue d7
+dd.getValue d4
+advance 0.0363
+dd.getValue d21
+dd.setValue d19 i:4
+advance 0.0396
+dd.getValue d2
+dd.getValue d29
+sr 217
+sr.update s
+dd.getValue d9
+dd.getValue d36
+dd.getLEDValue d18
+advance 0.0116
+dd.getTrigSource d36
+dd.getValue d30
+dd.getValue d28
+sr 201
+sr.update s
+dd.getValue d7
+dd.getLEDValue d34
+rand 6 0
+dd.getValue d35
+dd.getValue d9
+dd.setIgnoreNextButton d9
+advance 0.0385
+dd.getValue d18
+rand 1 0
+dd.getValue d37
+dd.getValue d10
+dd.getValue d16
+sr 233
+sr.update s
+dd.getValue d17
+dd.getValue d11
+dd.getTrigSource d12
+dd.setMode d21 s:triggered s:rising
+advance 0.0202
+dd.getValue d7
+dd.setIgnoreHID d31 b:True
+dd.getValue d22
+dd.getValue d8
+dd.getLEDValue d2
+dd.getLEDValue d28
+dd.getValue d22
+dd.getValue d30
+gpio 4 1
+advance 0.26
+dd.getValue d19
+dd.setIgnoreHID d33 b:False
+advance 0.0577
+dd.getValue d32
+rand 4 1
+dd.setIgnoreNextButton d32
+dd.getLEDValue d6
+dd.getTrigSource d24
+dd.getValue d6
+dd.getValue d2
+dd.getValue d9
+dd.getValue d4
+dd.getLEDValue d1
+dd.getValue d39
+dd.getValue d29
+dd.getValue d36
+advance 0.006
+dd.getValue d5
+gpio 4 0
+advance 0.26
+dd.getLEDValue d7
+dd.getValue d0
+sr 105
+sr.update s
+dd.getValue d8
+dd.getLEDValue d26
+advance 0.0125
+dd.getValue d37
+gpio 24 1
+advance 0.26
+dd.getLEDValue d30
+dd.getValue d15
+dd.getLEDValue d32
+dd.getValue d24
+advance 0.0254
+dd.getValue d34
+gpio 24 0
+advance 0.26
+dd.getValue d13
+gpio 24 1
+advance 0.26
+dd.getLEDValue d6
+dd.getValue d11
+sr 233
+sr.update s
+dd.getValue d39
+dd.getValue d25
+sr 232
+sr.update s
+dd.getLEDValue d12
+sr 200
+sr.update s
+dd.getValue d38
+dd.getValue d38
+dd.getLEDValue d38
+dd.getValue d2
+dd.getValue d7
+rand 1 0
+dd.getValue d15
+dd.getValue d20
+dd.getValue d7
+dd.getValue d5
+sr 136
+sr.update s
+dd.getLEDValue d13
+sr 8
+sr.update s
+dd.getValue d35
+dd.getValue d9
+gpio 17 0
+advance 0.26
+dd.getLEDValue d18
+dd.setMode d7 s:triggered s:falling
+gpio 24 0
+advance 0.26
+dd.getTrigSource d19
+advance 0.006
+dd.setIgnoreHID d16 b:True
+rand 6 1
+dd.getValue d26
+dd.getValue d10
+rand 0 3
+dd.getValue d10
+dd.getValue d37
+advance 0.0135
+dd.getValue d32
+dd.getLEDValue d38
+dd.getValue d2
+dd.setValue d29 i:2
+dd.getLEDValue d9
+dd.getValue d21
+advance 0.0578
+dd.getValue d12
+advance 0.0543
+dd.getValue d13
+sr 9
+sr.update s
+dd.getValue d6
+dd.getLEDValue d6
+dd.getLEDValue d30
+dd.getValue d3
+advance 0.0557
+dd.getLEDValue d16
+gpio 4 1
+advance 0.26
+dd.getTrigSource d22
+dd.getValue d21
+dd.getValue d0
+sr 41
+sr.update s
+dd.getValue d12
+advance 0.0534
+dd.getValue d18
+dd.getTrigSource d6
+sr 105
+sr.update s
+dd.getValue d27
+advance 0.0487
+dd.getValue d24
+dd.getValue d2
+dd.getLEDValue d0
+dd.getValue d2
+dd.getLEDValue d6
+sr 73
+sr.update s
+dd.setIgnoreGate d2 b:False
+dd.getValue d38
+dd.getValue d18
+advance 0.0291
+dd.getValue d32
+gpio 25 0
+advance 0.26
+dd.getValue d9
+dd.getLEDValue d15
+dd.getValue d39
+dd.getValue d0
+dd.getValue d5
+dd.getLEDValue d37
+dd.getLEDValue d31
+dd.getValue d6
+advance 0.0329
+dd.getValue d3
+sr 89
+sr.update s
+dd.getValue d30
+gpio 23 0
+advance 0.26
+dd.getValue d17
+dd.getValue d23
+dd.getValue d39
+sr 88
+sr.update s
+dd.getValue d12
+dd.getValue d39
+sr 120
+sr.update s
+dd.getTrigSource d1
+sr 121
+sr.update s
+dd.getValue d5
+dd.getValue d23
+dd.getValue d4
+advance 0.0321
+dd.getValue d38
+dd.getValue d0
+dd.getValue d2
+dd.setIgnoreNextButton d28
+dd.getValue d6
+dd.setIgnoreGate d13 b:True
+advance 0.0432
+dd.getValue d34
+sr 120
+sr.update s
+dd.getValue d10
+sr 248
+sr.update s
+dd.getTrigSource d32
+sr 184
+sr.update s
+dd.getValue d7
+sr 152
+sr.update s
+dd.setIgnoreHID d17 b:True
+dd.getValue d27
+dd.getValue d6
+dd.getValue d38
+dd.getLEDValue d19
+gpio 23 1
+advance 0.26
+dd.getValue d28
+sr 216
+sr.update s
+dd.getValue d33
+sr 88
+sr.update s
+dd.getValue d31
+dd.getValue d6
+gpio 23 0
+advance 0.26
+dd.setIgnoreHID d0 b:True
+dd.getValue d35
+dd.setIgnoreNextButton d18
+dd.getValue d38
+dd.getLEDValue d1
+dd.setIgnoreGate d22 b:True
+dd.getValue d36
+gpio 23 1
+advance 0.26
+dd.getValue d27
+dd.getValue d29
+dd.getLEDValue d29
+advance 0.044
+dd.getValue d24
+dd.getLEDValue d26
+advance 0.0528
+dd.getValue d15
+dd.getValue d37
+dd.getValue d26
+dd.getLEDValue d27
+dd.getLEDValue d1
+gpio 4 0
+advance 0.26
+dd.getLEDValue d36
+sr 216
+sr.update s
+dd.getValue d21
+sr 152
+sr.update s
+dd.setIgnoreHID d12 b:True
+dd.getValue d10
+dd.getTrigSource d31
+dd.getValue d24
+sr 216
+sr.update s
+dd.getValue d8
+sr 248
+sr.update s
+dd.getValue d37
+dd.getValue d4
+dd.getLEDValue d33
+dd.getValue d7
+gpio 24 1
+advance 0.26
+dd.getValue d25
+dd.getTrigSource d35
+dd.getValue d3
+dd.setIgnoreHID d9 b:False
+dd.getLEDValue d1
+gpio 24 0
+advance 0.26
+dd.getValue d12
+dd.getLEDValue d8
+dd.setIgnoreHID d3 b:False
+dd.getValue d7
+gpio 23 0
+advance 0.26
+dd.getLEDValue d5
+dd.getValue d39
+rand 3 1
+dd.getLEDValue d13
+dd.getValue d9
+gpio 25 1
+advance 0.26
+dd.getValue d3
+dd.getValue d8
+dd.getValue d14
+dd.getLEDValue d1
+dd.getValue d26
+sr 216
+sr.update s
+dd.getValue d36
+dd.getLEDValue d32
+advance 0.0149
+dd.getValue d21
+dd.setIgnoreNextButton d19
+dd.getValue d24
+advance 0.0283
+dd.getLEDValue d4
+dd.getTrigSource d25
+sr 200
+sr.update s
+dd.getTrigSource d4
+dd.getValue d1
+dd.getValue d0
+dd.getValue d18
+sr 192
+sr.update s
+dd.getValue d34
+sr 64
+sr.update s
+dd.getValue d16
+dd.getValue d4
+dd.getValue d28
+dd.getValue d14
+dd.getValue d37
+dd.setValue d7 i:3
+dd.getValue d24
+dd.getLEDValue d23
+dd.getValue d6
+dd.getValue d30
+sr 65
+sr.update s
+dd.getValue d9
+dd.getLEDValue d37
+dd.getValue d35
+dd.getValue d0
+dd.getValue d3
+dd.getValue d34
+dd.getValue d17
+dd.setIgnoreHID d0 b:True
+dd.getValue d28
+sr 73
+sr.update s
+dd.getValue d15
+dd.getValue d35
+gpio 25 0
+advance 0.26
+dd.getTrigSource d32
+dd.getValue d23
+dd.getValue d35
+gpio 4 1
+advance 0.26
+dd.getValue d26
+advance 0.037
+dd.getValue d7
+rand 4 0
+dd.getLEDValue d35
+dd.getValue d0
+sr 89
+sr.update s
+dd.getValue d3
+sr 25
+sr.update s
+dd.getValue d39
+gpio 4 0
+advance 0.26
+dd.setIgnoreGate d2 b:False
+dd.getValue d21
+dd.setIgnoreNextButton d32
+dd.getLEDValue d7
+dd.getValue d10
+sr 17
+sr.update s
+dd.getValue d25
+advance 0.0207
+dd.getValue d27
+dd.getValue d22
+advance 0.0013
+dd.getValue d7
+dd.getValue d5
+dd.setIncOrder d27 i:2
+sr 81
+sr.update s
+dd.getValue d8
+dd.getValue d37
+dd.getValue d18
+dd.getValue d23
+dd.getValue d19
+dd.getTrigSource d23
+dd.getValue d24
+sr 209
+sr.update s
+dd.setIgnoreHID d35 b:True
+dd.getValue d20
+dd.getValue d31
+advance 0.0221
+dd.getValue d36
+gpio 23 1
+advance 0.26
+dd.getValue d28
+gpio 4 1
+advance 0.26
+dd.getValue d38
+dd.getValue d3
+gpio 4 0
+advance 0.26
+dd.getValue d23
+dd.getValue d11
+sr 217
+sr.update s
+dd.getValue d7
+dd.getLEDValue d38
+dd.setIncOrder d33 i:1
+dd.getValue d22
+gpio 25 1
+advance 0.26
+dd.setIgnoreGate d12 b:False
+sr 216
+sr.update s
+dd.getValue d12
+dd.setMode d28 s:latching s:falling
+sr 248
+sr.update s
+dd.getValue d32
+dd.getValue d16
+gpio 24 1
+advance 0.26
+dd.getValue d27
+dd.getTrigSource d1
+dd.getValue d26
+dd.getValue d8
+dd.getValue d28
+dd.getValue d10
+dd.getLEDValue d22
+dd.getLEDValue d25
+sr 240
+sr.update s
+dd.getValue d15
+dd.setValue d13 i:0
+dd.getLEDValue d28
+advance 0.0016
+dd.getValue d9
+advance 0.0544
+dd.getValue d24
+dd.getValue d6
+dd.getValue d19
+dd.getValue d2
+dd.getValue d29
+sr 176
+sr.update s
+dd.getValue d26
+dd.setIgnoreNextButton d5
+dd.getValue d29
+sr 240
+sr.update s
+dd.getValue d15
+dd.getValue d0
+dd.setIgnoreHID d19 b:True
+dd.getLEDValue d29
+dd.getTrigSource d19
+dd.getValue d21
+dd.getTrigSource d39
+gpio 4 1
+advance 0.26
+dd.getValue d9
+dd.getValue d13
+gpio 24 0
+advance 0.26
+dd.getTrigSource d14
+dd.getValue d37
+dd.getValue d30
+rand 5 1
+dd.getValue d2
+dd.getLEDValue d6
+advance 0.0418
+dd.getValue d12
+dd.getValue d8
+dd.getValue d25
+dd.getValue d36
+sr 248
+sr.update s
+dd.getValue d30
+gpio 23 0
+advance 0.26
+dd.getValue d17
+dd.getValue d13
+dd.getValue d14
+dd.getValue d35
+dd.setValue d20 i:1
+dd.getValue d19
+dd.setIgnoreNextButton d38
+dd.getValue d18
+dd.getValue d35
+dd.getTrigSource d27
+sr 240
+sr.update s
+dd.getValue d23
+sr 208
+sr.update s
+dd.getValue d1
+dd.getLEDValue d30
+sr 192
+sr.update s
+dd.getValue d18
+sr 208
+sr.update s
+dd.getTrigSource d27
+advance 0.0095
+dd.getValue d10
+dd.getValue d37
+dd.getValue d34
+rand 5 2
+dd.getValue d0
+dd.getValue d2
+advance 0.051
+dd.getValue d20
+dd.getValue d17
+dd.getValue d12
+dd.getValue d31
+dd.getTrigSource d27
+dd.getValue d35
+gpio 25 0
+advance 0.26
+dd.getValue d8
+advance 0.0247
+dd.getValue d6
+advance 0.0178
+dd.getValue d36
+dd.getValue d34
+dd.getValue d0
+dd.getValue d17
+dd.getValue d18
+dd.getValue d2
+dd.getValue d0
+advance 0.0502
+dd.getLEDValue d12
+dd.getValue d13
+dd.getValue d23
+advance 0.0311
+dd.getValue d24
+dd.getValue d30
+gpio 24 1
+advance 0.26
+dd.getValue d21
+dd.getValue d30
+gpio 17 1
+advance 0.26
+dd.getValue d31
+dd.getValue d28
+dd.getValue d36
+dd.setIncOrder d29 i:2
+dd.getValue d36
+rand 1 3
+dd.setIgnoreGate d23 b:False
+dd.getValue d2
+dd.getLEDValue d10
+gpio 25 1
+advance 0.26
+dd.getValue d10
+dd.getValue d6
+sr 240
+sr.update s
+dd.getValue d14
+dd.getValue d6
+dd.getValue d32
+dd.getValue d18
+dd.getLEDValue d26
+sr 208
+sr.update s
+dd.getLEDValue d13
+rand 3 3
+dd.getValue d30
+gpio 23 1
+advance 0.26
+dd.getValue d26
+sr 209
+sr.update s
+dd.getValue d22
+dd.getLEDValue d16
+dd.getValue d6
+advance 0.0303
+dd.getValue d25
+dd.getLEDValue d32
+dd.getValue d22
+dd.getValue d30
+dd.getLEDValue d30
+sr 193
+sr.update s
+dd.getValue d20
+sr 65
+sr.update s
+dd.getValue d17
+sr 193
+sr.update s
+dd.getLEDValue d25
+sr 192
+sr.update s
+dd.setValue d31 i:2
+dd.getValue d37
+sr 64
+sr.update s
+dd.getTrigSource d14
+dd.getValue d31
+dd.getValue d29
+gpio 25 0
+advance 0.26
+dd.getValue d6
+dd.getValue d39
+dd.getLEDValue d8
+dd.getValue d21
+dd.getValue d0
+dd.getValue d28
+dd.getValue d6
+advance 0.0414
+dd.setMode d6 s:latching s:falling
+sr 65
+sr.update s
+dd.getValue d12
+dd.setIgnoreGate d30 b:True
+dd.getValue d26
+dd.setValue d26 i:3
+gpio 24 0
+advance 0.26
+dd.getValue d0
+gpio 24 1
+advance 0.26
+dd.getTrigSource d3
+dd.getValue d21
+dd.getValue d6
+dd.getTrigSource d35
+gpio 4 0
+advance 0.26
+dd.getValue d30
+dd.getLEDValue d7
+rand -1 0
+dd.getValue d16
+dd.getValue d20
+dd.getLEDValue d7
+dd.getValue d1
+dd.getValue d8
+dd.getValue d17
+dd.getValue d14
+sr 1
+sr.update s
+dd.getValue d38
+sr 129
+sr.update s
+dd.getLEDValue d16
+sr 137
+sr.update s
+dd.getValue d6
+dd.getValue d34
+dd.getLEDValue d19
+sr 169
+sr.update s
+dd.getValue d31
+dd.getValue d6
+dd.getValue d37
+dd.setIncOrder d15 i:0
+rand -1 2
+dd.getValue d5
+advance 0.0134
+dd.setIgnoreHID d32 b:True
+sr 137
+sr.update s
+dd.getValue d27
+gpio 23 0
+advance 0.26
+dd.getValue d14
+sr 169
+sr.update s
+dd.getValue d39
+gpio 17 0
+advance 0.26
+dd.getValue d27
+gpio 4 1
+advance 0.26
+dd.getValue d18
+dd.getValue d19
+dd.getValue d10
+dd.getValue d32
+dd.getValue d28
+sr 185
+sr.update s
+dd.getLEDValue d29
+dd.getValue d6
+dd.getValue d13
+dd.getValue d35
+rand -1 3
+dd.getValue d26
+gpio 4 0
+advance 0.26
+dd.getValue d22
+dd.getLEDValue d10
+gpio 17 1
+advance 0.26
+dd.getValue d25
+dd.getLEDValue d0
+sr 169
+sr.update s
+dd.getValue d26
+dd.getValue d36
+dd.getValue d38
+dd.setIgnoreHID d22 b:True
+dd.setIgnoreNextButton d11
+gpio 4 1
+advance 0.26
+dd.getValue d37
+gpio 25 1
+advance 0.26
+dd.getLEDValue d13
+dd.getLEDValue d20
+gpio 17 0
+advance 0.26
+dd.getValue d37
+dd.getLEDValue d32
+dd.getLEDValue d2
+dd.getValue d3
+dd.getTrigSource d32
+gpio 23 1
+advance 0.26
+dd.getValue d13
+dd.getLEDValue d7
+dd.getValue d31
+advance 0.0147
+dd.setValue d35 i:0
+dd.getValue d35
+dd.getValue d12
+dd.getValue d25
+gpio 24 0
+advance 0.26
+dd.getLEDValue d5
+advance 0.0103
+dd.getValue d5
+gpio 4 0
+advance 0.26
+dd.getValue d2
+dd.getLEDValue d3
+gpio 4 1
+advance 0.26
+dd.getValue d19
+dd.setIgnoreGate d38 b:True
+dd.getLEDValue d10
+dd.getValue d34
+sr 137
+sr.update s
+dd.getLEDValue d16
+dd.getValue d3
+sr 153
+sr.update s
+dd.getValue d12
+gpio 4 0
+advance 0.26
+dd.getValue d28
+sr 25
+sr.update s
+dd.getValue d30
+advance 0.0117
+dd.getTrigSource d15
+rand 4 0
+dd.getValue d16
+dd.getValue d18
+sr 153
+sr.update s
+dd.getTrigSource d21
+dd.getLEDValue d8
+sr 152
+sr.update s
+dd.setIgnoreNextButton d7
+advance 0.0293
+dd.getValue d39
+dd.getValue d1
+dd.getValue d13
+dd.getValue d36
+rand 6 1
+dd.getLEDValue d11
+sr 24
+sr.update s
+dd.getValue d26
+dd.setValue d26 i:0
+dd.getLEDValue d8
+dd.getLEDValue d29
+sr 56
+sr.update s
+dd.setIncOrder d11 i:0
+dd.setMode d21 s:latching s:rising
+dd.getLEDValue d8
+dd.getLEDValue d16
+dd.getTrigSource d25
+dd.getValue d37
+dd.getValue d0
+dd.getValue d34
+dd.getValue d33
+dd.getValue d6
+gpio 17 1
+advance 0.26
+dd.getValue d11
+dd.getValue d14
+gpio 24 1
+advance 0.26
+dd.getValue d8
+rand 4 2
+dd.getValue d14
+dd.getLEDValue d23
+dd.getLEDValue d32
+dd.getValue d7
+dd.getValue d0
+sr 57
+sr.update s
+dd.getValue d8
+gpio 17 0
+advance 0.26
+dd.getValue d29
+gpio 23 0
+advance 0.26
+dd.getValue d25
+sr 121
+sr.update s
+dd.getValue d23
+dd.getLEDValue d2
+dd.getLEDValue d23
+sr 120
+sr.update s
+dd.getValue d11
+dd.getValue d36
+sr 121
+sr.update s
+dd.getValue d37
+dd.getValue d10
+dd.getValue d35
+gpio 4 1
+advance 0.26
+dd.getValue d18
+dd.getValue d19
+sr 249
+sr.update s
+dd.getValue d11
+dd.getValue d2
+sr 185
+sr.update s
+dd.setValue d1 i:0
+advance 0.0007
+dd.getLEDValue d24
+sr 57
+sr.update s
+dd.getLEDValue d24
+dd.getLEDValue d14
+dd.getLEDValue d13
+sr 56
+sr.update s
+dd.getLEDValue d13
+dd.getLEDValue d36
+dd.getLEDValue d15
+sr 40
+sr.update s
+dd.setIgnoreHID d37 b:True
+dd.getValue d15
+dd.getValue d21
+sr 8
+sr.update s
+dd.getValue d35
+gpio 23 1
+advance 0.26
+dd.getValue d23
+dd.getValue d13
+dd.setOutputPeriod d14 i:5
+dd.getValue d24
+gpio 25 0
+advance 0.26
+dd.setIgnoreNextButton d12
+sr 40
+sr.update s
+dd.getLEDValue d7
+dd.getValue d31
+dd.getLEDValue d6
+dd.getValue d32
+sr 32
+sr.update s
+dd.getValue d1
+sr 33
+sr.update s
+dd.getValue d3
+advance 0.0491
+dd.getValue d23
+sr 32
+sr.update s
+dd.getValue d2
+dd.getValue d24
+gpio 23 0
+advance 0.26
+dd.getLEDValue d21
+dd.getValue d1
+dd.getValue d35
+dd.getValue d19
+dd.getLEDValue d8
+advance 0.0466
+dd.getValue d34
+dd.setOutputPeriod d21 i:10
+sr 160
+sr.update s
+dd.setIgnoreNextButton d27
+sr 161
+sr.update s
+dd.getValue d12
+gpio 4 0
+advance 0.26
+dd.getValue d4
+dd.setIgnoreNextButton d26
+dd.getValue d8
+dd.getTrigSource d5
+dd.getLEDValue d31
+sr 177
+sr.update s
+dd.getValue d17
+sr 176
+sr.update s
+dd.getValue d2
+dd.getValue d22
+dd.getValue d20
+dd.getValue d29
+dd.getValue d30
+dd.getValue d36
+dd.getValue d0
+rand 1 1
+dd.getLEDValue d7
+dd.getValue d17
+sr 160
+sr.update s
+dd.getValue d7
+dd.getValue d39
+dd.getValue d16
+dd.getTrigSource d4
+dd.getValue d18
+dd.getLEDValue d7
+dd.getValue d32
+dd.getValue d27
+gpio 23 1
+advance 0.26
+dd.getValue d1
+dd.getValue d37
+dd.getValue d22
+dd.getLEDValue d34
+dd.getValue d38
+sr 224
+sr.update s
+dd.getValue d36
+dd.setIgnoreHID d16 b:False
+dd.getValue d27
+gpio 24 0
+advance 0.26
+dd.getValue d34
+dd.getValue d10
+gpio 23 0
+advance 0.26
+dd.getValue d10
+dd.getValue d9
+dd.getValue d8
+sr 225
+sr.update s
+dd.getLEDValue d12
+sr 97
+sr.update s
+dd.getValue d15
+dd.getValue d17
+dd.getValue d24
+dd.getValue d1
+dd.setIgnoreNextButton d18
+dd.getLEDValue d16
+dd.getValue d21
+gpio 24 1
+advance 0.26
+dd.getValue d20
+dd.getValue d20
+gpio 23 1
+advance 0.26
+dd.setOutputPeriod d27 i:40
+dd.getValue d20
+dd.getValue d19
+dd.getValue d14
+dd.getValue d35
+dd.getValue d19
+dd.setIgnoreGate d37 b:False
+sr 105
+sr.update s
+dd.getLEDValue d31
+dd.getValue d19
+dd.getValue d8
+sr 121
+sr.update s
+dd.getValue d7
+gpio 4 1
+advance 0.26
+dd.getLEDValue d28
+dd.getValue d17
+dd.getValue d13
+dd.getValue d35
+dd.getValue d1
+dd.getValue d30
+advance 0.0552
+dd.getValue d11
+dd.getValue d15
+gpio 17 1
+advance 0.26
+dd.getValue d37
+dd.getValue d23
+dd.getValue d17
+gpio 23 0
+advance 0.26
+dd.getValue d3
+dd.getValue d34
+rand 0 2
+dd.getValue d31
+dd.getValue d29
+rand 4 3
+dd.getValue d36
+dd.getValue d5
+sr 89
+sr.update s
+dd.getValue d24
+gpio 23 1
+advance 0.26
+dd.getValue d23
+gpio 17 0
+advance 0.26
+dd.getLEDValue d6
+dd.getValue d20
+dd.getValue d1
+sr 88
+sr.update s
+dd.getValue d24
+dd.getValue d6
+dd.getLEDValue d33
+dd.getValue d21
+dd.getLEDValue d29
+dd.getValue d14
+dd.getValue d3
+dd.getValue d31
+sr 216
+sr.update s
+dd.getValue d2
+sr 248
+sr.update s
+dd.getLEDValue d30
+dd.getLEDValue d22
+sr 184
+sr.update s
+dd.getValue d33
+dd.getValue d15
+dd.getValue d32
+gpio 17 1
+advance 0.26
+dd.getValue d29
+gpio 24 0
+advance 0.26
+dd.getValue d32
+dd.getValue d14
+dd.getValue d13
+dd.getValue d16
+gpio 24 1
+advance 0.26
+dd.getValue d1
+dd.getValue d19
+dd.getLEDValue d18
+dd.getValue d4
+dd.getValue d22
+rand 1 2
+dd.getValue d33
+dd.getLEDValue d14
+dd.getValue d11
+dd.getValue d7
+rand 0 1
+dd.getValue d7
+dd.getValue d32
+dd.getTrigSource d4
+dd.setIgnoreHID d20 b:True
+dd.getValue d15
+dd.getValue d24
+sr 176
+sr.update s
+dd.setIgnoreHID d29 b:False
+dd.getValue d21
+sr 144
+sr.update s
+dd.getValue d0
+sr 152
+sr.update s
+dd.getValue d32
+dd.setIgnoreGate d16 b:False
+dd.getValue d30
+gpio 17 0
+advance 0.26
+dd.getValue d20
+dd.getValue d37
+dd.getValue d39
+dd.getValue d31
+dd.getValue d5
+dd.getLEDValue d28
+dd.getValue d29
+sr 144
+sr.update s
+dd.getLEDValue d31
+dd.setIgnoreHID d28 b:False
+advance 0.006
+dd.getValue d39
+gpio 23 0
+advance 0.26
+dd.getValue d32
+sr 208
+sr.update s
+dd.getValue d39
+dd.getValue d0
+dd.getLEDValue d26
+dd.getValue d12
+dd.setMode d11 s:incremental s:rising
+dd.getValue d39
+sr 80
+sr.update s
+dd.getValue d22
+dd.getLEDValue d7
+dd.getValue d23
+dd.getValue d29
+dd.getValue d2
+gpio 24 0
+advance 0.26
+dd.getValue d38
+gpio 24 1
+advance 0.26
+dd.getValue d31
+dd.getValue d39
+dd.setIgnoreGate d30 b:True
+dd.getValue d27
+dd.getValue d36
+dd.getValue d6
+dd.getValue d30
+sr 16
+sr.update s
+dd.getValue d9
+dd.getValue d26
+dd.getLEDValue d36
+dd.getValue d25
+dd.getValue d1
+dd.getValue d24
+dd.getLEDValue d26
+dd.getLEDValue d38
+dd.getValue d6
+dd.getValue d29
+dd.getValue d7
+dd.getValue d33
+dd.setIgnoreHID d1 b:True
+dd.getValue d36
+gpio 4 0
+advance 0.26
+dd.getValue d16
+sr 24
+sr.update s
+dd.getLEDValue d30
+dd.getValue d34
+dd.getValue d11
+dd.setIgnoreNextButton d21
+advance 0.0471
+dd.getValue d4
+dd.getValue d24
+sr 16
+sr.update s
+dd.getValue d36
+gpio 25 1
+advance 0.26
+dd.getValue d9
+dd.getValue d27
+dd.getValue d38
+gpio 24 0
+advance 0.26
+dd.getLEDValue d29
+dd.setIncOrder d1 i:1
+dd.setIgnoreHID d38 b:False
+dd.getValue d17
+dd.getValue d38
+dd.getValue d14
+gpio 17 1
+advance 0.26
+dd.setIgnoreHID d25 b:False
+dd.getValue d7
+dd.getTrigSource d14
+dd.getValue d4
+dd.getValue d15
+advance 0.0227
+dd.getLEDValue d4
+dd.getValue d21
+advance 0.008
+dd.getValue d39
+dd.getLEDValue d3
+dd.getLEDValue d17
+dd.getLEDValue d37
+dd.getValue d13
+advance 0.0432
+dd.getLEDValue d13
+dd.getValue d17
+dd.getValue d17
+dd.setIncOrder d3 i:1
+sr 17
+sr.update s
+dd.getLEDValue d2
+dd.getValue d29
+dd.getValue d23
+dd.getValue d2
+gpio 17 0
+advance 0.26
+dd.getValue d2
+advance 0.0512
+dd.getLEDValue d28
+sr 145
+sr.update s
+dd.getLEDValue d3
+dd.getValue d30
+dd.getValue d23
+dd.getValue d33
+sr 153
+sr.update s
+dd.getValue d16
+gpio 23 1
+advance 0.26
+dd.getValue d24
+dd.getValue d19
+sr 25
+sr.update s
+dd.getValue d30
+dd.getValue d36
+rand 2 1
+dd.getValue d23
+dd.getValue d32
+gpio 17 1
+advance 0.26
+dd.getValue d26
+dd.getValue d15
+sr 24
+sr.update s
+dd.getLEDValue d7
+rand 5 1
+dd.getValue d30
+dd.getValue d32
+dd.setIgnoreGate d15 b:False
+dd.getTrigSource d1
+dd.getLEDValue d35
+rand -1 2
+dd.getValue d16
+rand 4 3
+dd.getValue d10
+advance 0.0284
+dd.getValue d13
+dd.getValue d34
+sr 8
+sr.update s
+dd.getLEDValue d20
+rand 3 3
+dd.getValue d33
+dd.getValue d37
+dd.getValue d17
+dd.getValue d15
+dd.getValue d2
+dd.setIgnoreNextButton d39
+sr 136
+sr.update s
+dd.getLEDValue d15
+dd.getLEDValue d35
+dd.getValue d20
+dd.getValue d35
+dd.getValue d10
+dd.getValue d12
+sr 152
+sr.update s
+dd.getValue d0
+dd.getValue d9
+dd.setMode d1 s:incremental s:falling
+dd.getValue d35
+gpio 4 1
+advance 0.26
+dd.getValue d35
+dd.getValue d15
+advance 0.0168
+dd.getLEDValue d9
+dd.getValue d33
+dd.setIgnoreHID d27 b:False
+dd.getTrigSource d17
+sr 136
+sr.update s
+dd.getLEDValue d1
+dd.getValue d13
+dd.getValue d3
+dd.getValue d33
+sr 137
+sr.update s
+dd.getValue d18
+advance 0.0225
+dd.getValue d32
+dd.getValue d28
+advance 0.0018
+dd.getValue d0
+dd.getValue d14
+dd.getValue d10
+dd.getValue d0
+dd.getValue d38
+sr 129
+sr.update s
+dd.getValue d38
+dd.getValue d30
+dd.getValue d18
+dd.getValue d9
+advance 0.0335
+dd.getLEDValue d11
+sr 193
+sr.update s
+dd.getValue d18
+dd.getValue d2
+dd.getValue d32
+dd.setIgnoreNextButton d35
+dd.setIgnoreNextButton d30
+sr 129
+sr.update s
+dd.getValue d10
+dd.getValue d18
+sr 193
+sr.update s
+dd.setIgnoreNextButton d31
+rand -1 1
+dd.getValue d36
+dd.getValue d36
+dd.getValue d25
+sr 201
+sr.update s
+dd.setIgnoreGate d36 b:True
+advance 0.0334
+dd.getValue d3
+dd.getValue d38
+sr 193
+sr.update s
+dd.getValue d22
+dd.setOutputPeriod d5 i:40
+dd.getLEDValue d31
+gpio 25 0
+advance 0.26
+dd.getValue d30
+dd.getValue d1
+dd.getValue d37
+gpio 25 1
+advance 0.26
+dd.getValue d14
+dd.getValue d15
+sr 65
+sr.update s
+dd.getValue d37
+dd.getLEDValue d27
+dd.getValue d39
+dd.getLEDValue d23
+dd.getValue d19
+gpio 4 0
+advance 0.26
+dd.setIgnoreNextButton d26
+sr 193
+sr.update s
+dd.getTrigSource d4
+dd.getValue d14
+dd.setMode d1 s:incremental s:rising
+sr 65
+sr.update s
+dd.getValue d38
+dd.getValue d37
+sr 81
+sr.update s
+dd.getValue d26
+dd.getValue d13
+dd.getValue d16
+gpio 23 0
+advance 0.26
+dd.setIgnoreHID d18 b:True
+dd.getValue d20
+dd.getValue d29
+dd.getValue d11
+gpio 17 0
+advance 0.26
+dd.getValue d3
+dd.getLEDValue d38
+dd.setIncOrder d15 i:0
+dd.setIgnoreNextButton d17
+gpio 24 1
+advance 0.26
+dd.getValue d26
+dd.getValue d12
+dd.getValue d37
+dd.getTrigSource d1
+dd.setMode d33 s:momentary s:falling
+dd.getLEDValue d16
+sr 113
+sr.update s
+dd.getValue d7
+gpio 4 1
+advance 0.26
+dd.getValue d14
+dd.setOutputPeriod d9 i:5
+dd.getValue d23
+dd.getValue d20
+sr 241
+sr.update s
+dd.getValue d32
+dd.getLEDValue d26
+dd.getLEDValue d23
+dd.getLEDValue d7
+dd.getLEDValue d32
+advance 0.0187
+dd.getValue d23
+gpio 23 1
+advance 0.26
+dd.getLEDValue d24
+dd.getValue d12
+dd.getTrigSource d36
+dd.setIgnoreHID d9 b:True
+sr 177
+sr.update s
+dd.getValue d22
+dd.getValue d27
+dd.getValue d17
+dd.getValue d2
+dd.getValue d27
+dd.getValue d37
+dd.getLEDValue d37
+dd.getValue d22
+dd.getLEDValue d5
+dd.getValue d27
+rand -1 0
+dd.setOutputPeriod d37 i:40
+gpio 17 1
+advance 0.26
+dd.getLEDValue d38
+dd.getLEDValue d21
+gpio 24 0
+advance 0.26
+dd.getValue d3
+dd.getLEDValue d37
+advance 0.0099
+dd.getValue d5
+dd.getLEDValue d11
+dd.getValue d5
+rand 2 2
+dd.getValue d31
+dd.getLEDValue d10
+dd.getLEDValue d39
+sr 241
+sr.update s
+dd.getLEDValue d20
+dd.getValue d4
+sr 177
+sr.update s
+dd.getValue d39
+dd.getLEDValue d7
+advance 0.0063
+dd.getValue d10
+dd.getValue d35
+dd.getValue d39
+dd.getValue d19
+dd.getValue d30
+dd.getValue d0
+dd.getValue d38
+dd.getLEDValue d13
+dd.getLEDValue d31
+gpio 17 0
+advance 0.26
+dd.getValue d0
+dd.getValue d33
+dd.getValue d11
+sr 241
+sr.update s
+dd.getLEDValue d10
+dd.getLEDValue d28
+sr 177
+sr.update s
+dd.setMode d23 s:incremental s:rising
+dd.getValue d25
+dd.getValue d30
+dd.getValue d9
+dd.getValue d12
+dd.getTrigSource d38
+dd.getValue d17
+dd.getLEDValue d18
+dd.getValue d2
+dd.getLEDValue d5
+dd.getValue d39
+sr 145
+sr.update s
+dd.getValue d39
+dd.getValue d22
+dd.getLEDValue d1
+advance 0.0015
+dd.setIncOrder d14 i:0
+dd.getValue d2
+advance 0.0242
+dd.getValue d12
+dd.getValue d4
+dd.setIgnoreNextButton d11
+dd.getValue d24
+dd.getValue d24
+dd.setIgnoreGate d15 b:True
+sr 209
+sr.update s
+dd.getValue d1
+dd.getValue d33
+advance 0.0429
+dd.getValue d4
+dd.getValue d22
+dd.getValue d32
+sr 208
+sr.update s
+dd.setIgnoreNextButton d11
+dd.getValue d27
+dd.getValue d23
+advance 0.0538
+dd.getLEDValue d9
+gpio 4 0
+advance 0.26
+dd.setIgnoreGate d26 b:True
+dd.getValue d16
+dd.setIncOrder d24 i:1
+advance 0.0203
+dd.getLEDValue d1
+advance 0.0516
+dd.getLEDValue d30
+dd.setValue d0 i:0
+rand 4 0
+dd.getValue d5
+dd.getLEDValue d9
+dd.getValue d1
+dd.getValue d0
+dd.getLEDValue d14
+dd.getValue d18
+dd.getValue d5
+dd.getLEDValue d9
+dd.getLEDValue d6
+dd.getLEDValue d18
+advance 0.0193
+dd.getValue d0
+dd.getTrigSource d3
+dd.getValue d27
+dd.getValue d9
+advance 0.0464
+dd.getLEDValue d23
+dd.getValue d32
+sr 240
+sr.update s
+dd.getValue d10
+dd.getValue d24
+sr 241
+sr.update s
+dd.getValue d0
+dd.getLEDValue d6
+dd.getValue d36
+gpio 24 1
+advance 0.26
+dd.getValue d28
+advance 0.0013
+dd.getValue d31
+sr 209
+sr.update s
+dd.getValue d19
+dd.getValue d22
+advance 0.0388
+dd.getValue d17
+dd.getValue d24
+dd.getLEDValue d6
+dd.setIgnoreGate d1 b:True
+dd.getLEDValue d27
+sr 193
+sr.update s
+dd.getValue d38
+dd.setIncOrder d17 i:2
+gpio 4 1
+advance 0.26
+dd.getLEDValue d16
+dd.getValue d38
+dd.getValue d20
+dd.getLEDValue d7
+dd.getLEDValue d11
+advance 0.0038
+dd.getValue d25
+dd.getValue d2
+dd.getValue d26
+advance 0.0461
+dd.getTrigSource d23
+dd.getValue d25
+dd.getValue d7
+advance 0.0042
+dd.getValue d19
+sr 209
+sr.update s
+dd.getValue d29
+sr 208
+sr.update s
+dd.getValue d27
+dd.getValue d9
+dd.setIgnoreNextButton d32
+gpio 24 0
+advance 0.26
+dd.getValue d12
+dd.getValue d15
+dd.getLEDValue d39
+advance 0.0032
+dd.getValue d39
+dd.getValue d9
+advance 0.0536
+dd.getValue d35
+dd.getValue d18
+dd.getValue d25
+dd.getLEDValue d11
+sr 144
+sr.update s
+dd.getTrigSource d27
+dd.getValue d12
+dd.getValue d30
+dd.getValue d20
+dd.getLEDValue d3
+dd.getValue d12
+gpio 17 1
+advance 0.26
+dd.setIgnoreGate d3 b:False
+sr 145
+sr.update s
+dd.getValue d0
+dd.getValue d1
+dd.getValue d5
+dd.getValue d17
+dd.getValue d3
+sr 144
+sr.update s
+dd.getValue d13
+dd.getValue d21
+advance 0.0503
+dd.getValue d5
+dd.getValue d25
+dd.setIgnoreHID d26 b:True
+advance 0.0065
+dd.getLEDValue d39
+sr 145
+sr.update s
+dd.getValue d31
+sr 144
+sr.update s
+dd.getValue d30
+dd.setMode d28 s:incremental s:falling
+dd.getValue d37
+rand -1 2
+dd.getValue d8
+sr 16
+sr.update s
+dd.getValue d2
+dd.getValue d38
+dd.getValue d5
+gpio 17 0
+advance 0.26
+dd.getValue d22
+dd.setIgnoreHID d14 b:True
+dd.getValue d35
+sr 144
+sr.update s
+dd.getValue d23
+sr 128
+sr.update s
+dd.getValue d7
+dd.getValue d26
+dd.getLEDValue d11
+dd.getValue d20
+dd.getValue d33
+dd.getValue d28
+dd.getLEDValue d25
+dd.getValue d7
+advance 0.0585
+dd.getValue d26
+sr 144
+sr.update s
+dd.getValue d31
+dd.getLEDValue d26
+dd.setIgnoreNextButton d39
+dd.getValue d6
+advance 0.025
+dd.getValue d18
+sr 145
+sr.update s
+dd.getLEDValue d4
+sr 17
+sr.update s
+dd.getLEDValue d9
+sr 49
+sr.update s
+dd.getValue d37
+dd.setIgnoreHID d29 b:True
+dd.getValue d23
+dd.getValue d14
+dd.getValue d16
+dd.getValue d0
+sr 48
+sr.update s
+dd.setIgnoreGate d38 b:True
+advance 0.0066
+dd.getValue d9
+dd.getLEDValue d27
+sr 176
+sr.update s
+dd.getValue d26
+dd.setMode d30 s:latching s:falling
+dd.setIgnoreGate d9 b:True
+dd.getValue d35
+rand 4 2
+dd.getValue d34
+dd.setIgnoreGate d17 b:True
+sr 160
+sr.update s
+dd.setIgnoreGate d16 b:False
+sr 176
+sr.update s
+dd.getValue d7
+sr 48
+sr.update s
+dd.getValue d4
+dd.getValue d5
+advance 0.0434
+dd.getTrigSource d0
+dd.getValue d6
+advance 0.0116
+dd.getLEDValue d24
+sr 176
+sr.update s
+dd.setIncOrder d34 i:0
+advance 0.0353
+dd.getValue d17
+dd.getLEDValue d2
+dd.getValue d3
+dd.getLEDValue d1

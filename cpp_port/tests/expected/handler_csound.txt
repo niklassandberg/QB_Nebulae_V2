@@ -1,0 +1,236 @@
+L11 call inputs_init()
+L11 call set_input_rates(i:1200,i:400,i:400)
+L11 call input_scan_hz()
+L11 call input_digital_hz()
+L11 call input_adc_hz()
+L11 call set_gate_holdoff_us(i:5000)
+L11 call set_gate_interrupts(i:0)
+L11 call gate_interrupts()
+L12 cs channelPtr(speed,17)
+L12 cs channelPtr(pitch,17)
+L12 cs channelPtr(start,17)
+L12 cs channelPtr(size,17)
+L12 cs channelPtr(blend,17)
+L12 cs channelPtr(density,17)
+L12 cs channelPtr(overlap,17)
+L12 cs channelPtr(window,17)
+L12 cs channelPtr(reset,17)
+L12 cs channelPtr(freeze,17)
+L12 cs channelPtr(record,17)
+L12 cs channelPtr(file,17)
+L12 cs channelPtr(source,17)
+L12 cs channelPtr(filestate,17)
+L12 cs channelPtr(sourcegate,17)
+L12 cs channelPtr(speed_alt,17)
+L12 cs channelPtr(pitch_alt,17)
+L12 cs channelPtr(start_alt,17)
+L12 cs channelPtr(size_alt,17)
+L12 cs channelPtr(blend_alt,17)
+L12 cs channelPtr(density_alt,17)
+L12 cs channelPtr(overlap_alt,17)
+L12 cs channelPtr(window_alt,17)
+L12 cs channelPtr(reset_alt,17)
+L12 cs channelPtr(freeze_alt,17)
+L12 cs channelPtr(source_alt,17)
+L12 cs channelPtr(record_alt,17)
+L12 cs channelPtr(file_alt,17)
+L12 cs channelPtr(record_instr,17)
+L12 cs channelPtr(file_instr,17)
+L12 cs channelPtr(source_instr,17)
+L12 cs channelPtr(reset_instr,17)
+L12 cs channelPtr(freeze_instr,17)
+L12 cs channelPtr(source_state,17)
+L12 cs channelPtr(eol,33)
+L12 cs channelPtr(sizestatus,33)
+L12 cs channelPtr(recordstatus,33)
+L12 cs channelPtr(bufferlength,33)
+L13 [s:normal,s:normal,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L14 [[s:speed,s:hybrid,f:0.625],[s:pitch,s:hybrid,f:0.6],[s:start,s:analog,f:0.0],[s:size,s:analog,f:0.5],[s:blend,s:analog,f:0.0],[s:density,s:analog,f:0.0],[s:overlap,s:analog,f:0.0],[s:window,s:analog,f:0.0],[s:reset,s:digital,i:0],[s:freeze,s:digital,f:0.0],[s:record,s:digital,f:0.0],[s:file,s:digital,f:0.0],[s:source,s:digital,f:0.0],[s:filestate,s:digital,i:0],[s:sourcegate,s:digital,i:0]]
+L14 [[s:speed_alt,f:23.0],[s:pitch_alt,f:0.0],[s:start_alt,f:0.0],[s:size_alt,f:0.0],[s:blend_alt,f:0.0],[s:density_alt,f:0.0],[s:overlap_alt,f:0.0],[s:window_alt,f:0.0],[s:reset_alt,f:0.0],[s:freeze_alt,f:0.0],[s:source_alt,f:0.0],[s:record_alt,f:0.0],[s:file_alt,f:0.0]]
+L15 s:normal
+L16 b:False
+L17 i:0
+L19 None
+L20 call card_clip_count()
+L20 call set_eol(i:1)
+L22 [[s:speed,s:hybrid,f:0.625],[s:pitch,s:hybrid,f:0.6],[s:start,s:analog,i:0],[s:size,s:analog,i:0],[s:blend,s:analog,i:0],[s:density,s:analog,i:0],[s:overlap,s:analog,i:0],[s:window,s:analog,i:0],[s:reset,s:digital,i:0],[s:freeze,s:digital,i:0],[s:record,s:digital,i:0],[s:file,s:digital,i:0],[s:source,s:digital,i:0],[s:filestate,s:digital,i:0],[s:sourcegate,s:digital,i:0]]
+L22 [[s:speed_alt,f:23.0],[s:pitch_alt,f:0.0],[s:start_alt,f:0.0],[s:size_alt,f:0.0],[s:blend_alt,f:0.0],[s:density_alt,f:0.0],[s:overlap_alt,f:0.0],[s:window_alt,f:0.0],[s:reset_alt,f:0.0],[s:freeze_alt,f:0.0],[s:source_alt,f:0.0],[s:record_alt,f:0.0],[s:file_alt,f:0.0]]
+L27 None
+L30 None
+L33 None
+L34 call set_eol(i:0)
+L34 call set_eol(i:1)
+L34 call set_eol(i:1)
+L38 None
+L39 None
+L42 None
+L43 i:0
+L44 f:1.3
+L45 i:1
+L46 f:0.625
+L48 None
+L52 None
+L53 i:1
+L58 None
+L59 [s:normal,s:normal,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:True],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L60 b:True
+L61 i:0
+L62 cs table(200)
+L62 cs table(201)
+L63 usb mount
+L63 usb umount
+L64 file buffer_cnt.txt 1
+L65 file memory/neb_buffer_0.wav 524 524946460402000057415645666d7420100000000100020080bb000000ee02000400100064617461e001000001800180 cb304d28282be55c3d2c6a897b8735f8e654491587193496470c3a3178261948
+L68 None
+L71 None
+L72 b:True
+L73 None
+L74 b:False
+L75 b:False
+L78 None
+L82 None
+L86 None
+L87 [s:normal,s:normal,i:0,b:False,i:0,i:23,b:False,b:True,[[s:freeze,b:True],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L90 None
+L94 None
+L96 None
+L97 [s:secondary controls,s:normal,i:0,b:False,i:0,i:23,b:False,b:True,[[s:freeze,b:True],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L100 None
+L103 None
+L104 [[s:speed,s:hybrid,i:1],[s:pitch,s:hybrid,f:1.3],[s:start,s:analog,i:1],[s:size,s:analog,i:1],[s:blend,s:analog,i:1],[s:density,s:analog,i:1],[s:overlap,s:analog,i:1],[s:window,s:analog,i:1],[s:reset,s:digital,i:1],[s:freeze,s:digital,i:0],[s:record,s:digital,i:0],[s:file,s:digital,i:0],[s:source,s:digital,i:0],[s:filestate,s:digital,i:0],[s:sourcegate,s:digital,i:0]]
+L104 [[s:speed_alt,f:23.0],[s:pitch_alt,f:0.0],[s:start_alt,i:0],[s:size_alt,i:0],[s:blend_alt,i:0],[s:density_alt,i:0],[s:overlap_alt,i:0],[s:window_alt,i:0],[s:reset_alt,i:0],[s:freeze_alt,i:0],[s:source_alt,i:0],[s:record_alt,i:0],[s:file_alt,i:0]]
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L105 call set_eol(i:1)
+L108 None
+L109 [s:normal,s:secondary controls,i:0,b:False,i:0,i:23,b:False,b:True,[[s:freeze,b:True],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L110 [[s:speed,s:hybrid,i:1],[s:pitch,s:hybrid,f:1.3],[s:start,s:analog,i:1],[s:size,s:analog,i:1],[s:blend,s:analog,i:1],[s:density,s:analog,i:1],[s:overlap,s:analog,i:1],[s:window,s:analog,i:1],[s:reset,s:digital,i:0],[s:freeze,s:digital,i:0],[s:record,s:digital,i:0],[s:file,s:digital,i:0],[s:source,s:digital,i:0],[s:filestate,s:digital,i:0],[s:sourcegate,s:digital,i:0]]
+L110 [[s:speed_alt,f:23.0],[s:pitch_alt,f:0.0],[s:start_alt,i:0],[s:size_alt,i:0],[s:blend_alt,i:0],[s:density_alt,i:0],[s:overlap_alt,i:0],[s:window_alt,i:0],[s:reset_alt,i:0],[s:freeze_alt,i:0],[s:source_alt,i:0],[s:record_alt,i:0],[s:file_alt,i:0]]
+L111 None
+L112 [[s:speed,s:hybrid,i:1],[s:pitch,s:hybrid,f:1.3],[s:start,s:analog,i:1],[s:size,s:analog,i:1],[s:blend,s:analog,i:1],[s:density,s:analog,i:1],[s:overlap,s:analog,i:1],[s:window,s:analog,i:1],[s:reset,s:digital,i:0],[s:freeze,s:digital,i:0],[s:record,s:digital,i:0],[s:file,s:digital,i:0],[s:source,s:digital,i:0],[s:filestate,s:digital,i:0],[s:sourcegate,s:digital,i:0]]
+L112 [[s:speed_alt,f:23.0],[s:pitch_alt,f:0.0],[s:start_alt,i:0],[s:size_alt,i:0],[s:blend_alt,i:0],[s:density_alt,i:0],[s:overlap_alt,i:0],[s:window_alt,i:0],[s:reset_alt,i:0],[s:freeze_alt,f:0.0],[s:source_alt,i:1],[s:record_alt,f:0.0],[s:file_alt,f:0.0]]
+L114 None
+L115 None
+L116 None
+L119 None
+L120 i:0
+L121 i:0
+L124 None
+L127 None
+L128 i:0
+L129 [s:instr selector,s:secondary controls,i:0,b:False,i:0,i:23,b:False,b:True,[[s:freeze,b:True],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L130 None
+L131 None
+L132 file nebsettings.txt speed,0.625|pitch,0.6|start,1|size,1|blend,1|density,1|overlap,1|window,1|reset,0|freeze,0|source,0|record,0|file,0|speed_alt,23.0|pitch_alt,0.0|start_alt,0|size_alt,0|blend_alt,0|density_alt,0|overlap_alt,0|window_alt,0|reset_alt,0|freeze_alt,0|source_alt,0|record_alt,0|file_alt,0|
+L133 None
+L134 None
+L138 None
+L139 [s:normal,s:normal,i:0,b:False,i:0,i:23,b:False,b:True,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L146 None
+L149 None
+L150 i:1
+L152 None
+L153 i:1
+L155 None
+L156 i:0
+L159 None
+L160 i:0
+L163 None
+L164 i:1
+L165 cs channelPtr(speed,17)
+L165 cs channelPtr(pitch,17)
+L165 cs channelPtr(start,17)
+L165 cs channelPtr(size,17)
+L165 cs channelPtr(blend,17)
+L165 cs channelPtr(density,17)
+L165 cs channelPtr(overlap,17)
+L165 cs channelPtr(window,17)
+L165 cs channelPtr(reset,17)
+L165 cs channelPtr(freeze,17)
+L165 cs channelPtr(record,17)
+L165 cs channelPtr(file,17)
+L165 cs channelPtr(source,17)
+L165 cs channelPtr(filestate,17)
+L165 cs channelPtr(sourcegate,17)
+L165 cs channelPtr(speed_alt,17)
+L165 cs channelPtr(pitch_alt,17)
+L165 cs channelPtr(start_alt,17)
+L165 cs channelPtr(size_alt,17)
+L165 cs channelPtr(blend_alt,17)
+L165 cs channelPtr(density_alt,17)
+L165 cs channelPtr(overlap_alt,17)
+L165 cs channelPtr(window_alt,17)
+L165 cs channelPtr(reset_alt,17)
+L165 cs channelPtr(freeze_alt,17)
+L165 cs channelPtr(source_alt,17)
+L165 cs channelPtr(record_alt,17)
+L165 cs channelPtr(file_alt,17)
+L165 cs channelPtr(record_instr,17)
+L165 cs channelPtr(file_instr,17)
+L165 cs channelPtr(source_instr,17)
+L165 cs channelPtr(reset_instr,17)
+L165 cs channelPtr(freeze_instr,17)
+L165 cs channelPtr(source_state,17)
+L165 cs channelPtr(eol,33)
+L165 cs channelPtr(sizestatus,33)
+L165 cs channelPtr(recordstatus,33)
+L165 cs channelPtr(bufferlength,33)
+L169 E:IndexError
+L172 E:IndexError
+L175 E:UnboundLocalError
+L176 call set_eol(i:1)
+L176 call set_eol(i:1)
+L176 call set_eol(i:1)
+L176 call set_eol(i:1)
+L176 call set_input_rates(i:1200,i:400,i:400)
+L176 call input_scan_hz()
+L176 call input_digital_hz()
+L176 call input_adc_hz()
+L176 call set_gate_holdoff_us(i:5000)
+L176 call set_gate_interrupts(i:0)
+L176 call gate_interrupts()
+L176 call set_input_rates(i:1200,i:400,i:400)
+L176 call input_scan_hz()
+L176 call input_digital_hz()
+L176 call input_adc_hz()
+L176 call set_gate_holdoff_us(i:5000)
+L176 call set_gate_interrupts(i:0)
+L176 call gate_interrupts()
+L176 call set_eol(i:1)
+L176 call set_eol(i:1)
+L176 call set_eol(i:1)
+L176 call set_eol(i:1)
+L176 call set_eol(i:1)
+L176 call set_eol(i:1)
+L176 call set_input_rates(i:1200,i:400,i:400)
+L176 call input_scan_hz()
+L176 call input_digital_hz()
+L176 call input_adc_hz()
+L176 call set_gate_holdoff_us(i:5000)
+L176 call set_gate_interrupts(i:0)
+L176 call gate_interrupts()
+L176 call set_input_rates(i:1200,i:400,i:400)
+L176 call input_scan_hz()
+L176 call input_digital_hz()
+L176 call input_adc_hz()
+L176 call set_gate_holdoff_us(i:5000)
+L176 call set_gate_interrupts(i:0)
+L176 call gate_interrupts()
+L176 call set_input_rates(i:1200,i:400,i:400)
+L176 call input_scan_hz()
+L176 call input_digital_hz()
+L176 call input_adc_hz()
+L176 call set_gate_holdoff_us(i:5000)
+L176 call set_gate_interrupts(i:0)
+L176 call gate_interrupts()

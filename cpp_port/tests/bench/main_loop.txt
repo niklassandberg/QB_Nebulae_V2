@@ -1,0 +1,24 @@
+# The main loop's controls as controlhandler.py makes them (granular looper,
+# normal mode): 2 hybrid, 6 analog, 7 digital. "bench" runs passes of
+# snapshot, shift register update, update() and getValue() of every channel,
+# with knobs, CV, buttons and gates moving; the time goes to stderr.
+time 1000
+calib speed,0.0|pitch,0.0
+cs.new
+sr.new srg
+ctl.new speed speed f:0.625 hybrid data_channel=i:1
+ctl.new pitch pitch f:0.5 hybrid data_channel=i:4
+ctl.new start start f:0.0 analog data_channel=i:0
+ctl.new size size f:0.5 analog data_channel=i:6
+ctl.new blend blend f:0.5 analog data_channel=i:1 cvchn=i:3
+ctl.new density density f:0.5 analog data_channel=i:2
+ctl.new overlap overlap f:0.5 analog data_channel=i:7
+ctl.new window window f:0.5 analog data_channel=i:5
+ctl.new reset reset i:0 digital data_channel=i:1 sr=srg gate_pin=i:25 button_pin=i:0 config=triggered,rising
+ctl.new freeze freeze f:0.0 digital data_channel=i:1 sr=srg gate_pin=i:4 button_pin=i:4 config=latching,rising
+ctl.new record record f:0.0 digital data_channel=i:1 sr=srg gate_pin=i:24 button_pin=i:3 config=latching,rising
+ctl.new file file f:0.0 digital data_channel=i:1 sr=srg gate_pin=i:23 button_pin=i:7 config=incremental,falling maximum=i:4
+ctl.new source source f:0.0 digital data_channel=i:2 sr=srg gate_pin=i:6 button_pin=i:5 config=latching,falling
+ctl.new filestate filestate i:0 digital data_channel=i:1 sr=srg gate_pin=i:23 button_pin=i:7 config=momentary,rising
+ctl.new sourcegate sourcegate i:0 digital data_channel=i:2 sr=srg gate_pin=i:6 button_pin=i:5 config=momentary,rising
+bench 20000 srg speed pitch start size blend density overlap window reset freeze record file source filestate sourcegate

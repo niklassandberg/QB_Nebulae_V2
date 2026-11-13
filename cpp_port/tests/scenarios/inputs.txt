@@ -1,0 +1,80 @@
+# nebio.py inputs, switch.py, shiftregister.py, MCP3208.py
+time 1000.0
+gpio 23 1
+gpio 24 0
+gpio 4 1
+sr 0
+n.adc_codes
+calls
+sw.new g23 23
+sw.new g24 24
+calls
+sw.q g23
+sw.update g23
+sw.q g23
+gpio 23 0
+sw.update g23
+sw.q g23
+advance 0.3
+sw.update g23
+sw.q g23
+sw.update g23
+sw.q g23
+gpio 23 1
+advance 0.25
+sw.update g23
+sw.q g23
+advance 0.0001
+sw.update g23
+sw.q g23
+sw.update g24
+sw.q g24
+# a pin nebio does not handle reads 1
+sw.new g5 5
+advance 1
+sw.update g5
+sw.q g5
+n.gpio_level 99
+n.gpio_level -1
+n.gpio_level 24
+# shift register
+sr.new s
+sr.q s 0
+sr.update s
+sr.q s 0
+sr 0b1
+sr 33
+sr.update s
+sr.q s 0
+sr.q s 5
+sr.q s 1
+sr 32
+sr.update s
+sr.q s 0
+sr.q s 5
+sr.q s 7
+sr.q s -1
+sr.q s 8
+sr 255
+sr.update s
+sr.q s 7
+sr.q s 6
+n.sr_bits
+# ADCs
+adc 0 0 100
+adc 1 7 4095
+adc 1 0 2048
+mcp.new cv 0
+mcp.new pot 1
+mcp.read cv 0
+mcp.read pot 7
+n.snapshot
+mcp.read cv 0
+mcp.read pot 7
+mcp.read pot 0
+mcp.read pot 8
+mcp.read pot -1
+n.adc_code 1 7
+n.adc_code 0 0
+n.adc_codes
+calls

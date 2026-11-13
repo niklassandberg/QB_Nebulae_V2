@@ -1,0 +1,297 @@
+# digitaldata.py: every mode and edge, button/gate sources, long press,
+# ignores, incremental orders, LED pulses.
+# dd.new id name bgmode gate button sr mode edge max longtouch inc init
+time 2000
+gpio 23 1
+gpio 24 1
+gpio 17 1
+sr 0
+sr.new s
+sr.update s
+# latching / falling (button on SR 3, gate GPIO 24) with long press
+dd.new rec record 1 24 3 s latching falling i:1 1 0 i:0
+dd.getValue rec
+sr 8
+sr.update s
+dd.getValue rec
+sr 0
+sr.update s
+dd.getValue rec
+dd.getLEDValue rec
+sr 8
+sr.update s
+dd.getValue rec
+sr 0
+sr.update s
+dd.getValue rec
+dd.getLEDValue rec
+dd.getTrigSource rec
+# hold for a long press (300 updates)
+sr 8
+sr.update s
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.getValue rec
+dd.updateLongPress rec 1
+dd.updateLongPress rec 0
+dd.getValue rec
+# gate GPIO 24 (0 = high on the pull-up input)
+gpio 24 0
+advance 0.3
+dd.getValue rec
+dd.getTrigSource rec
+gpio 24 1
+advance 0.3
+dd.getValue rec
+dd.getValue rec
+dd.setIgnoreGate rec b:True
+gpio 24 0
+advance 0.3
+dd.getValue rec
+dd.setIgnoreGate rec b:False
+gpio 24 1
+advance 0.3
+dd.getValue rec
+dd.setIgnoreHID rec b:True
+sr 8
+sr.update s
+dd.getValue rec
+sr 0
+sr.update s
+dd.getValue rec
+dd.setIgnoreHID rec b:False
+dd.setIgnoreNextButton rec
+sr 8
+sr.update s
+dd.getValue rec
+sr 0
+sr.update s
+dd.getValue rec
+# triggered / rising with the pulse length
+time 3000
+dd.new rs reset 1 25 0 s triggered rising i:1 0 0 i:0
+gpio 25 1
+dd.getValue rs
+sr 1
+sr.update s
+dd.getValue rs
+dd.getLEDValue rs
+advance 0.005
+dd.getValue rs
+dd.getLEDValue rs
+advance 0.0051
+dd.getValue rs
+dd.getLEDValue rs
+advance 0.03
+dd.getLEDValue rs
+sr 0
+sr.update s
+dd.getValue rs
+dd.setOutputPeriod rs i:50
+sr 1
+sr.update s
+dd.getValue rs
+advance 0.02
+dd.getValue rs
+advance 0.031
+dd.getValue rs
+dd.getLEDValue rs
+sr 0
+sr.update s
+gpio 25 0
+advance 0.3
+dd.getValue rs
+dd.getTrigSource rs
+# momentary / rising, source: both on SR, the gate flipped
+dd.new so source 2 6 5 s momentary rising i:1 0 0 i:0
+sr 64
+sr.update s
+dd.getValue so
+sr 0
+sr.update s
+dd.getValue so
+dd.getTrigSource so
+sr 96
+sr.update s
+dd.getValue so
+dd.getLEDValue so
+dd.getRawValues so s:gate
+dd.getRawValues so s:button
+# incremental, file: up, down, random, LED pulse
+time 4000
+dd.new fi file 1 23 7 s incremental falling i:3 0 0 f:2.0
+dd.getValue fi
+dd.getLEDValue fi
+gpio 23 0
+advance 0.3
+dd.getValue fi
+dd.getLEDValue fi
+gpio 23 1
+advance 0.3
+dd.getValue fi
+gpio 23 0
+advance 0.3
+dd.getValue fi
+gpio 23 1
+advance 0.3
+dd.getValue fi
+dd.setIncOrder fi i:1
+gpio 23 0
+advance 0.3
+dd.getValue fi
+gpio 23 1
+advance 0.3
+dd.getValue fi
+gpio 23 0
+advance 0.3
+dd.getValue fi
+gpio 23 1
+advance 0.3
+dd.getValue fi
+dd.setIncOrder fi i:2
+rand 2 0 9
+gpio 23 0
+advance 0.3
+dd.getValue fi
+gpio 23 1
+advance 0.3
+dd.getValue fi
+gpio 23 0
+advance 0.3
+dd.getValue fi
+dd.getLEDValue fi
+advance 0.05
+dd.getLEDValue fi
+dd.setValue fi i:7
+dd.getValue fi
+dd.setValue fi f:1.0
+dd.setIncOrder fi i:0
+gpio 23 1
+advance 0.3
+dd.getValue fi
+gpio 23 0
+advance 0.3
+dd.getValue fi
+# button press on file (falling edge: the ignored first press)
+sr 128
+sr.update s
+dd.getValue fi
+sr 0
+sr.update s
+dd.getValue fi
+sr 128
+sr.update s
+dd.getValue fi
+sr 0
+sr.update s
+dd.getValue fi
+dd.getLEDValue fi
+# _alt channels ignore the gate
+dd.new fa file_alt 1 23 7 s incremental falling i:3 0 0 i:0
+gpio 23 1
+advance 0.3
+dd.getValue fa
+gpio 23 0
+advance 0.3
+dd.getValue fa
+# init above maximum, and setMode
+dd.new big file 1 23 7 s incremental falling i:3 0 0 i:5
+dd.getValue big
+dd.new big2 file 1 23 7 s incremental falling i:3 0 0 i:3
+dd.getValue big2
+dd.setMode big2 s:latching s:rising
+dd.getValue big2
+dd.setMode big2 s:latching s:falling
+dd.getTrigSource big2
+# button and gate both GPIO, GPIO button with SR gate, none
+dd.new gg x 0 17 24 s latching rising i:1 0 0 i:0
+gpio 17 0
+advance 0.3
+dd.getValue gg
+gpio 17 1
+gpio 24 0
+advance 0.3
+dd.getValue gg
+dd.getValue gg
+dd.new bs x 3 6 24 s momentary rising i:1 0 0 i:0
+sr 0
+sr.update s
+dd.getValue bs
+dd.new bn rec_instr 4 -1 24 s triggered falling i:1 0 0 i:0
+dd.getValue bn
+gpio 24 1
+advance 0.3
+dd.getValue bn
+dd.new sn freeze_instr 5 -1 4 s triggered falling i:1 0 0 i:0
+dd.getValue sn
+dd.new bad x 9 1 1 s latching falling i:1 0 0 i:0
+dd.getValue bad
+dd.new nosr x 1 24 3 nosuch latching falling i:1 0 0 i:0
+dd.getValue nosr
+dd.getAction rec i:1 i:0 s:button
+dd.getAction rec i:0 i:1 s:button
+dd.getAction rs i:0 i:1 s:gate
+dd.new unk x 1 24 3 s latching sideways i:1 0 0 i:0
+dd.getAction unk i:0 i:1 s:button
+dd.getAction unk i:0 i:1 s:gate
+dd.new inits x 1 24 3 s latching falling i:1 0 0 None
+dd.new inits2 x 1 24 3 s latching falling i:1 0 0 s:2
+dd.getValue inits2
+calls
