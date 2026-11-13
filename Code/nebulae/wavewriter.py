@@ -5,16 +5,16 @@ import ctypes
 import os
 import fileloader
 import neb_globals
+import textfile
 from classlogger import ClassLogger
 
 class WaveWriter(object):
     def __init__(self):
         self.fpath = "/home/alarm/QB_Nebulae_V2/Code/config/buffer_cnt.txt"
         if os.path.isfile(self.fpath) and os.path.getsize(self.fpath) > 0:
-            with open(self.fpath, 'r') as myfile:
-                for line in myfile:
-                    if line.strip():
-                        self.num_written = int(line)
+            for line in textfile.lines(self.fpath):
+                if line.strip():
+                    self.num_written = int(line)
         else:
             self.num_written = 0
             if neb_globals.remount_fs is True:

@@ -18,6 +18,8 @@ import queue
 import subprocess
 import threading
 
+import textfile
+
 CONFIG_FILE = "/home/alarm/QB_Nebulae_V2/Code/config/configsettings.txt"
 SCRIPTS_DIR = "/home/alarm/QB_Nebulae_V2/Code/scripts/"
 QUIET_SCRIPT = SCRIPTS_DIR + "quiet.sh"
@@ -69,8 +71,9 @@ def checkedRequest(values):
 
 def writeRequest(values):
     request = checkedRequest(values)
-    tmp = REQUEST_FILE + ".new"
-    with open(tmp, "w") as f:
+    # NebFile serves the page from a thread pool: a temp file of its own each.
+    tmp = "%s.%d.%d.new" % (REQUEST_FILE, os.getpid(), threading.get_ident())
+    with open(tmp, "w", encoding="utf-8") as f:
         for key, value in request.items():
             if isinstance(value, bool):
                 value = "on" if value else "off"
@@ -80,10 +83,13 @@ def writeRequest(values):
 
 
 def takeRequest():
+    # Claimed by a rename first: a request saved while this one is read stays
+    # for the next call instead of being removed unread.
+    taken = REQUEST_FILE + ".taken"
     try:
-        with open(REQUEST_FILE) as f:
-            text = f.read()
-        os.remove(REQUEST_FILE)
+        os.replace(REQUEST_FILE, taken)
+        text = textfile.read(taken)
+        os.remove(taken)
     except OSError:
         return {}
     values = {}
@@ -139,6 +145,8 @@ class ConfigSettings(object):
         self._gateInterrupts = False
         self._gateHoldoffMs = GATE_HOLDOFF_DEFAULT_MS
         self._lock = threading.Lock()
+        # The job thread (applyAtStart) and setPowerRegulator both sync it.
+        self._cmdlineLock = threading.Lock()
         self._jobs = None
         self.load()
 
@@ -146,11 +154,10 @@ class ConfigSettings(object):
         # No logging in here: classlogger reads logLevel before logging is set up.
         values = {}
         try:
-            with open(CONFIG_FILE) as f:
-                for line in f:
-                    key, sep, value = line.strip().partition("=")
-                    if sep:
-                        values[key.strip()] = value.strip()
+            for line in textfile.lines(CONFIG_FILE):
+                key, sep, value = line.strip().partition("=")
+                if sep:
+                    values[key.strip()] = value.strip()
         except FileNotFoundError:
             try:
                 open(CONFIG_FILE, "a").close()
@@ -391,7 +398,7 @@ class ConfigSettings(object):
                 + "gate_holdoff_ms=%.1f\n" % self._gateHoldoffMs)
         tmp = CONFIG_FILE + ".new"
         try:
-            with open(tmp, "w") as f:
+            with open(tmp, "w", encoding="utf-8") as f:
                 f.write(text)
                 f.flush()
                 os.fsync(f.fileno())
@@ -429,14 +436,17 @@ class ConfigSettings(object):
         return self._powerRegulator == "nohlt"
 
     def _syncCmdline(self):
+        with self._cmdlineLock:
+            self._syncCmdlineLocked()
+
+    def _syncCmdlineLocked(self):
         want = self._wantNohlt()
-        with open(CMDLINE) as f:
-            words = f.read().split()
+        words = textfile.read(CMDLINE).split()
         if ("nohlt" in words) == want:
             return
         words = [w for w in words if w != "nohlt"] + (["nohlt"] if want else [])
         tmp = CMDLINE + ".new"
-        with open(tmp, "w") as f:
+        with open(tmp, "w", encoding="utf-8") as f:
             f.write(" ".join(words) + "\n")
             f.flush()
             os.fsync(f.fileno())

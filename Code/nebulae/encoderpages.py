@@ -3,6 +3,7 @@
 import math
 import os
 
+import textfile
 from classlogger import ClassLogger
 
 PAGES_EXT = ".pages"
@@ -130,8 +131,7 @@ class PageState(object):
 
     def load(self, encoders):
         try:
-            with open(self.path) as f:
-                lines = f.read().splitlines()
+            lines = textfile.read(self.path).splitlines()
         except OSError:
             return
         for line in lines:
@@ -167,7 +167,7 @@ class PageState(object):
         try:
             os.makedirs(os.path.dirname(self.path), exist_ok=True)
             tmp = self.path + ".tmp"
-            with open(tmp, "w") as f:
+            with open(tmp, "w", encoding="utf-8") as f:
                 f.write("\n".join(lines) + "\n")
                 f.flush()
                 os.fsync(f.fileno())

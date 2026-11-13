@@ -2,6 +2,7 @@ import os
 from multiprocessing import Process
 from functools import partial
 import neb_globals
+import textfile
 from classlogger import ClassLogger
 
 class SettingManager(object):
@@ -24,9 +25,8 @@ class SettingManager(object):
         #print("Searching: \"" + fpath + "\" for settings.")
         #print("Is file: " + str(os.path.isfile(fpath)))
         #print("Size: " + str(os.path.getsize(fpath)))
-        with open(fpath, 'r') as myfile:
-            for line in myfile:
-                defaultList.append(line)
+        for line in textfile.lines(fpath):
+            defaultList.append(line)
         self.populateDefaultDict(defaultList,self.defaultDict)
         #self.mutableSettings = self.settingDict.copy()
         fpath = self.filepath + self.filename
@@ -35,10 +35,9 @@ class SettingManager(object):
         #print("Size: " + str(os.path.getsize(fpath)))
         if os.path.isfile(fpath) and os.path.getsize(fpath) > 0:
             self.log.info("Found Previously saved settings")
-            with open(self.filepath + self.filename, 'r') as myfile:
-                for line in myfile:
-                    if line.strip():
-                        settingList.append(line)
+            for line in textfile.lines(self.filepath + self.filename):
+                if line.strip():
+                    settingList.append(line)
             self.populateDict(settingList, self.settingDict)
             # Settings added later are missing from an older
             # file; without them they would never be saved.
@@ -55,7 +54,7 @@ class SettingManager(object):
         try:
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
-            with open(self.filepath + self.filename, 'w') as myfile:
+            with open(self.filepath + self.filename, 'w', encoding="utf-8") as myfile:
                 for line in self.lines:
                     myfile.write(line)
             if neb_globals.remount_fs is True:

@@ -31,6 +31,8 @@ import io
 import os
 import re
 
+import textfile
+
 INSTR_DIRS = {"instr": ("/home/alarm/instr/", ".instr"),
               "supercollider": ("/home/alarm/sc/", ".scd"),
               "puredata": ("/home/alarm/pd/", ".pd"),
@@ -83,8 +85,7 @@ class NebConfig(object):
 
     @classmethod
     def readFile(cls, path):
-        with open(path, "r") as f:
-            text = f.read()
+        text = textfile.read(path)
         if path.endswith(".pd"):
             return cls(_pdEntries(text), text)
         entries, body = _blockEntries(text)

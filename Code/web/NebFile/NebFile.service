@@ -8,6 +8,7 @@ Type=simple
 Restart=always
 RestartSec=1
 WorkingDir=/home/alarm/QB_Nebulae_V2/Code/web/NebFile
+Environment=PYTHONUTF8=1
 ExecStart=/usr/bin/python3 /home/alarm/QB_Nebulae_V2/Code/web/NebFile/NebFile.py
 
 [Install]

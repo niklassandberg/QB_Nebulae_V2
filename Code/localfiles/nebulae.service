@@ -10,14 +10,18 @@ Before=shutdown.target
 
 [Service]
 #ExecStart=/home/alarm/QB_Nebulae_V2/Code/scripts/startup.sh
+ExecStartPre=-/usr/bin/rm -f /run/nebulae-fatal
+# A fatal stop (fatal.py) also stopped sclang; it is otherwise only started at boot.
+ExecStartPre=-/usr/bin/systemctl start --no-block sclang.service
 ExecStart=/home/alarm/checkfirmware.sh
 WorkingDirectory=/
+Environment=PYTHONUTF8=1
 Restart=on-failure
+# 3: fatal.py stopped Nebulae (a file that is not UTF-8); a restart stops again.
+RestartPreventExitStatus=3
 RemainAfterExit=true
-# LEDs dark while restarting: the PCA9685 keeps its registers. Active low:
-# full ON in ALL_LED_ON_H, full OFF cleared in ALL_LED_OFF_H (it wins).
-ExecStopPost=-/usr/bin/i2cset -y 1 0x40 0xFB 0x10
-ExecStopPost=-/usr/bin/i2cset -y 1 0x40 0xFD 0x00
+# LEDs dark while restarting, red after a fatal stop.
+ExecStopPost=-/bin/sh /home/alarm/QB_Nebulae_V2/Code/scripts/nebulae_leds.sh
 TimeoutStopSec=5
 # No rate limit: log_level DEBUG writes more than journald allows.
 SyslogIdentifier=nebulae

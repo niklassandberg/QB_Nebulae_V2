@@ -2,6 +2,8 @@
 import sys
 import os
 import shutil
+import fatal
+fatal.enabled = True  # before the imports below: configsettings reads its file on import
 import ctcsound
 import controlhandler as ch
 import controlhandlerSC as chSC
@@ -25,6 +27,7 @@ import nebmixer
 import nebio
 import loopprofile
 import kernelswitch
+import textfile
 from classlogger import ClassLogger
 from configsettings import configSettings
 
@@ -63,14 +66,13 @@ class Nebulae(object):
             self.new_instr = None
             if os.path.isfile(self.instr_cfg) and os.path.getsize(self.instr_cfg) > 0:
                 # Get bank/instr from factory
-                with open(self.instr_cfg, 'r') as f:
-                    self.classlog.info("Reading bootinstr.txt")
-                    for line in f:
-                        templist = line.strip().split(',')
-                        if templist[0] == 'bank':
-                            self.new_bank = templist[1]
-                        elif templist[0] == 'instr':
-                            self.new_instr = templist[1] 
+                self.classlog.info("Reading bootinstr.txt")
+                for line in textfile.lines(self.instr_cfg):
+                    templist = line.strip().split(',')
+                    if templist[0] == 'bank':
+                        self.new_bank = templist[1]
+                    elif templist[0] == 'instr':
+                        self.new_instr = templist[1]
             if self.new_bank not in nebconfig.INSTR_DIRS or not self.new_instr or \
                     not os.path.isfile(nebconfig.instrumentPath(self.new_bank, self.new_instr)):
                 if self.new_bank is not None:
@@ -289,14 +291,13 @@ class Nebulae(object):
             if jack is not None:
                 text += 'jack,%d-%d-%d\n' % jack
             try:
-                with open(self.instr_cfg) as f:
-                    if f.read() == text:
-                        return
+                if textfile.read(self.instr_cfg) == text:
+                    return
             except OSError:
                 pass
             if neb_globals.remount_fs is True:
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw")
-            with open(self.instr_cfg, 'w') as f:
+            with open(self.instr_cfg, 'w', encoding="utf-8") as f:
                 self.classlog.debug("bootinstr: %s", text.replace('\n', ' '))
                 f.write(text)
                 #TODO: uncomment, maybe dead code. Do testing and see what happens. If working, remove. If now uncomment.

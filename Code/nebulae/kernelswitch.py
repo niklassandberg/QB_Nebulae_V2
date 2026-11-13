@@ -10,6 +10,7 @@ import subprocess
 
 import neb_globals
 import nebconfig
+import textfile
 from classlogger import ClassLogger
 
 BOOT_FILE = "/boot/nebulae-image.txt"
@@ -42,8 +43,7 @@ def _bootId():
 
 def _readMarker():
     try:
-        with open(MARKER) as f:
-            fields = dict(line.strip().split(",", 1) for line in f if "," in line)
+        fields = dict(line.strip().split(",", 1) for line in textfile.lines(MARKER) if "," in line)
         return fields.get("target"), fields.get("boot_id")
     except (OSError, ValueError):
         return None, None
@@ -51,7 +51,7 @@ def _readMarker():
 
 def _safeWrite(path, text):
     tmp = path + ".new"
-    with open(tmp, "w") as f:
+    with open(tmp, "w", encoding="utf-8") as f:
         f.write(text)
         f.flush()
         os.fsync(f.fileno())
@@ -79,8 +79,7 @@ def _writeMarker(target):
 
 def _setBootLine(rt):
     try:
-        with open(BOOT_FILE) as f:
-            lines = f.read().splitlines()
+        lines = textfile.read(BOOT_FILE).splitlines()
     except FileNotFoundError:
         lines = []
     kept = []

@@ -2,6 +2,7 @@ import os
 import subprocess
 from time import gmtime, strftime
 import neb_globals
+import textfile
 
 class NebLogger(object):
 
@@ -93,14 +94,13 @@ class NebLogger(object):
                 os.system("sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh ro")
 
     def acquireSystemData(self):
-        with open("/home/alarm/QB_Nebulae_V2/Code/config.txt", "r") as f:
-            for line in f:
-                items = line.split("=")
-                if len(items) > 1:
-                    self.system_data[items[0]] = items[1]
-                else:
-                    print("Invalid entry in config.txt:")
-                    print(line)
+        for line in textfile.lines("/home/alarm/QB_Nebulae_V2/Code/config.txt"):
+            items = line.split("=")
+            if len(items) > 1:
+                self.system_data[items[0]] = items[1]
+            else:
+                print("Invalid entry in config.txt:")
+                print(line)
 
     def getTimeStamp(self):
         return strftime("%a, %d %b %Y %H: %M:%S +0000", gmtime())

@@ -8,6 +8,7 @@ import os
 import digitaldata
 import time
 import nconfig
+import textfile
 from classlogger import ClassLogger
 
 
@@ -586,15 +587,14 @@ class ControlChannel(object):
         filename = 'calibration_data.txt'
         val = 0.0
         try:
-            with open(filepath + filename, 'r') as myfile:
-                for line in myfile:
-                    if line.startswith(name):
-                        datalist = line.split(',')  
-                        try:
-                            val = float(datalist[1])
-                        except:
-                            self.log.error('list value is not a floating point number:' + datalist[1])
-        except:
+            for line in textfile.lines(filepath + filename):
+                if line.startswith(name):
+                    datalist = line.split(',')
+                    try:
+                        val = float(datalist[1])
+                    except:
+                        self.log.error('list value is not a floating point number:' + datalist[1])
+        except Exception:
             self.log.error('No file: ' + filepath + filename)
         return val 
 
