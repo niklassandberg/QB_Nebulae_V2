@@ -21,6 +21,7 @@ import configsettings
 import control
 import controlhandler
 import controlhandlerEncoders
+import controlhandlerProg
 import controlhandlerSC
 import digitaldata
 import encoderpages
@@ -530,7 +531,21 @@ class Runner(object):
             self.put([[k, v] for k, v in o[a[0]].cvTargets().items()])
         elif op == "nc.entry":
             self.put(o[a[0]].entry(a[1]))
+        elif op == "nc.osc":
+            bindings, errors = o[a[0]].oscBindings()
+            self.put([list(b) for b in bindings])
+            self.put(errors)
         # --- controlhandler*.py ------------------------------------------
+        elif op == "h.new" and a[1] == "prog":
+            # As nebulae.py's start_programs(): no configData, the port and
+            # bindings from the block.
+            config = o[a[5]]
+            try:
+                port = config.oscPort()
+            except ValueError:
+                port = nebconfig.DEFAULT_OSC_PORT
+            o[a[0]] = controlhandlerProg.ProgControlHandler(
+                self.cs, val(a[2]), None, a[3], bank=a[4], oscPort=port, bindings=config.oscBindings()[0])
         elif op == "h.new":
             cls = {"base": controlhandler.ControlHandler,
                    "sc": controlhandlerSC.SCControlHandler}[a[1]]
@@ -557,6 +572,11 @@ class Runner(object):
             h = o[a[0]]
             self.put([[k, p.current, p.cv_target, p.candidate, [x.value for x in p.pages],
                        list(p.hold) if p.hold else None] for k, p in h.allPages().items()])
+        elif op == "h.prog":
+            h = o[a[0]]
+            self.put([h.oscPort, h.speed_leds, h.prog_resend_time,
+                      [[k, h.prog_sent[k]] for k in sorted(h.prog_sent)],
+                      [[k, [list(t) for t in h.bindings[k]]] for k in sorted(h.bindings)]])
         elif op == "h.rawChannels":
             self.put([c.name for c in o[a[0]].rawChannels()])
         # --- any method of an object -------------------------------------

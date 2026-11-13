@@ -29,7 +29,8 @@ add_library(nebport STATIC
     src/nebconfig.cpp
     src/controlhandler.cpp
     src/controlhandlerEncoders.cpp
-    src/controlhandlerSC.cpp)
+    src/controlhandlerSC.cpp
+    src/controlhandlerProg.cpp)
 target_include_directories(nebport PUBLIC src)
 find_package(Threads REQUIRED)
 target_link_libraries(nebport PUBLIC Threads::Threads)

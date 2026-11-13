@@ -27,6 +27,7 @@
 #include "configsettings.h"
 #include "control.h"
 #include "controlhandler.h"
+#include "controlhandlerProg.h"
 #include "controlhandlerSC.h"
 #include "digitaldata.h"
 #include "encoderpages.h"
@@ -989,6 +990,13 @@ void Runner::op(const std::string &op, const std::vector<std::string> &a) {
         for (auto &[e, t] : o(a.at(0)).nc->cvTargets()) l.push_back(L({S(e), t ? S(*t) : Value()}));
         put(L(l));
     }
+    else if (op == "nc.osc") {
+        auto [bindings, errors] = o(a.at(0)).nc->oscBindings();
+        std::vector<Value> l;
+        for (auto &b : bindings) l.push_back(L({S(b.control), S(b.path), F(b.lo), F(b.hi), S(b.curve)}));
+        put(L(l));
+        put(strs(errors));
+    }
     else if (op == "nc.entry") {
         auto *e = o(a.at(0)).nc->entry(a.at(1));
         put(e ? strs(*e) : Value());
@@ -1014,7 +1022,18 @@ void Runner::op(const std::string &op, const std::vector<std::string> &a) {
         };
         Csound *cs = cs_.get();
         try {
-            if (a.at(1) == "base")
+            if (a.at(1) == "prog") {
+                // As nebulae.py's start_programs(): no configData, the port and bindings from the block.
+                NebConfig &config = *o(a.at(5)).nc;
+                int port;
+                try {
+                    port = config.oscPort();
+                } catch (const PyError &) {
+                    port = DEFAULT_OSC_PORT;
+                }
+                ob.h = std::make_unique<ProgControlHandler>(cs, val(a.at(2)), nullptr, a.at(3), a.at(4), port,
+                                                            config.oscBindings().first, env);
+            } else if (a.at(1) == "base")
                 ob.h = std::make_unique<ControlHandler>(cs, val(a.at(2)), ob.ncDict.get(), a.at(3), a.at(4), env);
             else if (a.at(1) == "sc") {
                 auto h = std::make_unique<SCControlHandler>(cs, val(a.at(2)), ob.ncDict.get(), a.at(3), a.at(4), env);
@@ -1066,6 +1085,18 @@ void Runner::op(const std::string &op, const std::vector<std::string> &a) {
                            p->candidate ? S(*p->candidate) : Value(), L(values), hold}));
         }
         put(L(l));
+    }
+    else if (op == "h.prog") {
+        auto *h = dynamic_cast<ProgControlHandler *>(o(a.at(0)).h.get());
+        if (!h) throw PyError("AttributeError", a[0]);
+        std::vector<Value> sent, bindings;
+        for (auto &[k, v] : h->prog_sent) sent.push_back(L({S(k), F(v)}));
+        for (auto &[k, ts] : h->bindings) {
+            std::vector<Value> l;
+            for (auto &t : ts) l.push_back(L({S(t.path), F(t.lo), F(t.hi), S(t.curve)}));
+            bindings.push_back(L({S(k), L(l)}));
+        }
+        put(L({I(h->oscPort), B(h->speed_leds), I(h->prog_resend_time), L(sent), L(bindings)}));
     }
     else if (op == "h.rawChannels") {
         std::vector<Value> l;
@@ -1332,6 +1363,8 @@ void Runner::methodOp(const std::string &prefix, const std::string &m, const std
         NebConfig &c = *ob.nc;
         if (m == "encoderType") put(S(c.encoderType(str(0))));
         else if (m == "outputPeriod") put(F(c.outputPeriod()));
+        else if (m == "oscPort") put(I(c.oscPort()));
+        else if (m == "speedLeds") put(c.speedLeds() ? S(*c.speedLeds()) : Value());
         else if (m == "value") put(c.value(str(0)) ? S(*c.value(str(0))) : Value());
         else throw PyError("AttributeError", m);
     } else {
@@ -1409,6 +1442,13 @@ void Runner::handlerMethod(ControlHandler &h, const std::string &m, const std::v
     else if (m == "encoderCV") put(needE().encoderCV(str(0)));
     else if (m == "updateHolds") { needE().updateHolds(); none(); }
     else if (m == "updateCvAssign") { needE().updateCvAssign(); none(); }
+    // controlhandlerProg
+    else if (m == "playbackSpeed" || m == "enterProgramsMode") {
+        auto *p = dynamic_cast<ProgControlHandler *>(&h);
+        if (!p) throw PyError("AttributeError", m);
+        if (m == "enterProgramsMode") { p->enterProgramsMode(); none(); }
+        else put(p->playbackSpeed() ? F(*p->playbackSpeed()) : Value());
+    }
     // controlhandlerSC
     else if (m == "startRawEncoders") { needS().startRawEncoders(); none(); }
     else if (m == "setRawActive") { needS().setRawActive(arg(0).truthy()); none(); }

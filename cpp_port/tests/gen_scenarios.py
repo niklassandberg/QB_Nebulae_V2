@@ -214,17 +214,46 @@ HANDLER_CONFIGS = [
 ]
 
 
-def fuzz_handler(r, n):
-    """The SC handler's main loop: buttons (one edge per pass, as Python
-    walks the hold buttons in hash order), knobs, CV and encoders, page
-    turns, mode changes and instrument switches."""
-    out = ["# random main-loop passes through controlhandlerSC.py and its bases",
+# audrey's and miRings' blocks (Programs/*/*.prog).
+PROG_CONFIGS = [
+    ("a.prog", "oscport,3021|reset,momentary,rising|freeze,latching,rising|file,momentary,rising|"
+               "osc:density,/audrey/feedback,0,1|osc:blend,/audrey/reverb_mix,0,1|"
+               "osc:size,/audrey/reverb_size,0,1|osc:window,/audrey/lpf,0,1|osc:overlap,/audrey/hpf,0,1|"
+               "osc:start,/audrey/body,0,1|osc:reset,/audrey/gate,0,1|osc:freeze,/audrey/drone,0,1|"
+               "osc:source,/audrey/source,0,1|osc:record,/audrey/echo,0,1|osc:file,/audrey/echo_tap,0,1|"
+               "page:pitch:note,/audrey/note,16,76,lin,0.4|page:pitch:shape,/audrey/shape,0,1,lin,0|"
+               "page:speed:input,/audrey/input,0,1,lin,0.3|page:speed:lfo,/audrey/lfo,0,2,int,0|"
+               "hold:record:speed:echo_cutoff,/audrey/echo_cutoff,100,8000,exp,0.4745|"
+               "hold:record:pitch:echo_feedback,/audrey/echo_feedback,0,1.5,lin,0.5|"
+               "hold:record+file:pitch:echo_volume,/audrey/echo_volume,0,1,lin,0.5|"
+               "hold:record+file:speed:echo_wownflutter,/audrey/echo_wownflutter,0,1,lin,0.5|"
+               "cv:pitch,note|cv:speed,none"),
+    ("m.prog", "oscport,3020|osc:pitch,/rings/note,24,84|osc:speed,/rings/fm,-12,12|"
+               "osc:blend,/rings/structure,0,1|osc:window,/rings/brightness,0,1|osc:density,/rings/damping,0,1|"
+               "osc:start,/rings/position,0,1|osc:overlap,/rings/model,0,11,int|osc:size,/rings/polyphony,1,4,int|"
+               "osc:reset,/rings/strum,0,1|osc:freeze,/rings/internal_exciter,1,0|osc:blend_alt,/rings/fm_in,0,48|"
+               "osc:record_alt,/rings/mono,0,1"),
+]
+
+
+def fuzz_handler(r, n, bank="sc"):
+    """A handler's main loop (the SC or programs bank): buttons (one edge per
+    pass), knobs, CV and encoders, page turns, mode changes and instrument
+    switches."""
+    sc = bank == "sc"
+    configs = HANDLER_CONFIGS if sc else PROG_CONFIGS
+    out = ["# random main-loop passes through controlhandler%s.py and its bases" % ("SC" if sc else "Prog"),
            "cs.none", "mx.reset lib", "file.write defaultnebsettings.txt " + HANDLER_SETTINGS]
-    for name, block in HANDLER_CONFIGS:
+    for name, block in configs:
         out.append("file.write %s nebconfigbegin|%s|nebconfigend" % (name, block))
         out.append("nc.new c%s %s" % (name[0], name))
-    out += ["h.new h sc 5 p supercollider cp", "h.setConfig h cp p.pages", "h.startScOscServer h",
-            "h.enterSuperColliderMode h", "h.startRawEncoders h", "time 5000", "calls"]
+    first = configs[0][0][0]
+    if sc:
+        out += ["h.new h sc 5 p supercollider cp", "h.setConfig h cp p.pages", "h.startScOscServer h",
+                "h.enterSuperColliderMode h", "h.startRawEncoders h", "time 5000", "calls"]
+    else:
+        out += ["h.new h prog 5 %s programs c%s" % (first, first), "h.setConfig h c%s %s.pages" % (first, first),
+                "h.enterProgramsMode h", "time 5000", "calls"]
     codes = {(d, c): 2048 for d in (0, 1) for c in range(8)}
     bits = 0
     for _ in range(n):
@@ -253,25 +282,28 @@ def fuzz_handler(r, n):
         elif k < 0.11:
             out.append(r.choice(["h.enterInstrSelMode h", "h.enterNormalMode h", "h.enterSecondaryMode h"]))
         elif k < 0.115:
-            c = r.choice(HANDLER_CONFIGS)[0]
+            c = r.choice(configs)[0]
             out.append("h.setConfig h c%s %s.pages" % (c[0], c[0]))
-            if r.random() < 0.7:
+            if r.random() < 0.7 and sc:
                 out.append("h.startRawEncoders h")
         elif k < 0.12:
             out.append(r.choice(["h.saveInstrument h", "h.sendPages h b:True", "h.closeSockets h"]))
         if r.random() < 0.15:
             out.append("calls")
         if r.random() < 0.05:
-            out.append(r.choice(["h.enc h", "h.pages h", "h.state h", "h.chans h"]))
+            out.append(r.choice(["h.enc h", "h.pages h", "h.state h" if sc else "h.prog h", "h.chans h"]))
     out += ["calls", "h.enc h", "h.pages h", "h.state h", "h.chans h", "h.saveInstrument h",
-            "file.read p.pages", "file.read nebsettings.txt"]
+            "file.read %s.pages" % first, "file.read nebsettings.txt"]
+    if not sc:
+        out.append("h.prog h")
     return out
 
 
 def main():
     gens = [("fuzz_adc", fuzz_adc, 4000), ("fuzz_digital", fuzz_digital, 5000),
             ("fuzz_pages", fuzz_pages, 2500), ("fuzz_texts", fuzz_texts, 2500),
-            ("fuzz_handler", fuzz_handler, 6000)]
+            ("fuzz_handler", fuzz_handler, 6000),
+            ("fuzz_prog", lambda r, n: fuzz_handler(r, n, "prog"), 6000)]
     for seed, (name, gen, n) in enumerate(gens, 1):
         lines = gen(random.Random(seed * 7919), n)
         with open(os.path.join(OUT, name + ".txt"), "w") as f:

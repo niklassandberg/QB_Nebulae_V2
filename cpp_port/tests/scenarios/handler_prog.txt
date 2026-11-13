@@ -1,0 +1,159 @@
+# controlhandlerProg.py: the programs bank with audrey's and miRings' blocks
+# (osc: bindings, pages, hold layers), resends, playback speed, the modes
+cs.none
+mx.reset lib
+file.write defaultnebsettings.txt speed,0.625|pitch,0.6|start,0|size,0|blend,0|density,0|overlap,0|window,0|reset,0|freeze,0|source,0|record,0|file,0|speed_alt,23|pitch_alt,0|start_alt,0|size_alt,0|blend_alt,0|density_alt,0|overlap_alt,0|window_alt,0.0|reset_alt,0|freeze_alt,0|source_alt,0|record_alt,0|file_alt,0
+file.write audrey.prog audrey|nebconfigbegin|run,audrey|oscport,3021|kernel,rt|blocksize,32|reset,momentary,rising|freeze,latching,rising|file,momentary,rising|osc:density,/audrey/feedback,0,1|osc:blend,/audrey/reverb_mix,0,1|osc:size,/audrey/reverb_size,0,1|osc:window,/audrey/lpf,0,1|osc:overlap,/audrey/hpf,0,1|osc:start,/audrey/body,0,1|osc:reset,/audrey/gate,0,1|osc:freeze,/audrey/drone,0,1|osc:source,/audrey/source,0,1|osc:record,/audrey/echo,0,1|osc:file,/audrey/echo_tap,0,1|page:pitch:note,/audrey/note,16,76,lin,0.4|page:pitch:shape,/audrey/shape,0,1,lin,0|page:speed:input,/audrey/input,0,1,lin,0.3|page:speed:lfo,/audrey/lfo,0,2,int,0|hold:record:speed:echo_cutoff,/audrey/echo_cutoff,100,8000,exp,0.4745|hold:record:pitch:echo_feedback,/audrey/echo_feedback,0,1.5,lin,0.5|hold:record+file:pitch:echo_volume,/audrey/echo_volume,0,1,lin,0.5|hold:record+file:speed:echo_wownflutter,/audrey/echo_wownflutter,0,1,lin,0.5|#default\_CV\_connections|cv:pitch,note|cv:speed,none|nebconfigend
+nc.new ca audrey.prog
+nc.osc ca
+nc.oscPort ca
+nc.speedLeds ca
+adc 1 0 1000
+adc 1 2 3000
+adc 0 1 2048
+adc 0 4 2048
+h.new h prog 5 audrey programs ca
+calls
+h.setConfig h ca audrey.pages
+h.prog h
+h.enc h
+h.pages h
+h.enterProgramsMode h
+h.state h
+calls
+# passes: everything sent once, then only changes, all again after 1 s
+time 2000
+h.updateAll h
+calls
+adc 1 2 2000
+advance 0.002
+h.updateAll h
+calls
+advance 0.002
+h.updateAll h
+calls
+advance 1.0
+h.updateAll h
+calls
+h.prog h
+# the pitch page with CV, then the record hold (echo) and record+file
+adc 0 4 3000
+h.pageStep h s:pitch i:3
+h.nextPage h s:speed
+h.pageStep h s:speed i:1
+advance 0.002
+h.updateAll h
+calls
+sr 8
+advance 0.002
+h.updateAll h
+h.pageStep h s:speed i:-2
+h.pageStep h s:pitch i:5
+advance 0.002
+h.updateAll h
+calls
+sr 136
+advance 0.002
+h.updateAll h
+h.pageStep h s:speed i:4
+advance 0.002
+h.updateAll h
+calls
+h.enc h
+sr 8
+advance 0.002
+h.updateAll h
+sr 0
+advance 0.002
+h.updateAll h
+h.enc h
+calls
+# a short record press: the echo on
+sr 8
+advance 0.002
+h.updateAll h
+sr 0
+advance 0.05
+h.updateAll h
+calls
+# the gate button and drone
+sr 1
+advance 0.002
+h.updateAll h
+sr 0
+advance 0.002
+h.updateAll h
+sr 16
+advance 0.002
+h.updateAll h
+sr 0
+advance 0.002
+h.updateAll h
+calls
+# secondary controls: alt channels too, input level
+sr 32
+advance 0.002
+h.updateAll h
+advance 0.2
+h.updateAll h
+h.state h
+calls
+adc 1 2 100
+advance 0.002
+h.updateAll h
+calls
+sr 0
+advance 0.002
+h.updateAll h
+h.state h
+calls
+h.playbackSpeed h
+h.saveInstrument h
+file.read audrey.pages
+file.read nebsettings.txt
+calls
+h.closeSockets h
+calls
+# miRings: no pages, an int curve, a reversed range, alt bindings
+file.write miRings.prog nebconfigbegin|run,miRings|oscport,3020|osc:pitch,/rings/note,24,84|osc:speed,/rings/fm,-12,12|osc:blend,/rings/structure,0,1|osc:window,/rings/brightness,0,1|osc:density,/rings/damping,0,1|osc:start,/rings/position,0,1|osc:overlap,/rings/model,0,11,int|osc:size,/rings/polyphony,1,4,int|osc:reset,/rings/strum,0,1|osc:freeze,/rings/internal_exciter,1,0|osc:blend_alt,/rings/fm_in,0,48|osc:record_alt,/rings/mono,0,1|nebconfigend
+nc.new cm miRings.prog
+h.new m prog 5 miRings programs cm
+h.setConfig m cm miRings.pages
+h.enterProgramsMode m
+time 3000
+adc 1 7 4095
+adc 1 6 2600
+h.updateAll m
+calls
+h.prog m
+sr 32
+advance 0.002
+h.updateAll m
+advance 0.2
+h.updateAll m
+adc 1 1 4000
+advance 0.002
+h.updateAll m
+calls
+# playback speed shown on the LEDs; bad osc: lines and ports
+file.write pb.prog nebconfigbegin|speedleds,\_Playback\_|oscport,99999|osc:speed,/p/speed,-2,2|osc:,/p/x,0,1|osc:pitch,p/nopath,0,1|osc:size,/p/s,0|osc:blend,/p/b,x,1|osc:window,/p/w,0,1,cubic|osc:density,/p/d,0,1,exp|osc:start,/p/st,1,8,EXP|nebconfigend
+nc.new cp pb.prog
+nc.osc cp
+nc.oscPort cp
+nc.speedLeds cp
+h.new p prog 2 pb programs cp
+h.setConfig p cp pb.pages
+h.prog p
+h.enterProgramsMode p
+h.updateAll p
+h.playbackSpeed p
+h.setValue p s:speed f:0.25
+h.playbackSpeed p
+calls
+file.write pb2.prog nebconfigbegin|speedleds,playback|oscport,abc|nebconfigend
+nc.new cp2 pb2.prog
+nc.oscPort cp2
+h.new p2 prog 2 pb programs cp2
+h.setConfig p2 cp2 pb2.pages
+h.prog p2
+h.playbackSpeed p2

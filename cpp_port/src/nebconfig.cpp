@@ -179,6 +179,43 @@ double NebConfig::outputPeriod() const {
     return period > 100.0 ? period : 100.0;
 }
 
+std::optional<std::string> NebConfig::speedLeds() const {
+    std::string v = lower(strip(value("speedleds", "")));
+    if (v == "playback") return v;
+    return std::nullopt;
+}
+
+int NebConfig::oscPort() const {
+    auto v = value("oscport");
+    if (!v) return DEFAULT_OSC_PORT;
+    long long port = pyInt(*v).value_or(0);
+    if (!(1024 <= port && port <= 65535))
+        throw PyError("ValueError", "oscport " + repr(*v) + ": a UDP port, 1024..65535");
+    return static_cast<int>(port);
+}
+
+std::pair<std::vector<OscBinding>, std::vector<std::string>> NebConfig::oscBindings() const {
+    std::vector<OscBinding> bindings;
+    std::vector<std::string> errors;
+    for (auto &kv : entries_) {
+        if (!startsWith(kv.first, "osc:")) continue;
+        std::string control = strip(kv.first.substr(4));
+        auto values = stripped(kv.second);
+        try {
+            if (control.empty() || values.size() < 3 || !startsWith(values[0], "/"))
+                throw BadEntry{"osc:<control>,<path>,<min>,<max>[,curve]"};
+            double lo = toNumber(values[1]), hi = toNumber(values[2]);
+            std::string curve = values.size() > 3 && !values[3].empty() ? lower(values[3]) : "lin";
+            if (!contains(OSC_CURVES, curve)) throw BadEntry{"curve one of ('lin', 'exp', 'int')"};
+            if (curve == "exp" && (lo <= 0 || hi <= 0)) throw BadEntry{"exp needs min and max > 0"};
+            bindings.push_back(OscBinding{control, values[0], lo, hi, curve});
+        } catch (const BadEntry &e) {
+            errors.push_back(kv.first + "," + join(values, ",") + ": " + e.message);
+        }
+    }
+    return {bindings, errors};
+}
+
 std::pair<EncoderPageSpecs, std::vector<std::string>> NebConfig::encoderPages() const {
     EncoderPageSpecs pages;
     std::vector<std::string> errors;
