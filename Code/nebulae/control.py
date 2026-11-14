@@ -1,4 +1,3 @@
-import MCP3208
 import nebio
 import ctcsound
 import switch as libSwitch
@@ -15,6 +14,12 @@ from classlogger import ClassLogger
 # Hardware SPI configuration (read by nebio):
 SPI_DEVICE_CV = nebio.ADC_CV
 SPI_DEVICE_POT = nebio.ADC_POT
+
+
+# Where a chip's channel is in nebio.adc_codes() (filled by every snapshot).
+def adcIndex(device, channel):
+    assert 0 <= channel <= 7, 'ADC number must be a value of 0-7!'
+    return device * 8 + channel
 
 # Defines for Button/Gate Types
 BUTTON_GATE_GPIO = 0
@@ -95,9 +100,13 @@ class AdcData(object):
         self.stable_delta = 0.0
         self.last_in = 0.0
         if (pot_channel >= 0):
-            self.mcp_pot = MCP3208.MCP3208(SPI_DEVICE_POT)
+            nebio.inputs()
+            self.codes = nebio.adc_codes()
+            self.pot_index = adcIndex(SPI_DEVICE_POT, pot_channel)
         if (cv_channel >= 0):
-            self.mcp_cv = MCP3208.MCP3208(SPI_DEVICE_CV)
+            nebio.inputs()
+            self.codes = nebio.adc_codes()
+            self.cv_index = adcIndex(SPI_DEVICE_CV, cv_channel)
         if self.name == "start":
             self.smoothCoeff = defStartCoeff
 
@@ -162,9 +171,7 @@ class AdcData(object):
 
     def getCV(self):
         if (self.cv_channel >= 0):
-            #temp_cv_code = (self.mcp_cv.read_adc(self.cv_channel)) / 8
-            #temp_cv = ((511.0 - temp_cv_code) - 255.0) / 255.0
-            temp_cv_code = self.mcp_cv.read_adc(self.cv_channel)
+            temp_cv_code = self.codes[self.cv_index]
             temp_cv = ((4095.0 - temp_cv_code) - 2047.0) / 2047.0
             self.raw_cv = temp_cv
             temp_cv -= self.cv_offset
@@ -175,7 +182,7 @@ class AdcData(object):
 
     def getPot(self):
         if self.pot_channel >= 0:
-            temp_pot_code = self.mcp_pot.read_adc(self.pot_channel)
+            temp_pot_code = self.codes[self.pot_index]
             temp_pot = (temp_pot_code >> 3) / 511.0
             self.raw_pot = temp_pot
             self.filtPotVal += self.smoothCoeff * (temp_pot - self.filtPotVal)
@@ -275,8 +282,9 @@ class HybridData(object):
         self.range = self.maximum - self.minimum
         self.channel = channel
         if (channel >= 0):
-            self.mcp_cv = MCP3208.MCP3208(SPI_DEVICE_CV)
-            self.mcp_pot = MCP3208.MCP3208(SPI_DEVICE_POT)
+            nebio.inputs()
+            self.codes = nebio.adc_codes()
+            self.cv_index = adcIndex(SPI_DEVICE_CV, channel)
         self.average = 0.0
         self.analogVal = 0.0
         self.filtVal = 0.0
@@ -292,10 +300,8 @@ class HybridData(object):
         #hyst_amt = 0.0025
         hyst_amt = 0.001
         if (self.channel >= 0):
-            temp_code = self.mcp_cv.read_adc(self.channel)
+            temp_code = self.codes[self.cv_index]
             temp_analog = ((1.0 - (temp_code / 4095.0)) * self.range) + self.minimum
-            #temp_code = self.mcp_cv.read_adc(self.channel) >> 3
-            #temp_analog = ((1.0 - (temp_code / 511.0)) * self.range) + self.minimum
             temp_analog *= self.scaling
             self.raw_cv = temp_analog
         else:
