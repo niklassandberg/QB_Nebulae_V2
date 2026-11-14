@@ -1,14 +1,7 @@
 #include "links.h"
 
-#include <arpa/inet.h>
 #include <errno.h>
-#include <fcntl.h>
-#include <netinet/in.h>
-#include <poll.h>
-#include <sys/socket.h>
-#include <unistd.h>
 
-#include <chrono>
 #include <cstdint>
 #include <cstring>
 
@@ -21,9 +14,6 @@ namespace {
 constexpr const char *kScHost = "127.0.0.1";
 constexpr const char *kScSendPort = "3010";    // scsender.py rPort
 constexpr const char *kScListenPort = "3011";  // scsender.py sPort
-constexpr int kPdPort = 3000;                  // pdsender.py sport
-constexpr int kPdConnectTimeoutMs = 200;
-constexpr int kPdRetryMs = 250;
 
 // Index = NEBIO_RGB_* id
 constexpr const char *kLedPath[4] = {"/sc/led/pitch_pos", "/sc/led/pitch_neg",
@@ -237,123 +227,6 @@ void OscLink::sendFloat(const char *path, double value) {
     if (!target_) return;
     if (lo_send(target_, path, "f", static_cast<float>(value)) < 0)
         logError("could not send %s: %s", path, lo_address_errstr(target_));
-}
-
-// ---- Pure Data -----------------------------------------------------------
-
-PdLink &PdLink::instance() {
-    static PdLink *link = new PdLink();  // never destroyed, see GpioChip
-    return *link;
-}
-
-void PdLink::connect() {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (connected_ || connecting_) return;
-    if (thread_.joinable()) thread_.join();
-    connecting_ = true;
-    thread_ = std::thread(&PdLink::runConnect, this, generation_.load());
-}
-
-void PdLink::runConnect(unsigned generation) {
-    logInfo("connecting to PD on port %d", kPdPort);
-    bool warned = false;
-    while (generation_ == generation) {
-        int fd = socket(AF_INET, SOCK_STREAM, 0);
-        if (fd < 0) break;
-        fcntl(fd, F_SETFL, fcntl(fd, F_GETFL) | O_NONBLOCK);
-        sockaddr_in addr;
-        std::memset(&addr, 0, sizeof(addr));
-        addr.sin_family = AF_INET;
-        addr.sin_port = htons(kPdPort);
-        addr.sin_addr.s_addr = htonl(INADDR_LOOPBACK);
-        bool ok = false;
-        if (::connect(fd, reinterpret_cast<sockaddr *>(&addr), sizeof(addr)) == 0) {
-            ok = true;
-        } else if (errno == EINPROGRESS) {
-            pollfd p = {fd, POLLOUT, 0};
-            if (poll(&p, 1, kPdConnectTimeoutMs) == 1) {
-                int err = 0;
-                socklen_t len = sizeof(err);
-                getsockopt(fd, SOL_SOCKET, SO_ERROR, &err, &len);
-                ok = err == 0;
-            }
-        }
-        if (ok) {
-            std::lock_guard<std::mutex> lock(mutex_);
-            if (generation_ != generation) {
-                ::close(fd);
-                break;
-            }
-            fd_ = fd;
-            inbox_.clear();
-            connected_ = true;
-            logInfo("sending to PD on port %d", kPdPort);
-            break;
-        }
-        ::close(fd);
-        if (!warned) {
-            logInfo("PD not reachable yet - open PD with [netreceive %d], retrying", kPdPort);
-            warned = true;
-        }
-        std::this_thread::sleep_for(std::chrono::milliseconds(kPdRetryMs));
-    }
-    connecting_ = false;
-}
-
-void PdLink::close() {
-    ++generation_;  // stops a running connect loop
-    std::thread t;
-    {
-        std::lock_guard<std::mutex> lock(mutex_);
-        if (fd_ >= 0) {
-            logInfo("closing connection to PD");
-            ::close(fd_);
-        }
-        fd_ = -1;
-        connected_ = false;
-        t = std::move(thread_);
-    }
-    if (t.joinable()) t.join();
-}
-
-// The patch answers over the same connection: [send ready( into its
-// [netreceive 3000] arrives here as "ready;".
-bool PdLink::takeReady() {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (fd_ < 0) return false;
-    char buf[256];
-    ssize_t n;
-    while ((n = ::recv(fd_, buf, sizeof(buf), MSG_DONTWAIT)) > 0) inbox_.append(buf, static_cast<size_t>(n));
-    bool ready = false;
-    size_t end;
-    while ((end = inbox_.find(';')) != std::string::npos) {
-        std::string msg = inbox_.substr(0, end);
-        inbox_.erase(0, end + 1);
-        size_t a = msg.find_first_not_of(" \t\r\n"), b = msg.find_last_not_of(" \t\r\n");
-        if (a != std::string::npos && msg.compare(a, b - a + 1, "ready") == 0) ready = true;
-    }
-    if (inbox_.size() > 4096) inbox_.clear();  // a patch sending without ';'
-    return ready;
-}
-
-bool PdLink::send(const char *data, int len) {
-    std::lock_guard<std::mutex> lock(mutex_);
-    if (fd_ < 0) return false;
-    ssize_t n = ::send(fd_, data, static_cast<size_t>(len), MSG_DONTWAIT | MSG_NOSIGNAL);
-    if (n == len) return true;
-    if (n < 0 && (errno == EAGAIN || errno == EWOULDBLOCK)) {
-        logError("PD is not reading, dropped %d bytes", len);
-        return false;
-    }
-    if (n >= 0) {
-        logError("PD send was cut short (%zd of %d bytes)", n, len);
-        return false;
-    }
-    logError("could not send to PD: %s", std::strerror(errno));
-    ::close(fd_);
-    fd_ = -1;
-    connected_ = false;
-    return false;
 }
 
 }  // namespace nebio

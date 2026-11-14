@@ -104,11 +104,6 @@ def lib():
         "nebio_osc_open": (c_int, [c_int]),
         "nebio_osc_close": (None, []),
         "nebio_osc_send_float": (None, [c_char_p, c_double]),
-        "nebio_pd_connect": (None, []),
-        "nebio_pd_close": (None, []),
-        "nebio_pd_is_connected": (c_int, []),
-        "nebio_pd_send": (c_int, [c_char_p, c_int]),
-        "nebio_pd_take_ready": (c_int, []),
         "nebio_stats": (c_char_p, []),
     }
     for name, (restype, argtypes) in sigs.items():

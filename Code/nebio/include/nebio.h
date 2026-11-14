@@ -149,17 +149,6 @@ NEBIO_API void nebio_osc_send_float(const char *path, double value);
  * -1: the driver has no counter. */
 NEBIO_API int  nebio_card_clip_count(void);
 
-/* ---- Pure Data (TCP text) ---------------------------------------------- */
-
-/* Connects in the background, retrying. */
-NEBIO_API void nebio_pd_connect(void);
-NEBIO_API void nebio_pd_close(void);
-NEBIO_API int  nebio_pd_is_connected(void);
-/* "name value;name value;". Never blocks. 0 = sent. */
-NEBIO_API int  nebio_pd_send(const char *data, int len);
-/* 1 when the patch sent "ready;" back since the last call. Never blocks. */
-NEBIO_API int  nebio_pd_take_ready(void);
-
 /* ---- diagnostics ------------------------------------------------------- */
 
 /* One line with scan rate, snapshot rate and worst scan time. */

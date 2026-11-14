@@ -943,7 +943,7 @@
 #X obj 28 764 r initbang;
 #X floatatom 113 567 5 0 0 0 - - -, f 5;
 #X msg 30 686 0.5;
-#X obj -24 1478 netreceive 3000;
+#X obj -24 1478 netreceive -u -b 3000;
 #X obj 60 1533 route start size density overlap blend window pitch
 speed record file source reset freeze;
 #X obj 474 1530 route start_alt size_alt density_alt overlap_alt blend_alt
@@ -1017,8 +1017,8 @@ window_alt pitch_alt record_alt file_alt source_alt freeze_alt;
 -1 -1;
 #X obj 219 239 expr if ($i2 > 3 || $i1 == 0 \, 1 \, 0);
 #X obj 432 216 r clockDivmult;
-#X obj 176 1478 route nebready;
-#X msg 176 1508 send ready;
+#X obj -24 1503 oscparse;
+#X obj -24 1528 list trim;
 #X connect 1 0 4 0;
 #X connect 2 0 13 0;
 #X connect 3 0 15 0;
@@ -1291,5 +1291,4 @@ window_alt pitch_alt record_alt file_alt source_alt freeze_alt;
 #X connect 321 0 320 1;
 #X connect 253 0 322 0;
 #X connect 322 0 323 0;
-#X connect 323 0 253 0;
-#X connect 322 1 254 0;
+#X connect 323 0 254 0;

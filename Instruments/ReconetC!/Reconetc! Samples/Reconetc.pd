@@ -4,7 +4,7 @@
 #X obj 203 -350 s speed;
 #X obj 598 -375 bng 30 250 50 0 empty empty empty 17 7 0 10 -262144
 -1 -1;
-#X obj 63 318 netreceive 3000;
+#X obj 63 318 netreceive -u -b 3000;
 #X obj 146 356 route start size density overlap blend window pitch
 speed record file source reset freeze;
 #X obj 626 349 route start_alt size_alt density_alt overlap_alt blend_alt
@@ -2071,8 +2071,8 @@ files in samplers;
 #X text 947 176 Press Source then Record for Record_alt then Freeze
 acts as tap tempo / external clock also space bar here for testing
 ;
-#X obj 263 318 route nebready;
-#X msg 263 348 send ready;
+#X obj 63 343 oscparse;
+#X obj 63 368 list trim;
 #X connect 0 0 1 0;
 #X connect 2 0 114 0;
 #X connect 4 0 32 0;
@@ -2194,5 +2194,4 @@ acts as tap tempo / external clock also space bar here for testing
 #X coords 0 1040 1 1039 85 60 0;
 #X connect 3 0 160 0;
 #X connect 160 0 161 0;
-#X connect 161 0 3 0;
-#X connect 160 1 4 0;
+#X connect 161 0 4 0;

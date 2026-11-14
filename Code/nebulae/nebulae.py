@@ -12,6 +12,7 @@ import controlhandlerProg as chProg
 import encoderpages
 import conductor
 import nebconfig
+import pdconvert
 import ui
 import fileloader
 import time
@@ -89,7 +90,8 @@ class Nebulae(object):
         for bank in ("instr", "supercollider", "puredata", "programs"):
             folder, ext = nebconfig.INSTR_DIRS[bank]
             try:
-                names = sorted(f[:-len(ext)] for f in os.listdir(folder) if f.endswith(ext))
+                names = sorted(f[:-len(ext)] for f in os.listdir(folder)
+                               if f.endswith(ext) and not f.startswith("."))
             except OSError:
                 names = []
             if names:
@@ -534,13 +536,13 @@ class Nebulae(object):
                 libDir = "/usr/lib/pd/extra/" + lib
                 if os.path.isdir(libDir):
                     cmd += ["-path", libDir, "-lib", lib]
-            cmd.append(fullPath)
+            cmd.append(pdconvert.forNebulae(fullPath))
             
             self.wait_for_jack_to_start()
             
             self.pt = subprocess.Popen(cmd)
 
-            self.wait_for_puredata()
+            self.wait_for_port(self.pt, chPD.PD_PORT, "PureData")
             self.c_handle = chPD.PDControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr, bank="puredata")
             self.c_handle.setCsoundPerformanceThread(None)
             self.c_handle.enterPureDataMode()
@@ -551,34 +553,14 @@ class Nebulae(object):
             self.classlog.error("Error in start_puredata(): %s", e)
 
     # Until Pd listens on its netreceive port 3000 (the patch is loaded).
-    def wait_for_puredata(self, timeout=2.0):
-        start = time.time()
-        while time.time() - start < timeout:
-            if self.pt.poll() is not None:
-                self.classlog.error("PureData exited during startup")
-                return
-            for path in ("/proc/net/tcp", "/proc/net/tcp6"):
-                try:
-                    with open(path) as f:
-                        for line in f.readlines()[1:]:
-                            fields = line.split()
-                            # local address ends in :0BB8 (port 3000), state 0A = LISTEN
-                            if fields[1].endswith(":0BB8") and fields[3] == "0A":
-                                self.classlog.info("PureData ready after %.2f s", time.time() - start)
-                                return
-                except OSError:
-                    pass
-            time.sleep(0.05)
-        self.classlog.info("PureData not listening on port 3000 after %.1f s", timeout)
-
-    # Until the program listens on its OSC port: what is sent before is lost
-    # (UDP), what comes after waits in the socket until the program reads it.
-    def wait_for_program(self, port, timeout=5.0):
+    # Until Pd or the program listens on its OSC port: what is sent before is
+    # lost (UDP), what comes after waits in the socket until it is read.
+    def wait_for_port(self, proc, port, what, timeout=5.0):
         local = ":%04X" % port
         start = time.time()
         while time.time() - start < timeout:
-            if self.prog.poll() is not None:
-                self.classlog.error("The program exited during startup")
+            if proc.poll() is not None:
+                self.classlog.error("%s exited during startup", what)
                 return
             for path in ("/proc/net/udp", "/proc/net/udp6"):
                 try:
@@ -586,12 +568,12 @@ class Nebulae(object):
                         for line in f.readlines()[1:]:
                             fields = line.split()
                             if len(fields) > 1 and fields[1].endswith(local):
-                                self.classlog.info("Program listening after %.2f s", time.time() - start)
+                                self.classlog.info("%s listening after %.2f s", what, time.time() - start)
                                 return
                 except OSError:
                     pass
             time.sleep(0.02)
-        self.classlog.warning("Program not listening on port %d after %.1f s", port, timeout)
+        self.classlog.warning("%s not listening on port %d after %.1f s", what, port, timeout)
 
     def run_puredata(self):
         try:
@@ -761,7 +743,7 @@ class Nebulae(object):
                     os.chmod(program, 0o755)
                 self.classlog.info("Starting %s", " ".join(cmd))
                 self.prog = subprocess.Popen(cmd)
-                self.wait_for_program(port)
+                self.wait_for_port(self.prog, port, "The program")
             self.c_handle = chProg.ProgControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr,
                                                       bank="programs", oscPort=port, bindings=bindings)
             self.c_handle.setConfig(config, self.pagesPath("programs", name))

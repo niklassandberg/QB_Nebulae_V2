@@ -45,7 +45,7 @@
 #X connect 5 0 0 1;
 #X restore 42 357 pd audio-output;
 #N canvas 0 50 1449 445 receive-UI-controls 0;
-#X obj 54 33 netreceive 3000;
+#X obj 54 33 netreceive -u -b 3000;
 #X obj 138 88 route start size density overlap blend window pitch speed
 record file source reset freeze;
 #X obj 139 370 s start;
@@ -113,8 +113,8 @@ window_alt pitch_alt record_alt file_alt source_alt freeze_alt speed_alt
 #X connect 9 0 3 0;
 #X connect 10 0 7 0;
 #X restore 935 168 pd myscale;
-#X obj 254 33 route nebready;
-#X msg 254 63 send ready;
+#X obj 54 58 oscparse;
+#X obj 54 83 list trim;
 #X connect 1 0 2 0;
 #X connect 1 1 3 0;
 #X connect 1 2 4 0;
@@ -147,8 +147,7 @@ window_alt pitch_alt record_alt file_alt source_alt freeze_alt speed_alt
 #X connect 33 0 32 0;
 #X connect 0 0 34 0;
 #X connect 34 0 35 0;
-#X connect 35 0 0 0;
-#X connect 34 1 1 0;
+#X connect 35 0 1 0;
 #X restore 40 391 pd receive-UI-controls;
 #N canvas 0 50 1916 1004 synthesis 0;
 #X obj 843 1011 throw~ rbus;

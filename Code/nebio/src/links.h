@@ -1,5 +1,5 @@
-// links.h - communication with SuperCollider (OSC/UDP via liblo) and
-// Pure Data (text over TCP). Same wire protocol as scsender.py / pdsender.py.
+// links.h - OSC over UDP (liblo): to sclang (ScLink), and to the engine of
+// the Pd or programs bank (OscLink).
 #pragma once
 
 #include <lo/lo.h>
@@ -8,7 +8,6 @@
 #include <map>
 #include <mutex>
 #include <string>
-#include <thread>
 
 namespace nebio {
 
@@ -57,9 +56,9 @@ private:
     std::map<std::string, Last> last_;
 };
 
-// A program of the "programs" bank (controlhandlerProg.py): OSC to a port of
-// 127.0.0.1 given by its .prog, a float to any path. No change check here:
-// Python sends only what changed (and everything again now and then).
+// The engine of the Pd or programs bank: OSC to 127.0.0.1 (Pd on 3000, a
+// program on its .prog's oscport), a float to any path. No change check
+// here: Python sends only what changed.
 class OscLink {
 public:
     static OscLink &instance();
@@ -74,29 +73,6 @@ private:
 
     std::mutex mutex_;
     lo_address target_ = nullptr;
-};
-
-class PdLink {
-public:
-    static PdLink &instance();
-
-    void connect();  // background, retries
-    void close();
-    bool connected() const { return connected_; }
-    bool send(const char *data, int len);
-    bool takeReady();  // a "ready;" came back since the last call
-
-private:
-    PdLink() = default;
-    void runConnect(unsigned generation);
-
-    std::mutex mutex_;
-    int fd_ = -1;
-    std::string inbox_;  // what Pd sent back, up to an unfinished message
-    std::atomic<bool> connected_{false};
-    std::atomic<bool> connecting_{false};
-    std::atomic<unsigned> generation_{0};
-    std::thread thread_;
 };
 
 }  // namespace nebio

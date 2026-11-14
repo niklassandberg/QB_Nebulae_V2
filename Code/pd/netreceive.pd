@@ -1,5 +1,5 @@
 #N canvas 0 410 1680 995 10;
-#X obj 122 82 netreceive 3000;
+#X obj 122 82 netreceive -u -b 3000;
 #X text 1173 99 speed_alt will always control the hardware input level
 for Codec's ADC. Users will not have access to that control.;
 #X obj 60 290 route start size density overlap blend window pitch speed
@@ -40,8 +40,8 @@ to be used for 1V/Octave tracking. (Multiply it by 5 octaves of range
 #X obj 746 431 s source_alt;
 #X obj 203 695 r window;
 #X obj 203 737 print window;
-#X obj 322 82 route nebready;
-#X msg 322 112 send ready;
+#X obj 122 107 oscparse;
+#X obj 122 132 list trim;
 #X connect 2 0 7 0;
 #X connect 2 1 8 0;
 #X connect 2 2 9 0;
@@ -70,5 +70,4 @@ to be used for 1V/Octave tracking. (Multiply it by 5 octaves of range
 #X connect 31 0 32 0;
 #X connect 0 0 33 0;
 #X connect 33 0 34 0;
-#X connect 34 0 0 0;
-#X connect 33 1 2 0;
+#X connect 34 0 2 0;

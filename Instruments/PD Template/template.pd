@@ -1,5 +1,5 @@
 #N canvas 1681 54 1918 998 10;
-#X obj 56 302 netreceive 3000;
+#X obj 56 302 netreceive -u -b 3000;
 #X obj 140 357 route start size density overlap blend window pitch
 speed record file source reset freeze;
 #X obj 554 354 route start_alt size_alt density_alt overlap_alt blend_alt
@@ -41,8 +41,8 @@ window_alt pitch_alt record_alt file_alt source_alt freeze_alt;
 #X obj 115 138 adc~;
 #X obj 116 196 dac~;
 #X text 149 167 Audio Bypass -- Input to Output;
-#X obj 256 302 route nebready;
-#X msg 256 332 send ready;
+#X obj 56 327 oscparse;
+#X obj 56 352 list trim;
 #X connect 1 0 3 0;
 #X connect 1 1 4 0;
 #X connect 1 2 5 0;
@@ -75,5 +75,4 @@ window_alt pitch_alt record_alt file_alt source_alt freeze_alt;
 #X connect 36 1 37 1;
 #X connect 0 0 39 0;
 #X connect 39 0 40 0;
-#X connect 40 0 0 0;
-#X connect 39 1 1 0;
+#X connect 40 0 1 0;
