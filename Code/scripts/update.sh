@@ -1,7 +1,11 @@
 #!/bin/bash
 # Needs root.
+#   update.sh                  at boot (startup.sh): the update on the USB stick
+#   update.sh <neb_update.zip> that file, e.g. copied over the network
+#                              (deploy_fw_net.sh); no stick needed
 [ "$(id -u)" = 0 ] || exec sudo bash "$0" "$@"
-mount /dev/sda1 /mnt/memory
+ZIP="${1:-/mnt/memory/neb_update.zip}"
+mount /dev/sda1 /mnt/memory 2>/dev/null
 # "update_bootloader" on the stick: flash the EEPROM once.
 if [ -f /mnt/memory/update_bootloader ]
 then
@@ -10,7 +14,7 @@ then
     bash /home/alarm/QB_Nebulae_V2/Code/scripts/eeprom_update.sh flash
 fi
 # Nothing to install: no remount (~0.3 s at boot).
-if [ ! -f /mnt/memory/neb_update.zip ] && [ ! -d /home/alarm/QB_Nebulae_V2/Code/packages ] \
+if [ ! -f "$ZIP" ] && [ ! -d /home/alarm/QB_Nebulae_V2/Code/packages ] \
     && ! ls /mnt/memory/*.tar.xz /mnt/memory/*.tar.zst >/dev/null 2>&1
 then
     echo "No Update Detected"
@@ -19,7 +23,7 @@ then
     exit 0
 fi
 sh /home/alarm/QB_Nebulae_V2/Code/scripts/mountfs.sh rw
-if [ -f /mnt/memory/neb_update.zip ]
+if [ -f "$ZIP" ]
 then
     pkill -1 -f /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py
     python3 /home/alarm/QB_Nebulae_V2/Code/nebulae/bootleds.py updating &
@@ -32,7 +36,7 @@ then
     echo "Making sure New Backup Directory is Empty"
     rm -rf /home/alarm/backup/new/*
     echo "Copying neb_update.zip to Backup Directory"
-    cp -R /mnt/memory/neb_update.zip /home/alarm/backup/new
+    cp "$ZIP" /home/alarm/backup/new/neb_update.zip
     echo "Extracting Contents of neb_update.zip"
     tar -xvf /home/alarm/backup/new/neb_update.zip -C /home/alarm/backup/new/
     if [ -d /home/alarm/backup/new/QB_Nebulae_V2/Code/nebulae/ ]; then
@@ -58,8 +62,8 @@ then
     echo "Removing neb_update.zip from USB device. It is safely on the Nebulae."
     source /home/alarm/QB_Nebulae_V2/Code/config.txt
     now=$(date +"%a %D - %T")
-    echo "$now - Firmware updated to: $VERSION" >> /mnt/memory/neb_log.txt
-    rm -rf /mnt/memory/neb_update.zip
+    mountpoint -q /mnt/memory && echo "$now - Firmware updated to: $VERSION" >> /mnt/memory/neb_log.txt
+    rm -f "$ZIP"
     # check_calibration.py reads the knobs through nebio.
     echo "building nebio for the new firmware"
     sh /home/alarm/QB_Nebulae_V2/Code/scripts/build_nebio.sh

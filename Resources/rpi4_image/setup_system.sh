@@ -15,7 +15,7 @@ echo "== packages"
 pacman -S --noconfirm --needed sudo alsa-utils csound dnsmasq hostapd i2c-tools \
     libgpiod liblo netctl dhcpcd pd python python-pip python-cherrypy python-numpy \
     raspberrypi-utils unzip usbutils which wireless_tools iw net-tools dialog \
-    dosfstools jack2 git base-devel cmake pkgconf >/dev/null 2>&1
+    dosfstools jack2 jack-example-tools git base-devel cmake pkgconf >/dev/null 2>&1
 # The Arch csound above pulls in the dependencies; the Nebulae builds
 # (Code/engine_packages/ -> /home/alarm/engine_packages/: Csound optimised + -B working,
 # SuperCollider) replace them, IgnorePkg keeps them.

@@ -414,21 +414,20 @@ class Nebulae(object):
         self.stop_jack()
         self.wait_for_jack_to_die()
 
-    def wait_for_jack_to_start(self):
+    # Until jackd takes clients, not only runs: a Pd started earlier gives up
+    # ("couldn't connect to server") and stays silent. jack_wait is in
+    # jack-example-tools.
+    def wait_for_jack_to_start(self, timeout=10):
         try:
-            count = 0
-            while subprocess.call(
-                "pgrep jackd", shell=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-            ) != 0:
-                count += 1
-                if count > 25:
-                    raise TimeoutError("jackd did not start within 5 seconds")
-                time.sleep(0.2)
-                self.classlog.debug("waiting for jackd to start...")
-            self.classlog.debug("jackd is now running!!!!")
+            start = time.time()
+            done = subprocess.call(["jack_wait", "-w", "-t", str(timeout)],
+                                   stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
+            if done == 0:
+                self.classlog.info("jackd takes clients after %.2f s", time.time() - start)
+            else:
+                self.classlog.error("jackd does not take clients after %d s", timeout)
         except Exception as e:
             self.classlog.error("Error in wait_for_jack_to_start(): %s", e)
-
 
     def wait_for_jack_to_die(self):
         try:
@@ -514,6 +513,10 @@ class Nebulae(object):
     def start_puredata(self, patch):
         try:
             self.log.spill_basic_info()
+            # Csound's instance is used up: start() makes a new one when it comes back.
+            if self.c is not None:
+                self.c.cleanup()
+                self.c = None
             self.c_handle = None
             self.currentInstr = patch
             self.newInstr = patch
@@ -695,7 +698,7 @@ class Nebulae(object):
         except Exception as e:
             self.classlog.error("Error in cleanup_puredata(): %s", e)
         os.system("killall pt")
-        # nebio has one Pd connection; left open, the next Pd gets no knobs.
+        # The engine's OSC channel; the next engine opens its own.
         if isinstance(self.c_handle, chPD.PDControlHandler):
             self.c_handle.closeSockets()
         self.pt = None
