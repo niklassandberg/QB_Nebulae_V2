@@ -1,6 +1,6 @@
-# controlhandlerPD.py: the Pure Data bank: "name value;" messages, changes
-# only, all again after 1 s or a failed send; the 1 ms sleep per pass; modes.
-# nebconfig.py's .pd comment boxes.
+# controlhandlerPD.py: the Pure Data bank: OSC "/name value" on port 3000,
+# everything on the first pass, then only changes; the 1 ms sleep per pass;
+# modes. nebconfig.py's .pd comment boxes.
 cs.none
 mx.reset lib
 # CV inputs at 0 V
@@ -17,17 +17,15 @@ adc 1 0 1000
 adc 1 2 3000
 h.new h pd 4 mypatch puredata None
 calls
-ret pd_is_connected 0
 h.enterPureDataMode h
 h.state h
 calls
-# not connected yet: nothing goes, nothing remembered
+# the first pass: everything
 time 2000
 h.updateAll h
 h.pd h
 calls
-# connected: everything once, then only changes
-ret pd_is_connected 1
+# then only changes
 advance 0.002
 h.updateAll h
 h.pd h
@@ -46,29 +44,25 @@ sr 0
 advance 0.002
 h.updateAll h
 calls
-# all again after a second
+# no resend after a second
 advance 1.0
 h.updateAll h
 h.pd h
 calls
-# a failed send: everything again next pass
-ret pd_send 1
+# a knob
 adc 1 2 2500
 advance 0.002
 h.updateAll h
 h.pd h
-ret pd_send 0
 advance 0.002
 h.updateAll h
 h.pd h
 calls
-# the patch answers "ready": everything once, then only changes, no resend
-ret pd_take_ready 1
+# quiet passes
 advance 0.002
 h.updateAll h
 h.pd h
 calls
-ret pd_take_ready 0
 advance 0.002
 h.updateAll h
 advance 1.5
@@ -78,22 +72,18 @@ advance 0.002
 h.updateAll h
 h.pd h
 calls
-# a failed send: not ready any more, resends with "nebready" until it answers again
-ret pd_send 1
+# more knobs
 adc 1 0 4000
 advance 0.002
 h.updateAll h
-ret pd_send 0
 advance 0.002
 h.updateAll h
 advance 1.1
 h.updateAll h
 h.pd h
 calls
-ret pd_take_ready 1
 advance 0.002
 h.updateAll h
-ret pd_take_ready 0
 h.pd h
 calls
 # secondary controls: alt channels too
@@ -108,7 +98,6 @@ adc 1 1 4000
 advance 0.002
 h.updateAll h
 calls
-ret pd_is_connected 0
 sr 0
 advance 0.002
 h.updateAll h
@@ -121,7 +110,6 @@ h.updateAll h
 h.getInstrSelIdx h
 h.enterNormalMode h
 h.state h
-ret pd_is_connected 1
 h.closeSockets h
 calls
 file.read nebsettings.txt

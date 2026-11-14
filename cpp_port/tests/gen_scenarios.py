@@ -300,10 +300,10 @@ def fuzz_handler(r, n, bank="sc"):
 
 
 def fuzz_pd(r, n):
-    """The Pd handler's main loop, with the connection and sends failing."""
+    """The Pd handler's main loop."""
     out = ["# random main-loop passes through controlhandlerPD.py",
            "cs.none", "mx.reset lib", "file.write defaultnebsettings.txt " + HANDLER_SETTINGS,
-           "h.new h pd 5 p puredata None", "ret pd_is_connected 1", "h.enterPureDataMode h",
+           "h.new h pd 5 p puredata None", "h.enterPureDataMode h",
            "time 5000", "calls"]
     codes = {(d, c): 2048 for d in (0, 1) for c in range(8)}
     bits = 0
@@ -317,8 +317,6 @@ def fuzz_pd(r, n):
                 key = r.choice(list(codes))
                 codes[key] = adc_code(r, codes[key])
                 out.append("adc %d %d %d" % (key[0], key[1], codes[key]))
-        elif m < 0.65:
-            out.append("ret %s %d" % (r.choice(["pd_is_connected", "pd_send", "pd_take_ready"]), r.choice([0, 1])))
         out.append("advance %r" % r.choice([0.001, 0.0025, 0.01, 0.05, 0.18, 0.6, 1.2]))
         out.append("h.updateAll h")
         if r.random() < 0.01:

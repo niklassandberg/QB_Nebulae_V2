@@ -236,13 +236,6 @@ public:
     int osc_open(int port) override { return call("osc_open", {I(port)}); }
     void osc_close() override { call("osc_close"); }
     void osc_send_float(const std::string &p, double v) override { call("osc_send_float", {S(p), F(v)}); }
-    void pd_connect() override { call("pd_connect"); }
-    void pd_close() override { call("pd_close"); }
-    int pd_is_connected() override { return call("pd_is_connected"); }
-    int pd_take_ready() override { return call("pd_take_ready"); }
-    int pd_send(const std::string &d) override {
-        return call("pd_send", {S(d), I(static_cast<long long>(d.size()))});
-    }
 };
 
 class FakeCsound : public Csound {
@@ -320,7 +313,6 @@ public:
 struct Obj {
     std::unique_ptr<Switch> sw;
     std::unique_ptr<ShiftRegister> sr;
-    std::unique_ptr<MCP3208> mcp;
     std::unique_ptr<InputData> data;  // adc, hyb, st, raw, dd
     std::unique_ptr<CommChannel> comm;
     std::unique_ptr<ControlChannel> ctl;
@@ -329,7 +321,6 @@ struct Obj {
     std::unique_ptr<PageState> ps;
     std::unique_ptr<SettingManager> set;
     std::unique_ptr<WaveWriter> wav;
-    std::unique_ptr<PdSend> pd;
     std::unique_ptr<ScSend> sc;
     std::unique_ptr<ConfigSettings> cfg;
     std::unique_ptr<NConfig> ini;
@@ -731,10 +722,9 @@ void Runner::op(const std::string &op, const std::vector<std::string> &a) {
     else if (op == "rmdir") { std::system(("rm -rf '" + path(a.at(0)) + "'").c_str()); }
     // --- nebio.py ----------------------------------------------------------------
     else if (op.rfind("n.", 0) == 0) { nebioOp(op.substr(2), a); }
-    // --- switch / shiftregister / MCP3208 ----------------------------------------
+    // --- switch / shiftregister ---------------------------------------------------
     else if (op == "sw.new") { objs_[a.at(0)].sw = std::make_unique<Switch>(ival(a.at(1))); }
     else if (op == "sr.new") { objs_[a.at(0)].sr = std::make_unique<ShiftRegister>(); }
-    else if (op == "mcp.new") { objs_[a.at(0)].mcp = std::make_unique<MCP3208>(ival(a.at(1))); }
     // --- control.py -------------------------------------------------------------
     else if (op == "hyst") { put(addHysteresis(val(a.at(0)), val(a.at(1)), val(a.at(2)))); }
     else if (op == "control.reload") {
@@ -895,15 +885,9 @@ void Runner::op(const std::string &op, const std::vector<std::string> &a) {
     else if (op == "mx.enable") { nebmixer::enable(); put(Value()); }
     else if (op == "mx.disable") { nebmixer::disable(); put(Value()); }
     else if (op == "mx.inputLevel") { nebmixer::inputLevel(val(a.at(0))); put(Value()); }
-    // --- pdsender.py / scsender.py ------------------------------------------------
-    else if (op == "pd.new") { objs_[a.at(0)].pd = std::make_unique<PdSend>(); }
+    // --- scsender.py ---------------------------------------------------------------
     else if (op == "sc.new") { objs_[a.at(0)].sc = std::make_unique<ScSend>(); }
-    else if (op == "pd.send") {
-        std::vector<Value> msgs;
-        for (size_t k = 1; k < a.size(); ++k) msgs.push_back(val(a[k]));
-        put(B(o(a.at(0)).pd->send(msgs)));
-    }
-    else if (op == "sc.const") { put(L({I(ScSend::rPort), I(ScSend::sPort), I(PdSend::sport)})); }
+    else if (op == "sc.const") { put(L({I(ScSend::rPort), I(ScSend::sPort), I(PD_PORT)})); }
     else if (op == "sc.waitSynthIsUp") {
         put(B(o(a.at(0)).sc->waitSynthIsUp(val(a.at(1)).number())));
         put(F(fakeClock.t));
@@ -1107,7 +1091,7 @@ void Runner::op(const std::string &op, const std::vector<std::string> &a) {
         if (!h) throw PyError("AttributeError", a[0]);
         std::vector<Value> sent;
         for (auto &[k, v] : h->pd_sent) sent.push_back(L({S(k), v}));
-        put(L({I(h->pd_resend_time), L(sent), B(h->pd_ready)}));
+        put(L(sent));
     }
     else if (op == "h.rawChannels") {
         std::vector<Value> l;
@@ -1199,9 +1183,6 @@ void Runner::methodOp(const std::string &prefix, const std::string &m, const std
             int i = ival(a.at(1));
             put(L({B(s.risingEdge(i)), B(s.fallingEdge(i)), B(s.state(i)), B(s.prevState(i))}));
         } else throw PyError("AttributeError", m);
-    } else if (prefix == "mcp") {
-        if (m == "read") put(I(ob.mcp->read_adc(ival(a.at(1)))));
-        else throw PyError("AttributeError", m);
     } else if (prefix == "adc") {
         AdcData &d = data<AdcData>(a[0]);
         if (m == "getValue") put(d.getValue());
@@ -1328,13 +1309,6 @@ void Runner::methodOp(const std::string &prefix, const std::string &m, const std
         else if (m == "save") { s.save(str(0), arg(1)); none(); }
         else if (m == "getLastUpdate") put(s.getLastUpdate());
         else if (m == "printSettings") none();
-        else throw PyError("AttributeError", m);
-    } else if (prefix == "pd") {
-        PdSend &p = *ob.pd;
-        if (m == "connect") { p.connect(); none(); }
-        else if (m == "format") put(S(p.format(str(0), arg(1))));
-        else if (m == "close") { p.close(); none(); }
-        else if (m == "is_connected") put(B(p.is_connected()));
         else throw PyError("AttributeError", m);
     } else if (prefix == "sc") {
         ScSend &s = *ob.sc;

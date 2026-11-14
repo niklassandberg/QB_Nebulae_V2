@@ -1,4 +1,4 @@
-# nebio.py inputs, switch.py, shiftregister.py, MCP3208.py
+# nebio.py inputs, switch.py, shiftregister.py
 time 1000.0
 gpio 23 1
 gpio 24 0
@@ -64,16 +64,7 @@ n.sr_bits
 adc 0 0 100
 adc 1 7 4095
 adc 1 0 2048
-mcp.new cv 0
-mcp.new pot 1
-mcp.read cv 0
-mcp.read pot 7
 n.snapshot
-mcp.read cv 0
-mcp.read pot 7
-mcp.read pot 0
-mcp.read pot 8
-mcp.read pot -1
 n.adc_code 1 7
 n.adc_code 0 0
 n.adc_codes

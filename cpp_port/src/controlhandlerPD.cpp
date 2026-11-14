@@ -1,5 +1,7 @@
 #include "controlhandlerPD.h"
 
+#include "nebio.h"
+
 namespace neb {
 
 PDControlHandler::PDControlHandler(Csound *csound, const Value &numberFiles, const OrderedDict *configData,
@@ -8,61 +10,26 @@ PDControlHandler::PDControlHandler(Csound *csound, const Value &numberFiles, con
 
 void PDControlHandler::closeSockets() {
     ControlHandler::closeSockets();
-    if (pdSock.is_connected()) pdSock.close();
+    nebio::osc_close();
 }
 
 void PDControlHandler::enterPureDataMode() {
     prev_control_mode = control_mode;
     if (control_mode == "secondary controls") resistSecondarySettings();
     for (auto *chn : channels) chn->muteCSound(true);
-    if (!pdSock.is_connected()) {
-        NLOG(log_, INFO, "enterPureDataMode: connecting to PD socket");
-        pdSock.connect();
-    }
+    nebio::osc_open(PD_PORT);
     control_mode = "puredata";
     saveInstrument();
 }
 
-void PDControlHandler::enterSecondaryMode() {
-    if (!pdSock.is_connected() && control_mode == "puredata") {
-        NLOG(log_, INFO, "enterSecondaryMode: connecting to PD socket");
-        pdSock.connect();
-    }
-    ControlHandler::enterSecondaryMode();
-}
-
 void PDControlHandler::sendPdMessages(const std::vector<ControlChannel *> &chans) {
-    if (!pd_ready && pdSock.takeReady()) {
-        NLOG(log_, INFO, "pd: the patch is ready");
-        pd_ready = true;
-        pd_sent.clear();
-    }
-    bool full = !pd_ready && now - pd_resend_time >= PD_RESEND_MS;
-    std::vector<Value> msgs;
-    std::map<std::string, Value> changed;
     for (auto *chn : chans) {
         Value value = chn->getValue();
         auto it = pd_sent.find(chn->name);
-        if (full || it == pd_sent.end() || it->second != value) {
-            msgs.push_back(Value::str(chn->name + " " + pyStr(value)));
-            changed[chn->name] = value;
+        if (it == pd_sent.end() || it->second != value) {
+            nebio::osc_send("/" + chn->name, value.number());
+            pd_sent[chn->name] = value;
         }
-    }
-    if (full) msgs.push_back(Value::str("nebready"));
-    if (msgs.empty()) return;
-    try {
-        if (pdSock.send(msgs)) {
-            for (auto &[name, value] : changed) pd_sent[name] = value;
-            if (full) pd_resend_time = now;
-        } else {
-            pd_sent.clear();
-            pd_ready = false;
-        }
-    } catch (const std::exception &e) {
-        pd_sent.clear();
-        pd_ready = false;
-        NLOG(log_, ERROR, "pd: could not send messages to PD (%s): %s",
-             pdSock.is_connected() ? "connected" : "no connection", e.what());
     }
 }
 

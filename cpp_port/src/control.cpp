@@ -55,6 +55,12 @@ Value addHysteresis(const Value &cur, const Value &newVal, const Value &distance
 
 // ---- AdcData ---------------------------------------------------------------
 
+// Where a chip's channel is in nebio::adc_codes().
+static int adcIndex(int device, int channel) {
+    if (!(0 <= channel && channel <= 7)) throw PyError("AssertionError", "ADC number must be a value of 0-7!");
+    return device * 8 + channel;
+}
+
 AdcData::AdcData(int pot, int cv, std::string name_, Value minimum_, Value maximum_, Value init_val)
     : name(std::move(name_)), minimum(std::move(minimum_)), maximum(std::move(maximum_)),
       pot_channel(pot), cv_channel(cv) {
@@ -63,8 +69,16 @@ AdcData::AdcData(int pot, int cv, std::string name_, Value minimum_, Value maxim
     raw_pot = raw_cv = static_pot = init_val;
     if (!raw_pot.isNumber()) throw PyError("TypeError", "raw_pot / 4095");  // curminpot
     smoothCoeff = controlDefaults().smooth;
-    if (pot_channel >= 0) mcp_pot_ = std::make_unique<MCP3208>(nebio::ADC_POT);
-    if (cv_channel >= 0) mcp_cv_ = std::make_unique<MCP3208>(nebio::ADC_CV);
+    if (pot_channel >= 0) {
+        nebio::inputs();
+        codes_ = nebio::adc_codes();
+        potIndex_ = adcIndex(nebio::ADC_POT, pot_channel);
+    }
+    if (cv_channel >= 0) {
+        nebio::inputs();
+        codes_ = nebio::adc_codes();
+        cvIndex_ = adcIndex(nebio::ADC_CV, cv_channel);
+    }
     if (name == "start") smoothCoeff = controlDefaults().start;
 }
 
@@ -89,7 +103,7 @@ Value AdcData::getValue() {
 Value AdcData::getCV() {
     double temp_cv;
     if (cv_channel >= 0) {
-        int code = mcp_cv_->read_adc(cv_channel);
+        int code = codes_[cvIndex_];
         temp_cv = ((4095.0 - code) - 2047.0) / 2047.0;
         raw_cv = F(temp_cv);
         temp_cv -= cv_offset;
@@ -103,7 +117,7 @@ Value AdcData::getCV() {
 
 Value AdcData::getPot() {
     if (pot_channel < 0) return F(0.0);
-    int code = mcp_pot_->read_adc(pot_channel);
+    int code = codes_[potIndex_];
     double temp_pot = (code >> 3) / 511.0;
     raw_pot = F(temp_pot);
     double f = filtPotVal.number();
@@ -151,8 +165,9 @@ HybridData::HybridData(int channel_, std::string name_, Value minimum_, Value ma
     }
     range = sub(maximum, minimum);
     if (channel >= 0) {
-        mcp_cv_ = std::make_unique<MCP3208>(nebio::ADC_CV);
-        mcp_pot_ = std::make_unique<MCP3208>(nebio::ADC_POT);
+        nebio::inputs();
+        codes_ = nebio::adc_codes();
+        cvIndex_ = adcIndex(nebio::ADC_CV, channel);
     }
 }
 
@@ -160,7 +175,7 @@ Value HybridData::getValue() {
     const double hyst_amt = 0.001;
     double temp_analog;
     if (channel >= 0) {
-        int code = mcp_cv_->read_adc(channel);
+        int code = codes_[cvIndex_];
         temp_analog = ((1.0 - (code / 4095.0)) * range.number()) + minimum.number();
         temp_analog *= scaling;
         raw_cv = F(temp_analog);

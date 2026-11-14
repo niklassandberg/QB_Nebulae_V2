@@ -104,6 +104,7 @@ L123 i:3
 L124 i:3
 L125 i:3
 L126 i:3
-L128 E:AssertionError
+L127 E:AssertionError
+L128 E:KeyError
 L129 E:TypeError
 L130 call inputs_init()

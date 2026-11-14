@@ -1,5 +1,5 @@
-// switch.py, shiftregister.py and MCP3208.py: the GPIO inputs, the CD4021
-// shift register and the two ADCs, read from nebio's snapshot.
+// switch.py and shiftregister.py: the GPIO inputs and the CD4021 shift
+// register, read from nebio's snapshot.
 #pragma once
 
 namespace neb {
@@ -43,17 +43,6 @@ private:
     static int at(const int (&v)[8], int index);  // Python list index (negative from the end)
     int values_[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
     int prev_[8] = {-1, -1, -1, -1, -1, -1, -1, -1};
-};
-
-// MCP3208 12-bit ADC: device 0 = CV chip, 1 = POT chip.
-class MCP3208 {
-public:
-    explicit MCP3208(int device);
-    int read_adc(int adc_number) const;  // PyError AssertionError outside 0-7
-
-private:
-    int base_;
-    const int *codes_;
 };
 
 }  // namespace neb

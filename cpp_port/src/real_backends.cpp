@@ -66,13 +66,6 @@ public:
     int osc_open(int port) override { return nebio_osc_open(port); }
     void osc_close() override { nebio_osc_close(); }
     void osc_send_float(const std::string &p, double v) override { nebio_osc_send_float(p.c_str(), v); }
-    void pd_connect() override { nebio_pd_connect(); }
-    void pd_close() override { nebio_pd_close(); }
-    int pd_is_connected() override { return nebio_pd_is_connected(); }
-    int pd_take_ready() override { return nebio_pd_take_ready(); }
-    int pd_send(const std::string &data) override {
-        return nebio_pd_send(data.data(), static_cast<int>(data.size()));
-    }
 };
 
 class AlsaAsound : public Asound {

@@ -78,7 +78,8 @@ public:
     Value last_in = F(0.0);
 
 private:
-    std::unique_ptr<MCP3208> mcp_pot_, mcp_cv_;
+    const int *codes_ = nullptr;  // nebio::adc_codes(), filled by every snapshot
+    int potIndex_ = 0, cvIndex_ = 0;
 };
 
 class StaticData : public InputData {
@@ -115,7 +116,8 @@ public:
     bool ignore_enc = false;
 
 private:
-    std::unique_ptr<MCP3208> mcp_cv_, mcp_pot_;
+    const int *codes_ = nullptr;
+    int cvIndex_ = 0;
 };
 
 // rawencoder: sclang owns the value and LEDs; this only switches the routing.

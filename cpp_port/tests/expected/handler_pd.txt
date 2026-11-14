@@ -6,106 +6,102 @@ L19 call input_adc_hz()
 L19 call set_gate_holdoff_us(i:5000)
 L19 call set_gate_interrupts(i:0)
 L19 call gate_interrupts()
-L21 None
-L22 [s:puredata,s:normal,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
-L23 call pd_is_connected()
-L23 call pd_connect()
-L26 None
-L27 [i:0,[],b:False]
-L28 call pd_take_ready()
-L28 call pd_is_connected()
-L32 None
-L33 [i:2000003,[[s:blend,i:0],[s:density,f:0.4044],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.033],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]],b:False]
-L34 call pd_take_ready()
-L34 call pd_is_connected()
-L34 call pd_send(s:speed 0.625;pitch 1.033;start 0.244;size 0;blend 0;density 0.4044;overlap 0;window 0;reset 0;freeze 0;record 0;file 0;source 0;filestate 0;sourcegate 0;nebready;,i:161)
-L36 None
-L37 call pd_take_ready()
-L37 call pd_is_connected()
-L37 call pd_send(s:pitch 1.034;density 0.5131;,i:27)
-L40 None
-L41 call pd_take_ready()
-L41 call pd_is_connected()
-L41 call pd_send(s:density 0.4646;,i:15)
-L44 None
-L47 None
-L48 call pd_take_ready()
-L48 call pd_is_connected()
-L48 call pd_send(s:density 0.432;reset 1;,i:22)
-L48 call pd_take_ready()
-L48 call pd_is_connected()
-L48 call pd_send(s:density 0.4102;,i:15)
-L51 None
-L52 [i:2001016,[[s:blend,i:0],[s:density,f:0.3956],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]],b:False]
-L53 call pd_take_ready()
-L53 call pd_is_connected()
-L53 call pd_send(s:speed 0.625;pitch 1.034;start 0.244;size 0;blend 0;density 0.3956;overlap 0;window 0;reset 0;freeze 0;record 0;file 0;source 0;filestate 0;sourcegate 0;nebready;,i:161)
+L20 None
+L21 [s:puredata,s:normal,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L22 call osc_open(i:3000)
+L25 None
+L26 [[s:blend,i:0],[s:density,i:0],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:0.6],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,i:0],[s:window,i:0]]
+L27 call osc_send_float(s:/speed,f:0.625)
+L27 call osc_send_float(s:/pitch,f:0.6)
+L27 call osc_send_float(s:/start,f:0.0)
+L27 call osc_send_float(s:/size,f:0.0)
+L27 call osc_send_float(s:/blend,f:0.0)
+L27 call osc_send_float(s:/density,f:0.0)
+L27 call osc_send_float(s:/overlap,f:0.0)
+L27 call osc_send_float(s:/window,f:0.0)
+L27 call osc_send_float(s:/reset,f:0.0)
+L27 call osc_send_float(s:/freeze,f:0.0)
+L27 call osc_send_float(s:/record,f:0.0)
+L27 call osc_send_float(s:/file,f:0.0)
+L27 call osc_send_float(s:/source,f:0.0)
+L27 call osc_send_float(s:/filestate,f:0.0)
+L27 call osc_send_float(s:/sourcegate,f:0.0)
+L30 None
+L31 [[s:blend,i:0],[s:density,f:0.4044],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.033],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]]
+L32 call osc_send_float(s:/pitch,f:1.033)
+L32 call osc_send_float(s:/start,f:0.244)
+L32 call osc_send_float(s:/density,f:0.4044)
+L34 None
+L35 call osc_send_float(s:/pitch,f:1.034)
+L35 call osc_send_float(s:/density,f:0.5131)
+L38 None
+L39 call osc_send_float(s:/density,f:0.4646)
+L42 None
+L45 None
+L46 call osc_send_float(s:/density,f:0.432)
+L46 call osc_send_float(s:/reset,f:1.0)
+L46 call osc_send_float(s:/density,f:0.4102)
+L49 None
+L50 [[s:blend,i:0],[s:density,f:0.3956],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]]
+L51 call osc_send_float(s:/density,f:0.3956)
+L51 call osc_send_float(s:/reset,f:0.0)
+L55 None
+L56 [[s:blend,i:0],[s:density,f:0.4665],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]]
 L58 None
-L59 [i:2001016,[],b:False]
-L62 None
-L63 [i:2001016,[[s:blend,i:0],[s:density,f:0.5141],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]],b:False]
-L64 call pd_take_ready()
-L64 call pd_is_connected()
-L64 call pd_send(s:density 0.4665;,i:15)
-L64 call pd_take_ready()
-L64 call pd_is_connected()
-L64 call pd_send(s:speed 0.625;pitch 1.034;start 0.244;size 0;blend 0;density 0.5141;overlap 0;window 0;reset 0;freeze 0;record 0;file 0;source 0;filestate 0;sourcegate 0;,i:152)
-L68 None
-L69 [i:2001016,[[s:blend,i:0],[s:density,f:0.5459],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]],b:True]
-L70 call pd_take_ready()
-L70 call pd_is_connected()
-L70 call pd_send(s:speed 0.625;pitch 1.034;start 0.244;size 0;blend 0;density 0.5459;overlap 0;window 0;reset 0;freeze 0;record 0;file 0;source 0;filestate 0;sourcegate 0;,i:152)
-L73 None
-L75 None
+L59 [[s:blend,i:0],[s:density,f:0.5141],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]]
+L60 call osc_send_float(s:/density,f:0.4665)
+L60 call osc_send_float(s:/density,f:0.5141)
+L63 None
+L64 [[s:blend,i:0],[s:density,f:0.5459],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]]
+L65 call osc_send_float(s:/density,f:0.5459)
+L67 None
+L69 None
+L72 None
+L73 [[s:blend,i:0],[s:density,f:0.6718],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]]
+L74 call osc_send_float(s:/density,f:0.5673)
+L74 call osc_send_float(s:/density,f:0.5815)
+L74 call osc_send_float(s:/density,f:0.6718)
 L78 None
-L79 [i:2001016,[[s:blend,i:0],[s:density,f:0.6718],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.244],[s:window,i:0]],b:True]
-L80 call pd_is_connected()
-L80 call pd_send(s:density 0.5673;,i:15)
-L80 call pd_is_connected()
-L80 call pd_send(s:density 0.5815;,i:15)
-L80 call pd_is_connected()
-L80 call pd_send(s:density 0.6718;,i:15)
-L85 None
-L88 None
-L90 None
-L91 [i:2003639,[[s:blend,i:0],[s:density,f:0.8],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.9766],[s:window,i:0]],b:False]
-L92 call pd_is_connected()
-L92 call pd_send(s:start 0.9418;density 0.7323;,i:28)
-L92 call pd_take_ready()
-L92 call pd_is_connected()
-L92 call pd_send(s:speed 0.625;pitch 1.034;start 0.9766;size 0;blend 0;density 0.7729;overlap 0;window 0;reset 0;freeze 0;record 0;file 0;source 0;filestate 0;sourcegate 0;nebready;,i:162)
-L92 call pd_take_ready()
-L92 call pd_is_connected()
-L92 call pd_send(s:speed 0.625;pitch 1.034;start 0.9766;size 0;blend 0;density 0.8;overlap 0;window 0;reset 0;freeze 0;record 0;file 0;source 0;filestate 0;sourcegate 0;nebready;,i:159)
-L95 None
-L97 [i:2003639,[[s:blend,i:0],[s:density,f:0.8182],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.9766],[s:window,i:0]],b:True]
-L98 call pd_take_ready()
-L98 call pd_is_connected()
-L98 call pd_send(s:speed 0.625;pitch 1.034;start 0.9766;size 0;blend 0;density 0.8182;overlap 0;window 0;reset 0;freeze 0;record 0;file 0;source 0;filestate 0;sourcegate 0;,i:153)
-L102 None
-L104 None
-L105 [s:secondary controls,s:puredata,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
-L106 call pd_is_connected()
-L106 call pd_send(s:density 0.8304;,i:15)
-L106 call pd_is_connected()
-L106 call pd_is_connected()
-L106 call pd_send(s:speed_alt 23.0;pitch_alt 0.0;start_alt 0;size_alt 0;blend_alt 0;density_alt 0;overlap_alt 0;window_alt 0;reset_alt 0;freeze_alt 0;source_alt 0;record_alt 0;file_alt 0;,i:167)
+L80 None
+L82 None
+L83 [[s:blend,i:0],[s:density,f:0.8],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.9766],[s:window,i:0]]
+L84 call osc_send_float(s:/start,f:0.9418)
+L84 call osc_send_float(s:/density,f:0.7323)
+L84 call osc_send_float(s:/start,f:0.9766)
+L84 call osc_send_float(s:/density,f:0.7729)
+L84 call osc_send_float(s:/density,f:0.8)
+L86 None
+L87 [[s:blend,i:0],[s:density,f:0.8182],[s:file,i:0],[s:filestate,i:0],[s:freeze,i:0],[s:overlap,i:0],[s:pitch,f:1.034],[s:record,i:0],[s:reset,i:0],[s:size,i:0],[s:source,i:0],[s:sourcegate,i:0],[s:speed,f:0.625],[s:start,f:0.9766],[s:window,i:0]]
+L88 call osc_send_float(s:/density,f:0.8182)
+L92 None
+L94 None
+L95 [s:secondary controls,s:puredata,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L96 call osc_send_float(s:/density,f:0.8304)
+L96 call osc_send_float(s:/speed_alt,f:23.0)
+L96 call osc_send_float(s:/pitch_alt,f:0.0)
+L96 call osc_send_float(s:/start_alt,f:0.0)
+L96 call osc_send_float(s:/size_alt,f:0.0)
+L96 call osc_send_float(s:/blend_alt,f:0.0)
+L96 call osc_send_float(s:/density_alt,f:0.0)
+L96 call osc_send_float(s:/overlap_alt,f:0.0)
+L96 call osc_send_float(s:/window_alt,f:0.0)
+L96 call osc_send_float(s:/reset_alt,f:0.0)
+L96 call osc_send_float(s:/freeze_alt,f:0.0)
+L96 call osc_send_float(s:/source_alt,f:0.0)
+L96 call osc_send_float(s:/record_alt,f:0.0)
+L96 call osc_send_float(s:/file_alt,f:0.0)
+L99 None
+L103 None
+L104 [s:puredata,s:secondary controls,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L105 call osc_open(i:3000)
+L106 None
 L109 None
-L114 None
-L115 [s:puredata,s:secondary controls,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
-L116 call pd_is_connected()
-L116 call pd_connect()
-L117 None
-L120 None
-L121 i:0
-L122 None
-L123 [s:puredata,s:instr selector,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
-L125 None
-L126 call pd_is_connected()
-L126 call pd_connect()
-L126 call pd_is_connected()
-L126 call pd_is_connected()
-L126 call pd_close()
-L127 file nebsettings.txt speed,0.625|pitch,0.6|start,0|size,0|blend,0|density,0|overlap,0|window,0|reset,0|freeze,0|source,0|record,0|file,0|speed_alt,23|pitch_alt,0|start_alt,0|size_alt,0|blend_alt,0|density_alt,0|overlap_alt,0|window_alt,0.0|reset_alt,0|freeze_alt,0|source_alt,0|record_alt,0|file_alt,0|
-L131 [[s:kernel,[s:rt]],[s:blocksize,[s:256]],[s:freeze,[s:triggered,s:rising ; x$1]],[s:reset,[s:triggered,s:falling;\r #X text 20 120 NEBCONFIG no]],[s:width,[s:f 2x]],[s:last,[s:1]]]
-L132 s:hybrid
+L110 i:0
+L111 None
+L112 [s:puredata,s:instr selector,i:0,b:False,i:0,i:23,b:False,b:False,[[s:freeze,b:False],[s:record,b:False],[s:reset,b:False],[s:source,b:False],[s:sourcegate,b:False]]]
+L113 None
+L114 call osc_open(i:3000)
+L114 call osc_close()
+L115 file nebsettings.txt speed,0.625|pitch,0.6|start,0|size,0|blend,0|density,0|overlap,0|window,0|reset,0|freeze,0|source,0|record,0|file,0|speed_alt,23|pitch_alt,0|start_alt,0|size_alt,0|blend_alt,0|density_alt,0|overlap_alt,0|window_alt,0.0|reset_alt,0|freeze_alt,0|source_alt,0|record_alt,0|file_alt,0|
+L119 [[s:kernel,[s:rt]],[s:blocksize,[s:256]],[s:freeze,[s:triggered,s:rising ; x$1]],[s:reset,[s:triggered,s:falling;\r #X text 20 120 NEBCONFIG no]],[s:width,[s:f 2x]],[s:last,[s:1]]]
+L120 s:hybrid

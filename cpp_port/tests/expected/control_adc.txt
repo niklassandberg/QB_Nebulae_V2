@@ -114,7 +114,8 @@ L138 f:0.0
 L139 i:0
 L141 E:TypeError
 L142 E:TypeError
-L144 E:AssertionError
+L143 E:AssertionError
+L144 E:KeyError
 L147 i:3
 L148 None
 L149 f:0.75

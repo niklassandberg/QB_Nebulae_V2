@@ -27,12 +27,10 @@ import controlhandlerSC
 import digitaldata
 import encoderpages
 import fatal
-import MCP3208
 import nebconfig
 import nconfig
 import nebio
 import nebmixer
-import pdsender
 import scsender
 import settings
 import shiftregister
@@ -323,7 +321,7 @@ class Runner(object):
         # --- nebio.py ----------------------------------------------------
         elif op.startswith("n."):
             self.nebio_op(op[2:], a)
-        # --- switch / shiftregister / MCP3208 ----------------------------
+        # --- switch / shiftregister ---------------------------------------
         elif op == "sw.new":
             o[a[0]] = switch.Switch(int(a[1]))
         elif op == "sw.q":
@@ -334,10 +332,6 @@ class Runner(object):
         elif op == "sr.q":
             s, i = o[a[0]], int(a[1])
             self.put([s.risingEdge(i), s.fallingEdge(i), s.state(i), s.prevState(i)])
-        elif op == "mcp.new":
-            o[a[0]] = MCP3208.MCP3208(int(a[1]))
-        elif op == "mcp.read":
-            self.put(o[a[0]].read_adc(int(a[1])))
         # --- control.py --------------------------------------------------
         elif op == "hyst":
             self.put(control.addHysteresis(val(a[0]), val(a[1]), val(a[2])))
@@ -461,15 +455,11 @@ class Runner(object):
         elif op.startswith("mx."):
             fn = getattr(nebmixer, op[3:])
             self.put(fn(*[val(x) for x in a]))
-        # --- pdsender.py / scsender.py -----------------------------------
-        elif op == "pd.new":
-            o[a[0]] = pdsender.PdSend()
+        # --- scsender.py -------------------------------------------------
         elif op == "sc.new":
             o[a[0]] = scsender.ScSend()
-        elif op == "pd.send":
-            self.put(o[a[0]].send([val(x) for x in a[1:]]))
         elif op == "sc.const":
-            self.put([scsender.ScSend.rPort, scsender.ScSend.sPort, pdsender.PdSend.sport])
+            self.put([scsender.ScSend.rPort, scsender.ScSend.sPort, controlhandlerPD.PD_PORT])
         elif op in ("sc.waitSynthIsUp",):
             self.put(o[a[0]].waitSynthIsUp(val(a[1])))
             self.put(clock.t)
@@ -582,7 +572,7 @@ class Runner(object):
                       [[k, [list(t) for t in h.bindings[k]]] for k in sorted(h.bindings)]])
         elif op == "h.pd":
             h = o[a[0]]
-            self.put([h.pd_resend_time, [[k, h.pd_sent[k]] for k in sorted(h.pd_sent)], h.pd_ready])
+            self.put([[k, h.pd_sent[k]] for k in sorted(h.pd_sent)])
         elif op == "h.rawChannels":
             self.put([c.name for c in o[a[0]].rawChannels()])
         # --- any method of an object -------------------------------------

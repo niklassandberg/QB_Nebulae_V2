@@ -18,13 +18,13 @@ safety net.
 |---|---|---|
 | `control.py`: `addHysteresis`, `AdcData`, `StaticData`, `HybridData`, `RawEncoderData`, `CommChannel`, `ControlChannel` | `src/control.*` | |
 | `digitaldata.py`: `DigitalData` | `src/digitaldata.*` | |
-| `switch.py`, `shiftregister.py`, `MCP3208.py` | `src/inputs.*` | |
+| `switch.py`, `shiftregister.py` | `src/inputs.*` | the ADCs are read from `nebio::adc_codes()` in `control.*` |
 | `nebio.py` (inputs, SC/OSC/PD, gate and rate settings) | `src/nebio.*` | LED part (`LedDriver`, ui.py's) not ported |
 | `encoderpages.py`: `scale`, `pulse`, `Page`, `EncoderPages`, `PageState` | `src/encoderpages.*` | |
 | `settings.py`: `SettingManager` | `src/settings.*` | |
 | `wavewriter.py`: `WaveWriter` | `src/wavewriter.*` | |
 | `nebmixer.py` | `src/nebmixer.*` | |
-| `pdsender.py`, `scsender.py` | `src/senders.*` | |
+| `scsender.py` | `src/senders.*` | |
 | `configsettings.py` | `src/configsettings.*` | |
 | `classlogger.py` | `src/classlogger.*` | formatting and levels; not the crash hooks |
 | `nconfig.py` (configparser) | `src/nconfig.*` | |
@@ -89,7 +89,7 @@ PYTHON=~/cpp_port_venv/bin/python ./run_tests.sh ~/cpp_port_build
 
 ### Result (2026-11-13)
 
-24 scenarios, 74 210 trace lines: Python and C++ identical. 26/26 ctest,
+24 scenarios, 54 279 trace lines: Python and C++ identical. 26/26 ctest,
 28/28 unittest. Also clean with `-fsanitize=address,undefined`.
 
 The handlers: `handler_csound.txt` (Csound's channels back: end of loop,
@@ -102,9 +102,8 @@ button edges, knobs, CV, encoder steps, page turns, mode changes, switches),
 `handler_prog.txt` and `fuzz_prog.txt` (the programs bank with audrey's and
 miRings' blocks: osc: bindings, changes only, the echo hold layers,
 playback speed, bad osc: lines and ports), `handler_pd.txt` and
-`fuzz_pd.txt` (Pd messages, changes only, the 1 s resend, a lost connection
-or failed send resending everything, the patch's "ready" answer, a .pd
-patch's comment boxes),
+`fuzz_pd.txt` (OSC to Pd on port 3000, everything once, then changes only, a
+.pd patch's comment boxes),
 `nebconfig.txt` the block's parsing and its error messages. The Python runs
 give the same trace under any `PYTHONHASHSEED` (checked with 12).
 

@@ -4,41 +4,6 @@
 
 namespace neb {
 
-void PdSend::connect() {
-    NLOG(log_, INFO, "Connecting to PD");
-    nebioC().pd_connect();
-}
-
-bool PdSend::send(const std::vector<Value> &msgs) {
-    if (!nebioC().pd_is_connected()) {
-        if (!warned) {  // the connect runs in the background, warn once
-            NLOG(log_, WARNING, "PD socket not connected. Cannot send messages.");
-            warned = true;
-        }
-        return false;
-    }
-    warned = false;
-    std::string data;
-    for (auto &m : msgs) data += pyStr(m) + ";";
-    if (nebioC().pd_send(data) != 0) {
-        NLOG(log_, ERROR, "Could not send to PD: %s", nebio::last_error().c_str());
-        return false;
-    }
-    return true;
-}
-
-void PdSend::close() {
-    if (nebioC().pd_is_connected())
-        NLOG(log_, INFO, "Closing connection to PD");
-    else
-        NLOG(log_, WARNING, "No PD client to close.");
-    nebioC().pd_close();
-}
-
-bool PdSend::is_connected() { return nebioC().pd_is_connected() != 0; }
-
-bool PdSend::takeReady() { return nebioC().pd_take_ready() != 0; }
-
 bool ScSend::synthIsUpStatus() {
     bool status = nebioC().sc_synth_is_up() != 0;
     NLOG(log_, DEBUG, "synthIsUpStatus=%s", status ? "True" : "False");

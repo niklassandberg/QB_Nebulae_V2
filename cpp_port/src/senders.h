@@ -1,5 +1,5 @@
-// pdsender.py and scsender.py: the PdSend / ScSend interfaces the handlers use,
-// over nebio's PD (TCP text) and SC (OSC) links.
+// scsender.py: the ScSend interface the SC handler uses, over nebio's SC
+// (OSC) link.
 #pragma once
 
 #include <string>
@@ -9,24 +9,6 @@
 #include "pyvalue.h"
 
 namespace neb {
-
-class PdSend {
-public:
-    static constexpr int sport = 3000;
-    void connect();  // in the background, retries until PD answers or close()
-    bool send(const std::vector<Value> &msgs);  // true when the messages went out
-    // True when the patch sent "ready" back since the last call: it answers
-    // "nebready" with [send ready( into its [netreceive 3000] once set up.
-    bool takeReady();
-    std::string format(const std::string &target, const Value &val) const { return target + " " + pyStr(val); }
-    void close();
-    bool is_connected();
-
-    bool warned = false;
-
-private:
-    Logger log_{"PdSend"};
-};
 
 class ScSend {
 public:

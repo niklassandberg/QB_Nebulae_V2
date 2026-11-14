@@ -26,18 +26,4 @@ int ShiftRegister::at(const int (&v)[8], int index) {
     return v[index];
 }
 
-MCP3208::MCP3208(int device) : base_(device * 8) {
-    nebio::inputs();
-    codes_ = nebio::adc_codes();
-}
-
-int MCP3208::read_adc(int adc_number) const {
-    if (!(0 <= adc_number && adc_number <= 7))
-        throw PyError("AssertionError", "ADC number must be a value of 0-7!");
-    int k = base_ + adc_number;
-    if (k < 0) k += 16;
-    if (k < 0 || k >= 16) throw PyError("IndexError", "invalid index");
-    return codes_[k];
-}
-
 }  // namespace neb
