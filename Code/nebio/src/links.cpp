@@ -285,6 +285,7 @@ void PdLink::runConnect(unsigned generation) {
                 break;
             }
             fd_ = fd;
+            inbox_.clear();
             connected_ = true;
             logInfo("sending to PD on port %d", kPdPort);
             break;
@@ -313,6 +314,26 @@ void PdLink::close() {
         t = std::move(thread_);
     }
     if (t.joinable()) t.join();
+}
+
+// The patch answers over the same connection: [send ready( into its
+// [netreceive 3000] arrives here as "ready;".
+bool PdLink::takeReady() {
+    std::lock_guard<std::mutex> lock(mutex_);
+    if (fd_ < 0) return false;
+    char buf[256];
+    ssize_t n;
+    while ((n = ::recv(fd_, buf, sizeof(buf), MSG_DONTWAIT)) > 0) inbox_.append(buf, static_cast<size_t>(n));
+    bool ready = false;
+    size_t end;
+    while ((end = inbox_.find(';')) != std::string::npos) {
+        std::string msg = inbox_.substr(0, end);
+        inbox_.erase(0, end + 1);
+        size_t a = msg.find_first_not_of(" \t\r\n"), b = msg.find_last_not_of(" \t\r\n");
+        if (a != std::string::npos && msg.compare(a, b - a + 1, "ready") == 0) ready = true;
+    }
+    if (inbox_.size() > 4096) inbox_.clear();  // a patch sending without ';'
+    return ready;
 }
 
 bool PdLink::send(const char *data, int len) {

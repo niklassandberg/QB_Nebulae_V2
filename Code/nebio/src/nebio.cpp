@@ -146,6 +146,7 @@ void nebio_pd_connect(void) { PdLink::instance().connect(); }
 void nebio_pd_close(void) { PdLink::instance().close(); }
 int nebio_pd_is_connected(void) { return PdLink::instance().connected(); }
 int nebio_pd_send(const char *data, int len) { return PdLink::instance().send(data, len) ? 0 : -1; }
+int nebio_pd_take_ready(void) { return PdLink::instance().takeReady() ? 1 : 0; }
 
 // ---- diagnostics -----------------------------------------------------------
 

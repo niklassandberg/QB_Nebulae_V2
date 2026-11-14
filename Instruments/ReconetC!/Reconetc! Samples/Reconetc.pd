@@ -2071,9 +2071,10 @@ files in samplers;
 #X text 947 176 Press Source then Record for Record_alt then Freeze
 acts as tap tempo / external clock also space bar here for testing
 ;
+#X obj 263 318 route nebready;
+#X msg 263 348 send ready;
 #X connect 0 0 1 0;
 #X connect 2 0 114 0;
-#X connect 3 0 4 0;
 #X connect 4 0 32 0;
 #X connect 4 1 6 0;
 #X connect 4 2 7 0;
@@ -2191,3 +2192,7 @@ acts as tap tempo / external clock also space bar here for testing
 #X connect 148 0 98 0;
 #X connect 148 0 0 0;
 #X coords 0 1040 1 1039 85 60 0;
+#X connect 3 0 160 0;
+#X connect 160 0 161 0;
+#X connect 161 0 3 0;
+#X connect 160 1 4 0;

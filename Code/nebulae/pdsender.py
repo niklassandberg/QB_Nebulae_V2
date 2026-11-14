@@ -43,6 +43,11 @@ class PdSend(object):
     # Utilities
     # -------------------------
 
+    # True when the patch sent "ready" back since the last call: it answers
+    # "nebready" with [send ready( into its [netreceive 3000] once set up.
+    def takeReady(self):
+        return self.lib.nebio_pd_take_ready() != 0
+
     def format(self, target, val):
         """Return a formatted PD message string"""
         return target + ' ' + str(val)

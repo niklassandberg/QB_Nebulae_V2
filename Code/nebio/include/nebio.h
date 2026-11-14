@@ -157,6 +157,8 @@ NEBIO_API void nebio_pd_close(void);
 NEBIO_API int  nebio_pd_is_connected(void);
 /* "name value;name value;". Never blocks. 0 = sent. */
 NEBIO_API int  nebio_pd_send(const char *data, int len);
+/* 1 when the patch sent "ready;" back since the last call. Never blocks. */
+NEBIO_API int  nebio_pd_take_ready(void);
 
 /* ---- diagnostics ------------------------------------------------------- */
 

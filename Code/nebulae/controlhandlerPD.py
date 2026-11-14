@@ -3,7 +3,8 @@ import time
 import pdsender
 from controlhandler import ControlHandler
 
-# Everything is resent this often, for a [netreceive] opened late.
+# Until the patch answers "nebready" with "ready", everything is resent this
+# often (with "nebready"): a patch without the answer still gets all values.
 PD_RESEND_MS = 1000
 
 class PDControlHandler(ControlHandler):
@@ -13,6 +14,7 @@ class PDControlHandler(ControlHandler):
         self.pdSock = pdsender.PdSend()
         self.pd_sent = {}
         self.pd_resend_time = 0
+        self.pd_ready = False
 
     def closeSockets(self):
         super(PDControlHandler, self).closeSockets()
@@ -42,9 +44,14 @@ class PDControlHandler(ControlHandler):
             self.pdSock.connect()
         super(PDControlHandler, self).enterSecondaryMode()
 
-    # A failed send forgets what was sent, so everything goes again.
+    # The patch's "ready" gets everything once, then only changes. A failed
+    # send forgets what was sent and that it was ready, so everything goes again.
     def sendPdMessages(self, channels):
-        full = self.now - self.pd_resend_time >= PD_RESEND_MS
+        if not self.pd_ready and self.pdSock.takeReady():
+            self.classlog.info("pd: the patch is ready")
+            self.pd_ready = True
+            self.pd_sent.clear()
+        full = not self.pd_ready and self.now - self.pd_resend_time >= PD_RESEND_MS
         sent = self.pd_sent
         msgs = []
         changed = {}
@@ -54,6 +61,8 @@ class PDControlHandler(ControlHandler):
             if full or name not in sent or sent[name] != value:
                 msgs.append(name + ' ' + str(value))
                 changed[name] = value
+        if full:
+            msgs.append("nebready")
         if not msgs:
             return
         try:
@@ -63,8 +72,10 @@ class PDControlHandler(ControlHandler):
                     self.pd_resend_time = self.now
             else:
                 sent.clear()
+                self.pd_ready = False
         except Exception as e:
             sent.clear()
+            self.pd_ready = False
             if self.pdSock.is_connected():
                 self.classlog.error("pd: Could not send messages to PD. Connected, but error?: %s", e)
             else:

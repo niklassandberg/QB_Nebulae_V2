@@ -84,6 +84,7 @@ public:
     void close();
     bool connected() const { return connected_; }
     bool send(const char *data, int len);
+    bool takeReady();  // a "ready;" came back since the last call
 
 private:
     PdLink() = default;
@@ -91,6 +92,7 @@ private:
 
     std::mutex mutex_;
     int fd_ = -1;
+    std::string inbox_;  // what Pd sent back, up to an unfinished message
     std::atomic<bool> connected_{false};
     std::atomic<bool> connecting_{false};
     std::atomic<unsigned> generation_{0};

@@ -40,7 +40,8 @@ to be used for 1V/Octave tracking. (Multiply it by 5 octaves of range
 #X obj 746 431 s source_alt;
 #X obj 203 695 r window;
 #X obj 203 737 print window;
-#X connect 0 0 2 0;
+#X obj 322 82 route nebready;
+#X msg 322 112 send ready;
 #X connect 2 0 7 0;
 #X connect 2 1 8 0;
 #X connect 2 2 9 0;
@@ -67,3 +68,7 @@ to be used for 1V/Octave tracking. (Multiply it by 5 octaves of range
 #X connect 3 9 30 0;
 #X connect 3 10 27 0;
 #X connect 31 0 32 0;
+#X connect 0 0 33 0;
+#X connect 33 0 34 0;
+#X connect 34 0 0 0;
+#X connect 33 1 2 0;
