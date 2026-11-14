@@ -39,7 +39,8 @@ nebconfigend
 Controls: `pitch speed start size blend density overlap window` (0..1, knob and
 CV), `reset freeze record source file` (buttons and gates, 0/1; `file` counts
 up), and in secondary controls the same names with `_alt`. Only bound controls
-are sent: when a value changes, and every value once a second. Button modes
+are sent: every value once as soon as the program listens on its OSC port
+(Nebulae waits for it), then when a value changes. Button modes
 as for the other banks, e.g. `reset,momentary,rising` (a gate: 1 while held).
 
 ## Encoder pages (more parameters than knobs)

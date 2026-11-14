@@ -571,6 +571,28 @@ class Nebulae(object):
             time.sleep(0.05)
         self.classlog.info("PureData not listening on port 3000 after %.1f s", timeout)
 
+    # Until the program listens on its OSC port: what is sent before is lost
+    # (UDP), what comes after waits in the socket until the program reads it.
+    def wait_for_program(self, port, timeout=5.0):
+        local = ":%04X" % port
+        start = time.time()
+        while time.time() - start < timeout:
+            if self.prog.poll() is not None:
+                self.classlog.error("The program exited during startup")
+                return
+            for path in ("/proc/net/udp", "/proc/net/udp6"):
+                try:
+                    with open(path) as f:
+                        for line in f.readlines()[1:]:
+                            fields = line.split()
+                            if len(fields) > 1 and fields[1].endswith(local):
+                                self.classlog.info("Program listening after %.2f s", time.time() - start)
+                                return
+                except OSError:
+                    pass
+            time.sleep(0.02)
+        self.classlog.warning("Program not listening on port %d after %.1f s", port, timeout)
+
     def run_puredata(self):
         try:
             new_instr = None
@@ -739,6 +761,7 @@ class Nebulae(object):
                     os.chmod(program, 0o755)
                 self.classlog.info("Starting %s", " ".join(cmd))
                 self.prog = subprocess.Popen(cmd)
+                self.wait_for_program(port)
             self.c_handle = chProg.ProgControlHandler(None, self.orc_handle.numFiles(), None, self.new_instr,
                                                       bank="programs", oscPort=port, bindings=bindings)
             self.c_handle.setConfig(config, self.pagesPath("programs", name))

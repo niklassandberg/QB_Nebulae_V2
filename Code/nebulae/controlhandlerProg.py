@@ -2,9 +2,6 @@ import encoderpages
 import nebio
 from controlhandlerEncoders import EncoderControlHandler
 
-# Everything is resent this often, so a program that starts late gets all values.
-PROG_RESEND_MS = 1000
-
 # Programs bank: controls go to the program as OSC, by the .prog's osc: lines.
 class ProgControlHandler(EncoderControlHandler):
 
@@ -16,7 +13,6 @@ class ProgControlHandler(EncoderControlHandler):
         for control, path, lo, hi, curve in bindings:
             self.bindings.setdefault(control, []).append((path, lo, hi, curve))
         self.prog_sent = {}
-        self.prog_resend_time = 0
         self.speed_leds = False
 
     def setConfig(self, config, pages_path):
@@ -64,10 +60,9 @@ class ProgControlHandler(EncoderControlHandler):
     def enterNormalMode(self):
         self.enterProgramsMode()
 
+    # nebulae.py starts the handler once the program listens: everything goes
+    # on the first pass, then only changes.
     def sendProgMessages(self, channels):
-        full = self.now - self.prog_resend_time >= PROG_RESEND_MS
-        if full:
-            self.prog_resend_time = self.now
         sent = self.prog_sent
         for chn in channels:
             if not self.sendsControl(chn.name):
@@ -75,10 +70,10 @@ class ProgControlHandler(EncoderControlHandler):
             value = chn.getValue()
             for path, lo, hi, curve in self.bindings.get(chn.name, []):
                 out = encoderpages.scale(value, lo, hi, curve)
-                if full or sent.get(path) != out:
+                if sent.get(path) != out:
                     nebio.osc_send(path, out)
                     sent[path] = out
-        self.sendPages(full)
+        self.sendPages()
 
     def updateAll(self):
         self.countUpdateAll()
