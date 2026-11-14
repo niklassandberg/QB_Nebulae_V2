@@ -65,6 +65,7 @@ public:
     virtual void pd_close() = 0;
     virtual int pd_is_connected() = 0;
     virtual int pd_send(const std::string &data) = 0;
+    virtual int pd_take_ready() = 0;
 };
 
 // time.time() and time.sleep().

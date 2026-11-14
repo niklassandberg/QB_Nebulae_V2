@@ -299,11 +299,45 @@ def fuzz_handler(r, n, bank="sc"):
     return out
 
 
+def fuzz_pd(r, n):
+    """The Pd handler's main loop, with the connection and sends failing."""
+    out = ["# random main-loop passes through controlhandlerPD.py",
+           "cs.none", "mx.reset lib", "file.write defaultnebsettings.txt " + HANDLER_SETTINGS,
+           "h.new h pd 5 p puredata None", "ret pd_is_connected 1", "h.enterPureDataMode h",
+           "time 5000", "calls"]
+    codes = {(d, c): 2048 for d in (0, 1) for c in range(8)}
+    bits = 0
+    for _ in range(n):
+        m = r.random()
+        if m < 0.25:
+            bits ^= 1 << r.choice([0, 3, 4, 5, 7])
+            out.append("sr %d" % bits)
+        elif m < 0.6:
+            for _ in range(r.randint(1, 3)):
+                key = r.choice(list(codes))
+                codes[key] = adc_code(r, codes[key])
+                out.append("adc %d %d %d" % (key[0], key[1], codes[key]))
+        elif m < 0.65:
+            out.append("ret %s %d" % (r.choice(["pd_is_connected", "pd_send", "pd_take_ready"]), r.choice([0, 1])))
+        out.append("advance %r" % r.choice([0.001, 0.0025, 0.01, 0.05, 0.18, 0.6, 1.2]))
+        out.append("h.updateAll h")
+        if r.random() < 0.01:
+            out.append(r.choice(["h.enterInstrSelMode h", "h.enterNormalMode h", "h.enterSecondaryMode h",
+                                 "h.saveInstrument h", "h.closeSockets h"]))
+        if r.random() < 0.2:
+            out.append("calls")
+        if r.random() < 0.05:
+            out.append(r.choice(["h.pd h", "h.state h", "h.chans h"]))
+    out += ["calls", "h.pd h", "h.state h", "h.chans h"]
+    return out
+
+
 def main():
     gens = [("fuzz_adc", fuzz_adc, 4000), ("fuzz_digital", fuzz_digital, 5000),
             ("fuzz_pages", fuzz_pages, 2500), ("fuzz_texts", fuzz_texts, 2500),
             ("fuzz_handler", fuzz_handler, 6000),
-            ("fuzz_prog", lambda r, n: fuzz_handler(r, n, "prog"), 6000)]
+            ("fuzz_prog", lambda r, n: fuzz_handler(r, n, "prog"), 6000),
+            ("fuzz_pd", fuzz_pd, 5000)]
     for seed, (name, gen, n) in enumerate(gens, 1):
         lines = gen(random.Random(seed * 7919), n)
         with open(os.path.join(OUT, name + ".txt"), "w") as f:

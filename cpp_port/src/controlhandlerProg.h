@@ -11,9 +11,6 @@
 
 namespace neb {
 
-// Everything is resent this often, so a program that starts late gets all values.
-constexpr int PROG_RESEND_MS = 1000;
-
 class ProgControlHandler : public EncoderControlHandler {
 public:
     ProgControlHandler(Csound *csound, const Value &numberFiles, const OrderedDict *configData, std::string instr,
@@ -30,6 +27,8 @@ public:
     void sendPath(const std::string &path, double value) override;
     void enterProgramsMode();
     void enterNormalMode() override { enterProgramsMode(); }
+    // nebulae.py starts the handler once the program listens: everything goes
+    // on the first pass, then only changes.
     void sendProgMessages(const std::vector<ControlChannel *> &chans);
     void updateAll() override;
 
@@ -41,7 +40,6 @@ public:
     int oscPort;
     std::map<std::string, std::vector<Target>> bindings;  // control -> its osc: lines
     std::map<std::string, double> prog_sent;
-    long long prog_resend_time = 0;
     bool speed_leds = false;
 };
 

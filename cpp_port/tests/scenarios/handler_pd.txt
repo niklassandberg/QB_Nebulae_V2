@@ -1,0 +1,132 @@
+# controlhandlerPD.py: the Pure Data bank: "name value;" messages, changes
+# only, all again after 1 s or a failed send; the 1 ms sleep per pass; modes.
+# nebconfig.py's .pd comment boxes.
+cs.none
+mx.reset lib
+# CV inputs at 0 V
+adc 0 0 2048
+adc 0 1 2048
+adc 0 2 2048
+adc 0 3 2048
+adc 0 4 2048
+adc 0 5 2048
+adc 0 6 2048
+adc 0 7 2048
+file.write defaultnebsettings.txt speed,0.625|pitch,0.6|start,0|size,0|blend,0|density,0|overlap,0|window,0|reset,0|freeze,0|source,0|record,0|file,0|speed_alt,23|pitch_alt,0|start_alt,0|size_alt,0|blend_alt,0|density_alt,0|overlap_alt,0|window_alt,0.0|reset_alt,0|freeze_alt,0|source_alt,0|record_alt,0|file_alt,0
+adc 1 0 1000
+adc 1 2 3000
+h.new h pd 4 mypatch puredata None
+calls
+ret pd_is_connected 0
+h.enterPureDataMode h
+h.state h
+calls
+# not connected yet: nothing goes, nothing remembered
+time 2000
+h.updateAll h
+h.pd h
+calls
+# connected: everything once, then only changes
+ret pd_is_connected 1
+advance 0.002
+h.updateAll h
+h.pd h
+calls
+advance 0.002
+h.updateAll h
+calls
+adc 1 2 1500
+advance 0.002
+h.updateAll h
+calls
+sr 1
+advance 0.002
+h.updateAll h
+sr 0
+advance 0.002
+h.updateAll h
+calls
+# all again after a second
+advance 1.0
+h.updateAll h
+h.pd h
+calls
+# a failed send: everything again next pass
+ret pd_send 1
+adc 1 2 2500
+advance 0.002
+h.updateAll h
+h.pd h
+ret pd_send 0
+advance 0.002
+h.updateAll h
+h.pd h
+calls
+# the patch answers "ready": everything once, then only changes, no resend
+ret pd_take_ready 1
+advance 0.002
+h.updateAll h
+h.pd h
+calls
+ret pd_take_ready 0
+advance 0.002
+h.updateAll h
+advance 1.5
+h.updateAll h
+adc 1 2 3500
+advance 0.002
+h.updateAll h
+h.pd h
+calls
+# a failed send: not ready any more, resends with "nebready" until it answers again
+ret pd_send 1
+adc 1 0 4000
+advance 0.002
+h.updateAll h
+ret pd_send 0
+advance 0.002
+h.updateAll h
+advance 1.1
+h.updateAll h
+h.pd h
+calls
+ret pd_take_ready 1
+advance 0.002
+h.updateAll h
+ret pd_take_ready 0
+h.pd h
+calls
+# secondary controls: alt channels too
+sr 32
+advance 0.002
+h.updateAll h
+advance 0.2
+h.updateAll h
+h.state h
+calls
+adc 1 1 4000
+advance 0.002
+h.updateAll h
+calls
+ret pd_is_connected 0
+sr 0
+advance 0.002
+h.updateAll h
+h.state h
+calls
+h.enterInstrSelMode h
+sr 8
+advance 0.002
+h.updateAll h
+h.getInstrSelIdx h
+h.enterNormalMode h
+h.state h
+ret pd_is_connected 1
+h.closeSockets h
+calls
+file.read nebsettings.txt
+# a .pd patch's nebconfig comment boxes
+file.write p.pd #N\_canvas\_0\_50\_450\_300\_12;|#X\_obj\_10\_10\_netreceive\_3000;|#X\_text\_20\_40\_nebconfig\_kernel\,\_rt;|#X\_text\_-20\_60\_nebconfig\_blocksize\_\,\_256\_\,\_f\_20;|#X\_text\_20\_80\_nebconfig\_freeze\,\_triggered\,\_rising\_\;\_x\$1;\_\_|#X\_text\_20\_100\_nebconfig\_reset\,|triggered\,\_falling;\r|#X\_text\_20\_120\_NEBCONFIG\_no;|#X\_text\_20\_140\_nebconfig;|#X\_text\_a\_140\_nebconfig\_x\,1;|#X\_text\_20\_160\_nebconfigx\_y\,1;|#X\_text\_20\_180\_nebconfig\_;|#X\_text\_20\_200\_nebconfig\_width\,\_f\_2x;|#X\_text\_20\_220\_nebconfig\_last\,1
+nc.new c p.pd
+nc.entries c
+nc.encoderType c s:speed

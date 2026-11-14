@@ -97,6 +97,95 @@ T &slot(std::vector<std::pair<std::string, T>> &list, const std::string &key) {
     return list.back().second;
 }
 
+bool isSpace(char c) { return c == ' ' || c == '\t' || c == '\n' || c == '\r' || c == '\f' || c == '\v'; }
+
+// " ".join(text.split())
+std::string squeeze(const std::string &text) {
+    std::string out;
+    size_t i = 0;
+    while (i < text.size()) {
+        while (i < text.size() && isSpace(text[i])) ++i;
+        size_t start = i;
+        while (i < text.size() && !isSpace(text[i])) ++i;
+        if (i > start) out += (out.empty() ? "" : " ") + text.substr(start, i - start);
+    }
+    return out;
+}
+
+bool isNumber(const std::string &t, size_t &i) {  // -?\d+ at i
+    size_t start = i;
+    if (i < t.size() && t[i] == '-') ++i;
+    size_t digits = i;
+    while (i < t.size() && std::isdigit(static_cast<unsigned char>(t[i]))) ++i;
+    if (i == digits) {
+        i = start;
+        return false;
+    }
+    return true;
+}
+
+std::string replaceAll(std::string s, const std::string &from, const std::string &to) {
+    for (size_t p = 0; (p = s.find(from, p)) != std::string::npos; p += to.size()) s.replace(p, from.size(), to);
+    return s;
+}
+
+// One Pd statement as a nebconfig entry: "#X text <x> <y> nebconfig <entry>".
+std::optional<std::string> pdEntry(const std::string &statement) {
+    std::string t = squeeze(statement);
+    const std::string head = "#X text ";
+    if (!startsWith(t, head)) return std::nullopt;
+    size_t i = head.size();
+    if (!isNumber(t, i) || i >= t.size() || t[i++] != ' ') return std::nullopt;
+    if (!isNumber(t, i) || i >= t.size() || t[i++] != ' ') return std::nullopt;
+    if (t.compare(i, 9, "nebconfig") != 0) return std::nullopt;
+    i += 9;
+    if (i >= t.size() || t[i] != ' ') return std::nullopt;
+    std::string entry = t.substr(i + 1);
+    if (!entry.empty() && entry.back() == ';') entry.pop_back();
+    entry = replaceAll(replaceAll(replaceAll(entry, "\\,", ","), "\\;", ";"), "\\$", "$");
+    entry = strip(entry);
+    std::string joined;  // re.sub(r"\s*,\s*", ",", ...)
+    for (size_t k = 0; k < entry.size(); ++k) {
+        if (entry[k] == ',') {
+            while (!joined.empty() && isSpace(joined.back())) joined.pop_back();
+            joined += ',';
+            while (k + 1 < entry.size() && isSpace(entry[k + 1])) ++k;
+        } else {
+            joined += entry[k];
+        }
+    }
+    size_t f = joined.rfind(",f ");  // the box width ", f 20"
+    if (f != std::string::npos && f + 3 < joined.size() &&
+        std::all_of(joined.begin() + static_cast<long>(f) + 3, joined.end(),
+                    [](char c) { return std::isdigit(static_cast<unsigned char>(c)); }))
+        joined.erase(f);
+    return joined;
+}
+
+// A .pd file's statements end in an unescaped ";" before a line end.
+std::vector<std::string> pdEntries(const std::string &text) {
+    std::vector<std::string> entries;
+    size_t start = 0, i = 0;
+    auto take = [&](size_t end) {
+        if (auto e = pdEntry(text.substr(start, end - start))) entries.push_back(*e);
+    };
+    while (i < text.size()) {
+        if (text[i] == ';' && !(i > 0 && text[i - 1] == '\\')) {
+            size_t k = i + 1;
+            while (k < text.size() && (text[k] == ' ' || text[k] == '\t')) ++k;
+            if (k < text.size() && text[k] == '\r') ++k;
+            if (k < text.size() && text[k] == '\n') {
+                take(i);
+                start = i = k + 1;
+                continue;
+            }
+        }
+        ++i;
+    }
+    take(text.size());
+    return entries;
+}
+
 }  // namespace
 
 NebConfig::NebConfig(const std::vector<std::string> &entries, std::string body_) : body(std::move(body_)) {
@@ -112,6 +201,7 @@ NebConfig::NebConfig(const std::vector<std::string> &entries, std::string body_)
 
 NebConfig NebConfig::readFile(const std::string &path) {
     std::string text = textfile::read(path);
+    if (path.size() >= 3 && path.compare(path.size() - 3, 3, ".pd") == 0) return NebConfig(pdEntries(text), text);
     std::vector<std::string> entries;
     std::string body;
     bool inside = false;

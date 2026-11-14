@@ -37,6 +37,8 @@ void PdSend::close() {
 
 bool PdSend::is_connected() { return nebioC().pd_is_connected() != 0; }
 
+bool PdSend::takeReady() { return nebioC().pd_take_ready() != 0; }
+
 bool ScSend::synthIsUpStatus() {
     bool status = nebioC().sc_synth_is_up() != 0;
     NLOG(log_, DEBUG, "synthIsUpStatus=%s", status ? "True" : "False");

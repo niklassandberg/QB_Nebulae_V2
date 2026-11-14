@@ -58,8 +58,6 @@ void ProgControlHandler::enterProgramsMode() {
 }
 
 void ProgControlHandler::sendProgMessages(const std::vector<ControlChannel *> &chans) {
-    bool full = now - prog_resend_time >= PROG_RESEND_MS;
-    if (full) prog_resend_time = now;
     for (auto *chn : chans) {
         if (!sendsControl(chn->name)) continue;
         auto it = bindings.find(chn->name);
@@ -68,13 +66,13 @@ void ProgControlHandler::sendProgMessages(const std::vector<ControlChannel *> &c
         for (auto &t : it->second) {
             double out = scale(value, F(t.lo), F(t.hi), t.curve);
             auto sent = prog_sent.find(t.path);
-            if (full || sent == prog_sent.end() || sent->second != out) {
+            if (sent == prog_sent.end() || sent->second != out) {
                 nebio::osc_send(t.path, out);
                 prog_sent[t.path] = out;
             }
         }
     }
-    sendPages(full);
+    sendPages();
 }
 
 void ProgControlHandler::updateAll() {

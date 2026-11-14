@@ -1,7 +1,6 @@
 // nebconfig.py: the nebconfig block of an instrument, one
-// "key,value[,value...]" per line. The parts the control handlers use; the
-// .pd comment boxes (_pdEntries) and the JACK/kernel/run keys are not
-// ported yet.
+// "key,value[,value...]" per line (in a .pd: one comment box per entry,
+// "nebconfig key,value"). The JACK, kernel and run keys are not ported yet.
 #pragma once
 
 #include <optional>

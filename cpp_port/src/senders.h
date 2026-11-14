@@ -15,6 +15,9 @@ public:
     static constexpr int sport = 3000;
     void connect();  // in the background, retries until PD answers or close()
     bool send(const std::vector<Value> &msgs);  // true when the messages went out
+    // True when the patch sent "ready" back since the last call: it answers
+    // "nebready" with [send ready( into its [netreceive 3000] once set up.
+    bool takeReady();
     std::string format(const std::string &target, const Value &val) const { return target + " " + pyStr(val); }
     void close();
     bool is_connected();

@@ -27,6 +27,7 @@
 #include "configsettings.h"
 #include "control.h"
 #include "controlhandler.h"
+#include "controlhandlerPD.h"
 #include "controlhandlerProg.h"
 #include "controlhandlerSC.h"
 #include "digitaldata.h"
@@ -238,6 +239,7 @@ public:
     void pd_connect() override { call("pd_connect"); }
     void pd_close() override { call("pd_close"); }
     int pd_is_connected() override { return call("pd_is_connected"); }
+    int pd_take_ready() override { return call("pd_take_ready"); }
     int pd_send(const std::string &d) override {
         return call("pd_send", {S(d), I(static_cast<long long>(d.size()))});
     }
@@ -1033,7 +1035,9 @@ void Runner::op(const std::string &op, const std::vector<std::string> &a) {
                 }
                 ob.h = std::make_unique<ProgControlHandler>(cs, val(a.at(2)), nullptr, a.at(3), a.at(4), port,
                                                             config.oscBindings().first, env);
-            } else if (a.at(1) == "base")
+            } else if (a.at(1) == "pd")
+                ob.h = std::make_unique<PDControlHandler>(cs, val(a.at(2)), ob.ncDict.get(), a.at(3), a.at(4), env);
+            else if (a.at(1) == "base")
                 ob.h = std::make_unique<ControlHandler>(cs, val(a.at(2)), ob.ncDict.get(), a.at(3), a.at(4), env);
             else if (a.at(1) == "sc") {
                 auto h = std::make_unique<SCControlHandler>(cs, val(a.at(2)), ob.ncDict.get(), a.at(3), a.at(4), env);
@@ -1096,7 +1100,14 @@ void Runner::op(const std::string &op, const std::vector<std::string> &a) {
             for (auto &t : ts) l.push_back(L({S(t.path), F(t.lo), F(t.hi), S(t.curve)}));
             bindings.push_back(L({S(k), L(l)}));
         }
-        put(L({I(h->oscPort), B(h->speed_leds), I(h->prog_resend_time), L(sent), L(bindings)}));
+        put(L({I(h->oscPort), B(h->speed_leds), L(sent), L(bindings)}));
+    }
+    else if (op == "h.pd") {
+        auto *h = dynamic_cast<PDControlHandler *>(o(a.at(0)).h.get());
+        if (!h) throw PyError("AttributeError", a[0]);
+        std::vector<Value> sent;
+        for (auto &[k, v] : h->pd_sent) sent.push_back(L({S(k), v}));
+        put(L({I(h->pd_resend_time), L(sent), B(h->pd_ready)}));
     }
     else if (op == "h.rawChannels") {
         std::vector<Value> l;
@@ -1448,6 +1459,13 @@ void Runner::handlerMethod(ControlHandler &h, const std::string &m, const std::v
         if (!p) throw PyError("AttributeError", m);
         if (m == "enterProgramsMode") { p->enterProgramsMode(); none(); }
         else put(p->playbackSpeed() ? F(*p->playbackSpeed()) : Value());
+    }
+    // controlhandlerPD
+    else if (m == "enterPureDataMode") {
+        auto *p = dynamic_cast<PDControlHandler *>(&h);
+        if (!p) throw PyError("AttributeError", m);
+        p->enterPureDataMode();
+        none();
     }
     // controlhandlerSC
     else if (m == "startRawEncoders") { needS().startRawEncoders(); none(); }

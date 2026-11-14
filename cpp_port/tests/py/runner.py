@@ -21,6 +21,7 @@ import configsettings
 import control
 import controlhandler
 import controlhandlerEncoders
+import controlhandlerPD
 import controlhandlerProg
 import controlhandlerSC
 import digitaldata
@@ -186,6 +187,7 @@ class Runner(object):
         controlhandler.threading = types.SimpleNamespace(Thread=InPlaceThread)
         controlhandler.time = clock
         controlhandlerSC.time = clock
+        controlhandlerPD.time = clock
         controlhandlerSC.open = lambda p, *a, **k: real_open(udp.get(p, p), *a, **k)
 
     # The work dir differs between the runners: "W" in the trace.
@@ -548,7 +550,8 @@ class Runner(object):
                 self.cs, val(a[2]), None, a[3], bank=a[4], oscPort=port, bindings=config.oscBindings()[0])
         elif op == "h.new":
             cls = {"base": controlhandler.ControlHandler,
-                   "sc": controlhandlerSC.SCControlHandler}[a[1]]
+                   "sc": controlhandlerSC.SCControlHandler,
+                   "pd": controlhandlerPD.PDControlHandler}[a[1]]
             cfg = None if a[5] == "None" else o[a[5]].asDict()
             o[a[0]] = cls(self.cs, val(a[2]), cfg, a[3], bank=a[4])
         elif op == "h.setConfig":
@@ -574,9 +577,12 @@ class Runner(object):
                        list(p.hold) if p.hold else None] for k, p in h.allPages().items()])
         elif op == "h.prog":
             h = o[a[0]]
-            self.put([h.oscPort, h.speed_leds, h.prog_resend_time,
+            self.put([h.oscPort, h.speed_leds,
                       [[k, h.prog_sent[k]] for k in sorted(h.prog_sent)],
                       [[k, [list(t) for t in h.bindings[k]]] for k in sorted(h.bindings)]])
+        elif op == "h.pd":
+            h = o[a[0]]
+            self.put([h.pd_resend_time, [[k, h.pd_sent[k]] for k in sorted(h.pd_sent)], h.pd_ready])
         elif op == "h.rawChannels":
             self.put([c.name for c in o[a[0]].rawChannels()])
         # --- any method of an object -------------------------------------

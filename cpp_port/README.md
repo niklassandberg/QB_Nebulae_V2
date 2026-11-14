@@ -1,8 +1,8 @@
 # C++ port of the control handlers and the classes they use
 
-The Python control handlers (`controlhandler.py`, `controlhandlerEncoders.py`,
-`controlhandlerSC.py`, `controlhandlerProg.py`; `controlhandlerPD.py` not
-yet) and the classes they use (here called **B**), translated to C++ (**W**),
+All Python control handlers (`controlhandler.py`, `controlhandlerEncoders.py`,
+`controlhandlerSC.py`, `controlhandlerProg.py`, `controlhandlerPD.py`) and
+the classes they use (here called **B**), translated to C++ (**W**),
 with tests that run both on the same scenarios and require identical
 results. Outside the Nebulae code: nothing in `Code/` is changed or used by it.
 
@@ -28,11 +28,12 @@ safety net.
 | `configsettings.py` | `src/configsettings.*` | |
 | `classlogger.py` | `src/classlogger.*` | formatting and levels; not the crash hooks |
 | `nconfig.py` (configparser) | `src/nconfig.*` | |
-| `nebconfig.py`: `NebConfig` (block, `entry`, `value`, `asDict`, `encoderType`, `outputPeriod`, `encoderPages`, `holdPages`, `cvTargets`, `oscBindings`, `oscPort`, `speedLeds`) | `src/nebconfig.*` | not yet: `.pd` comment boxes, the JACK, kernel and `run` keys |
+| `nebconfig.py`: `NebConfig` (block, `entry`, `value`, `asDict`, `encoderType`, `outputPeriod`, `encoderPages`, `holdPages`, `cvTargets`, `oscBindings`, `oscPort`, `speedLeds`) | `src/nebconfig.*` | also the `.pd` comment boxes; not yet: the JACK, kernel and `run` keys |
 | `controlhandler.py`: `ControlHandler` | `src/controlhandler.*` | the Csound bank; settings dir, WAV writer and the writing thread in `HandlerEnv` |
 | `controlhandlerEncoders.py`: `EncoderControlHandler` | `src/controlhandlerEncoders.*` | |
 | `controlhandlerSC.py`: `SCControlHandler` | `src/controlhandlerSC.*` | `/proc/net/udp` paths in `udpTables` |
 | `controlhandlerProg.py`: `ProgControlHandler` | `src/controlhandlerProg.*` | |
+| `controlhandlerPD.py`: `PDControlHandler` | `src/controlhandlerPD.*` | keeps the 1 ms sleep per pass |
 | `textfile.py`: UTF-8 (BOM, any line end) or `fatal` | `src/textfile.*` | Python's strict decoder rejects the same bytes |
 | `fatal.py`: stop on a file that is not UTF-8 | `src/fatal.*` | LEDs, stick, journal, exit behind `fatal::Backend` |
 | Python semantics: `round`, `repr(float)`, `float()`/`int()` of a text, `str.strip()` with Unicode spaces, int/float types | `src/pyvalue.*` | |
@@ -88,8 +89,8 @@ PYTHON=~/cpp_port_venv/bin/python ./run_tests.sh ~/cpp_port_build
 
 ### Result (2026-11-13)
 
-22 scenarios, 56 997 trace lines: Python and C++ identical. 24/24 ctest,
-26/26 unittest. Also clean with `-fsanitize=address,undefined`.
+24 scenarios, 74 210 trace lines: Python and C++ identical. 26/26 ctest,
+28/28 unittest. Also clean with `-fsanitize=address,undefined`.
 
 The handlers: `handler_csound.txt` (Csound's channels back: end of loop,
 record status; a file-edit freeze writing the record buffer; secondary
@@ -99,8 +100,11 @@ the sclang handshakes and its UDP port, an instrument switch) and
 `fuzz_handler.txt` (6000 random main-loop passes over three instruments:
 button edges, knobs, CV, encoder steps, page turns, mode changes, switches),
 `handler_prog.txt` and `fuzz_prog.txt` (the programs bank with audrey's and
-miRings' blocks: osc: bindings, the 1 s resend, the echo hold layers,
-playback speed, bad osc: lines and ports),
+miRings' blocks: osc: bindings, changes only, the echo hold layers,
+playback speed, bad osc: lines and ports), `handler_pd.txt` and
+`fuzz_pd.txt` (Pd messages, changes only, the 1 s resend, a lost connection
+or failed send resending everything, the patch's "ready" answer, a .pd
+patch's comment boxes),
 `nebconfig.txt` the block's parsing and its error messages. The Python runs
 give the same trace under any `PYTHONHASHSEED` (checked with 12).
 
